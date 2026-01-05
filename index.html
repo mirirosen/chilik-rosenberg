@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>הסיורים של חיליק | חוויה תרבותית בבני ברק</title>
     
-    <!-- Libraries -->
+    <!-- ספריות עיצוב ופונטים -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
+        /* הגדרות עיצוב בסיסיות */
         :root {
             --bg-dark: #121214;       
             --bg-card: #1E1E24;       
@@ -29,6 +30,7 @@
         
         h1, h2, h3 { font-family: 'Frank Ruhl Libre', serif; }
 
+        /* גלילה מותאמת אישית */
         .custom-scroll::-webkit-scrollbar { height: 8px; }
         .custom-scroll::-webkit-scrollbar-track { background: var(--bg-card); border-radius: 8px; }
         .custom-scroll::-webkit-scrollbar-thumb { background-color: var(--gold); border-radius: 8px; }
@@ -39,6 +41,7 @@
             box-shadow: 0 0 15px rgba(233, 196, 106, 0.4);
         }
 
+        /* תפריט מובייל */
         #mobile-menu {
             transition: transform 0.3s ease-in-out;
             transform: translateX(100%);
@@ -63,7 +66,7 @@
             font-style: italic;
         }
 
-        /* Message Box instead of alert */
+        /* הודעה צפה */
         #ui-message {
             position: fixed;
             bottom: 20px;
@@ -84,7 +87,7 @@
 
     <div id="ui-message"></div>
 
-    <!-- Navigation -->
+    <!-- תפריט ניווט -->
     <nav class="fixed top-0 w-full bg-[#121214]/95 backdrop-blur-md shadow-lg z-50 border-b border-white/5">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="text-xl font-black text-[#E9C46A] cursor-pointer flex items-center gap-2" onclick="scrollToSection('home')">
@@ -107,7 +110,7 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu -->
+    <!-- תפריט מובייל נפתח -->
     <div id="mobile-menu" class="fixed inset-0 z-[60] pt-24 px-6 flex flex-col gap-6 text-center text-xl font-medium bg-[#121214] md:hidden">
         <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 text-3xl text-gray-400"><i class="fas fa-times"></i></button>
         <button onclick="mobileNavigate('home')" class="py-4 border-b border-white/10 text-white">החוויה</button>
@@ -118,36 +121,46 @@
 
     <main class="pt-20">
 
-        <!-- SECTION: HERO -->
-        <section id="home" class="relative">
-            <div class="relative h-[85vh] flex items-center justify-center bg-black overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121214] via-black/40 to-transparent z-10"></div>
-                <!-- Background Image with fallback -->
-                <img src="hero-hilik.jpg" 
-                     class="absolute inset-0 w-full h-full object-cover opacity-60" 
-                     alt="בני ברק בחוויית חיליק"
-                     onerror="this.src='https://images.unsplash.com/photo-1549488344-c73885b59365?q=80&w=1600&auto=format&fit=crop'">
+        <!-- SECTION: HERO (החלק העליון עם התמונה שלך) -->
+        <section id="home" class="relative h-[85vh] flex items-center justify-center bg-black overflow-hidden">
+            
+            <!-- שימי לב: הסיומת כאן היא jpeg כפי שביקשת -->
+            <img 
+                src="hero-bg.jpeg" 
+                alt="סיור ליל שישי בבני ברק עם חיליק" 
+                class="absolute inset-0 w-full h-full object-cover opacity-60"
+                loading="eager"
+                onerror="this.src='https://images.unsplash.com/photo-1549488344-c73885b59365?q=80&w=1600&auto=format&fit=crop'"
+            >
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-[#121214] via-black/40 to-transparent z-10"></div>
+            
+            <div class="relative z-20 text-center text-white px-4 max-w-4xl mt-10">
+                <div class="inline-block bg-[#E9C46A] text-[#121214] px-4 py-1 rounded-md font-bold mb-6 text-sm tracking-widest uppercase shadow-lg">
+                    חוויה שהיא הצגה
+                </div>
                 
-                <div class="relative z-20 text-center text-white px-4 max-w-4xl">
-                    <div class="inline-block bg-[#E9C46A] text-[#121214] px-4 py-1 rounded-md font-bold mb-6 text-sm tracking-widest uppercase">
-                        סיור שהוא הצגה
-                    </div>
-                    <h1 class="text-5xl md:text-8xl mb-6 text-[#E9C46A] font-bold">ליל שישי בבני ברק</h1>
-                    <p class="text-xl md:text-3xl mb-8 text-white font-serif italic">"סיור שהוא הצגה מלאת הומור וחיבור עמוק"</p>
-                    <div class="flex flex-col md:flex-row gap-4 justify-center">
-                        <button onclick="scrollToSection('dates')" class="bg-[#E9C46A] text-[#121214] px-10 py-4 rounded-full font-black text-lg shadow-xl hover:bg-white transition transform hover:scale-105">
-                            שריינו מקום למופע הקרוב
-                        </button>
-                    </div>
+                <h1 class="text-5xl md:text-8xl mb-6 text-[#E9C46A] font-bold drop-shadow-2xl font-serif">
+                    ליל שישי בבני ברק
+                </h1>
+                
+                <p class="text-xl md:text-3xl mb-8 text-white font-serif italic drop-shadow-md">
+                    "סיור שהוא הצגה מלאת הומור, אוכל וחיבור עמוק"
+                </p>
+                
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="scrollToSection('dates')" class="bg-[#E9C46A] text-[#121214] px-10 py-4 rounded-full font-black text-lg shadow-xl hover:bg-white transition transform hover:scale-105">
+                        שריינו מקום לסיור הקרוב
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- SECTION: MEET HILIK -->
+        <!-- SECTION: הכירו את חיליק -->
         <section class="py-16 bg-[#1a1a1d] border-y border-white/5">
             <div class="max-w-4xl mx-auto px-6 text-center">
                 <div class="mb-8">
-                    <!-- Updated placeholder -->
+                    <!-- כאן תוכלי להחליף לתמונה של חיליק אם תרצי בהמשך -->
                     <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=300&h=300&auto=format&fit=crop" 
                          class="w-32 h-32 rounded-full border-4 border-[#E9C46A] mx-auto mb-4 object-cover grayscale hover:grayscale-0 transition duration-500 shadow-2xl" 
                          alt="חיליק">
@@ -162,7 +175,7 @@
             </div>
         </section>
 
-        <!-- SECTION: THE JOURNEY -->
+        <!-- SECTION: המסע (The Journey) -->
         <section id="journey" class="py-24 max-w-6xl mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-serif text-[#E9C46A] mb-4">מה נראה בסיור?</h2>
@@ -208,7 +221,7 @@
             </div>
         </section>
 
-        <!-- SECTION: MENU -->
+        <!-- SECTION: האוכל (Menu) -->
         <section id="menu" class="py-24 bg-[#0a0a0a]">
             <div class="max-w-6xl mx-auto px-6">
                 <div class="text-center mb-16">
@@ -250,7 +263,7 @@
             </div>
         </section>
 
-        <!-- SECTION: DATES -->
+        <!-- SECTION: תאריכים והרשמה -->
         <section id="dates" class="py-24 bg-[#121214]">
             <div class="max-w-5xl mx-auto px-6">
                 <div class="bg-[#1E1E24] p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-white/5">
@@ -285,6 +298,7 @@
         <p class="text-gray-700 text-xs mt-6">© 2024 כל הזכויות שמורות</p>
     </footer>
 
+    <!-- סקריפטים לניהול האתר -->
     <script>
         function showMessage(text) {
             const msg = document.getElementById('ui-message');
