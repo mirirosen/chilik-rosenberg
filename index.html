@@ -11,7 +11,7 @@
     <title>הסיורים של חיליק | חמישי בבני ברק - סיור קולינרי חרדי</title>
     <meta name="description" content="הצטרפו לסיור קולינרי שהוא הצגה! חוויה חרדית אותנטית בסמטאות בני ברק עם חיליק רוזנברג.">
     
-    <!-- Canonical URL (חשוב מאוד לדומיין החדש) -->
+    <!-- Canonical URL -->
     <link rel="canonical" href="https://www.chilik-tours.com/" />
 
     <!-- Preconnect & Preload -->
@@ -19,49 +19,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="image" href="hero-bg.jpeg">
     
-    <!-- Open Graph / WhatsApp / Facebook Preview -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
-   <meta property="og:url" content="https://www.chilik-tours.com/">
+    <meta property="og:url" content="https://www.chilik-tours.com/">
     <meta property="og:title" content="חמישי בבני ברק | הסיור הקולינרי של חיליק">
     <meta property="og:description" content="סיור קולינרי שהוא הצגה מלאת הומור, אוכל יהודי וחיבור עמוק. בואו לטעום את בני ברק האמיתית.">
     <meta property="og:image" content="https://www.chilik-tours.com/hero-bg.jpeg">
 
-    <!-- Twitter Preview -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="חמישי בבני ברק | הסיור של חיליק">
-    <meta property="twitter:description" content="חוויה קולינרית ותרבותית בסמטאות בני ברק.">
-
-    <!-- Google Search Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "הסיורים של חיליק - חמישי בבני ברק",
-      "image": "https://www.chilik-tours.com/hero-bg.jpeg",
-      "description": "סיור קולינרי ותרבותי בשכונות החרדיות של בני ברק.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "בני ברק",
-        "addressCountry": "IL"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "32.0833",
-        "longitude": "34.8333"
-      },
-      "url": "https://www.chilik-tours.com/",
-      "telephone": "+972505804367"
-    }
-    </script>
-    
-    <!-- Core Libraries -->
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --bg-dark: #121214; --gold: #E9C46A; }
@@ -120,25 +92,55 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
 
-        // *** ודאי שהמפתחות כאן מעודכנים בגרסה שלך ***
-        const firebaseConfig = {
+        // *** קונפיגורציה קשיחה למניעת שגיאות ב-Preview ***
+        const productionConfig = {
             apiKey: "AIzaSyCXrBqy3a2Ig7J3JE04av1rviedQfPrah0",
             authDomain: "hilik-rosenberg-ddb9b.firebaseapp.com",
             projectId: "hilik-rosenberg-ddb9b",
             storageBucket: "hilik-rosenberg-ddb9b.firebasestorage.app",
             messagingSenderId: "401698649096",
-            appId: "1:401698649096:web:d17c5296a859e47b8c4dbd"
+            appId: "1:401698649096:web:d17c5296a859e47b8c4dbd",
+            measurementId: "G-WWSFZDRB0J"
         };
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            window.FB_CORE = { db, auth, doc, onSnapshot, setDoc, onAuthStateChanged, appId: "hilik-rosenberg-v1" };
-            window.FB_STATUS = "online";
-            signInAnonymously(auth).catch(() => {});
-        } catch (err) { window.FB_STATUS = "error"; }
+        let config;
+        let isConfigValid = false;
+
+        // שינוי לוגיקה: מעדיפים את הקונפיגורציה הידנית אם היא תקינה
+        if (productionConfig.apiKey && productionConfig.apiKey !== "YOUR_API_KEY") {
+            config = productionConfig;
+            isConfigValid = true;
+        } else if (typeof __firebase_config !== 'undefined') {
+            try {
+                config = JSON.parse(__firebase_config);
+                isConfigValid = true;
+            } catch (e) {}
+        }
+        
+        // מזהה אפליקציה קבוע התואם לחוקי ה-Firestore שהגדרת
+        const appId = 'hilik-rosenberg-v1';
+
+        if (isConfigValid) {
+            try {
+                const app = initializeApp(config);
+                const analytics = getAnalytics(app);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                window.FB_CORE = { auth, db, appId, signInAnonymously, signInWithCustomToken: null, onAuthStateChanged, doc, setDoc, onSnapshot };
+                window.FB_STATUS = "online";
+                
+                // התחברות אנונימית מיידית
+                signInAnonymously(auth).catch((e) => console.warn("Auth warning:", e));
+            } catch (err) {
+                console.error("Firebase Init Failed:", err);
+                window.FB_STATUS = "error";
+            }
+        } else {
+            window.FB_STATUS = "offline";
+        }
+        
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
 
@@ -148,6 +150,7 @@
         const ADMIN_PASSWORD = "hilik123";
 
         const App = () => {
+            const [fbStatus, setFbStatus] = useState(window.FB_STATUS || null);
             const [data, setData] = useState({ blocked: [], soldOut: [] });
             const [selectedDate, setSelectedDate] = useState('');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -156,6 +159,8 @@
             const [adminPassInput, setAdminPassInput] = useState('');
             const [adminDateInput, setAdminDateInput] = useState('');
             const [adminStatusInput, setAdminStatusInput] = useState('open');
+            const [uiMessage, setUiMessage] = useState('');
+            const [manualStatus, setManualStatus] = useState(null);
             const [loading, setLoading] = useState(true);
             
             const scrollContainerRef = useRef(null);
@@ -175,25 +180,47 @@
             useEffect(() => {
                 const checkAdmin = () => {
                     const params = new URLSearchParams(window.location.search);
-                    if (params.get('access') === 'hilik_private') setIsAdminOpen(true);
+                    if (params.get('access') === 'hilik_private' || window.location.hash.includes('access=hilik_private')) {
+                        setIsAdminOpen(true);
+                    }
                 };
                 window.addEventListener('firebase-ready', checkAdmin);
-                checkAdmin();
+                if (window.FB_STATUS) checkAdmin();
+                
                 return () => window.removeEventListener('firebase-ready', checkAdmin);
             }, []);
 
             useEffect(() => {
-                if (!window.FB_CORE) return;
-                const { db, appId, onSnapshot, doc, onAuthStateChanged, auth } = window.FB_CORE;
-                let unsub = onAuthStateChanged(auth, (user) => {
+                if (fbStatus !== "online") { 
+                    if (fbStatus) setLoading(false); 
+                    return; 
+                }
+                
+                const { auth, db, appId, onSnapshot, doc, onAuthStateChanged } = window.FB_CORE;
+                let unsubscribeSnap = null;
+
+                const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        return onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global'), (snap) => {
+                        const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+                        unsubscribeSnap = onSnapshot(settingsDoc, (snap) => {
                             if (snap.exists()) setData(snap.data());
+                            setLoading(false);
+                        }, (err) => {
+                            console.error("Firestore Permission Error:", err);
+                            // במקרה של שגיאת הרשאה, אנחנו עדיין משחררים את הטעינה כדי שהאתר יוצג
+                            setLoading(false); 
                         });
+                    } else {
+                        // Timeout למקרה שההתחברות מתעכבת
+                        setTimeout(() => setLoading(false), 2500);
                     }
                 });
-                return () => unsub && unsub();
-            }, []);
+
+                return () => {
+                    unsubscribeAuth();
+                    if (unsubscribeSnap) unsubscribeSnap();
+                };
+            }, [fbStatus]);
 
             useEffect(() => { 
                 if (window.lucide) lucide.createIcons();
@@ -206,16 +233,22 @@
                 }
             }, [selectedDate]);
 
+            const showMsg = (txt) => { setUiMessage(txt); setTimeout(() => setUiMessage(''), 4000); };
+            
             const thursdays = useMemo(() => {
                 const list = [];
                 let d = new Date();
                 d.setHours(12, 0, 0, 0); 
-                let diff = (4 - d.getDay() + 7) % 7;
-                if (diff === 0 && new Date().getHours() >= 20) diff = 7;
+                let diff = 4 - d.getDay();
+                if (diff < 0 || (diff === 0 && new Date().getHours() >= 20)) diff += 7;
                 d.setDate(d.getDate() + diff);
                 for (let i = 0; i < 10; i++) {
-                    const dateStr = d.toISOString().split('T')[0];
-                    list.push({ dateStr, day: d.getDate(), month: d.toLocaleDateString('he-IL', { month: 'short' }) });
+                    const dateStr = d.toLocaleDateString('en-CA');
+                    list.push({
+                        dateStr: dateStr,
+                        day: d.getDate(),
+                        month: d.toLocaleDateString('he-IL', { month: 'short' })
+                    });
                     d.setDate(d.getDate() + 7);
                 }
                 return list;
@@ -227,10 +260,34 @@
                 return { text: 'נותרו מקומות', color: 'text-green-400', type: 'open' };
             };
 
+            const updateCloud = async () => {
+                if (fbStatus !== "online") return showMsg("שגיאת חיבור לענן");
+                if (!adminDateInput) return showMsg("נא לבחור תאריך");
+                
+                const { db, appId, doc, setDoc } = window.FB_CORE;
+                try {
+                    const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+                    
+                    const newBlocked = (data.blocked || []).filter(d => d !== adminDateInput);
+                    const newSoldOut = (data.soldOut || []).filter(d => d !== adminDateInput);
+                    
+                    if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
+                    if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
+                    
+                    await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut }, { merge: true });
+                    
+                    showMsg("התאריך עודכן בהצלחה!");
+                    setIsAdminOpen(false);
+                } catch (e) {
+                    console.error(e);
+                    showMsg("שגיאת הרשאות: בדקי Rules בקונסול");
+                }
+            };
+
             const handleWhatsApp = (date, type = 'regular') => {
                 const d = new Date(date);
                 const dateText = d.toLocaleDateString('he-IL', {day:'numeric', month:'long'});
-                let msg = (type === 'private' || type === 'weekday')
+                let msg = type.includes('private') || type === 'weekday' 
                     ? `היי מירי, אשמח לקבל פרטים על סגירת קבוצה פרטית בתאריך ה-${dateText} (10 איש ומעלה).`
                     : `היי מירי, אשמח להירשם לסיור הקולינרי של חיליק ב-${dateText}, נותרו מקומות?`;
                 window.location.href = `https://wa.me/972505804367?text=${encodeURIComponent(msg)}`;
@@ -244,7 +301,6 @@
                     const elementRect = el.getBoundingClientRect().top;
                     const elementPosition = elementRect - bodyRect;
                     const offsetPosition = elementPosition - offset;
-
                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                     setIsMenuOpen(false);
                 }
@@ -254,27 +310,23 @@
 
             return (
                 <div className="min-h-screen">
-                    {/* Mobile Menu Overlay */}
-                    <div className={`fixed inset-0 mobile-menu-overlay z-[1000] flex flex-col items-center justify-center p-8 gap-12 transition-all duration-500 ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
-                        <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 left-8 text-[#E9C46A]">
-                            <i data-lucide="x" size={48}></i>
-                        </button>
-                        <button onClick={() => scrollToId('about')} className="text-4xl font-serif text-white hover:text-[#E9C46A] transition-colors">מי אני?</button>
-                        <button onClick={() => scrollToId('journey')} className="text-4xl font-serif text-white hover:text-[#E9C46A] transition-colors">מה רואים?</button>
-                        <button onClick={() => scrollToId('menu')} className="text-4xl font-serif text-white hover:text-[#E9C46A] transition-colors">מה אוכלים?</button>
-                        <button onClick={() => scrollToId('dates')} className="text-4xl font-serif text-white hover:text-[#E9C46A] transition-colors">מתי יש סיור?</button>
-                        <button onClick={() => scrollToId('dates')} className="bg-[#E9C46A] text-black px-14 py-5 rounded-full font-black text-2xl shadow-2xl mt-4">להרשמה עכשיו</button>
-                    </div>
+                    {uiMessage && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#E9C46A] text-[#121214] px-8 py-4 rounded-full font-black z-[100] shadow-2xl animate-msg text-center">{uiMessage}</div>}
 
-                    {/* Admin Panel */}
+                    {/* Admin Modal */}
                     {isAdminOpen && (
                         <div className="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center p-4 backdrop-blur-md text-right">
                             <div className="bg-[#1E1E24] w-full max-w-md p-10 rounded-[2.5rem] border border-[#E9C46A]/30 shadow-2xl">
                                 <h2 className="text-2xl font-bold text-[#E9C46A] mb-4 font-serif italic text-center">ניהול סיורים</h2>
+                                {fbStatus !== "online" && (
+                                    <div className="bg-red-500/10 p-3 rounded-lg text-red-400 text-xs text-center mb-4 dir-ltr">
+                                        <strong>שים לב:</strong> הענן לא מחובר.
+                                    </div>
+                                )}
+
                                 {!adminAuth ? (
                                     <div className="space-y-6">
                                         <input type="password" placeholder="סיסמה" onChange={e=>setAdminPassInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-center outline-none border border-white/10 focus:border-[#E9C46A] text-xl" />
-                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : alert("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg">כניסה</button>
+                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : showMsg("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg hover:bg-white transition-all shadow-lg">כניסה</button>
                                         <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-600 text-xs mt-2 underline text-center block mx-auto">חזרה</button>
                                     </div>
                                 ) : (
@@ -287,16 +339,8 @@
                                             <option value="soldout">אזל המקום</option>
                                             <option value="holiday">אין סיור (חג/סגור)</option>
                                         </select>
-                                        <button onClick={async () => {
-                                            const { db, appId, doc, setDoc } = window.FB_CORE;
-                                            const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
-                                            const newBlocked = (data.blocked || []).filter(d => d !== adminDateInput);
-                                            const newSoldOut = (data.soldOut || []).filter(d => d !== adminDateInput);
-                                            if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
-                                            if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
-                                            await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut });
-                                            setIsAdminOpen(false);
-                                        }} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold">עדכן עכשיו</button>
+                                        <button onClick={updateCloud} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold hover:bg-white shadow-xl transition-all">עדכן עכשיו</button>
+                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-500 text-sm mt-4 text-center underline block mx-auto">ביטול</button>
                                     </div>
                                 )}
                             </div>
@@ -347,10 +391,10 @@
                             <div className="w-full md:w-1/2 text-right">
                                 <h2 className="text-5xl md:text-7xl font-serif text-[#E9C46A] mb-8 italic text-right">נעים להכיר.</h2>
                                 <p className="text-2xl text-white font-medium leading-relaxed mb-6 text-right">
-                                    אני חיליק אברך חרדי מבני ברק בתכלס חוץ מזה שאני אוהב את החרדיות אני אוהב אדם.
+                                    אני חיליק רוזנברג, אברך חרדי מבני ברק. בתכלס, חוץ מזה שאני אוהב את החרדיות, אני אוהב אדם.
                                 </p>
                                 <p className="text-lg text-gray-400 leading-relaxed mb-8 text-right">
-                                    אני אוהב לתת לכם את החוויה האותנטית והעמוקה של החיים החרדיים יחד עם כל האוכל היהודי כמובן משמח הנפשות.
+                                    ואני אוהב לתת לכם את החוויה האותנטית והעמוקה של החיים החרדיים יחד עם כל האוכל היהודי כמובן, משמח הנפשות.
                                 </p>
                                 <div className="flex items-center gap-6 justify-start flex-row-reverse">
                                     <div className="w-16 h-px bg-[#E9C46A]"></div>
@@ -366,12 +410,15 @@
                             <div className="text-center mb-32"><h2 className="text-6xl md:text-8xl font-serif text-[#E9C46A] mb-8 italic">מה רואים בסיור?</h2><div className="w-32 h-1 bg-[#E9C46A] mx-auto opacity-30"></div></div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-right">
                                 {[
-                                    { icon: "users", title: "ישיבות וחיידרים", desc: "נבין את ההבדלים בין חסידים לליטאים ונשמע את קול התורה הבוקע מהקירות." },
-                                    { icon: "heart", title: "עולם השידוכים", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי. סיפורים מאחורי הקלעים." },
-                                    { icon: "handshake", title: "צדקה ומכירות", desc: "חדרי צדקה הפועלים 24/7 ומכירות שכונתיות נסתרות בתוך הבתים הפרטיים." },
-                                    { icon: "home", title: "בנייה יצירתית", desc: "על המרפסות המעופפות והבנייה שהפכה לאומנות של פאזל במצוקת הדיור הבני ברקית." },
-                                    { icon: "music", title: "מוזיקה ואינטרנט", desc: "איך חרדים שומעים מוזיקה? מה זה חדר אינטרנט? ואיך נראים המשחקים של הילדים." },
-                                    { icon: "map-pin", title: "שטיבלך וסמטאות", desc: "ביקור בבתי הכנסת שבהם התפילה לא פוסקת לעולם ובחנויות הספרים המיתולוגיות." }
+                                    { icon: "users", title: "ישיבות וחיידרים", desc: "נחווה מקרוב מה באמת עושים כל הזמן בישיבה ואיך ילד חרדי גדל." },
+                                    { icon: "layers", title: "הזרמים החרדיים", desc: "נכיר מקרוב את הזרמים החרדיים השונים, ההבדלים, המשותף ומי לא מתחתן עם מי (רמז: לא מה שאתם חושבים)." },
+                                    { icon: "heart", title: "עולם השידוכים", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי." },
+                                    { icon: "shopping-bag", title: "צדקה ומכירות", desc: "נכיר דרכם את אורח החיים החסכוני כל כך כחרדי עם סיפורים מבפנים." },
+                                    { icon: "store", title: "חנויות וסמטאות", desc: "ביקור בחנויות חרדיות מיתולוגיות ובסמטאות הסודיות. נראה מקרוב ספרים לילדים ומבוגרים ואת השירה החרדית." },
+                                    { icon: "hand-heart", title: "התנדבות והשתלבות", desc: "נראה את אירגוני ההתנדבות החרדיים כמו איחוד הצלה ונכיר מקרוב את סיפור ההשתלבות." },
+                                    { icon: "croissant", title: "מאפיית ויז'ניץ", desc: "לא סתם סיור. נכנס לתוך המאפייה, עד איפה שהקמח נשפך מהתקרה, נקלע חלות ונעשה הפרשת חלה למעוניינים." },
+                                    { icon: "home", title: "בנייה יצירתית", desc: "על המרפסות המעופפות והבנייה שהפכה לאומנות של פאזל במצוקת הדיור." },
+                                    { icon: "music", title: "מוזיקה ואינטרנט", desc: "איך חרדים שומעים מוזיקה? מה זה חדר אינטרנט? ואיך נראים המשחקים." },
                                 ].map((item, i) => (
                                     <div key={i} className="bg-[#1E1E24] p-12 rounded-[3.5rem] border border-white/5 shadow-2xl group hover:border-[#E9C46A]/20 transition-all text-right">
                                         <div className="text-[#E9C46A] mb-8 transform group-hover:scale-110 transition-all text-right"><i data-lucide={item.icon} size={36}></i></div>
