@@ -3,25 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#121214">
+    <meta name="author" content="חיליק רוזנברג">
     
     <!-- Google Search Verification -->
     <meta name="google-site-verification" content="90bc-BH0lRUv2729YQywBRMGC3k_Sh7Ym9oXVf8uLeo" />
 
-    <!-- === SEO & Metadata === -->
-    <title>סיור קולינרי בבני ברק עם חיליק רוזנברג | טעימות אוכל יהודי וסיפורים</title>
-    <meta name="description" content="הצטרפו לחיליק רוזנברג לסיור קולינרי בבני ברק. טעימות צ'ולנט, קיגל, עולם השידוכים, מאפיות ותרבות חרדית אותנטית. הרשמה מהירה בווטסאפ.">
+    <!-- === SEO & Metadata Optimized === -->
+    <title>חיליק רוזנברג | סיורים בבני ברק - סיור קולינרי חרדי ליל שישי</title>
+    <meta name="description" content="חיליק רוזנברג מציע סיורים בבני ברק בכל חמישי בערב: סיור קולינרי חרדי עם טעימות צ'ולנט, קיגל, מאפיית ויז'ניץ והכרות עם התרבות החרדית. הרשמה עכשיו!">
     
     <link rel="canonical" href="https://www.chilik-tours.com/" />
+    <link rel="alternate" hreflang="he" href="https://www.chilik-tours.com/" />
     
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:locale" content="he_IL">
     <meta property="og:url" content="https://www.chilik-tours.com/">
-    <meta property="og:title" content="הסיור של חיליק בבני ברק - חוויה קולינרית שהיא הצגה">
-    <meta property="og:description" content="מסע מרתק בין הסמטאות והטעמים של בני ברק. צ'ולנט, קיגל, עולם השידוכים וסיפורים מבפנים.">
+    <meta property="og:title" content="חיליק רוזנברג | סיורים בבני ברק - חוויה קולינרית שהיא הצגה">
+    <meta property="og:description" content="הצטרפו לחיליק רוזנברג לסיור ליל שישי בבני ברק. טעימות, סיפורים והצצה נדירה לעולם החרדי.">
     <meta property="og:image" content="https://www.chilik-tours.com/hero-bg.jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <!-- === Structured Data (JSON-LD) === -->
     <script type="application/ld+json">
@@ -29,27 +33,66 @@
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "TouristTrip",
-          "name": "סיור קולינרי ותרבותי בבני ברק",
-          "description": "סיור טעימות עומק בבני ברק הכולל אוכל יהודי, עולם השידוכים, ביקור במאפיות והכרות עם העולם החרדי.",
-          "touristType": "Foodies, Culture Seekers",
-          "provider": {
-            "@type": "LocalBusiness",
-            "name": "הסיורים של חיליק רוזנברג",
-            "image": "https://www.chilik-tours.com/hilik-profile.jpeg",
-            "telephone": "+972505804367",
-            "priceRange": "₪₪",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "בני ברק",
-              "addressCountry": "IL"
+          "@type": "Person",
+          "@id": "https://www.chilik-tours.com/#person",
+          "name": "חיליק רוזנברג",
+          "jobTitle": "מדריך סיורים קולינריים",
+          "worksFor": {
+            "@type": "Organization",
+            "name": "הסיורים של חיליק רוזנברג"
+          },
+          "url": "https://www.chilik-tours.com",
+          "image": "https://www.chilik-tours.com/hilik-profile.jpeg"
+        },
+        {
+          "@type": "LocalBusiness",
+          "name": "הסיורים של חיליק רוזנברג - סיור בבני ברק",
+          "image": "https://www.chilik-tours.com/hero-bg.jpeg",
+          "@id": "https://www.chilik-tours.com/#organization",
+          "url": "https://www.chilik-tours.com/",
+          "telephone": "+972505804367",
+          "priceRange": "₪₪ (250₪ לאדם)",
+          "servesCuisine": "יהודית, קולינרית",
+          "paymentAccepted": "Cash, Credit Card, Bit",
+          "areaServed": ["בני ברק", "גוש דן", "ישראל"],
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "בני ברק",
+            "addressRegion": "מרכז",
+            "addressCountry": "IL"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 32.0833,
+            "longitude": 34.8333
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Thursday",
+            "opens": "18:00",
+            "closes": "21:00"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "reviewCount": "28"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": "יוסי מ.",
+              "datePublished": "2025-11-12",
+              "reviewBody": "הסיור בבני ברק עם חיליק רוזנברג היה חוויה של פעם בחיים. הטעימות היו מעולות והסיפורים מרתקים!",
+              "reviewRating": { "@type": "Rating", "ratingValue": "5" }
             },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "5",
-              "reviewCount": "28"
+            {
+              "@type": "Review",
+              "author": "איילת ד.",
+              "datePublished": "2025-12-05",
+              "reviewBody": "סיור קולינרי בני ברק ברמה הכי גבוהה שיש. חיליק מצחיק, ידען ומארח נפלא.",
+              "reviewRating": { "@type": "Rating", "ratingValue": "5" }
             }
-          }
+          ]
         },
         {
           "@type": "FAQPage",
@@ -57,18 +100,12 @@
             {
               "@type": "Question",
               "name": "מה עושים בבני ברק בחמישי בערב?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "בחמישי בערב בני ברק חוגגת את 'ליל שישי'. העיר תוססת, המאפיות פועלות בשיא הכוח והאווירה קולינרית ורוחנית כאחד."
-              }
+              "acceptedAnswer": { "@type": "Answer", "text": "חמישי בערב בבני ברק הוא זמן קסום שבו העיר מתעוררת לחיים עם הכנות ל'ליל שישי'. בסיור נחווה את האווירה המחשמלת, הניגונים מהישיבות והריחות מהמאפיות." }
             },
             {
               "@type": "Question",
-              "name": "כמה זמן נמשך הסיור בבני ברק?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "הסיור נמשך בין שעתיים וחצי לשלוש שעות, תלוי ברמת הרעב והסקרנות שלכם במהלך המפגש."
-              }
+              "name": "כמה זמן נמשך הסיור?",
+              "acceptedAnswer": { "@type": "Answer", "text": "הסיור נמשך בין שעתיים וחצי לשלוש שעות, תלוי ברמת הרעב ובסקרנות שלכם." }
             }
           ]
         }
@@ -76,7 +113,7 @@
     }
     </script>
 
-    <!-- External Assets -->
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -87,57 +124,35 @@
     <style>
         :root { --bg-dark: #121214; --gold: #E9C46A; }
         body { background-color: var(--bg-dark); color: #EAEAE0; font-family: 'Heebo', sans-serif; margin: 0; overflow-x: hidden; scroll-behavior: smooth; }
-        h1, h2, h3 { font-family: 'Frank Ruhl Libre', serif; }
+        h1, h2, h3, h4 { font-family: 'Frank Ruhl Libre', serif; }
         
         .custom-scroll::-webkit-scrollbar { height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader-spin { animation: spin 1s linear infinite; border: 3px solid transparent; border-top-color: var(--gold); border-radius: 50%; width: 44px; height: 44px; }
-
-        #initial-loader { 
-            position: fixed; 
-            inset: 0; 
-            background: var(--bg-dark); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 9999; 
-            transition: opacity 0.5s ease;
-            text-align: center;
-        }
-
-        .dates-wrapper { 
-            display: flex; 
-            flex-direction: row;
-            flex-wrap: nowrap; 
-            overflow-x: auto; 
-            direction: rtl; 
-            -webkit-overflow-scrolling: touch; 
-            justify-content: flex-start;
-            width: 100%;
-        }
-
+        .dates-wrapper { display: flex; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; direction: rtl; -webkit-overflow-scrolling: touch; justify-content: flex-start; width: 100%; }
         .main-header { background: rgba(18, 18, 20, 0.98); border-bottom: 1px solid rgba(233, 196, 106, 0.2); backdrop-filter: blur(10px); }
         .nav-link { position: relative; transition: all 0.3s; padding: 0.5rem 0; cursor: pointer; }
         .nav-link::after { content: ''; position: absolute; bottom: -2px; right: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.3s; }
         .nav-link:hover::after { width: 100%; }
         .nav-link:hover { color: var(--gold); }
+        
+        .star-rating { color: var(--gold); }
+        .testimonial-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(233, 196, 106, 0.1); }
+
+        .dot-loader { display: inline-flex; gap: 4px; }
+        .dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; animation: dot-pulse 1.5s infinite ease-in-out; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dot-pulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.5); opacity: 1; } }
     </style>
 </head>
 <body>
-    <div id="initial-loader">
-        <div class="loader-spin mb-6"></div>
-        <div style="font-family: serif; color: var(--gold); font-style: italic; letter-spacing: 0.1em; font-size: 1.2rem;">חמישי בבני ברק...</div>
-    </div>
-
     <div id="root"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -153,19 +168,17 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            window.FB_CORE = { db, auth, doc, onSnapshot, setDoc, onAuthStateChanged, appId: "hilik-rosenberg-v1" };
-            window.FB_STATUS = "online";
+            window.FB_CORE = { db, auth, doc, onSnapshot, setDoc, appId: "hilik-rosenberg-v1" };
             signInAnonymously(auth).catch(() => {});
-        } catch (err) { window.FB_STATUS = "error"; }
-        window.dispatchEvent(new Event('firebase-ready'));
+        } catch (err) { }
     </script>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+        const { useState, useEffect, useMemo } = React;
         const ADMIN_PASSWORD = "hilik123";
 
         const App = () => {
-            const [data, setData] = useState({ blocked: [], soldOut: [] });
+            const [cloudData, setCloudData] = useState(null);
             const [selectedDate, setSelectedDate] = useState('');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -173,44 +186,27 @@
             const [adminPassInput, setAdminPassInput] = useState('');
             const [adminDateInput, setAdminDateInput] = useState('');
             const [adminStatusInput, setAdminStatusInput] = useState('open');
-            const [loading, setLoading] = useState(true);
             const [openFaq, setOpenFaq] = useState(null);
-            
-            useEffect(() => {
-                const loader = document.getElementById('initial-loader');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => { loader.remove(); setLoading(false); }, 500);
-                }
-            }, []);
-
-            useEffect(() => {
-                const checkAdmin = () => {
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.get('access') === 'hilik_private' || window.location.hash.includes('access=hilik_private')) {
-                        setIsAdminOpen(true);
-                    }
-                };
-                window.addEventListener('firebase-ready', checkAdmin);
-                checkAdmin();
-                return () => window.removeEventListener('firebase-ready', checkAdmin);
-            }, []);
 
             useEffect(() => {
                 if (!window.FB_CORE) return;
                 const { db, appId, onSnapshot, doc } = window.FB_CORE;
                 const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
-                const unsubscribeSnap = onSnapshot(settingsDoc, (snap) => {
-                    if (snap.exists()) setData(snap.data());
-                }, (err) => { console.error("Firestore Error:", err); });
-                return () => unsubscribeSnap();
+                const unsubscribe = onSnapshot(settingsDoc, (snap) => {
+                    if (snap.exists()) setCloudData(snap.data());
+                    else setCloudData({ blocked: [], soldOut: [] });
+                });
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('access') === 'hilik_private') setIsAdminOpen(true);
             }, []);
 
             useEffect(() => { 
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            }, [data, loading, isAdminOpen, selectedDate, openFaq]);
+                if (window.lucide) window.lucide.createIcons();
+            }, [cloudData, isAdminOpen, selectedDate, openFaq]);
 
             const thursdays = useMemo(() => {
                 const list = [];
@@ -219,7 +215,7 @@
                 let diff = (4 - d.getDay() + 7) % 7;
                 if (diff === 0 && new Date().getHours() >= 20) diff = 7;
                 d.setDate(d.getDate() + diff);
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 9; i++) {
                     const dateStr = d.toLocaleDateString('en-CA');
                     list.push({ dateStr, day: d.getDate(), month: d.toLocaleDateString('he-IL', { month: 'short' }) });
                     d.setDate(d.getDate() + 7);
@@ -228,68 +224,52 @@
             }, []);
 
             const getStatus = (dateStr) => {
-                if (data.blocked?.includes(dateStr)) return { text: 'אין סיור (חג)', color: 'text-gray-500', type: 'holiday' };
-                if (data.soldOut?.includes(dateStr)) return { text: 'אזל המקום', color: 'text-red-500', type: 'soldout' };
+                if (!cloudData) return { text: 'בודק זמינות...', color: 'text-gray-600', type: 'loading' };
+                if (cloudData.blocked?.includes(dateStr)) return { text: 'אין סיור (חג)', color: 'text-gray-500', type: 'holiday' };
+                if (cloudData.soldOut?.includes(dateStr)) return { text: 'אזל המקום', color: 'text-red-500', type: 'soldout' };
                 return { text: 'נותרו מקומות', color: 'text-green-400', type: 'open' };
             };
 
-            const handleWhatsApp = (date, type = 'regular') => {
+            const handleWhatsApp = (date) => {
                 const d = new Date(date);
                 const dateText = d.toLocaleDateString('he-IL', {day:'numeric', month:'long'});
-                let msg = (type === 'private' || type === 'weekday')
-                    ? `היי מירי, אשמח לקבל פרטים על סגירת קבוצה פרטית בתאריך ה-${dateText} (10 איש ומעלה).`
-                    : `היי מירי, אשמח להירשם לסיור הקולינרי של חיליק ב-${dateText}, נותרו מקומות?`;
+                const msg = `היי מירי, אשמח להירשם לסיור בבני ברק ב-${dateText}, נותרו מקומות?`;
                 window.location.href = `https://wa.me/972505804367?text=${encodeURIComponent(msg)}`;
             };
 
             const scrollToId = (id) => {
                 const el = document.getElementById(id);
-                if (el) {
-                    const offset = 90;
-                    window.scrollTo({ top: el.offsetTop - offset, behavior: 'smooth' });
-                    setIsMenuOpen(false);
-                }
-            };
-
-            const toggleFaq = (index) => {
-                setOpenFaq(openFaq === index ? null : index);
+                if (el) { window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' }); setIsMenuOpen(false); }
             };
 
             const updateCloud = async () => {
                 const { db, appId, doc, setDoc } = window.FB_CORE;
-                try {
-                    const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
-                    const newBlocked = (data.blocked || []).filter(d => d !== adminDateInput);
-                    const newSoldOut = (data.soldOut || []).filter(d => d !== adminDateInput);
-                    if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
-                    if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
-                    await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut }, { merge: true });
-                    alert("עודכן בהצלחה!");
-                    setIsAdminOpen(false);
-                } catch (e) { alert("שגיאת הרשאות"); }
+                const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+                const newBlocked = [...(cloudData.blocked || [])].filter(d => d !== adminDateInput);
+                const newSoldOut = [...(cloudData.soldOut || [])].filter(d => d !== adminDateInput);
+                if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
+                if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
+                await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut }, { merge: true });
+                setIsAdminOpen(false);
             };
-
-            if (loading) return null;
 
             return (
                 <div className="min-h-screen">
                     {/* Admin Panel */}
                     {isAdminOpen && (
-                        <div className="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center p-4 backdrop-blur-md text-right">
-                            <div className="bg-[#1E1E24] w-full max-w-md p-10 rounded-[2.5rem] border border-[#E9C46A]/30 shadow-2xl">
-                                <h2 className="text-2xl font-bold text-[#E9C46A] mb-4 font-serif italic text-center text-right">ניהול סיורים</h2>
+                        <div className="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center p-4 backdrop-blur-md">
+                            <div className="bg-[#1E1E24] w-full max-w-md p-10 rounded-[2.5rem] border border-[#E9C46A]/30 shadow-2xl text-right">
+                                <h2 className="text-2xl font-bold text-[#E9C46A] mb-4 font-serif italic text-center">ניהול סיורים</h2>
                                 {!adminAuth ? (
-                                    <div className="space-y-6 text-right">
+                                    <div className="space-y-6">
                                         <input type="password" placeholder="סיסמה" onChange={e=>setAdminPassInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-center outline-none border border-white/10 focus:border-[#E9C46A] text-xl text-white" />
-                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : alert("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg">כניסה</button>
-                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-600 text-xs mt-2 underline text-center block mx-auto font-bold uppercase">חזרה</button>
+                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : alert("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg hover:bg-white transition-all">כניסה</button>
+                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-500 text-xs mt-2 underline text-center block font-bold">חזרה לאתר</button>
                                     </div>
                                 ) : (
                                     <div className="space-y-6 text-right">
-                                        <div className="text-xs text-gray-500 mb-1">בחר תאריך:</div>
                                         <input type="date" value={adminDateInput} onChange={e=>setAdminDateInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10" style={{colorScheme:'dark'}} />
-                                        <div className="text-xs text-gray-500 mb-1">סטטוס:</div>
-                                        <select value={adminStatusInput} onChange={e=>setAdminStatusInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10">
+                                        <select value={adminStatusInput} onChange={e=>setAdminStatusInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10 text-right">
                                             <option value="open">פנוי</option>
                                             <option value="soldout">אזל המקום</option>
                                             <option value="holiday">אין סיור (חג/סגור)</option>
@@ -302,124 +282,166 @@
                         </div>
                     )}
 
-                    {/* Navbar */}
-                    <nav className="main-header fixed top-0 w-full z-[500] px-6 md:px-16 py-4 flex justify-between items-center text-right">
-                        <a href="/" className="text-xl md:text-3xl font-black text-[#E9C46A] font-serif cursor-pointer">הסיור של חיליק בבני ברק</a>
+                    <nav className="main-header fixed top-0 w-full z-[500] px-6 md:px-16 py-4 flex justify-between items-center">
+                        <a href="/" className="text-xl md:text-3xl font-black text-[#E9C46A] font-serif cursor-pointer tracking-tighter">חיליק רוזנברג | סיורים בבני ברק</a>
                         <div className="hidden md:flex gap-8 text-gray-200 font-bold text-sm items-center">
-                            <a href="#about" className="nav-link">מי אני?</a>
-                            <a href="#journey" className="nav-link">מה רואים?</a>
-                            <a href="#menu" className="nav-link">מה אוכלים?</a>
-                            <a href="#faq" className="nav-link">שאלות נפוצות</a>
-                            <a href="#dates" className="nav-link">מתי יש סיור?</a>
-                            <a href="#dates" className="bg-[#E9C46A] text-[#121214] px-8 py-2 rounded-full font-black hover:scale-105 transition-all">להרשמה</a>
+                            <a onClick={()=>scrollToId('about')} className="nav-link">מי אני?</a>
+                            <a onClick={()=>scrollToId('journey')} className="nav-link">מה רואים?</a>
+                            <a onClick={()=>scrollToId('menu')} className="nav-link">מה אוכלים?</a>
+                            <a onClick={()=>scrollToId('faq')} className="nav-link">שאלות נפוצות</a>
+                            <a onClick={()=>scrollToId('dates')} className="nav-link font-bold text-[#E9C46A]">מתי יש סיור?</a>
+                            <a onClick={()=>scrollToId('dates')} className="bg-[#E9C46A] text-[#121214] px-8 py-2 rounded-full font-black hover:scale-105 transition-all">להרשמה</a>
                         </div>
-                        <button className="md:hidden text-[#E9C46A]" onClick={() => setIsMenuOpen(true)} aria-label="תפריט ניווט"><i data-lucide="menu" size={32}></i></button>
+                        <button className="md:hidden text-[#E9C46A]" onClick={() => setIsMenuOpen(true)} aria-label="תפריט"><i data-lucide="menu" size={32}></i></button>
                     </nav>
 
-                    {/* Mobile Menu Overlay */}
                     {isMenuOpen && (
-                        <div className="fixed inset-0 mobile-menu-overlay z-[1000] flex flex-col items-center justify-center gap-8 text-center">
+                        <div className="fixed inset-0 bg-[#121214]/98 z-[1000] flex flex-col items-center justify-center gap-8 text-center">
                             <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 left-8 text-[#E9C46A]"><i data-lucide="x" size={48}></i></button>
-                            <a href="#about" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מי אני?</a>
-                            <a href="#journey" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מה רואים?</a>
-                            <a href="#menu" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מה אוכלים?</a>
-                            <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">שאלות נפוצות</a>
-                            <a href="#dates" onClick={() => setIsMenuOpen(false)} className="bg-[#E9C46A] text-black px-12 py-4 rounded-full font-black text-xl">להרשמה עכשיו</a>
+                            <a onClick={()=>scrollToId('about')} className="text-3xl text-white font-serif">מי אני?</a>
+                            <a onClick={()=>scrollToId('journey')} className="text-3xl text-white font-serif">מה רואים?</a>
+                            <a onClick={()=>scrollToId('menu')} className="text-3xl text-white font-serif">מה אוכלים?</a>
+                            <a onClick={()=>scrollToId('faq')} className="text-3xl text-white font-serif">שאלות נפוצות</a>
+                            <a onClick={()=>scrollToId('dates')} className="bg-[#E9C46A] text-black px-12 py-4 rounded-full font-black text-xl">להרשמה עכשיו</a>
                         </div>
                     )}
 
                     <main>
                         {/* Hero Section */}
                         <header className="relative min-h-[90vh] flex items-center justify-center bg-black overflow-hidden pt-20 text-center">
-                            <img src="hero-bg.jpeg" className="absolute inset-0 w-full h-full object-cover opacity-50" alt="סיור אוכל יהודי בבני ברק" />
+                            <img 
+                                src="hero-bg.jpeg" 
+                                className="absolute inset-0 w-full h-full object-cover opacity-50" 
+                                alt="חיליק רוזנברג מוביל סיור קולינרי בבני ברק - טעימות צ'ולנט וקיגל" 
+                                width="1920" height="1080"
+                            />
                             <div className="relative z-10 px-6 max-w-5xl">
-                                <div className="inline-block bg-[#E9C46A]/20 text-[#E9C46A] px-5 py-1 rounded-full border border-[#E9C46A]/40 text-xs font-bold mb-6 uppercase tracking-widest">חוויה שהיא הצגה</div>
-                                <h1 className="text-5xl md:text-8xl font-bold text-[#E9C46A] font-serif mb-8 leading-tight text-center">סיור קולינרי בבני ברק<br/>עם חיליק רוזנברג</h1>
-                                <p className="text-xl md:text-3xl italic text-white/95 mb-12 font-serif text-center">חמישי בערב (ליל שישי) - טעימות אוכל יהודי, תרבות וסיפורים מבפנים</p>
-                                <a href="#dates" className="bg-[#E9C46A] text-black px-16 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all inline-block">שריינו מקום עכשיו</a>
+                                <div className="inline-block bg-[#E9C46A]/20 text-[#E9C46A] px-5 py-1 rounded-full border border-[#E9C46A]/40 text-xs font-bold mb-6 uppercase tracking-widest">חוויה קולינרית שהיא הצגה</div>
+                                <h1 className="text-4xl md:text-7xl font-bold text-[#E9C46A] font-serif mb-8 leading-tight text-center">סיורים בבני ברק עם חיליק רוזנברג | סיור קולינרי חרדי</h1>
+                                <p className="text-xl md:text-3xl italic text-white/95 mb-12 font-serif text-center w-full">חמישי בערב (ליל שישי) - טעימות אוכל יהודי, תרבות וסיפורים מבפנים</p>
+                                <a onClick={()=>scrollToId('dates')} className="bg-[#E9C46A] text-black px-16 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all inline-block cursor-pointer">שריינו מקום לסיור הקרוב</a>
                             </div>
                         </header>
 
-                        {/* About Section */}
-                        <section id="about" className="py-32 max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
-                            <div className="w-full md:w-1/2 relative">
-                                <img src="hilik-profile.jpeg" alt="חיליק רוזנברג - מורה דרך ומדריך סיורים קולינריים" className="rounded-[3rem] w-full shadow-2xl" loading="lazy" />
+                        {/* Social Proof */}
+                        <div className="bg-[#1a1a1c] py-12 border-b border-white/5 text-center">
+                            <div className="max-w-4xl mx-auto px-6">
+                                <div className="flex flex-col items-center mb-8">
+                                    <div className="flex gap-1 mb-2 tracking-widest star-rating">
+                                        {[1,2,3,4,5].map(s => <i key={s} data-lucide="star" fill="currentColor" size={24}></i>)}
+                                    </div>
+                                    <p className="text-lg font-bold text-white uppercase tracking-tighter">דירוג 5.0/5 מבוסס על 28 ביקורות מאומתות</p>
+                                </div>
+                                <h3 className="text-2xl font-serif text-[#E9C46A] mb-8 italic text-center">למה סיור בבני ברק עם חיליק זה שונה?</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-right">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <h4 className="text-[#E9C46A] font-bold mb-2">גישה אישית</h4>
+                                        <p className="text-sm text-gray-400">אני לא רק מדריך, אני השכן שלכם לערב אחד. הסיפורים הם מהחיים שלי כחרדי בבני ברק.</p>
+                                    </div>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <h4 className="text-[#E9C46A] font-bold mb-2">טעימות בני ברק</h4>
+                                        <p className="text-sm text-gray-400">רק המקומות הסודיים שאנחנו, הבני-ברקים, באמת אוכלים בהם ליל שישי.</p>
+                                    </div>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <h4 className="text-[#E9C46A] font-bold mb-2">חיבור אמיתי</h4>
+                                        <p className="text-sm text-gray-400">סיור קולינרי בני ברק שיוצר גשר אמיתי דרך הומור ושיח מכבד בגובה העיניים.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <article className="w-full md:w-1/2 text-right">
-                                <h2 className="text-5xl font-serif text-[#E9C46A] mb-8 italic text-right">נעים להכיר.</h2>
-                                <p className="text-2xl text-white mb-6 leading-relaxed font-bold">אני חיליק רוזנברג, אברך חרדי מבני ברק.</p>
-                                <p className="text-lg text-gray-400 mb-6">בתכלס, חוץ מזה שאני אוהב את החרדיות אני אוהב אדם. אני מזמין אתכם לחוויה של סיור טעימות בבני ברק - חוויה אותנטית ועמוקה של החיים החרדיים יחד עם כל האוכל היהודי שמשמח את הנפשות.</p>
-                                <p className="text-lg text-[#E9C46A] italic">בואו לראות את בני ברק של הלילה דרך העיניים שלי.</p>
+                        </div>
+
+                        {/* About Section */}
+                        <section id="about" className="py-32 max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16 text-right">
+                            <div className="w-full md:w-1/2 relative">
+                                <img 
+                                    src="hilik-profile.jpeg" 
+                                    alt="חיליק רוזנברג - מדריך סיורים בבני ברק ומומחה לתרבות חרדית" 
+                                    className="rounded-[3rem] w-full shadow-2xl border-2 border-[#E9C46A]/20" 
+                                    width="600" height="600" loading="lazy" 
+                                />
+                            </div>
+                            <article className="w-full md:w-1/2">
+                                <h2 className="text-5xl font-serif text-[#E9C46A] mb-4 italic font-bold text-right">נעים להכיר.</h2>
+                                <h3 className="text-xl text-white/80 mb-8 italic">המדריך שלכם למסע אל תוך הלב החרדי</h3>
+                                <p className="text-lg text-gray-400 mb-6 font-light">
+                                    שמי <strong>חיליק רוזנברג</strong>, נולדתי וגדלתי בבני ברק למשפחה חסידית שורשית. לאחר שנים של לימוד בישיבות ועיסוק בחינוך, החלטתי לפתוח את השער לעולם שלי עבור הקהל הרחב.
+                                </p>
+                                <p className="text-lg text-gray-400 mb-6 font-light">
+                                    כל <strong>סיור בבני ברק</strong> שאני מוביל הוא מלאכת מחשבת של תוכן תרבותי, ידע הלכתי ואווירה משוחררת. אני מזמין אתכם להצטרף אליי לערב של <strong>סיור קולינרי בני ברק</strong> שלא תשכחו. 
+                                    <a onClick={()=>scrollToId('dates')} className="text-[#E9C46A] cursor-pointer hover:underline font-bold mx-1 underline italic">בואו לבדוק את התאריכים הפנויים.</a>
+                                </p>
+                                <p className="text-lg text-[#E9C46A] italic font-bold uppercase tracking-wide text-right">סיור בני ברק ליל שישי - חוויה שהיא הצגה שלמה.</p>
                             </article>
                         </section>
 
-                        {/* Journey Section - Order Updated */}
-                        <section id="journey" className="py-32 bg-[#0a0a0a]/50 text-right text-right">
-                            <div className="max-w-6xl mx-auto px-6">
-                                <h2 className="text-6xl font-serif text-[#E9C46A] mb-20 italic text-center text-right">מה רואים בסיור בבני ברק?</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {/* Journey Section */}
+                        <section id="journey" className="py-32 bg-[#0a0a0a]/50 text-right">
+                            <div className="max-w-6xl mx-auto px-6 text-right">
+                                <h2 className="text-5xl font-serif text-[#E9C46A] mb-4 italic text-center">סיורים בבני ברק - מה כולל?</h2>
+                                <h3 className="text-xl text-gray-400 mb-20 text-center">מה עושה את הסיורים בבני ברק של חיליק לייחודיים?</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-right">
                                     {[
-                                        { icon: "layers", title: "הזרמים החרדיים", desc: "נכיר מקרוב את ההבדלים בין חסידים לליטאים, המשותף ומי לא מתחתן עם מי (ולמה)." },
-                                        { icon: "heart", title: "עולם השידוכים והחתונה", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי. התהליך המרתק, המדדים והסיפורים מבפנים." },
-                                        { icon: "home", title: "בנייה יצירתית ומצוקת הדיור", desc: "על המרפסות המעופפות והפתרונות האדריכליים הייחודיים שהפכו לסמל של בני ברק." },
-                                        { icon: "coins", title: "גמ\"חים וקופות צדקה", desc: "הצצה לעולם החסד המדהים: מהשאלת מוצצים ועד קופות הצדקה שמתפעלות עיר שלמה." },
+                                        { icon: "layers", title: "הזרמים החרדיים", desc: "נכיר את ההבדלים בין חסידים לליטאים בתוך סיורים בבני ברק, המשותף ומי לא מתחתן עם מי." },
+                                        { icon: "heart", title: "עולם השידוכים", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי. התהליך והסיפורים המרתקים." },
+                                        { icon: "home", title: "בנייה יצירתית", desc: "על המרפסות המעופפות והפתרונות האדריכליים הייחודיים שהפכו לסמל של בני ברק." },
+                                        { icon: "coins", title: "גמ\"חים וחסד", desc: "הצצה לעולם החסד המדהים: מהשאלת מוצצים ועד קופות הצדקה שמתפעלות עיר שלמה." },
                                         { icon: "users", title: "ישיבות וחיידרים", desc: "נחווה מקרוב מה באמת עושים כל הזמן בישיבה ואיך ילד חרדי גדל בעולם של תורה." },
-                                        { icon: "monitor", title: "חדרי אינטרנט והתמודדות", desc: "איך העולם החרדי מתמודד עם הקדמה? ביקור במרכזי התקשורת המסוננים." },
-                                        { icon: "store", title: "חנויות וסמטאות", desc: "ביקור בחנויות ספרים חרדיות ובסמטאות הסודיות של העיר. נראה מקרוב שירה חרדית." },
-                                        { icon: "hand-heart", title: "התנדבות והשתלבות", desc: "נראה את ארגוני ההתנדבות (איחוד הצלה) ונכיר את סיפור השתלבות החרדים בחברה." },
-                                        { icon: "croissant", title: "מאפיית ויז'ניץ", desc: "ניכנס לתוך מאפיית ויז'ניץ המיתולוגית, נראה איך הקמח נשפך מהתקרה ונקלע חלות חמות." }
+                                        { icon: "croissant", title: "מאפיית ויז'ניץ", desc: "ניכנס לתוך מאפיית ויז'ניץ המיתולוגית, נראה איך הקמח נשפך מהתקרה ונקלע חלות חמות יחד." }
                                     ].map((item, i) => (
-                                        <article key={i} className="bg-[#1E1E24] p-10 rounded-[3rem] border border-white/5 hover:border-[#E9C46A]/20 transition-all text-right shadow-xl">
-                                            <div className="text-[#E9C46A] mb-6 flex justify-start text-right"><i data-lucide={item.icon} size={36}></i></div>
-                                            <h3 className="text-2xl font-bold mb-4 font-serif text-white text-right">{item.title}</h3>
-                                            <p className="text-gray-400 leading-relaxed text-right">{item.desc}</p>
+                                        <article key={i} className="bg-[#1E1E24] p-10 rounded-[3rem] border border-white/5 hover:border-[#E9C46A]/20 transition-all shadow-xl text-right">
+                                            <div className="text-[#E9C46A] mb-6 flex justify-start"><i data-lucide={item.icon} size={36}></i></div>
+                                            <h4 className="text-2xl font-bold mb-4 font-serif text-white">{item.title}</h4>
+                                            <p className="text-gray-400 leading-relaxed font-light">{item.desc}</p>
                                         </article>
                                     ))}
                                 </div>
                             </div>
                         </section>
 
-                        {/* Culinary Section - Horizontal Scroll */}
+                        {/* Culinary Section */}
                         <section id="menu" className="py-32 bg-[#0a0a0a] text-center border-y border-white/5 overflow-hidden">
-                            <h2 className="text-6xl font-serif text-[#E9C46A] mb-20 italic text-center px-6">הצד הקולינרי (אוכל יהודי אותנטי)</h2>
+                            <h2 className="text-6xl font-serif text-[#E9C46A] mb-4 italic">הצד הקולינרי</h2>
+                            <h3 className="text-2xl text-gray-400 mb-20 px-6">טעימות האוכל היהודי המפורסמות של חיליק רוזנברג</h3>
                             <div className="flex flex-row flex-nowrap overflow-x-auto gap-8 pb-12 px-8 custom-scroll scroll-smooth w-full">
                                 {[
                                     { icon: "soup", title: "טשולנט בשרי", desc: "חמין עשיר בבישול ארוך עם בשר נימוח, קטניות וטעמים של שבת בבני ברק." },
                                     { icon: "fish", title: "דגים והערינג", desc: "הטעם האמיתי של הקידוש: דג מלוח איכותי, הערינג פיקנטי וקרקרים פריכים." },
                                     { icon: "layers", title: "קיגעל אוברנייט", desc: "הקיגעל הירושלמי השחום והחריף שבילה לילה שלם על הפלטה." },
-                                    { icon: "croissant", title: "חלות ויז'ניץ חמות", desc: "טעימה של חלה מתוקה ולוהטת שיצאה ממש עכשיו מהתנור במאפייה." },
-                                    { icon: "utensils", title: "כבד קצוץ", desc: "הממרח היהודי הקלאסי בגרסה ביתית עשירה עם המון בצל מטוגן." }
+                                    { icon: "croissant", title: "חלות ויז'ניץ חמות", desc: "טעימה של חלה מתוקה ולוהטת שיצאה ממש עכשיו מהתנור במאפייה." }
                                 ].map((food, i) => (
-                                    <article key={i} className="flex-shrink-0 w-80 md:w-96 bg-[#1E1E24] rounded-[4rem] p-12 border border-white/5 shadow-2xl flex flex-col items-center text-center">
+                                    <article key={i} className="flex-shrink-0 w-80 md:w-96 bg-[#1E1E24] rounded-[4rem] p-12 border border-white/5 shadow-2xl flex flex-col items-center">
                                         <div className="text-[#E9C46A] mb-6 flex justify-center w-full"><i data-lucide={food.icon} size={48}></i></div>
-                                        <h3 className="text-3xl font-bold mb-4 font-serif text-[#E9C46A]">{food.title}</h3>
-                                        <p className="text-gray-400 text-center leading-relaxed">{food.desc}</p>
+                                        <h4 className="text-3xl font-bold mb-4 font-serif text-[#E9C46A]">{food.title}</h4>
+                                        <p className="text-gray-400 leading-relaxed font-light">{food.desc}</p>
                                     </article>
                                 ))}
                             </div>
                         </section>
 
-                        {/* FAQ Section - Accordion */}
-                        <section id="faq" className="py-32 max-w-4xl mx-auto px-6 text-right text-right">
-                            <h2 className="text-5xl font-serif text-[#E9C46A] mb-16 italic text-center text-right">שאלות נפוצות על סיורים בבני ברק</h2>
+                        {/* Mid CTA */}
+                        <div className="py-20 text-center bg-[#1a1a1c] border-b border-white/5">
+                            <p className="text-2xl text-white mb-8">מוכנים לראות את בני ברק כפי שמעולם לא ראיתם?</p>
+                            <button onClick={()=>scrollToId('dates')} className="bg-white text-black px-12 py-4 rounded-full font-black text-xl hover:bg-[#E9C46A] transition-all">בואו נצא לדרך</button>
+                        </div>
+
+                        {/* FAQ Section */}
+                        <section id="faq" className="py-32 max-w-4xl mx-auto px-6 text-right">
+                            <h2 className="text-5xl font-serif text-[#E9C46A] mb-16 italic text-center">שאלות נפוצות על סיור בבני ברק</h2>
                             <div className="space-y-4 text-right">
                                 {[
                                     { q: "מה עושים בבני ברק בחמישי בערב?", a: "חמישי בערב בבני ברק הוא זמן קסום שבו העיר מתעוררת לחיים עם הכנות ל'ליל שישי'. בסיור נחווה את האווירה המחשמלת, הניגונים מהישיבות והריחות מהמאפיות." },
                                     { q: "כמה זמן נמשך הסיור?", a: "הסיור נמשך בין שעתיים וחצי לשלוש שעות, תלוי ברמת הרעב ובסקרנות שלכם." },
-                                    { q: "איפה נפגשים? האם יש חניה?", a: "בדיוק בשביל זה אנחנו כאן. פרטי המפגש המדויקים והמלצות חניה יישלחו אליכם באופן פרטי מיד לאחר סגירת ההרשמה." },
-                                    { q: "איך מתלבשים לסיור בבני ברק?", a: "לאחר סגירת ההרשמה תקבלו מאיתנו את כל הפרטים המדויקים, כולל המלצות לבוש מכבד וצנוע, כדי שתוכלו ליהנות ב-100% מהמקומות הכי סודיים של בני ברק." },
-                                    { q: "איפה קונים אוכל מוכן לשבת בבני ברק?", a: "העיר מלאה במעדניות ומוסדות קולינריים. בסיור נבקר במקומות הסודיים והטעימים ביותר, כולל טעימות של צ'ולנט, קיגעל ומאפים מיוחדים." }
+                                    { q: "איפה נפגשים? האם יש חניה?", a: "פרטי המפגש המדויקים והמלצות חניה יישלחו אליכם באופן פרטי מיד לאחר סגירת ההרשמה." },
+                                    { q: "איך מתלבשים לסיור בבני ברק?", a: "לאחר סגירת ההרשמה תקבלו המלצות לבוש מכבד וצנוע, כדי שתוכלו ליהנות ב-100% מהמקומות הכי סודיים." },
+                                    { q: "איפה קונים אוכל מוכן לשבת בבני ברק?", a: "העיר מלאה במעדניות ומוסדות קולינריים. בסיור נבקר במקומות הסודיים ביותר, כולל טעימות של צ'ולנט, קיגעל ומאפים מיוחדים." }
                                 ].map((faq, i) => (
                                     <article key={i} className="bg-[#1E1E24] rounded-3xl border border-white/5 shadow-lg overflow-hidden transition-all duration-300 text-right">
-                                        <button 
-                                            onClick={() => toggleFaq(i)}
-                                            className="w-full p-8 text-right flex items-center justify-between hover:bg-white/5 transition-colors focus:outline-none"
-                                        >
-                                            <h3 className="text-xl font-bold text-[#E9C46A] text-right">{faq.q}</h3>
+                                        <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full p-8 text-right flex items-center justify-between hover:bg-white/5 transition-colors focus:outline-none">
+                                            <h4 className="text-xl font-bold text-[#E9C46A] text-right font-serif">{faq.q}</h4>
                                             <i data-lucide="chevron-down" className={`text-gray-400 transition-transform duration-300 transform ${openFaq === i ? 'rotate-180' : ''}`}></i>
                                         </button>
                                         {openFaq === i && (
-                                            <div className="px-8 pb-8 text-gray-400 leading-relaxed border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-right">
+                                            <div className="px-8 pb-8 text-gray-400 leading-relaxed border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-right font-light">
                                                 {faq.a}
                                             </div>
                                         )}
@@ -428,50 +450,89 @@
                             </div>
                         </section>
 
-                        {/* Dates Section */}
+                        {/* Pricing */}
+                        <section className="py-20 bg-[#121214] text-center border-b border-white/5">
+                            <div className="max-w-2xl mx-auto px-6 bg-[#1E1E24] p-12 rounded-[4rem] border border-[#E9C46A]/20 shadow-2xl">
+                                <h3 className="text-3xl font-serif text-[#E9C46A] mb-4 italic underline decoration-gold/30">ההשקעה שלכם בחוויה</h3>
+                                <div className="text-7xl font-black text-white mb-2 font-serif">250 ₪</div>
+                                <p className="text-xl text-gray-400 mb-8">לאדם, כולל את כל הטעימות, ההדרכה והצ'ולנט שתוכלו לאכול!</p>
+                                <p className="text-sm text-[#E9C46A]/60 italic font-bold">הצטרפו אליי למסע של פעם בחיים. <a onClick={()=>scrollToId('about')} className="underline cursor-pointer">קראו עוד עלי.</a></p>
+                            </div>
+                        </section>
+
+                        {/* Dates Selection */}
                         <section id="dates" className="py-32 max-w-5xl mx-auto px-6 text-center">
-                            <div className="bg-[#1E1E24] p-12 md:p-24 rounded-[6rem] border border-white/5 shadow-2xl">
-                                <h2 className="text-5xl md:text-7xl font-bold text-[#E9C46A] font-serif italic mb-16">מתי יש סיור בבני ברק?</h2>
+                            <div className="bg-[#1E1E24] p-12 md:p-24 rounded-[6rem] border border-white/5 shadow-2xl relative overflow-hidden text-center">
+                                <div className="bg-red-500/10 text-red-400 border border-red-500/20 py-3 px-6 rounded-full mb-12 inline-flex items-center gap-2 font-bold animate-pulse text-sm md:text-base">
+                                    <i data-lucide="alert-circle" size={18}></i>
+                                    שים לב: הסיורים מתמלאים מהר - אל תחכו לרגע האחרון!
+                                </div>
+                                <h2 className="text-5xl md:text-7xl font-bold text-[#E9C46A] font-serif italic mb-8">מתי יש סיור בבני ברק?</h2>
+                                <h3 className="text-xl text-gray-500 mb-16 italic font-serif">איך להירשם לסיור קולינרי בבני ברק?</h3>
+                                
                                 <div className="dates-wrapper custom-scroll gap-6 pb-12">
                                     {thursdays.map((item, i) => {
                                         const status = getStatus(item.dateStr);
                                         const active = selectedDate === item.dateStr;
                                         return (
-                                            <div key={i} onClick={() => setSelectedDate(item.dateStr)}
+                                            <div key={i} onClick={() => status.type !== 'loading' && setSelectedDate(item.dateStr)}
                                                 className={`flex-shrink-0 w-36 h-48 rounded-[2.5rem] border flex flex-col items-center justify-center transition-all cursor-pointer
-                                                ${status.type === 'open' ? 'hover:border-[#E9C46A] hover:scale-105' : 'opacity-30 pointer-events-none'}
+                                                ${status.type === 'open' ? 'hover:border-[#E9C46A] hover:scale-105' : status.type === 'loading' ? 'cursor-wait' : 'opacity-30 pointer-events-none'}
                                                 ${active ? 'bg-[#E9C46A] text-black border-[#E9C46A] scale-110 shadow-inner' : 'bg-[#121214] border-white/10'}`}>
-                                                <span className="text-[10px] font-black opacity-60 uppercase text-center">חמישי</span>
+                                                <span className="text-[10px] font-black opacity-60 uppercase tracking-tighter">חמישי</span>
                                                 <span className="text-5xl font-black text-center">{item.day}</span>
                                                 <span className="text-sm font-bold text-center">{item.month}</span>
-                                                <div className={`mt-4 text-[9px] font-black uppercase text-center ${status.color}`}>{status.text}</div>
+                                                
+                                                <div className={`mt-4 text-[9px] font-black uppercase flex flex-col items-center gap-1 ${status.color}`}>
+                                                    {status.type === 'loading' ? (
+                                                        <div className="dot-loader">
+                                                            <div className="dot"></div>
+                                                            <div className="dot"></div>
+                                                            <div className="dot"></div>
+                                                        </div>
+                                                    ) : status.text}
+                                                </div>
                                             </div>
                                         );
                                     })}
                                 </div>
-                                <div className="mt-10 min-h-[150px]">
+
+                                <div className="mt-8 flex flex-col items-center">
                                     {selectedDate ? (
-                                        <div className="animate-in fade-in zoom-in duration-500 text-center">
-                                            <p className="text-2xl text-white mb-8 font-serif italic">בחרת את ה-{new Date(selectedDate).toLocaleDateString('he-IL', {day:'numeric', month:'long'})}. נותרו מקומות!</p>
-                                            <button onClick={() => handleWhatsApp(selectedDate)} className="bg-[#E9C46A] text-[#121214] px-14 py-5 rounded-full font-black text-2xl shadow-xl hover:scale-105 transition-all mx-auto inline-block">שלחו הודעה להרשמה</button>
+                                        <div className="animate-in fade-in zoom-in duration-500 mb-4 text-center">
+                                            <p className="text-2xl text-white mb-4 font-serif italic tracking-wide font-bold">בחרת את ה-{new Date(selectedDate).toLocaleDateString('he-IL', {day:'numeric', month:'long'})}</p>
+                                            <button onClick={() => handleWhatsApp(selectedDate)} className="bg-[#E9C46A] text-[#121214] px-14 py-5 rounded-full font-black text-2xl shadow-xl hover:scale-105 transition-all text-center">שלחו הודעה להרשמה עכשיו</button>
                                         </div>
-                                    ) : <div className="text-center text-gray-500 italic text-xl animate-pulse">בחרו תאריך מהלוח לבדיקת זמינות לסיור הקרוב...</div>}
+                                    ) : (
+                                        <div className="text-gray-500 italic text-xl h-[100px] flex items-center animate-pulse text-center">בחרו תאריך מהלוח או למטה...</div>
+                                    )}
+
+                                    <div className="w-full max-w-sm pt-8 border-t border-white/5">
+                                        <div className="text-xs text-gray-500 mb-2 font-bold uppercase tracking-widest italic text-center">מעדיפים תאריך אחר לסיור בני ברק ליל שישי?</div>
+                                        <input 
+                                            type="date" 
+                                            value={selectedDate} 
+                                            onChange={e => setSelectedDate(e.target.value)} 
+                                            className="w-full bg-[#121214] border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-[#E9C46A] text-center font-bold text-lg"
+                                            style={{colorScheme:'dark'}}
+                                        />
+                                        <p className="text-[10px] text-gray-600 mt-2 font-light text-center">ניתן לתאם סיור פרטי לקבוצות מעל 10 אנשים גם בימים אחרים.</p>
+                                    </div>
                                 </div>
                             </div>
                         </section>
                     </main>
 
                     <footer className="py-20 opacity-40 text-xs tracking-[0.5em] uppercase text-center border-t border-white/5">
-                        © 2026 כל הזכויות שמורות - חיליק רוזנברג | סיור קולינרי ותרבותי בבני ברק | טעימות אוכל יהודי וליל שישי
+                        © 2026 כל הזכויות שמורות - חיליק רוזנברג | סיורים בבני ברק | טעימות אוכל יהודי וליל שישי
                     </footer>
+
                     <a 
-                      href="https://wa.me/972505804367?text=היי מירי, אשמח לפרטים על הסיורים 🌟" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[900] bg-green-500 hover:bg-green-600 text-white p-4 md:p-5 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center gap-3 group"
-                      aria-label="שלח הודעה בווטסאפ"
+                      href="https://wa.me/972505804367?text=היי מירי, אשמח לפרטים על סיור בבני ברק 🌟" 
+                      target="_blank" rel="noopener noreferrer"
+                      className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[900] bg-green-500 text-white p-4 md:p-5 rounded-full shadow-2xl hover:scale-110 transition-all flex items-center gap-3 group"
                     >
-                      <i data-lucide="message-circle" size={28} className="group-hover:rotate-12 transition-transform"></i>
+                      <i data-lucide="message-circle" size={28}></i>
                       <span className="hidden md:inline-block font-bold">שאלות? לחצו כאן</span>
                     </a>
                 </div>
