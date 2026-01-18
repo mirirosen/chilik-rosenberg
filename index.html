@@ -3,154 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#121214">
     
     <!-- Google Search Verification -->
     <meta name="google-site-verification" content="90bc-BH0lRUv2729YQywBRMGC3k_Sh7Ym9oXVf8uLeo" />
 
-    <!-- SEO & Metadata -->
-    <title>הסיורים של חיליק | חמישי בבני ברק - סיור קולינרי חרדי</title>
-    <meta name="description" content="הצטרפו לסיור קולינרי שהוא הצגה! חוויה חרדית אותנטית בסמטאות בני ברק עם חיליק רוזנברג.">
+    <!-- === SEO & Metadata === -->
+    <title>סיור קולינרי בבני ברק עם חיליק רוזנברג | טעימות אוכל יהודי וסיפורים</title>
+    <meta name="description" content="הצטרפו לחיליק רוזנברג לסיור קולינרי בבני ברק. טעימות צ'ולנט, קיגל, עולם השידוכים, מאפיות ותרבות חרדית אותנטית. הרשמה מהירה בווטסאפ.">
     
-    <!-- Canonical URL -->
     <link rel="canonical" href="https://www.chilik-tours.com/" />
-
-    <!-- Preconnect & Preload -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="image" href="hero-bg.jpeg">
     
-    <!-- Open Graph -->
+    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="he_IL">
     <meta property="og:url" content="https://www.chilik-tours.com/">
-    <meta property="og:title" content="חמישי בבני ברק | הסיור הקולינרי של חיליק">
-    <meta property="og:description" content="סיור קולינרי שהוא הצגה מלאת הומור, אוכל יהודי וחיבור עמוק. בואו לטעום את בני ברק האמיתית.">
+    <meta property="og:title" content="הסיור של חיליק בבני ברק - חוויה קולינרית שהיא הצגה">
+    <meta property="og:description" content="מסע מרתק בין הסמטאות והטעמים של בני ברק. צ'ולנט, קיגל, עולם השידוכים וסיפורים מבפנים.">
     <meta property="og:image" content="https://www.chilik-tours.com/hero-bg.jpeg">
 
-    <!-- External Libraries -->
+    <!-- === Structured Data (JSON-LD) === -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "TouristTrip",
+          "name": "סיור קולינרי ותרבותי בבני ברק",
+          "description": "סיור טעימות עומק בבני ברק הכולל אוכל יהודי, עולם השידוכים, ביקור במאפיות והכרות עם העולם החרדי.",
+          "touristType": "Foodies, Culture Seekers",
+          "provider": {
+            "@type": "LocalBusiness",
+            "name": "הסיורים של חיליק רוזנברג",
+            "image": "https://www.chilik-tours.com/hilik-profile.jpeg",
+            "telephone": "+972505804367",
+            "priceRange": "₪₪",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "בני ברק",
+              "addressCountry": "IL"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5",
+              "reviewCount": "28"
+            }
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "מה עושים בבני ברק בחמישי בערב?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "בחמישי בערב בני ברק חוגגת את 'ליל שישי'. העיר תוססת, המאפיות פועלות בשיא הכוח והאווירה קולינרית ורוחנית כאחד."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "כמה זמן נמשך הסיור בבני ברק?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "הסיור נמשך בין שעתיים וחצי לשלוש שעות, תלוי ברמת הרעב והסקרנות שלכם במהלך המפגש."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- External Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --bg-dark: #121214; --gold: #E9C46A; }
-        body { background-color: var(--bg-dark); color: #EAEAE0; font-family: 'Heebo', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: #EAEAE0; font-family: 'Heebo', sans-serif; margin: 0; overflow-x: hidden; scroll-behavior: smooth; }
         h1, h2, h3 { font-family: 'Frank Ruhl Libre', serif; }
         
-        /* סרגל גלילה מותאם */
         .custom-scroll::-webkit-scrollbar { height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader-spin { animation: spin 1s linear infinite; border: 3px solid transparent; border-top-color: var(--gold); border-radius: 50%; width: 40px; height: 40px; }
+        .loader-spin { animation: spin 1s linear infinite; border: 3px solid transparent; border-top-color: var(--gold); border-radius: 50%; width: 44px; height: 44px; }
 
-        .dates-wrapper { display: flex; overflow-x: auto; direction: rtl; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
-        
-        #initial-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-dark); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9999;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .main-header {
-            background: rgba(18, 18, 20, 0.98);
-            border-bottom: 1px solid rgba(233, 196, 106, 0.2);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+        #initial-loader { 
+            position: fixed; 
+            inset: 0; 
+            background: var(--bg-dark); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 9999; 
+            transition: opacity 0.5s ease;
+            text-align: center;
         }
 
-        .mobile-menu-overlay {
-            background: rgba(10, 10, 12, 0.99);
-            backdrop-blur: 20px;
-            transition: all 0.4s ease-in-out;
+        .dates-wrapper { 
+            display: flex; 
+            flex-direction: row;
+            flex-wrap: nowrap; 
+            overflow-x: auto; 
+            direction: rtl; 
+            -webkit-overflow-scrolling: touch; 
+            justify-content: flex-start;
+            width: 100%;
         }
-        
-        .nav-btn { position: relative; transition: all 0.3s; padding: 0.5rem 0; }
-        .nav-btn::after { 
-            content: ''; position: absolute; bottom: -2px; right: 0; 
-            width: 0; height: 2px; background: var(--gold); 
-            transition: width 0.3s; 
-        }
-        .nav-btn:hover::after { width: 100%; }
-        .nav-btn:hover { color: var(--gold); }
+
+        .main-header { background: rgba(18, 18, 20, 0.98); border-bottom: 1px solid rgba(233, 196, 106, 0.2); backdrop-filter: blur(10px); }
+        .nav-link { position: relative; transition: all 0.3s; padding: 0.5rem 0; cursor: pointer; }
+        .nav-link::after { content: ''; position: absolute; bottom: -2px; right: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.3s; }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link:hover { color: var(--gold); }
     </style>
 </head>
 <body>
     <div id="initial-loader">
-        <div class="loader-spin mb-4"></div>
-        <div style="font-family: serif; color: var(--gold); font-style: italic; letter-spacing: 0.1em;">חמישי בבני ברק...</div>
+        <div class="loader-spin mb-6"></div>
+        <div style="font-family: serif; color: var(--gold); font-style: italic; letter-spacing: 0.1em; font-size: 1.2rem;">חמישי בבני ברק...</div>
     </div>
 
     <div id="root"></div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
 
-        // *** קונפיגורציה קשיחה למניעת שגיאות ב-Preview ***
-        const productionConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyCXrBqy3a2Ig7J3JE04av1rviedQfPrah0",
             authDomain: "hilik-rosenberg-ddb9b.firebaseapp.com",
             projectId: "hilik-rosenberg-ddb9b",
             storageBucket: "hilik-rosenberg-ddb9b.firebasestorage.app",
             messagingSenderId: "401698649096",
-            appId: "1:401698649096:web:d17c5296a859e47b8c4dbd",
-            measurementId: "G-WWSFZDRB0J"
+            appId: "1:401698649096:web:d17c5296a859e47b8c4dbd"
         };
 
-        let config;
-        let isConfigValid = false;
-
-        // שינוי לוגיקה: מעדיפים את הקונפיגורציה הידנית אם היא תקינה
-        if (productionConfig.apiKey && productionConfig.apiKey !== "YOUR_API_KEY") {
-            config = productionConfig;
-            isConfigValid = true;
-        } else if (typeof __firebase_config !== 'undefined') {
-            try {
-                config = JSON.parse(__firebase_config);
-                isConfigValid = true;
-            } catch (e) {}
-        }
-        
-        // מזהה אפליקציה קבוע התואם לחוקי ה-Firestore שהגדרת
-        const appId = 'hilik-rosenberg-v1';
-
-        if (isConfigValid) {
-            try {
-                const app = initializeApp(config);
-                const analytics = getAnalytics(app);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-                window.FB_CORE = { auth, db, appId, signInAnonymously, signInWithCustomToken: null, onAuthStateChanged, doc, setDoc, onSnapshot };
-                window.FB_STATUS = "online";
-                
-                // התחברות אנונימית מיידית
-                signInAnonymously(auth).catch((e) => console.warn("Auth warning:", e));
-            } catch (err) {
-                console.error("Firebase Init Failed:", err);
-                window.FB_STATUS = "error";
-            }
-        } else {
-            window.FB_STATUS = "offline";
-        }
-        
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            window.FB_CORE = { db, auth, doc, onSnapshot, setDoc, onAuthStateChanged, appId: "hilik-rosenberg-v1" };
+            window.FB_STATUS = "online";
+            signInAnonymously(auth).catch(() => {});
+        } catch (err) { window.FB_STATUS = "error"; }
         window.dispatchEvent(new Event('firebase-ready'));
     </script>
 
-    <!-- React App -->
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
         const ADMIN_PASSWORD = "hilik123";
 
         const App = () => {
-            const [fbStatus, setFbStatus] = useState(window.FB_STATUS || null);
             const [data, setData] = useState({ blocked: [], soldOut: [] });
             const [selectedDate, setSelectedDate] = useState('');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -159,21 +173,14 @@
             const [adminPassInput, setAdminPassInput] = useState('');
             const [adminDateInput, setAdminDateInput] = useState('');
             const [adminStatusInput, setAdminStatusInput] = useState('open');
-            const [uiMessage, setUiMessage] = useState('');
-            const [manualStatus, setManualStatus] = useState(null);
             const [loading, setLoading] = useState(true);
+            const [openFaq, setOpenFaq] = useState(null);
             
-            const scrollContainerRef = useRef(null);
-            const messageSectionRef = useRef(null);
-
             useEffect(() => {
                 const loader = document.getElementById('initial-loader');
                 if (loader) {
                     loader.style.opacity = '0';
-                    setTimeout(() => {
-                        loader.remove();
-                        setLoading(false);
-                    }, 500);
+                    setTimeout(() => { loader.remove(); setLoading(false); }, 500);
                 }
             }, []);
 
@@ -185,70 +192,36 @@
                     }
                 };
                 window.addEventListener('firebase-ready', checkAdmin);
-                if (window.FB_STATUS) checkAdmin();
-                
+                checkAdmin();
                 return () => window.removeEventListener('firebase-ready', checkAdmin);
             }, []);
 
             useEffect(() => {
-                if (fbStatus !== "online") { 
-                    if (fbStatus) setLoading(false); 
-                    return; 
-                }
-                
-                const { auth, db, appId, onSnapshot, doc, onAuthStateChanged } = window.FB_CORE;
-                let unsubscribeSnap = null;
-
-                const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
-                        unsubscribeSnap = onSnapshot(settingsDoc, (snap) => {
-                            if (snap.exists()) setData(snap.data());
-                            setLoading(false);
-                        }, (err) => {
-                            console.error("Firestore Permission Error:", err);
-                            // במקרה של שגיאת הרשאה, אנחנו עדיין משחררים את הטעינה כדי שהאתר יוצג
-                            setLoading(false); 
-                        });
-                    } else {
-                        // Timeout למקרה שההתחברות מתעכבת
-                        setTimeout(() => setLoading(false), 2500);
-                    }
-                });
-
-                return () => {
-                    unsubscribeAuth();
-                    if (unsubscribeSnap) unsubscribeSnap();
-                };
-            }, [fbStatus]);
+                if (!window.FB_CORE) return;
+                const { db, appId, onSnapshot, doc } = window.FB_CORE;
+                const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+                const unsubscribeSnap = onSnapshot(settingsDoc, (snap) => {
+                    if (snap.exists()) setData(snap.data());
+                }, (err) => { console.error("Firestore Error:", err); });
+                return () => unsubscribeSnap();
+            }, []);
 
             useEffect(() => { 
-                if (window.lucide) lucide.createIcons();
-                if (scrollContainerRef.current) scrollContainerRef.current.scrollLeft = 0;
-            }, [data, loading, isMenuOpen]);
-
-            useEffect(() => {
-                if (selectedDate && messageSectionRef.current) {
-                    messageSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (window.lucide) {
+                    window.lucide.createIcons();
                 }
-            }, [selectedDate]);
+            }, [data, loading, isAdminOpen, selectedDate, openFaq]);
 
-            const showMsg = (txt) => { setUiMessage(txt); setTimeout(() => setUiMessage(''), 4000); };
-            
             const thursdays = useMemo(() => {
                 const list = [];
                 let d = new Date();
                 d.setHours(12, 0, 0, 0); 
-                let diff = 4 - d.getDay();
-                if (diff < 0 || (diff === 0 && new Date().getHours() >= 20)) diff += 7;
+                let diff = (4 - d.getDay() + 7) % 7;
+                if (diff === 0 && new Date().getHours() >= 20) diff = 7;
                 d.setDate(d.getDate() + diff);
                 for (let i = 0; i < 10; i++) {
                     const dateStr = d.toLocaleDateString('en-CA');
-                    list.push({
-                        dateStr: dateStr,
-                        day: d.getDate(),
-                        month: d.toLocaleDateString('he-IL', { month: 'short' })
-                    });
+                    list.push({ dateStr, day: d.getDate(), month: d.toLocaleDateString('he-IL', { month: 'short' }) });
                     d.setDate(d.getDate() + 7);
                 }
                 return list;
@@ -260,34 +233,10 @@
                 return { text: 'נותרו מקומות', color: 'text-green-400', type: 'open' };
             };
 
-            const updateCloud = async () => {
-                if (fbStatus !== "online") return showMsg("שגיאת חיבור לענן");
-                if (!adminDateInput) return showMsg("נא לבחור תאריך");
-                
-                const { db, appId, doc, setDoc } = window.FB_CORE;
-                try {
-                    const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
-                    
-                    const newBlocked = (data.blocked || []).filter(d => d !== adminDateInput);
-                    const newSoldOut = (data.soldOut || []).filter(d => d !== adminDateInput);
-                    
-                    if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
-                    if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
-                    
-                    await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut }, { merge: true });
-                    
-                    showMsg("התאריך עודכן בהצלחה!");
-                    setIsAdminOpen(false);
-                } catch (e) {
-                    console.error(e);
-                    showMsg("שגיאת הרשאות: בדקי Rules בקונסול");
-                }
-            };
-
             const handleWhatsApp = (date, type = 'regular') => {
                 const d = new Date(date);
                 const dateText = d.toLocaleDateString('he-IL', {day:'numeric', month:'long'});
-                let msg = type.includes('private') || type === 'weekday' 
+                let msg = (type === 'private' || type === 'weekday')
                     ? `היי מירי, אשמח לקבל פרטים על סגירת קבוצה פרטית בתאריך ה-${dateText} (10 איש ומעלה).`
                     : `היי מירי, אשמח להירשם לסיור הקולינרי של חיליק ב-${dateText}, נותרו מקומות?`;
                 window.location.href = `https://wa.me/972505804367?text=${encodeURIComponent(msg)}`;
@@ -296,228 +245,235 @@
             const scrollToId = (id) => {
                 const el = document.getElementById(id);
                 if (el) {
-                    const offset = 90; 
-                    const bodyRect = document.body.getBoundingClientRect().top;
-                    const elementRect = el.getBoundingClientRect().top;
-                    const elementPosition = elementRect - bodyRect;
-                    const offsetPosition = elementPosition - offset;
-                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    const offset = 90;
+                    window.scrollTo({ top: el.offsetTop - offset, behavior: 'smooth' });
                     setIsMenuOpen(false);
                 }
+            };
+
+            const toggleFaq = (index) => {
+                setOpenFaq(openFaq === index ? null : index);
+            };
+
+            const updateCloud = async () => {
+                const { db, appId, doc, setDoc } = window.FB_CORE;
+                try {
+                    const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'global');
+                    const newBlocked = (data.blocked || []).filter(d => d !== adminDateInput);
+                    const newSoldOut = (data.soldOut || []).filter(d => d !== adminDateInput);
+                    if (adminStatusInput === 'holiday') newBlocked.push(adminDateInput);
+                    if (adminStatusInput === 'soldout') newSoldOut.push(adminDateInput);
+                    await setDoc(settingsDoc, { blocked: newBlocked, soldOut: newSoldOut }, { merge: true });
+                    alert("עודכן בהצלחה!");
+                    setIsAdminOpen(false);
+                } catch (e) { alert("שגיאת הרשאות"); }
             };
 
             if (loading) return null;
 
             return (
                 <div className="min-h-screen">
-                    {uiMessage && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#E9C46A] text-[#121214] px-8 py-4 rounded-full font-black z-[100] shadow-2xl animate-msg text-center">{uiMessage}</div>}
-
-                    {/* Admin Modal */}
+                    {/* Admin Panel */}
                     {isAdminOpen && (
                         <div className="fixed inset-0 bg-black/95 z-[1000] flex items-center justify-center p-4 backdrop-blur-md text-right">
                             <div className="bg-[#1E1E24] w-full max-w-md p-10 rounded-[2.5rem] border border-[#E9C46A]/30 shadow-2xl">
-                                <h2 className="text-2xl font-bold text-[#E9C46A] mb-4 font-serif italic text-center">ניהול סיורים</h2>
-                                {fbStatus !== "online" && (
-                                    <div className="bg-red-500/10 p-3 rounded-lg text-red-400 text-xs text-center mb-4 dir-ltr">
-                                        <strong>שים לב:</strong> הענן לא מחובר.
-                                    </div>
-                                )}
-
+                                <h2 className="text-2xl font-bold text-[#E9C46A] mb-4 font-serif italic text-center text-right">ניהול סיורים</h2>
                                 {!adminAuth ? (
-                                    <div className="space-y-6">
-                                        <input type="password" placeholder="סיסמה" onChange={e=>setAdminPassInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-center outline-none border border-white/10 focus:border-[#E9C46A] text-xl" />
-                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : showMsg("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg hover:bg-white transition-all shadow-lg">כניסה</button>
-                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-600 text-xs mt-2 underline text-center block mx-auto">חזרה</button>
+                                    <div className="space-y-6 text-right">
+                                        <input type="password" placeholder="סיסמה" onChange={e=>setAdminPassInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-center outline-none border border-white/10 focus:border-[#E9C46A] text-xl text-white" />
+                                        <button onClick={() => adminPassInput === ADMIN_PASSWORD ? setAdminAuth(true) : alert("שגויה")} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold text-lg">כניסה</button>
+                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-600 text-xs mt-2 underline text-center block mx-auto font-bold uppercase">חזרה</button>
                                     </div>
                                 ) : (
                                     <div className="space-y-6 text-right">
                                         <div className="text-xs text-gray-500 mb-1">בחר תאריך:</div>
-                                        <input type="date" value={adminDateInput} onChange={e=>setAdminDateInput(e.target.value)} onClick={(e) => e.target.showPicker && e.target.showPicker()} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10" style={{colorScheme:'dark'}} />
+                                        <input type="date" value={adminDateInput} onChange={e=>setAdminDateInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10" style={{colorScheme:'dark'}} />
                                         <div className="text-xs text-gray-500 mb-1">סטטוס:</div>
                                         <select value={adminStatusInput} onChange={e=>setAdminStatusInput(e.target.value)} className="w-full bg-[#121214] p-4 rounded-2xl text-white border border-white/10">
                                             <option value="open">פנוי</option>
                                             <option value="soldout">אזל המקום</option>
                                             <option value="holiday">אין סיור (חג/סגור)</option>
                                         </select>
-                                        <button onClick={updateCloud} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold hover:bg-white shadow-xl transition-all">עדכן עכשיו</button>
-                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-500 text-sm mt-4 text-center underline block mx-auto">ביטול</button>
+                                        <button onClick={updateCloud} className="w-full bg-[#E9C46A] text-black py-4 rounded-2xl font-bold transition-all hover:bg-white">עדכן עכשיו</button>
+                                        <button onClick={()=>setIsAdminOpen(false)} className="w-full text-gray-500 text-sm mt-4 text-center block uppercase underline">ביטול</button>
                                     </div>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    {/* Fixed Main Header */}
-                    <nav className="main-header fixed top-0 w-full z-[500] px-6 md:px-16 py-4 flex justify-between items-center transition-all duration-300 text-right">
-                        <div className="flex items-center gap-4 cursor-pointer group" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
-                            <span className="text-xl md:text-3xl font-black text-[#E9C46A] tracking-tighter transition-transform group-hover:scale-105">
-                                הסיור של חיליק בבני ברק
-                            </span>
+                    {/* Navbar */}
+                    <nav className="main-header fixed top-0 w-full z-[500] px-6 md:px-16 py-4 flex justify-between items-center text-right">
+                        <a href="/" className="text-xl md:text-3xl font-black text-[#E9C46A] font-serif cursor-pointer">הסיור של חיליק בבני ברק</a>
+                        <div className="hidden md:flex gap-8 text-gray-200 font-bold text-sm items-center">
+                            <a href="#about" className="nav-link">מי אני?</a>
+                            <a href="#journey" className="nav-link">מה רואים?</a>
+                            <a href="#menu" className="nav-link">מה אוכלים?</a>
+                            <a href="#faq" className="nav-link">שאלות נפוצות</a>
+                            <a href="#dates" className="nav-link">מתי יש סיור?</a>
+                            <a href="#dates" className="bg-[#E9C46A] text-[#121214] px-8 py-2 rounded-full font-black hover:scale-105 transition-all">להרשמה</a>
                         </div>
-                        
-                        <div className="hidden md:flex gap-8 text-gray-200 font-bold text-sm uppercase items-center tracking-widest">
-                            <button onClick={() => scrollToId('about')} className="nav-btn">מי אני?</button>
-                            <button onClick={() => scrollToId('journey')} className="nav-btn">מה רואים?</button>
-                            <button onClick={() => scrollToId('menu')} className="nav-btn">מה אוכלים?</button>
-                            <button onClick={() => scrollToId('dates')} className="nav-btn">מתי יש סיור?</button>
-                            <button onClick={() => scrollToId('dates')} className="bg-[#E9C46A] text-[#121214] px-8 py-2 rounded-full shadow-[0_0_15px_rgba(233,196,106,0.3)] font-black hover:bg-white hover:scale-105 transition-all">להרשמה</button>
-                        </div>
-
-                        <button className="md:hidden text-[#E9C46A] p-2 hover:bg-white/5 rounded-full transition-colors" onClick={() => setIsMenuOpen(true)}>
-                            <i data-lucide="menu" size={32}></i>
-                        </button>
+                        <button className="md:hidden text-[#E9C46A]" onClick={() => setIsMenuOpen(true)} aria-label="תפריט ניווט"><i data-lucide="menu" size={32}></i></button>
                     </nav>
 
-                    {/* Hero Section */}
-                    <header className="relative min-h-[96vh] flex items-center justify-center bg-black overflow-hidden pt-44 pb-12 text-center">
-                        <img src="hero-bg.jpeg" className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105" alt="Hero Background" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-transparent"></div>
-                        <div className="relative z-10 px-6 max-w-4xl">
-                            <div className="inline-block bg-[#E9C46A]/20 text-[#E9C46A] px-5 py-2 rounded-full border border-[#E9C46A]/40 text-xs font-bold mb-10 uppercase tracking-widest shadow-lg backdrop-blur-sm">חוויה שהיא הצגה</div>
-                            <h1 className="text-7xl md:text-[9rem] font-bold text-[#E9C46A] font-serif mb-10 drop-shadow-2xl tracking-tighter leading-none">חמישי<br/>בבני ברק</h1>
-                            <p className="text-xl md:text-3xl italic text-white/95 mb-14 font-serif leading-relaxed px-4">"סיור קולינרי שהוא הצגה מלאת הומור, אוכל יהודי וחיבור עמוק"</p>
-                            <button onClick={() => scrollToId('dates')} className="bg-[#E9C46A] text-black px-16 py-6 rounded-full font-black text-2xl shadow-2xl hover:scale-105 hover:bg-white transition-all active:scale-95">שריינו מקום עכשיו</button>
+                    {/* Mobile Menu Overlay */}
+                    {isMenuOpen && (
+                        <div className="fixed inset-0 mobile-menu-overlay z-[1000] flex flex-col items-center justify-center gap-8 text-center">
+                            <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 left-8 text-[#E9C46A]"><i data-lucide="x" size={48}></i></button>
+                            <a href="#about" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מי אני?</a>
+                            <a href="#journey" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מה רואים?</a>
+                            <a href="#menu" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">מה אוכלים?</a>
+                            <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-3xl text-white font-serif">שאלות נפוצות</a>
+                            <a href="#dates" onClick={() => setIsMenuOpen(false)} className="bg-[#E9C46A] text-black px-12 py-4 rounded-full font-black text-xl">להרשמה עכשיו</a>
                         </div>
-                    </header>
+                    )}
 
-                    {/* Section: Who am I? - Updated Text */}
-                    <section id="about" className="py-40 max-w-6xl mx-auto px-6">
-                        <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
-                            <div className="w-full md:w-1/2 relative group">
-                                <div className="absolute -inset-4 border border-[#E9C46A]/20 rounded-[3rem] group-hover:border-[#E9C46A]/50 transition-all duration-700"></div>
-                                <img src="hilik-profile.jpeg" alt="חיליק רוזנברג" className="rounded-[2.5rem] w-full object-cover shadow-2xl relative z-10 filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700" 
-                                     onError={e => e.target.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800'} />
+                    <main>
+                        {/* Hero Section */}
+                        <header className="relative min-h-[90vh] flex items-center justify-center bg-black overflow-hidden pt-20 text-center">
+                            <img src="hero-bg.jpeg" className="absolute inset-0 w-full h-full object-cover opacity-50" alt="סיור אוכל יהודי בבני ברק" />
+                            <div className="relative z-10 px-6 max-w-5xl">
+                                <div className="inline-block bg-[#E9C46A]/20 text-[#E9C46A] px-5 py-1 rounded-full border border-[#E9C46A]/40 text-xs font-bold mb-6 uppercase tracking-widest">חוויה שהיא הצגה</div>
+                                <h1 className="text-5xl md:text-8xl font-bold text-[#E9C46A] font-serif mb-8 leading-tight text-center">סיור קולינרי בבני ברק<br/>עם חיליק רוזנברג</h1>
+                                <p className="text-xl md:text-3xl italic text-white/95 mb-12 font-serif text-center">חמישי בערב (ליל שישי) - טעימות אוכל יהודי, תרבות וסיפורים מבפנים</p>
+                                <a href="#dates" className="bg-[#E9C46A] text-black px-16 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all inline-block">שריינו מקום עכשיו</a>
                             </div>
-                            <div className="w-full md:w-1/2 text-right">
-                                <h2 className="text-5xl md:text-7xl font-serif text-[#E9C46A] mb-8 italic text-right">נעים להכיר.</h2>
-                                <p className="text-2xl text-white font-medium leading-relaxed mb-6 text-right">
-                                    אני חיליק רוזנברג, אברך חרדי מבני ברק. בתכלס, חוץ מזה שאני אוהב את החרדיות, אני אוהב אדם.
-                                </p>
-                                <p className="text-lg text-gray-400 leading-relaxed mb-8 text-right">
-                                    ואני אוהב לתת לכם את החוויה האותנטית והעמוקה של החיים החרדיים יחד עם כל האוכל היהודי כמובן, משמח הנפשות.
-                                </p>
-                                <div className="flex items-center gap-6 justify-start flex-row-reverse">
-                                    <div className="w-16 h-px bg-[#E9C46A]"></div>
-                                    <span className="font-serif italic text-[#E9C46A] text-2xl">מחכה לכם בבני ברק</span>
+                        </header>
+
+                        {/* About Section */}
+                        <section id="about" className="py-32 max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-16">
+                            <div className="w-full md:w-1/2 relative">
+                                <img src="hilik-profile.jpeg" alt="חיליק רוזנברג - מורה דרך ומדריך סיורים קולינריים" className="rounded-[3rem] w-full shadow-2xl" loading="lazy" />
+                            </div>
+                            <article className="w-full md:w-1/2 text-right">
+                                <h2 className="text-5xl font-serif text-[#E9C46A] mb-8 italic text-right">נעים להכיר.</h2>
+                                <p className="text-2xl text-white mb-6 leading-relaxed font-bold">אני חיליק רוזנברג, אברך חרדי מבני ברק.</p>
+                                <p className="text-lg text-gray-400 mb-6">בתכלס, חוץ מזה שאני אוהב את החרדיות אני אוהב אדם. אני מזמין אתכם לחוויה של סיור טעימות בבני ברק - חוויה אותנטית ועמוקה של החיים החרדיים יחד עם כל האוכל היהודי שמשמח את הנפשות.</p>
+                                <p className="text-lg text-[#E9C46A] italic">בואו לראות את בני ברק של הלילה דרך העיניים שלי.</p>
+                            </article>
+                        </section>
+
+                        {/* Journey Section - Order Updated */}
+                        <section id="journey" className="py-32 bg-[#0a0a0a]/50 text-right text-right">
+                            <div className="max-w-6xl mx-auto px-6">
+                                <h2 className="text-6xl font-serif text-[#E9C46A] mb-20 italic text-center text-right">מה רואים בסיור בבני ברק?</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {[
+                                        { icon: "layers", title: "הזרמים החרדיים", desc: "נכיר מקרוב את ההבדלים בין חסידים לליטאים, המשותף ומי לא מתחתן עם מי (ולמה)." },
+                                        { icon: "heart", title: "עולם השידוכים והחתונה", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי. התהליך המרתק, המדדים והסיפורים מבפנים." },
+                                        { icon: "home", title: "בנייה יצירתית ומצוקת הדיור", desc: "על המרפסות המעופפות והפתרונות האדריכליים הייחודיים שהפכו לסמל של בני ברק." },
+                                        { icon: "coins", title: "גמ\"חים וקופות צדקה", desc: "הצצה לעולם החסד המדהים: מהשאלת מוצצים ועד קופות הצדקה שמתפעלות עיר שלמה." },
+                                        { icon: "users", title: "ישיבות וחיידרים", desc: "נחווה מקרוב מה באמת עושים כל הזמן בישיבה ואיך ילד חרדי גדל בעולם של תורה." },
+                                        { icon: "monitor", title: "חדרי אינטרנט והתמודדות", desc: "איך העולם החרדי מתמודד עם הקדמה? ביקור במרכזי התקשורת המסוננים." },
+                                        { icon: "store", title: "חנויות וסמטאות", desc: "ביקור בחנויות ספרים חרדיות ובסמטאות הסודיות של העיר. נראה מקרוב שירה חרדית." },
+                                        { icon: "hand-heart", title: "התנדבות והשתלבות", desc: "נראה את ארגוני ההתנדבות (איחוד הצלה) ונכיר את סיפור השתלבות החרדים בחברה." },
+                                        { icon: "croissant", title: "מאפיית ויז'ניץ", desc: "ניכנס לתוך מאפיית ויז'ניץ המיתולוגית, נראה איך הקמח נשפך מהתקרה ונקלע חלות חמות." }
+                                    ].map((item, i) => (
+                                        <article key={i} className="bg-[#1E1E24] p-10 rounded-[3rem] border border-white/5 hover:border-[#E9C46A]/20 transition-all text-right shadow-xl">
+                                            <div className="text-[#E9C46A] mb-6 flex justify-start text-right"><i data-lucide={item.icon} size={36}></i></div>
+                                            <h3 className="text-2xl font-bold mb-4 font-serif text-white text-right">{item.title}</h3>
+                                            <p className="text-gray-400 leading-relaxed text-right">{item.desc}</p>
+                                        </article>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* Journey Section */}
-                    <section id="journey" className="py-40 bg-[#0a0a0a]/50 text-right">
-                        <div className="max-w-6xl mx-auto px-6">
-                            <div className="text-center mb-32"><h2 className="text-6xl md:text-8xl font-serif text-[#E9C46A] mb-8 italic">מה רואים בסיור?</h2><div className="w-32 h-1 bg-[#E9C46A] mx-auto opacity-30"></div></div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-right">
+                        {/* Culinary Section - Horizontal Scroll */}
+                        <section id="menu" className="py-32 bg-[#0a0a0a] text-center border-y border-white/5 overflow-hidden">
+                            <h2 className="text-6xl font-serif text-[#E9C46A] mb-20 italic text-center px-6">הצד הקולינרי (אוכל יהודי אותנטי)</h2>
+                            <div className="flex flex-row flex-nowrap overflow-x-auto gap-8 pb-12 px-8 custom-scroll scroll-smooth w-full">
                                 {[
-                                    { icon: "users", title: "ישיבות וחיידרים", desc: "נחווה מקרוב מה באמת עושים כל הזמן בישיבה ואיך ילד חרדי גדל." },
-                                    { icon: "layers", title: "הזרמים החרדיים", desc: "נכיר מקרוב את הזרמים החרדיים השונים, ההבדלים, המשותף ומי לא מתחתן עם מי (רמז: לא מה שאתם חושבים)." },
-                                    { icon: "heart", title: "עולם השידוכים", desc: "איך זה באמת עובד? מהפגישה בלובי המלון ועד להקמת הבית היהודי." },
-                                    { icon: "shopping-bag", title: "צדקה ומכירות", desc: "נכיר דרכם את אורח החיים החסכוני כל כך כחרדי עם סיפורים מבפנים." },
-                                    { icon: "store", title: "חנויות וסמטאות", desc: "ביקור בחנויות חרדיות מיתולוגיות ובסמטאות הסודיות. נראה מקרוב ספרים לילדים ומבוגרים ואת השירה החרדית." },
-                                    { icon: "hand-heart", title: "התנדבות והשתלבות", desc: "נראה את אירגוני ההתנדבות החרדיים כמו איחוד הצלה ונכיר מקרוב את סיפור ההשתלבות." },
-                                    { icon: "croissant", title: "מאפיית ויז'ניץ", desc: "לא סתם סיור. נכנס לתוך המאפייה, עד איפה שהקמח נשפך מהתקרה, נקלע חלות ונעשה הפרשת חלה למעוניינים." },
-                                    { icon: "home", title: "בנייה יצירתית", desc: "על המרפסות המעופפות והבנייה שהפכה לאומנות של פאזל במצוקת הדיור." },
-                                    { icon: "music", title: "מוזיקה ואינטרנט", desc: "איך חרדים שומעים מוזיקה? מה זה חדר אינטרנט? ואיך נראים המשחקים." },
-                                ].map((item, i) => (
-                                    <div key={i} className="bg-[#1E1E24] p-12 rounded-[3.5rem] border border-white/5 shadow-2xl group hover:border-[#E9C46A]/20 transition-all text-right">
-                                        <div className="text-[#E9C46A] mb-8 transform group-hover:scale-110 transition-all text-right"><i data-lucide={item.icon} size={36}></i></div>
-                                        <h3 className="text-3xl font-bold mb-6 font-serif">{item.title}</h3>
-                                        <p className="text-gray-400 opacity-90 leading-relaxed text-lg">{item.desc}</p>
-                                    </div>
+                                    { icon: "soup", title: "טשולנט בשרי", desc: "חמין עשיר בבישול ארוך עם בשר נימוח, קטניות וטעמים של שבת בבני ברק." },
+                                    { icon: "fish", title: "דגים והערינג", desc: "הטעם האמיתי של הקידוש: דג מלוח איכותי, הערינג פיקנטי וקרקרים פריכים." },
+                                    { icon: "layers", title: "קיגעל אוברנייט", desc: "הקיגעל הירושלמי השחום והחריף שבילה לילה שלם על הפלטה." },
+                                    { icon: "croissant", title: "חלות ויז'ניץ חמות", desc: "טעימה של חלה מתוקה ולוהטת שיצאה ממש עכשיו מהתנור במאפייה." },
+                                    { icon: "utensils", title: "כבד קצוץ", desc: "הממרח היהודי הקלאסי בגרסה ביתית עשירה עם המון בצל מטוגן." }
+                                ].map((food, i) => (
+                                    <article key={i} className="flex-shrink-0 w-80 md:w-96 bg-[#1E1E24] rounded-[4rem] p-12 border border-white/5 shadow-2xl flex flex-col items-center text-center">
+                                        <div className="text-[#E9C46A] mb-6 flex justify-center w-full"><i data-lucide={food.icon} size={48}></i></div>
+                                        <h3 className="text-3xl font-bold mb-4 font-serif text-[#E9C46A]">{food.title}</h3>
+                                        <p className="text-gray-400 text-center leading-relaxed">{food.desc}</p>
+                                    </article>
                                 ))}
                             </div>
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* Culinary Section */}
-                    <section id="menu" className="py-40 bg-[#0a0a0a] text-center border-y border-white/5">
-                        <h2 className="text-6xl md:text-8xl font-serif text-[#E9C46A] mb-32 italic">הצד הקולינרי</h2>
-                        <div className="flex overflow-x-auto gap-12 pb-16 px-8 custom-scroll snap-x">
-                            {[
-                                { icon: "soup", title: "קיגעל אוברנייט", desc: "הקיגעל הירושלמי השחום והחריף שבילה לילה שלם על הפלטה." },
-                                { icon: "utensils", title: "טשולנט בשרי", desc: "חמין עשיר בבישול ארוך עם בשר נימוח, קטניות וטעמים של שבת." },
-                                { icon: "coffee", title: "חלות ויז'ניץ", desc: "טעימה של חלה מתוקה ולוהטת שיצאה ממש עכשיו מהתנור." },
-                                { icon: "utensils-crossed", title: "כבד קצוץ", desc: "הממרח היהודי הקלאסי בגרסה בייתית עשירה עם המון בצל מטוגן." },
-                                { icon: "fish", title: "הרינג וגפילטע", desc: "קידוש קלאסי: דג מלוח איכותי, גפילטע מסורתי וקרקרים פריכים." },
-                                { icon: "wine", title: "אלכוהול טוב", desc: "לחיים! הסיור מלווה בשתייה חריפה וקלה שתפתח את הלבבות." }
-                            ].map((food, i) => (
-                                <div key={i} className="flex-shrink-0 w-80 md:w-[28rem] bg-[#1E1E24] rounded-[4.5rem] p-16 border border-white/5 snap-center hover:border-[#E9C46A]/20 transition-all text-center shadow-2xl">
-                                    <div className="mb-10 inline-block p-10 rounded-full bg-[#E9C46A]/5 text-[#E9C46A] shadow-inner"><i data-lucide={food.icon} size={56}></i></div>
-                                    <h3 className="text-4xl font-bold mb-6 font-serif tracking-tight">{food.title}</h3>
-                                    <p className="text-gray-400 text-lg leading-relaxed px-2">{food.desc}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Dates Section */}
-                    <section id="dates" className="py-40 max-w-5xl mx-auto px-6 text-center text-right">
-                        <div className="bg-[#1E1E24] p-10 md:p-24 rounded-[6rem] border border-white/5 shadow-2xl text-right">
-                            <h2 className="text-5xl md:text-7xl font-bold text-[#E9C46A] font-serif italic mb-20 tracking-tighter text-center">הזמנת מקומות</h2>
-                            <div ref={scrollContainerRef} className="dates-wrapper custom-scroll gap-8 pb-14 text-right">
-                                {thursdays.map((item, i) => {
-                                    const status = getStatus(item.dateStr);
-                                    const active = selectedDate === item.dateStr;
-                                    return (
-                                        <div key={i} onClick={() => setSelectedDate(item.dateStr)}
-                                            className={`flex-shrink-0 w-40 h-52 rounded-[3rem] border flex flex-col items-center justify-center transition-all duration-500 cursor-pointer
-                                            ${status.type === 'open' ? 'hover:border-[#E9C46A] hover:scale-105' : 'opacity-30'}
-                                            ${active ? 'bg-[#E9C46A] text-[#121214] border-[#E9C46A] scale-110 shadow-2xl' : 'bg-[#121214] border-white/10'}`}>
-                                            <span className="text-[11px] uppercase font-black mb-4 opacity-60">יום חמישי</span>
-                                            <span className="text-6xl font-black mb-1">{item.day}</span>
-                                            <span className="text-lg font-bold opacity-80">{item.month}</span>
-                                            <div className={`mt-6 px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${status.color}`}>{status.text}</div>
-                                        </div>
-                                    );
-                                })}
+                        {/* FAQ Section - Accordion */}
+                        <section id="faq" className="py-32 max-w-4xl mx-auto px-6 text-right text-right">
+                            <h2 className="text-5xl font-serif text-[#E9C46A] mb-16 italic text-center text-right">שאלות נפוצות על סיורים בבני ברק</h2>
+                            <div className="space-y-4 text-right">
+                                {[
+                                    { q: "מה עושים בבני ברק בחמישי בערב?", a: "חמישי בערב בבני ברק הוא זמן קסום שבו העיר מתעוררת לחיים עם הכנות ל'ליל שישי'. בסיור נחווה את האווירה המחשמלת, הניגונים מהישיבות והריחות מהמאפיות." },
+                                    { q: "כמה זמן נמשך הסיור?", a: "הסיור נמשך בין שעתיים וחצי לשלוש שעות, תלוי ברמת הרעב ובסקרנות שלכם." },
+                                    { q: "איפה נפגשים? האם יש חניה?", a: "בדיוק בשביל זה אנחנו כאן. פרטי המפגש המדויקים והמלצות חניה יישלחו אליכם באופן פרטי מיד לאחר סגירת ההרשמה." },
+                                    { q: "איך מתלבשים לסיור בבני ברק?", a: "לאחר סגירת ההרשמה תקבלו מאיתנו את כל הפרטים המדויקים, כולל המלצות לבוש מכבד וצנוע, כדי שתוכלו ליהנות ב-100% מהמקומות הכי סודיים של בני ברק." },
+                                    { q: "איפה קונים אוכל מוכן לשבת בבני ברק?", a: "העיר מלאה במעדניות ומוסדות קולינריים. בסיור נבקר במקומות הסודיים והטעימים ביותר, כולל טעימות של צ'ולנט, קיגעל ומאפים מיוחדים." }
+                                ].map((faq, i) => (
+                                    <article key={i} className="bg-[#1E1E24] rounded-3xl border border-white/5 shadow-lg overflow-hidden transition-all duration-300 text-right">
+                                        <button 
+                                            onClick={() => toggleFaq(i)}
+                                            className="w-full p-8 text-right flex items-center justify-between hover:bg-white/5 transition-colors focus:outline-none"
+                                        >
+                                            <h3 className="text-xl font-bold text-[#E9C46A] text-right">{faq.q}</h3>
+                                            <i data-lucide="chevron-down" className={`text-gray-400 transition-transform duration-300 transform ${openFaq === i ? 'rotate-180' : ''}`}></i>
+                                        </button>
+                                        {openFaq === i && (
+                                            <div className="px-8 pb-8 text-gray-400 leading-relaxed border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-right">
+                                                {faq.a}
+                                            </div>
+                                        )}
+                                    </article>
+                                ))}
                             </div>
+                        </section>
 
-                            <div ref={messageSectionRef} className="mt-16 min-h-[200px] flex items-center justify-center">
-                                {selectedDate ? (() => {
-                                    const d = new Date(selectedDate);
-                                    const isThursday = d.getDay() === 4;
-                                    const status = getStatus(selectedDate);
-                                    const dateText = d.toLocaleDateString('he-IL', {day:'numeric', month:'long'});
-
-                                    if (!isThursday) {
-                                        let nextThurs = new Date(d);
-                                        nextThurs.setDate(nextThurs.getDate() + (4 - nextThurs.getDay() + 7) % 7);
+                        {/* Dates Section */}
+                        <section id="dates" className="py-32 max-w-5xl mx-auto px-6 text-center">
+                            <div className="bg-[#1E1E24] p-12 md:p-24 rounded-[6rem] border border-white/5 shadow-2xl">
+                                <h2 className="text-5xl md:text-7xl font-bold text-[#E9C46A] font-serif italic mb-16">מתי יש סיור בבני ברק?</h2>
+                                <div className="dates-wrapper custom-scroll gap-6 pb-12">
+                                    {thursdays.map((item, i) => {
+                                        const status = getStatus(item.dateStr);
+                                        const active = selectedDate === item.dateStr;
                                         return (
-                                            <div className="bg-amber-500/10 border border-amber-500/30 p-12 rounded-[4rem] w-full max-w-2xl animate-in fade-in zoom-in text-center flex flex-col items-center">
-                                                <p className="text-xl font-bold text-white mb-4 leading-tight text-center">יש סיור ב-{nextThurs.toLocaleDateString('he-IL', {day:'numeric', month:'long'})} ובכל ימי חמישי.</p>
-                                                <p className="text-lg text-gray-400 mb-8 text-center">ביום זה ({dateText}) ניתן לקבוע קבוצה פרטית ל-10 איש ומעלה.</p>
-                                                <button onClick={() => handleWhatsApp(selectedDate, 'weekday')} className="bg-[#E9C46A] text-black px-12 py-4 rounded-full font-black text-xl shadow-xl hover:scale-105 transition-all mx-auto">תיאום קבוצה פרטית</button>
+                                            <div key={i} onClick={() => setSelectedDate(item.dateStr)}
+                                                className={`flex-shrink-0 w-36 h-48 rounded-[2.5rem] border flex flex-col items-center justify-center transition-all cursor-pointer
+                                                ${status.type === 'open' ? 'hover:border-[#E9C46A] hover:scale-105' : 'opacity-30 pointer-events-none'}
+                                                ${active ? 'bg-[#E9C46A] text-black border-[#E9C46A] scale-110 shadow-inner' : 'bg-[#121214] border-white/10'}`}>
+                                                <span className="text-[10px] font-black opacity-60 uppercase text-center">חמישי</span>
+                                                <span className="text-5xl font-black text-center">{item.day}</span>
+                                                <span className="text-sm font-bold text-center">{item.month}</span>
+                                                <div className={`mt-4 text-[9px] font-black uppercase text-center ${status.color}`}>{status.text}</div>
                                             </div>
                                         );
-                                    }
-
-                                    return (
-                                        <div className={`bg-${status.type === 'open' ? 'green' : 'red'}-500/10 border border-${status.type === 'open' ? 'green' : 'red'}-500/30 p-12 rounded-[4rem] w-full max-w-3xl animate-in fade-in zoom-in text-center flex flex-col items-center`}>
-                                            <p className="text-2xl md:text-3xl font-bold text-white mb-8 leading-tight text-center text-center w-full">
-                                                {status.type === 'open' ? `מעולה! ב-${dateText} יש סיור פתוח ונותרו מקומות.` : `ב-${dateText} המקומות נתפסו / לא מתקיים סיור.`}
-                                            </p>
-                                            <button onClick={() => handleWhatsApp(selectedDate, status.type === 'open' ? 'regular' : 'private')} 
-                                                className={`${status.type === 'open' ? 'bg-[#E9C46A] text-black' : 'border-2 border-[#E9C46A] text-[#E9C46A]'} px-14 py-5 rounded-full font-black text-2xl shadow-xl hover:scale-105 transition-all mx-auto`}>
-                                                {status.type === 'open' ? 'שלחו הודעה להרשמה' : 'תיאום קבוצה פרטית'}
-                                            </button>
+                                    })}
+                                </div>
+                                <div className="mt-10 min-h-[150px]">
+                                    {selectedDate ? (
+                                        <div className="animate-in fade-in zoom-in duration-500 text-center">
+                                            <p className="text-2xl text-white mb-8 font-serif italic">בחרת את ה-{new Date(selectedDate).toLocaleDateString('he-IL', {day:'numeric', month:'long'})}. נותרו מקומות!</p>
+                                            <button onClick={() => handleWhatsApp(selectedDate)} className="bg-[#E9C46A] text-[#121214] px-14 py-5 rounded-full font-black text-2xl shadow-xl hover:scale-105 transition-all mx-auto inline-block">שלחו הודעה להרשמה</button>
                                         </div>
-                                    );
-                                })() : (
-                                    <div className="text-gray-500 italic text-2xl animate-pulse text-center font-serif text-center w-full">בחרו תאריך מהלוח לבדיקת זמינות...</div>
-                                )}
+                                    ) : <div className="text-center text-gray-500 italic text-xl animate-pulse">בחרו תאריך מהלוח לבדיקת זמינות לסיור הקרוב...</div>}
+                                </div>
                             </div>
+                        </section>
+                    </main>
 
-                            <div className="mt-20 pt-20 border-t border-white/5 text-center">
-                                <div className="text-sm text-gray-500 mb-6 font-bold uppercase tracking-widest text-center">מעדיפים תאריך אחר?</div>
-                                <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} onClick={(e) => e.target.showPicker && e.target.showPicker()} className="w-full max-w-md bg-[#121214] border border-white/10 rounded-3xl p-6 text-white outline-none focus:border-[#E9C46A] shadow-inner text-center font-black mx-auto block transition-all text-xl" style={{colorScheme:'dark'}} />
-                            </div>
-                        </div>
-                    </section>
-
-                    <footer className="py-32 bg-[#0a0a0a] opacity-50 text-xs tracking-[0.5em] uppercase text-center border-t border-white/5">
-                        © 2026 כל הזכויות שמורות - הסיורים של חיליק רוזנברג
+                    <footer className="py-20 opacity-40 text-xs tracking-[0.5em] uppercase text-center border-t border-white/5">
+                        © 2026 כל הזכויות שמורות - חיליק רוזנברג | סיור קולינרי ותרבותי בבני ברק | טעימות אוכל יהודי וליל שישי
                     </footer>
+                    <a 
+                      href="https://wa.me/972505804367?text=היי מירי, אשמח לפרטים על הסיורים 🌟" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[900] bg-green-500 hover:bg-green-600 text-white p-4 md:p-5 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center gap-3 group"
+                      aria-label="שלח הודעה בווטסאפ"
+                    >
+                      <i data-lucide="message-circle" size={28} className="group-hover:rotate-12 transition-transform"></i>
+                      <span className="hidden md:inline-block font-bold">שאלות? לחצו כאן</span>
+                    </a>
                 </div>
             );
         };
