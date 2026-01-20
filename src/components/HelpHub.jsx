@@ -1,4 +1,4 @@
-import { MessageCircle, HelpCircle } from 'lucide-react';
+import { MessageCircle, HelpCircle } from '../utils/icons';
 import { whatsappNumber } from '../data/content';
 
 const HelpHub = () => {

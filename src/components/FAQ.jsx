@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from '../utils/icons';
 import { faqs } from '../data/content';
 
 const FAQ = () => {
@@ -11,7 +11,7 @@ const FAQ = () => {
 
   return (
     <section id="faq" className="py-32 max-w-4xl mx-auto px-6 text-right">
-      <h2 className="text-5xl font-serif text-gold mb-16 italic text-center font-bold">
+      <h2 className="text-5xl font-serif text-brand-gold mb-16 italic text-center font-bold">
         שאלות נפוצות
       </h2>
       
@@ -19,13 +19,13 @@ const FAQ = () => {
         {faqs.map((faq, i) => (
           <article 
             key={i} 
-            className="bg-[#1E1E24] rounded-3xl border border-white/5 overflow-hidden text-right"
+            className="bg-brand-dark-lighter rounded-3xl border border-white/5 overflow-hidden text-right"
           >
             <button 
               onClick={() => handleFAQToggle(i)} 
               className="w-full p-8 text-right flex items-center justify-between hover:bg-white/5"
             >
-              <h4 className="text-xl font-bold text-gold font-serif text-right">
+              <h4 className="text-xl font-bold text-brand-gold font-serif text-right">
                 {faq.q}
               </h4>
               <ChevronDown 

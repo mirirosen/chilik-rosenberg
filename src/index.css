@@ -4,203 +4,116 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { 
-  --bg-dark: #121214; 
-  --gold: #E9C46A; 
-  --green-whatsapp: #25D366;
-  --mako-color: #7d32d3; 
-  --reshet-color: #0056d2; 
-  --ynet-color: #ed1c24;
-  --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+@layer base {
+  html, body { 
+    @apply min-h-full bg-brand-dark text-brand-text font-sans overflow-x-hidden;
+    scroll-behavior: smooth; 
+  }
+
+  section { 
+    scroll-margin-top: 100px; 
+  }
+
+  h1, h2, h3, h4 { 
+    @apply font-serif;
+  }
 }
 
-html, body { 
-  min-height: 100%; 
-  background-color: var(--bg-dark); 
-  color: #EAEAE0; 
-  font-family: 'Heebo', sans-serif; 
-  overflow-x: hidden; 
-  scroll-behavior: smooth; 
-}
+@layer components {
+  /* Header Styles */
+  .main-header { 
+    @apply border-b backdrop-blur-md;
+    background-color: rgb(18 18 20 / 0.98);
+    border-bottom-color: rgb(233 196 106 / 0.1);
+  }
 
-section { 
-  scroll-margin-top: 100px; 
-}
+  .nav-link { 
+    @apply relative transition-all duration-300 font-bold cursor-pointer border-0 bg-transparent;
+  }
 
-h1, h2, h3, h4 { 
-  font-family: 'Frank Ruhl Libre', serif; 
-}
+  .nav-link::after { 
+    @apply content-[''] absolute -bottom-0.5 right-0 w-0 h-0.5 bg-brand-gold transition-all duration-300;
+  }
 
-/* Header Styles */
-.main-header { 
-  background: rgba(18, 18, 20, 0.98); 
-  border-bottom: 1px solid rgba(233, 196, 106, 0.1); 
-  backdrop-filter: blur(10px); 
-}
+  .nav-link:hover::after { 
+    @apply w-full;
+  }
 
-.nav-link { 
-  position: relative; 
-  transition: 0.3s; 
-  font-weight: bold; 
-  cursor: pointer; 
-  border: none; 
-  background: transparent; 
-  color: inherit; 
-}
+  /* Hub Buttons */
+  .hub-btn { 
+    @apply h-[52px] w-[140px] flex items-center justify-center rounded-full transition-all duration-300 shadow-hub font-extrabold gap-2 border border-white/10 text-sm no-underline cursor-pointer whitespace-nowrap;
+  }
 
-.nav-link::after { 
-  content: ''; 
-  position: absolute; 
-  bottom: -2px; 
-  right: 0; 
-  width: 0; 
-  height: 2px; 
-  background: var(--gold); 
-  transition: 0.3s; 
-}
+  .hub-btn-whatsapp { 
+    @apply bg-whatsapp text-white;
+  }
 
-.nav-link:hover::after { 
-  width: 100%; 
-}
+  .hub-btn-faq { 
+    @apply bg-brand-gold text-brand-dark;
+  }
 
-/* Hub Buttons */
-.hub-btn { 
-  height: 52px; 
-  width: 140px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  border-radius: 9999px; 
-  transition: 0.3s; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-  font-weight: 800; 
-  gap: 8px; 
-  border: 1px solid rgba(255,255,255,0.1); 
-  font-size: 14px; 
-  text-decoration: none; 
-  cursor: pointer; 
-  white-space: nowrap; 
-}
+  .pulse { 
+    @apply animate-pulse-green;
+  }
 
-.hub-btn-whatsapp { 
-  background-color: var(--green-whatsapp) !important; 
-  color: white !important; 
-}
+  /* Media Cards */
+  .media-card { 
+    @apply bg-white/[0.03] border border-white/5 border-r-[6px] rounded-4xl transition-all;
+    transition-duration: 400ms;
+  }
 
-.hub-btn-faq { 
-  background-color: var(--gold) !important; 
-  color: #121214 !important; 
-}
+  .media-card:hover { 
+    @apply -translate-y-1 bg-white/[0.06];
+  }
 
-.pulse { 
-  animation: pulse-green 2s infinite; 
-}
+  /* Horizontal Scroll Support */
+  .dates-wrapper { 
+    @apply flex flex-row flex-nowrap overflow-x-auto gap-4 pb-4;
+    direction: rtl !important; 
+    -webkit-overflow-scrolling: touch; 
+  }
 
-@keyframes pulse-green { 
-  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); } 
-  70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); } 
-  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } 
-}
+  .date-card { 
+    @apply flex-none w-[8.5rem] rounded-4xl transition-all duration-300 cursor-pointer;
+  }
 
-/* Media Cards */
-.media-card { 
-  background: rgba(255,255,255,0.03); 
-  border: 1px solid rgba(255,255,255,0.05); 
-  border-right-width: 6px; 
-  border-radius: 2rem; 
-  transition: 0.4s; 
-}
+  .custom-scroll::-webkit-scrollbar { 
+    @apply h-[5px];
+  }
 
-.media-card:hover { 
-  transform: translateY(-5px); 
-  background: rgba(255,255,255,0.06); 
-}
+  .custom-scroll::-webkit-scrollbar-thumb { 
+    @apply bg-brand-gold rounded-lg;
+  }
 
-/* Horizontal Scroll Support */
-.dates-wrapper { 
-  display: flex !important; 
-  flex-direction: row !important; 
-  flex-wrap: nowrap !important; 
-  overflow-x: auto !important; 
-  direction: rtl !important; 
-  gap: 1rem; 
-  padding-bottom: 1rem; 
-  -webkit-overflow-scrolling: touch; 
-}
+  /* Floating Button Animation */
+  .floating-btn {
+    @apply animate-float;
+  }
 
-.date-card { 
-  flex: 0 0 auto; 
-  width: 8.5rem; 
-  border-radius: 2rem; 
-  transition: 0.3s; 
-  cursor: pointer; 
-}
+  /* Fade In Animation */
+  .react-content { 
+    @apply opacity-0 transition-opacity ease-in;
+    transition-duration: 600ms;
+  }
 
-.custom-scroll::-webkit-scrollbar { 
-  height: 5px; 
-}
+  .react-content.loaded { 
+    @apply opacity-100;
+  }
 
-.custom-scroll::-webkit-scrollbar-thumb { 
-  background: var(--gold); 
-  border-radius: 10px; 
-}
+  /* Tailwind Animation Utilities */
+  .animate-in {
+    animation-fill-mode: both;
+  }
 
-/* Floating Button Animation */
-.floating-btn {
-  animation: float 3s ease-in-out infinite;
-}
+  .fade-in {
+    @apply animate-fade-in;
+  }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
+  .slide-in-from-top-2 {
+    @apply animate-slide-in-from-top;
+  }
 
-/* Fade In Animation */
-.react-content { 
-  opacity: 0; 
-  transition: opacity 0.6s ease-in; 
-}
-
-.react-content.loaded { 
-  opacity: 1; 
-}
-
-/* Tailwind Animation Utilities */
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slide-in-from-top-2 {
-  from { transform: translateY(-0.5rem); }
-  to { transform: translateY(0); }
-}
-
-@keyframes zoom-in {
-  from { transform: scale(0.95); }
-  to { transform: scale(1); }
-}
-
-.animate-in {
-  animation-fill-mode: both;
-}
-
-.fade-in {
-  animation: fade-in 0.3s ease-in-out;
-}
-
-.slide-in-from-top-2 {
-  animation: slide-in-from-top-2 0.3s ease-in-out;
-}
-
-.zoom-in {
-  animation: zoom-in 0.3s ease-in-out;
-}
-
-.duration-300 {
-  animation-duration: 300ms;
-}
-
-.duration-500 {
-  animation-duration: 500ms;
+  .zoom-in {
+    @apply animate-zoom-in;
+  }
 }

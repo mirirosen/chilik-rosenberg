@@ -18,11 +18,11 @@ const Hero = () => {
       />
       
       <div className="relative z-10 px-6 max-w-5xl mx-auto">
-        <div className="inline-block bg-gold/20 text-gold px-5 py-1 rounded-full border border-gold/40 text-xs font-bold mb-8 uppercase tracking-widest text-center">
+        <div className="inline-block bg-brand-gold/20 text-brand-gold px-5 py-1 rounded-full border border-brand-gold/40 text-xs font-bold mb-8 uppercase tracking-widest text-center">
           חוויה שהיא הצגה
         </div>
         
-        <h1 className="text-5xl md:text-8xl font-bold text-gold font-serif mb-8 leading-tight">
+        <h1 className="text-5xl md:text-8xl font-bold text-brand-gold font-serif mb-8 leading-tight">
           בואו איתי למסע קולינרי בבני ברק
         </h1>
         
@@ -33,7 +33,7 @@ const Hero = () => {
         <div className="pb-16">
           <button 
             onClick={() => scrollToSection('dates-anchor')} 
-            className="bg-gold text-bg-dark px-12 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all block mx-auto shadow-gold/20"
+            className="bg-brand-gold text-brand-dark px-12 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all block mx-auto shadow-brand-gold/20"
           >
             שריינו מקום לסיור הקרוב
           </button>

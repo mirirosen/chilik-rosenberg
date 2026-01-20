@@ -1,11 +1,11 @@
-import { Star } from 'lucide-react';
+import { Star } from '../utils/icons';
 
 const RatingBar = () => {
   return (
-    <div className="bg-[#1a1a1c] py-16 border-b border-white/5 text-center">
+    <div className="bg-brand-dark-alt py-16 border-b border-white/5 text-center">
       <div className="max-w-5xl mx-auto px-6 text-center">
         <div className="flex flex-col items-center mb-10 text-center">
-          <div className="flex gap-1 mb-2 text-gold">
+          <div className="flex gap-1 mb-2 text-brand-gold">
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={24} fill="currentColor" />
             ))}
@@ -24,7 +24,7 @@ const RatingBar = () => {
           </article>
           
           <article className="p-8 bg-white/5 rounded-3xl border border-white/5 shadow-2xl text-right">
-            <h4 className="text-gold font-bold mb-3 text-xl font-serif text-right">
+            <h4 className="text-brand-gold font-bold mb-3 text-xl font-serif text-right">
               טעימות בלעדיות
             </h4>
             <p className="text-gray-400 font-light leading-relaxed text-right">
@@ -33,7 +33,7 @@ const RatingBar = () => {
           </article>
           
           <article className="p-8 bg-white/5 rounded-3xl border border-white/5 shadow-2xl text-right">
-            <h4 className="text-gold font-bold mb-3 text-xl font-serif text-right">
+            <h4 className="text-brand-gold font-bold mb-3 text-xl font-serif text-right">
               גשר בין עולמות
             </h4>
             <p className="text-gray-400 font-light leading-relaxed text-right">

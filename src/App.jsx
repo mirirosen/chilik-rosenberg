@@ -15,7 +15,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 function App() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-bg-dark text-white">
+      <div className="min-h-screen bg-brand-dark text-white">
         <Header />
         <Hero />
         <RatingBar />

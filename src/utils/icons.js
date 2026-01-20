@@ -1,0 +1,28 @@
+// Import only the icons we need to reduce bundle size
+export { 
+  Menu, 
+  X, 
+  Star, 
+  Layers, 
+  Heart, 
+  Home, 
+  BookOpen, 
+  Coins, 
+  Users, 
+  Croissant, 
+  HeartHandshake, 
+  Monitor, 
+  Soup, 
+  Fish, 
+  Utensils, 
+  Tv, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronDown, 
+  MessageCircle, 
+  HelpCircle, 
+  ArrowUp,
+  Scale,
+  Cookie,
+  Circle
+} from 'lucide-react';

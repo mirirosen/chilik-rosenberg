@@ -17,13 +17,13 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-bg-dark text-center">
-          <h2 className="text-gold text-2xl font-serif mb-4">
+        <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-brand-dark text-center">
+          <h2 className="text-brand-gold text-2xl font-serif mb-4">
             אופס, משהו קטן השתבש...
           </h2>
           <button 
             onClick={() => window.location.reload()} 
-            className="bg-gold text-black px-8 py-2 rounded-full font-bold"
+            className="bg-brand-gold text-black px-8 py-2 rounded-full font-bold"
           >
             רענן דף
           </button>

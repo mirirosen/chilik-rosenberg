@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+dist/
+
+# Build outputs
+*.local
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Backup files
+*.backup

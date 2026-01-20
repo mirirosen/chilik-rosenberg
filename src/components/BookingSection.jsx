@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from '../utils/icons';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew } from '../utils/dateUtils';
 import { handleWhatsApp } from '../utils/whatsapp';
@@ -38,8 +38,8 @@ const BookingSection = () => {
 
   return (
     <section id="dates-anchor" className="py-32 max-w-5xl mx-auto px-6 text-center text-right">
-      <div className="bg-[#1E1E24] p-8 md:p-24 rounded-[3rem] md:rounded-[6rem] border border-white/5 shadow-2xl relative overflow-hidden text-center">
-        <h2 className="text-4xl md:text-7xl font-bold text-gold font-serif mb-12 text-center">
+      <div className="bg-brand-dark-lighter p-8 md:p-24 rounded-5xl md:rounded-7xl border border-white/5 shadow-2xl relative overflow-hidden text-center">
+        <h2 className="text-4xl md:text-7xl font-bold text-brand-gold font-serif mb-12 text-center">
           מתי ניפגש לסיור?
         </h2>
         
@@ -47,7 +47,7 @@ const BookingSection = () => {
           {/* Left Arrow */}
           <button 
             onClick={() => scrollDates('left')} 
-            className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
           >
             <ChevronLeft size={24} />
           </button>
@@ -68,8 +68,8 @@ const BookingSection = () => {
                   onClick={() => setSelectedDate(item.dateStr)}
                   className={`date-card h-44 md:h-48 border flex flex-col items-center justify-center transition-all cursor-pointer text-center ${
                     active 
-                      ? 'bg-gold text-black scale-110 shadow-inner' 
-                      : 'bg-bg-dark border-white/10 hover:border-gold'
+                      ? 'bg-brand-gold text-black scale-110 shadow-inner' 
+                      : 'bg-brand-dark border-white/10 hover:border-brand-gold'
                   }`}
                 >
                   <span className="text-[10px] font-black opacity-60 uppercase text-center">
@@ -92,7 +92,7 @@ const BookingSection = () => {
           {/* Right Arrow */}
           <button 
             onClick={() => scrollDates('right')} 
-            className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
           >
             <ChevronRight size={24} />
           </button>
@@ -109,7 +109,7 @@ const BookingSection = () => {
                   <div className="flex flex-col gap-3 text-center">
                     <button 
                       onClick={handleThursdayCorrection} 
-                      className="bg-white text-black py-3 px-6 rounded-full font-bold text-sm hover:bg-gold transition-all text-center"
+                      className="bg-white text-black py-3 px-6 rounded-full font-bold text-sm hover:bg-brand-gold transition-all text-center"
                     >
                       שנה ליום חמישי הקרוב
                     </button>
@@ -128,7 +128,7 @@ const BookingSection = () => {
                   </p>
                   <button 
                     onClick={() => handleWhatsApp(selectedDate)} 
-                    className="bg-gold text-bg-dark px-10 md:px-14 py-4 rounded-full font-black text-xl md:text-2xl shadow-xl hover:scale-105 transition-all text-center"
+                    className="bg-brand-gold text-brand-dark px-10 md:px-14 py-4 rounded-full font-black text-xl md:text-2xl shadow-xl hover:scale-105 transition-all text-center"
                   >
                     לחצו להרשמה עכשיו
                   </button>
@@ -141,7 +141,7 @@ const BookingSection = () => {
             type="date" 
             value={selectedDate} 
             onChange={(e) => setSelectedDate(e.target.value)} 
-            className="w-full max-w-sm bg-bg-dark border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-gold text-center font-bold text-lg mx-auto block shadow-inner" 
+            className="w-full max-w-sm bg-brand-dark border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center font-bold text-lg mx-auto block shadow-inner" 
             style={{ colorScheme: 'dark' }}
           />
         </div>

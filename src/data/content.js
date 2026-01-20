@@ -50,22 +50,32 @@ export const foods = [
   { 
     icon: "soup", 
     title: "הטשולנט שלי", 
-    desc: "חמין עשיר בבישול ארוך עם בשר נימוח וטעמים של שבת." 
+    desc: "חמין עשיר בבישול ארוך עם בשר נימוח, קישקע וטעמים של בית." 
   },
   { 
     icon: "fish", 
-    title: "דגים והערינג", 
-    desc: "הטעם האמיתי של הקידוש: דג מלוח איכותי וקרקרים פריכים." 
+    title: "חגיגת דגים וסביצ'ה", 
+    desc: "פלטת דגים יוקרתית: סביצ'ה סלמון טרי, סביצ'ה טונה אדומה והערינג משובח." 
   },
   { 
     icon: "layers", 
-    title: "קיגעל אוברנייט", 
-    desc: "הקיגעל הירושלמי השחום והחריף שבילה לילה שלם על הפלטה." 
+    title: "קוגל ירושלמי", 
+    desc: "הקוגל הירושלמי האותנטי - שחום, חריף ומתובל בפלפל שחור גרוס." 
   },
   { 
-    icon: "croissant", 
-    title: "חלות ויז'ניץ חמות", 
-    desc: "טעימה של חלה לוהטת שיצאה ממש עכשיו מהתנור במאפייה." 
+    icon: "utensils", 
+    title: "כבד קצוץ מסורתי", 
+    desc: "כבד קצוץ במרקם קטיפתי עם ריבת בצל ושפע של אהבה יהודית." 
+  },
+  { 
+    icon: "scale", 
+    title: "דו-קרב המאפיות", 
+    desc: "מבחן טעימות עיוור בין ענקיות החלה: מאפיית הצבי מול ויז'ניץ. מי תנצח?" 
+  },
+  { 
+    icon: "cookie", 
+    title: "בלינצ'ס אגדיים", 
+    desc: "קינוח חם ומתוק של בלינצ'ס גבינה עשירים שסוגרים את הפינה." 
   }
 ];
 
@@ -96,21 +106,21 @@ export const mediaLinks = [
   {
     name: "מאקו",
     icon: "utensils",
-    color: "#7d32d3",
+    colorClass: "media-mako", // Uses Tailwind color from config
     url: "https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm",
     buttonText: "לקריאת הכתבה"
   },
   {
     name: "כאן 11",
     icon: "tv",
-    color: "white",
+    colorClass: "media-kan", // Uses Tailwind color from config
     url: "https://www.kan.org.il/content/kan/kan-11/p-864341/s1/864346/",
     buttonText: "לצפייה בפרק"
   },
   {
     name: "רשת 13",
     icon: "tv",
-    color: "#0056d2",
+    colorClass: "media-reshet", // Uses Tailwind color from config
     url: "https://13tv.co.il/allshows/series/696/",
     buttonText: "לצפייה בסדרה"
   }
