@@ -81,7 +81,7 @@ const Hero = () => {
       {/* ============================================ */}
       
       <div 
-        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 z-[1]"
+        className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/75 z-[1]"
         aria-hidden="true"
       />
       
@@ -89,23 +89,28 @@ const Hero = () => {
       {/* HERO CONTENT (Always on Top)                */}
       {/* ============================================ */}
       
-      <div className="relative z-10 px-6 max-w-5xl mx-auto">
-        <div className="inline-block bg-brand-gold/20 text-brand-gold px-5 py-1 rounded-full border border-brand-gold/40 text-xs font-bold mb-8 uppercase tracking-widest text-center backdrop-blur-sm">
+      <div className="relative z-10 px-6 max-w-6xl mx-auto">
+        {/* Glassmorphism Badge - Staggered Entry */}
+        <div className="hero-badge inline-block bg-white/10 text-brand-gold px-6 py-2 rounded-full border-2 border-brand-gold/50 text-sm font-bold mb-10 uppercase tracking-widest text-center backdrop-blur-md shadow-2xl">
           חוויה שהיא הצגה
         </div>
         
-        <h1 className="text-5xl md:text-8xl font-bold text-brand-gold font-serif mb-8 leading-tight drop-shadow-2xl">
+        {/* Main Title - Premium Typography */}
+        <h1 className="hero-title text-6xl md:text-9xl font-black text-brand-gold font-serif mb-10 leading-[1.1] drop-shadow-2xl" style={{ textShadow: '0 10px 40px rgba(233, 196, 106, 0.5), 0 0 80px rgba(233, 196, 106, 0.3)' }}>
           בואו איתי למסע קולינרי בבני ברק
         </h1>
         
-        <p className="text-xl md:text-3xl italic text-white mb-14 font-serif text-center drop-shadow-lg">
+        {/* Subtitle - Enhanced Readability */}
+        <p className="hero-subtitle text-2xl md:text-4xl italic text-white/95 mb-16 font-serif text-center drop-shadow-2xl leading-relaxed" style={{ textShadow: '0 4px 20px rgba(0, 0, 0, 0.8)' }}>
           "סיור שהוא הצגה מלאת הומור, אוכל וחיבור עמוק"
         </p>
         
-        <div className="pb-16">
+        {/* CTA Button - Gold Glow Effect */}
+        <div className="hero-button pb-20">
           <button 
             onClick={() => scrollToSection('dates-anchor')} 
-            className="bg-brand-gold text-brand-dark px-12 py-5 rounded-full font-black text-2xl shadow-2xl hover:scale-105 transition-all block mx-auto shadow-brand-gold/20 relative z-20 cursor-pointer"
+            className="bg-brand-gold text-brand-dark px-14 py-6 rounded-full font-black text-3xl shadow-2xl hover:scale-110 hover:shadow-brand-gold/60 transition-all duration-300 block mx-auto relative z-20 cursor-pointer"
+            style={{ boxShadow: '0 0 40px rgba(233, 196, 106, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5)' }}
             aria-label="Book a tour"
           >
             שריינו מקום לסיור הקרוב
