@@ -9,14 +9,8 @@ const Hero = () => {
   // PRODUCTION MODE: Local images (add your images to public/hero-images/)
   const heroImages = [
     'hero-images/img1.jpg',  // Jewish food theme (Challah, Shabbat table)
-    'hero-images/img2.jpg',  // Bakery scene (Vizhnitz bakery, pastries)
-    'hero-images/img3.jpg',  // Bnei Brak cityscape (streets, iconic locations)
-    'hero-images/img4.jpg',  // Bnei Brak cityscape (streets, iconic locations)
-    'hero-images/img5.jpg',  // Bnei Brak cityscape (streets, iconic locations)
-    'hero-images/img6.jpg',  // Bnei Brak cityscape (streets, iconic locations)
-    'hero-images/img7.jpg',  // Bnei Brak cityscape (streets, iconic locations)
+    'hero-images/img2.jpg'  // Bakery scene (Vizhnitz bakery, pastries)
   ];
-  
   // TESTING FALLBACK: External Unsplash URLs (if local images not found)
   // const heroImages = [
   //   'https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=1920&q=80', // Jewish challah bread
@@ -108,12 +102,15 @@ const Hero = () => {
         {/* CTA Button - Gold Glow Effect */}
         <div className="hero-button pb-20">
           <button 
-            onClick={() => scrollToSection('dates-anchor')} 
+            onClick={() => {
+              window.history.pushState({}, '', '/booking');
+              window.location.href = '/booking';
+            }} 
             className="bg-brand-gold text-brand-dark px-14 py-6 rounded-full font-black text-3xl shadow-2xl hover:scale-110 hover:shadow-brand-gold/60 transition-all duration-300 block mx-auto relative z-20 cursor-pointer"
             style={{ boxShadow: '0 0 40px rgba(233, 196, 106, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5)' }}
             aria-label="Book a tour"
           >
-            שריינו מקום לסיור הקרוב
+            הרשמה לסיור
           </button>
         </div>
       </div>

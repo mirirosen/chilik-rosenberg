@@ -35,10 +35,13 @@ const Header = () => {
             מתי יש סיור?
           </button>
           <button 
-            onClick={() => scrollToSection('dates-anchor')} 
+            onClick={() => {
+              window.history.pushState({}, '', '/booking');
+              window.location.href = '/booking';
+            }} 
             className="bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all"
           >
-            להרשמה
+            הרשמה לסיור
           </button>
         </div>
 
@@ -84,10 +87,14 @@ const Header = () => {
           מה אוכלים?
         </button>
         <button 
-          onClick={() => scrollToSection('dates-anchor')} 
+          onClick={() => {
+            setMobileMenuOpen(false);
+            window.history.pushState({}, '', '/booking');
+            window.location.href = '/booking';
+          }} 
           className="bg-brand-gold text-black px-12 py-4 rounded-full font-black text-xl shadow-lg"
         >
-          להרשמה עכשיו
+          הרשמה לסיור
         </button>
       </div>
     </>

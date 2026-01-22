@@ -127,7 +127,10 @@ const BookingSection = () => {
                     בחרתם את ה-{formatDateHebrew(selectedDate)}
                   </p>
                   <button 
-                    onClick={() => handleWhatsApp(selectedDate)} 
+                    onClick={() => {
+                      window.history.pushState({}, '', '/booking');
+                      window.location.href = '/booking';
+                    }} 
                     className="bg-brand-gold text-brand-dark px-10 md:px-14 py-4 rounded-full font-black text-xl md:text-2xl shadow-xl hover:scale-105 transition-all text-center"
                   >
                     לחצו להרשמה עכשיו

@@ -24,5 +24,17 @@ export {
   ArrowUp,
   Scale,
   Cookie,
-  Circle
+  Circle,
+  Lock,
+  Unlock,
+  XCircle,
+  CheckCircle,
+  LogOut,
+  Calendar,
+  Phone,
+  Mail,
+  MessageSquare,
+  Clock,
+  Plus,
+  Minus
 } from 'lucide-react';
