@@ -214,8 +214,8 @@ const Admin = () => {
               onClick={handleLogout}
               className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2 rounded-full text-sm font-bold hover:bg-red-500/20 transition-all"
             >
-              <LogOut size={16} />
               <span className="hidden md:inline">יציאה</span>
+              <LogOut size={16} />
             </button>
           </div>
         </div>
@@ -233,8 +233,8 @@ const Admin = () => {
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              <Calendar size={20} />
               <span>ניהול תאריכים</span>
+              <Calendar size={20} />
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
@@ -244,8 +244,8 @@ const Admin = () => {
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              <Users size={20} />
               <span>הזמנות</span>
+              <Users size={20} />
             </button>
           </div>
         </div>
@@ -297,10 +297,10 @@ const Admin = () => {
                   // Warning for non-Thursday dates
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-6">
                     <div className="flex items-center gap-3 mb-3 justify-center">
-                      <XCircle size={24} className="text-yellow-500" />
                       <div className="text-lg font-bold text-yellow-500">
                         הסיורים הקבועים מתקיימים רק בימי חמישי
                       </div>
+                      <XCircle size={24} className="text-yellow-500" />
                     </div>
                     <div className="text-center text-gray-300 text-sm">
                       <p className="mb-2">התאריך שבחרת: <strong>{formatDateHebrew(selectedDate)}</strong></p>
@@ -347,8 +347,8 @@ const Admin = () => {
                               : 'bg-gray-500/20 text-gray-400 border border-gray-500/30 hover:bg-gray-500/30'
                           } disabled:opacity-50`}
                         >
+                          <span>{getStatus(selectedDate).status === 'blocked' ? 'בטל חסימה' : 'חסום'}</span>
                           {getStatus(selectedDate).status === 'blocked' ? <Lock size={16} /> : <Unlock size={16} />}
-                          {getStatus(selectedDate).status === 'blocked' ? 'בטל חסימה' : 'חסום'}
                         </button>
 
                         <button
@@ -360,8 +360,8 @@ const Admin = () => {
                               : 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
                           } disabled:opacity-50`}
                         >
+                          <span>{getStatus(selectedDate).status === 'soldOut' ? 'פנה מקום' : 'אזל'}</span>
                           {getStatus(selectedDate).status === 'soldOut' ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                          {getStatus(selectedDate).status === 'soldOut' ? 'פנה מקום' : 'אזל'}
                         </button>
                       </div>
                     </div>
@@ -380,19 +380,19 @@ const Admin = () => {
           <ul className="space-y-2 text-gray-300 text-right text-sm">
             <li className="flex items-start gap-3 justify-end">
               <span>לחץ על "חסום" כדי לסמן תאריך שבו אין סיור</span>
-              <XCircle size={20} className="text-gray-400 mt-0.5" />
+              <div className="mt-0.5"><XCircle size={20} className="text-gray-400" /></div>
             </li>
             <li className="flex items-start gap-3 justify-end">
               <span>לחץ על "אזל המקום" כדי לסמן סיור שהתמלא</span>
-              <CheckCircle size={20} className="text-red-400 mt-0.5" />
+              <div className="mt-0.5"><CheckCircle size={20} className="text-red-400" /></div>
             </li>
             <li className="flex items-start gap-3 justify-end">
               <span>תאריך לא יכול להיות גם חסום וגם "אזל המקום" במקביל</span>
-              <Lock size={20} className="text-brand-gold mt-0.5" />
+              <div className="mt-0.5"><Lock size={20} className="text-brand-gold" /></div>
             </li>
             <li className="flex items-start gap-3 justify-end">
               <span>השינויים נשמרים מיידית ומעודכנים באתר הראשי</span>
-              <Unlock size={20} className="text-green-400 mt-0.5" />
+              <div className="mt-0.5"><Unlock size={20} className="text-green-400" /></div>
             </li>
           </ul>
         </div>
@@ -474,18 +474,18 @@ const Admin = () => {
 
                     {/* Action Buttons */}
                     <div className="flex gap-3 md:w-1/3 justify-end">
-                      <button
-                        onClick={() => toggleBlocked(item.dateStr)}
-                        disabled={saving}
-                        className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm font-bold transition-all ${
-                          status.status === 'blocked'
-                            ? 'bg-gray-500 text-white shadow-lg'
-                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30 hover:bg-gray-500/30'
-                        } disabled:opacity-50`}
-                      >
-                        {status.status === 'blocked' ? <Lock size={16} /> : <Unlock size={16} />}
-                        {status.status === 'blocked' ? 'בטל חסימה' : 'חסום'}
-                      </button>
+                        <button
+                          onClick={() => toggleBlocked(item.dateStr)}
+                          disabled={saving}
+                          className={`flex items-center gap-2 px-5 py-3 rounded-full text-sm font-bold transition-all ${
+                            status.status === 'blocked'
+                              ? 'bg-gray-500 text-white shadow-lg'
+                              : 'bg-gray-500/20 text-gray-400 border border-gray-500/30 hover:bg-gray-500/30'
+                          } disabled:opacity-50`}
+                        >
+                          <span>{status.status === 'blocked' ? 'בטל חסימה' : 'חסום'}</span>
+                          {status.status === 'blocked' ? <Lock size={16} /> : <Unlock size={16} />}
+                        </button>
 
                       <button
                         onClick={() => toggleSoldOut(item.dateStr)}
@@ -496,8 +496,8 @@ const Admin = () => {
                             : 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
                         } disabled:opacity-50`}
                       >
+                        <span>{status.status === 'soldOut' ? 'פנה מקום' : 'אזל'}</span>
                         {status.status === 'soldOut' ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                        {status.status === 'soldOut' ? 'פנה מקום' : 'אזל'}
                       </button>
                     </div>
                   </div>

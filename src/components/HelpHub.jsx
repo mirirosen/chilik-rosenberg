@@ -10,7 +10,15 @@ const HelpHub = () => {
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-[1100] flex flex-row-reverse items-center gap-4">
+    <div className="fixed bottom-6 right-6 z-[1100] flex flex-row items-center gap-4">
+      <button 
+        onClick={openFaqSection} 
+        className="hub-btn hub-btn-faq text-center"
+      >
+        <HelpCircle size={22} />
+        <span>שאלות?</span>
+      </button>
+      
       <a 
         href={`https://wa.me/${whatsappNumber}`} 
         target="_blank" 
@@ -20,14 +28,6 @@ const HelpHub = () => {
         <MessageCircle size={24} />
         <span>להרשמה</span>
       </a>
-      
-      <button 
-        onClick={openFaqSection} 
-        className="hub-btn hub-btn-faq text-center"
-      >
-        <HelpCircle size={22} />
-        <span>שאלות?</span>
-      </button>
     </div>
   );
 };

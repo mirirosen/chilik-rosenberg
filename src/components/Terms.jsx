@@ -133,24 +133,24 @@ const Terms = () => {
                 onClick={() => handlePaymentClick('bit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
               >
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">Bit 💳</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום ←</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('credit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
               >
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">כרטיס אשראי 💳</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום ←</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('bank')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
               >
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">העברה בנקאית 🏦</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום ←</span>
               </button>
             </div>
           </section>
@@ -343,8 +343,8 @@ const Terms = () => {
           >
             <button
               onClick={closePaymentModal}
-              className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors"
-              aria-label="Close"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              aria-label="סגור"
             >
               <XCircle size={32} />
             </button>

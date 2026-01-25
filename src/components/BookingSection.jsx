@@ -26,7 +26,8 @@ const BookingSection = () => {
 
   const scrollDates = (direction) => {
     if (scrollContainerRef.current) {
-      const move = direction === 'left' ? -300 : 300;
+      // In RTL, we reverse the scroll direction
+      const move = direction === 'left' ? 300 : -300;
       scrollContainerRef.current.scrollBy({ left: move, behavior: 'smooth' });
     }
   };
@@ -44,12 +45,13 @@ const BookingSection = () => {
         </h2>
         
         <div className="relative group mx-auto text-center">
-          {/* Left Arrow */}
+          {/* Right Arrow (in RTL, right = previous) */}
           <button 
-            onClick={() => scrollDates('left')} 
-            className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            onClick={() => scrollDates('right')} 
+            className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            aria-label="גלול ימינה"
           >
-            <ChevronLeft size={24} />
+            <ChevronRight size={24} />
           </button>
           
           {/* Dates Container */}
@@ -89,12 +91,13 @@ const BookingSection = () => {
             })}
           </div>
           
-          {/* Right Arrow */}
+          {/* Left Arrow (in RTL, left = next) */}
           <button 
-            onClick={() => scrollDates('right')} 
-            className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            onClick={() => scrollDates('left')} 
+            className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
+            aria-label="גלול שמאלה"
           >
-            <ChevronRight size={24} />
+            <ChevronLeft size={24} />
           </button>
         </div>
         

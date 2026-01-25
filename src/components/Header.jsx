@@ -67,12 +67,12 @@ const Header = () => {
       {/* Mobile Menu */}
       <div 
         className={`fixed inset-0 bg-brand-dark z-[1200] flex flex-col items-center justify-center gap-8 text-center transition-transform duration-300 ${
-          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <button 
           onClick={() => setMobileMenuOpen(false)} 
-          className="absolute top-8 left-8 text-brand-gold"
+          className="absolute top-8 right-8 text-brand-gold"
         >
           <X size={48} />
         </button>

@@ -92,7 +92,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-right">
+          <div className="flex flex-col md:flex-row-reverse justify-between items-center gap-4 text-center md:text-right">
             <div className="text-xs text-gray-500 tracking-wider">
               © 2026 סיורי חיליק רוזנברג - כל הזכויות שמורות
             </div>

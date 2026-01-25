@@ -237,7 +237,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Phone Field */}
         <div>
           <label htmlFor="phone" className="block text-sm font-bold mb-2 text-right">
-            <Phone size={16} className="inline ml-2" />
+            <Phone size={16} className="inline mr-2" />
             טלפון / WhatsApp <span className="text-red-400">*</span>
           </label>
           <input
@@ -255,7 +255,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Email Field */}
         <div>
           <label htmlFor="email" className="block text-sm font-bold mb-2 text-right">
-            <Mail size={16} className="inline ml-2" />
+            <Mail size={16} className="inline mr-2" />
             אימייל <span className="text-red-400">*</span>
           </label>
           <input
@@ -315,7 +315,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Tour Date Selection - Date Picker (Thursdays Only) */}
         <div>
           <label htmlFor="tourDate" className="block text-sm font-bold mb-2 text-right">
-            <Calendar size={16} className="inline ml-2" />
+            <Calendar size={16} className="inline mr-2" />
             תאריך הסיור <span className="text-red-400">*</span>
           </label>
           <input
@@ -353,9 +353,9 @@ const BookingForm = ({ onSuccess }) => {
         {/* Number of Participants - Manual Input with +/- Buttons */}
         <div>
           <label htmlFor="participants" className="block text-sm font-bold mb-2 text-right">
-            <Users size={16} className="inline ml-2" />
+            <Users size={16} className="inline mr-2" />
             מספר משתתפים <span className="text-red-400">*</span>
-            <span className="text-xs text-gray-400 font-normal mr-2">(1-20)</span>
+            <span className="text-xs text-gray-400 font-normal ml-2">(1-20)</span>
           </label>
           <div className="flex items-center gap-3">
             {/* Decrement Button */}
@@ -488,7 +488,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Notes Field */}
         <div>
           <label htmlFor="notes" className="block text-sm font-bold mb-2 text-right">
-            <MessageSquare size={16} className="inline ml-2" />
+            <MessageSquare size={16} className="inline mr-2" />
             הערות / בקשות מיוחדות (אופציונלי)
           </label>
           <textarea
