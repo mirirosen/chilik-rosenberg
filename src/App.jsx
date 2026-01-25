@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import RatingBar from './components/RatingBar';
@@ -18,8 +19,16 @@ import BookingConfirmation from './components/BookingConfirmation';
 import Terms from './components/Terms';
 
 function App() {
+  const { i18n } = useTranslation();
   const [currentRoute, setCurrentRoute] = useState('home'); // 'home', 'admin', 'booking', 'confirmation', 'terms'
   const [bookingData, setBookingData] = useState(null);
+
+  useEffect(() => {
+    // Set initial direction based on current language
+    const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.setAttribute('dir', dir);
+    document.documentElement.setAttribute('lang', i18n.language);
+  }, [i18n.language]);
 
   useEffect(() => {
     // Check current path

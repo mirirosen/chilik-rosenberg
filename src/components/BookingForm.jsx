@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import { useFirebaseData } from '../hooks/useFirebaseData';
@@ -9,6 +10,7 @@ import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus } from '../uti
 const PRICE_PER_PERSON = 250;
 
 const BookingForm = ({ onSuccess }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -213,14 +215,14 @@ const BookingForm = ({ onSuccess }) => {
   return (
     <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl">
       <h2 className="text-3xl md:text-5xl font-serif text-brand-gold text-center mb-8 font-bold">
-        הרשמה לסיור
+        {t('booking.title')}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-bold mb-2 text-right">
-            שם מלא <span className="text-red-400">*</span>
+            {t('booking.form.fullName')} <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
@@ -228,7 +230,7 @@ const BookingForm = ({ onSuccess }) => {
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             className={`w-full bg-brand-dark border ${errors.name ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-right`}
-            placeholder="הזן שם מלא"
+            placeholder={t('booking.form.fullName')}
             disabled={isSubmitting}
           />
           {errors.name && <p className="text-red-400 text-sm mt-1 text-right">{errors.name}</p>}
@@ -238,7 +240,7 @@ const BookingForm = ({ onSuccess }) => {
         <div>
           <label htmlFor="phone" className="block text-sm font-bold mb-2 text-right">
             <Phone size={16} className="inline mr-2" />
-            טלפון / WhatsApp <span className="text-red-400">*</span>
+            {t('booking.form.phone')} <span className="text-red-400">*</span>
           </label>
           <input
             type="tel"
@@ -256,7 +258,7 @@ const BookingForm = ({ onSuccess }) => {
         <div>
           <label htmlFor="email" className="block text-sm font-bold mb-2 text-right">
             <Mail size={16} className="inline mr-2" />
-            אימייל <span className="text-red-400">*</span>
+            {t('booking.form.email')} <span className="text-red-400">*</span>
           </label>
           <input
             type="email"
@@ -541,7 +543,7 @@ const BookingForm = ({ onSuccess }) => {
           disabled={isSubmitting || availableDates.length === 0}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {isSubmitting ? 'שולח הזמנה...' : 'שלח הזמנה'}
+          {isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
         </button>
 
         <button
@@ -552,7 +554,7 @@ const BookingForm = ({ onSuccess }) => {
           }}
           className="w-full bg-transparent border-2 border-white/20 text-white py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all"
         >
-          ביטול וחזרה לדף הראשי
+          {t('booking.form.backToHome')}
         </button>
 
         <p className="text-center text-sm text-gray-400">

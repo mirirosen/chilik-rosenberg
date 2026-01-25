@@ -1,0 +1,149 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "close": "סגור",
+    "cancel": "ביטול",
+    "save": "שמור",
+    "back": "חזרה"
+  },
+  "header": {
+    "title": "חיליק רוזנברג | סיורים בבני ברק",
+    "about": "מי אני?",
+    "journey": "מה רואים?",
+    "menu": "מה אוכלים?",
+    "dates": "מתי יש סיור?",
+    "terms": "תקנון",
+    "register": "הרשמה לסיור",
+    "toWebsite": "לאתר הראשי",
+    "logout": "יציאה"
+  },
+  "hero": {
+    "badge": "חוויה שהיא הצגה",
+    "title": "סיור קולינרי בבני ברק",
+    "subtitle": "טעמים, סיפורים, ומסורת בלב העיר",
+    "cta": "הרשמה לסיור",
+    "termsReminder": "לפני ההרשמה, מומלץ לקרוא את תנאי השימוש והתקנון"
+  },
+  "booking": {
+    "title": "הרשמה לסיור",
+    "form": {
+      "fullName": "שם מלא",
+      "phone": "טלפון / WhatsApp",
+      "email": "אימייל",
+      "howDidYouHear": "איך הגעת אלינו?",
+      "dateOfBirth": "תאריך לידה",
+      "tourDate": "תאריך הסיור",
+      "participants": "מספר משתתפים",
+      "paymentMethod": "אמצעי תשלום",
+      "notes": "הערות / בקשות מיוחדות",
+      "agreeToTerms": "אני מאשר/ת את תנאי השימוש והתקנון (כולל מדיניות הביטולים)",
+      "required": "שדה חובה",
+      "submit": "שלח הזמנה",
+      "submitting": "שולח הזמנה...",
+      "backToHome": "ביטול וחזרה לדף הראשי"
+    },
+    "paymentMethods": {
+      "bit": "Bit",
+      "credit": "אשראי",
+      "bankTransfer": "העברה בנקאית"
+    },
+    "howOptions": {
+      "friend": "המלצה מחבר/ה",
+      "google": "חיפוש בגוגל",
+      "facebook": "פייסבוק",
+      "instagram": "אינסטגרם",
+      "other": "אחר"
+    },
+    "validation": {
+      "nameRequired": "שם מלא הוא שדה חובה",
+      "phoneRequired": "טלפון / WhatsApp הוא שדה חובה",
+      "phoneInvalid": "מספר טלפון לא תקין (פורמט: 05X-XXXXXXX)",
+      "emailRequired": "כתובת אימייל היא שדה חובה",
+      "emailInvalid": "כתובת אימייל לא תקינה",
+      "howRequired": "יש לבחור כיצד הגעת אלינו",
+      "dobRequired": "תאריך לידה הוא שדה חובה",
+      "ageRestriction": "הרשמה מותרת רק למעל גיל 18",
+      "dateRequired": "יש לבחור תאריך סיור",
+      "thursdayOnly": "ניתן לבחור רק ימי חמישי",
+      "dateUnavailable": "התאריך שנבחר אינו זמין (חסום או אזל המקום)",
+      "participantsRange": "מספר המשתתפים חייב להיות בין 1 ל-20",
+      "paymentRequired": "יש לבחור אמצעי תשלום",
+      "termsRequired": "יש לאשר את תנאי השימוש והתקנון"
+    },
+    "price": {
+      "total": "מחיר כולל",
+      "perPerson": "לאדם"
+    },
+    "contact": {
+      "title": "לשאלות ובירורים:",
+      "name": "חיליק רוזנברג",
+      "whatsapp": "שלח הודעת WhatsApp"
+    }
+  },
+  "confirmation": {
+    "title": "ההזמנה נשלחה בהצלחה!",
+    "thankYou": "תודה רבה",
+    "bookingId": "מספר הזמנה",
+    "saveId": "שמור מספר זה לצורך בירורים",
+    "details": "פרטי ההזמנה",
+    "tourDate": "תאריך הסיור",
+    "participants": "מספר משתתפים",
+    "participant": "משתתף",
+    "participantsPlural": "משתתפים",
+    "email": "אימייל",
+    "phone": "טלפון",
+    "total": "סה\"כ לתשלום",
+    "notes": "הערות",
+    "nextSteps": "מה הלאה?",
+    "steps": {
+      "emailSent": "אישור ההזמנה נשלח לכתובת המייל שלך",
+      "contactSoon": "נציג יצור איתך קשר בהקדם לאישור סופי ותשלום",
+      "bookingNumber": "מספר ההזמנה שלך"
+    },
+    "contactTitle": "שאלות? צור קשר",
+    "backHome": "חזרה לדף הראשי"
+  },
+  "terms": {
+    "title": "תנאי שימוש ותקנון",
+    "subtitle": "נא לקרוא בעיון לפני ביצוע הזמנה",
+    "general": "כללי",
+    "payment": "תשלום",
+    "cancellation": "מדיניות ביטולים",
+    "age": "מתאים לכל הגילאים",
+    "liability": "אחריות",
+    "privacy": "פרטיות ואבטחת מידע",
+    "contact": "יצירת קשר",
+    "backToBooking": "חזרה לטופס הרשמה",
+    "scrollTop": "חזרה למעלה",
+    "lastUpdated": "עדכון אחרון",
+    "selectPayment": "בחר אמצעי תשלום:",
+    "clickForDetails": "לחץ לפרטי תשלום"
+  },
+  "admin": {
+    "title": "ניהול סיורים",
+    "name": "חיליק רוזנברג",
+    "tabs": {
+      "tours": "ניהול תאריכים",
+      "bookings": "הזמנות"
+    },
+    "password": "סיסמה",
+    "login": "התחבר",
+    "loginTitle": "כניסת מנהל"
+  },
+  "faq": {
+    "title": "שאלות נפוצות"
+  },
+  "footer": {
+    "contact": "יצירת קשר",
+    "quickLinks": "קישורים מהירים",
+    "about": "אודות הסיורים",
+    "aboutText": "סיורים קולינריים בבני ברק עם חיליק רוזנברג. חוויה אותנטית של טעמים, ריחות וסיפורים מהלב החרדי של בני ברק.",
+    "register": "הרשמה לסיור",
+    "terms": "תנאי שימוש ותקנון",
+    "faqs": "שאלות נפוצות",
+    "aboutLink": "אודות",
+    "copyright": "כל הזכויות שמורות - חיליק רוזנברג | סיורים בבני ברק"
+  }
+}

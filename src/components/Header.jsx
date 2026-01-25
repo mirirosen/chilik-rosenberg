@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Menu, X } from '../utils/icons';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header = () => {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (id) => {
@@ -17,22 +20,22 @@ const Header = () => {
       {/* Main Header */}
       <nav className="main-header fixed top-0 w-full z-[1000] px-6 md:px-16 py-4 flex justify-between items-center text-right">
         <a href="/" className="text-xl md:text-3xl font-black text-brand-gold font-serif tracking-tighter">
-          חיליק רוזנברג | סיורים בבני ברק
+          {t('header.title')}
         </a>
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-8 text-gray-200 text-sm items-center">
           <button onClick={() => scrollToSection('about')} className="nav-link">
-            מי אני?
+            {t('header.about')}
           </button>
           <button onClick={() => scrollToSection('journey')} className="nav-link">
-            מה רואים?
+            {t('header.journey')}
           </button>
           <button onClick={() => scrollToSection('menu')} className="nav-link">
-            מה אוכלים?
+            {t('header.menu')}
           </button>
           <button onClick={() => scrollToSection('dates-anchor')} className="nav-link text-brand-gold">
-            מתי יש סיור?
+            {t('header.dates')}
           </button>
           <button 
             onClick={() => {
@@ -41,8 +44,9 @@ const Header = () => {
             }} 
             className="nav-link text-gray-400 hover:text-white"
           >
-            תקנון
+            {t('header.terms')}
           </button>
+          <LanguageSwitcher />
           <button 
             onClick={() => {
               window.history.pushState({}, '', '/booking');
@@ -50,7 +54,7 @@ const Header = () => {
             }} 
             className="bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all"
           >
-            הרשמה לסיור
+            {t('header.register')}
           </button>
         </div>
 
@@ -81,19 +85,19 @@ const Header = () => {
           onClick={() => scrollToSection('about')} 
           className="text-3xl text-white font-serif"
         >
-          מי אני?
+          {t('header.about')}
         </button>
         <button 
           onClick={() => scrollToSection('journey')} 
           className="text-3xl text-white font-serif"
         >
-          מה רואים?
+          {t('header.journey')}
         </button>
         <button 
           onClick={() => scrollToSection('menu')} 
           className="text-3xl text-white font-serif"
         >
-          מה אוכלים?
+          {t('header.menu')}
         </button>
         <button 
           onClick={() => {
@@ -103,8 +107,11 @@ const Header = () => {
           }} 
           className="text-2xl text-gray-300 font-serif"
         >
-          תקנון ותנאי שימוש
+          {t('header.terms')}
         </button>
+        
+        <LanguageSwitcher mobile={true} />
+        
         <button 
           onClick={() => {
             setMobileMenuOpen(false);
@@ -113,7 +120,7 @@ const Header = () => {
           }} 
           className="bg-brand-gold text-black px-12 py-4 rounded-full font-black text-xl shadow-lg"
         >
-          הרשמה לסיור
+          {t('header.register')}
         </button>
       </div>
     </>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import heroImage from '../assets/hero-bg.jpeg';
 
 const Hero = () => {
+  const { t } = useTranslation();
   // ============================================
   // HERO IMAGES CONFIGURATION
   // ============================================
@@ -86,17 +88,17 @@ const Hero = () => {
       <div className="relative z-10 px-6 max-w-6xl mx-auto">
         {/* Glassmorphism Badge - Staggered Entry */}
         <div className="hero-badge inline-block bg-white/10 text-brand-gold px-6 py-2 rounded-full border-2 border-brand-gold/50 text-sm font-bold mb-10 uppercase tracking-widest text-center backdrop-blur-md shadow-2xl">
-          חוויה שהיא הצגה
+          {t('hero.badge')}
         </div>
         
         {/* Main Title - Premium Typography */}
         <h1 className="hero-title text-6xl md:text-9xl font-black text-brand-gold font-serif mb-10 leading-[1.1] drop-shadow-2xl" style={{ textShadow: '0 10px 40px rgba(233, 196, 106, 0.5), 0 0 80px rgba(233, 196, 106, 0.3)' }}>
-          בואו איתי למסע קולינרי בבני ברק
+          {t('hero.title')}
         </h1>
         
         {/* Subtitle - Enhanced Readability */}
         <p className="hero-subtitle text-2xl md:text-4xl italic text-white/95 mb-16 font-serif text-center drop-shadow-2xl leading-relaxed" style={{ textShadow: '0 4px 20px rgba(0, 0, 0, 0.8)' }}>
-          "סיור שהוא הצגה מלאת הומור, אוכל וחיבור עמוק"
+          {t('hero.subtitle')}
         </p>
         
         {/* CTA Button - Gold Glow Effect */}
@@ -110,12 +112,12 @@ const Hero = () => {
             style={{ boxShadow: '0 0 40px rgba(233, 196, 106, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5)' }}
             aria-label="Book a tour"
           >
-            הרשמה לסיור
+            {t('hero.cta')}
           </button>
           
           {/* Terms Link Below Button */}
           <p className="text-center mt-6 text-sm text-gray-400">
-            לפני ההרשמה, מומלץ לקרוא את{' '}
+            {t('hero.termsReminder')}{' '}
             <button 
               onClick={() => {
                 window.history.pushState({}, '', '/terms');
@@ -123,7 +125,7 @@ const Hero = () => {
               }}
               className="text-brand-gold hover:underline transition-all"
             >
-              תנאי השימוש והתקנון
+              {t('header.terms')}
             </button>
           </p>
         </div>

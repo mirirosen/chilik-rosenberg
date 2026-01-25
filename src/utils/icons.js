@@ -36,5 +36,6 @@ export {
   MessageSquare,
   Clock,
   Plus,
-  Minus
+  Minus,
+  Globe
 } from 'lucide-react';

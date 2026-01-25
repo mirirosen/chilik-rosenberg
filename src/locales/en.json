@@ -1,0 +1,149 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back"
+  },
+  "header": {
+    "title": "Chilik Rosenberg | Bnei Brak Tours",
+    "about": "Who am I?",
+    "journey": "What will we see?",
+    "menu": "What will we eat?",
+    "dates": "When is the tour?",
+    "terms": "Terms",
+    "register": "Register for Tour",
+    "toWebsite": "To Main Site",
+    "logout": "Logout"
+  },
+  "hero": {
+    "badge": "An Experience Like No Other",
+    "title": "Culinary Tour in Bnei Brak",
+    "subtitle": "Flavors, Stories, and Tradition at the Heart of the City",
+    "cta": "Register for Tour",
+    "termsReminder": "Before registering, please read the terms and conditions"
+  },
+  "booking": {
+    "title": "Register for Tour",
+    "form": {
+      "fullName": "Full Name",
+      "phone": "Phone / WhatsApp",
+      "email": "Email",
+      "howDidYouHear": "How did you hear about us?",
+      "dateOfBirth": "Date of Birth",
+      "tourDate": "Tour Date",
+      "participants": "Number of Participants",
+      "paymentMethod": "Payment Method",
+      "notes": "Notes / Special Requests",
+      "agreeToTerms": "I agree to the terms and conditions (including cancellation policy)",
+      "required": "Required field",
+      "submit": "Submit Booking",
+      "submitting": "Submitting booking...",
+      "backToHome": "Cancel and return to homepage"
+    },
+    "paymentMethods": {
+      "bit": "Bit",
+      "credit": "Credit Card",
+      "bankTransfer": "Bank Transfer"
+    },
+    "howOptions": {
+      "friend": "Friend's recommendation",
+      "google": "Google search",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "other": "Other"
+    },
+    "validation": {
+      "nameRequired": "Full name is required",
+      "phoneRequired": "Phone / WhatsApp is required",
+      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Invalid email address",
+      "howRequired": "Please select how you heard about us",
+      "dobRequired": "Date of birth is required",
+      "ageRestriction": "Registration is only for ages 18+",
+      "dateRequired": "Please select a tour date",
+      "thursdayOnly": "Only Thursdays can be selected",
+      "dateUnavailable": "Selected date is not available (blocked or sold out)",
+      "participantsRange": "Number of participants must be between 1 and 20",
+      "paymentRequired": "Please select a payment method",
+      "termsRequired": "You must agree to the terms and conditions"
+    },
+    "price": {
+      "total": "Total Price",
+      "perPerson": "per person"
+    },
+    "contact": {
+      "title": "For questions and inquiries:",
+      "name": "Chilik Rosenberg",
+      "whatsapp": "Send WhatsApp Message"
+    }
+  },
+  "confirmation": {
+    "title": "Booking Submitted Successfully!",
+    "thankYou": "Thank you so much",
+    "bookingId": "Booking Number",
+    "saveId": "Save this number for inquiries",
+    "details": "Booking Details",
+    "tourDate": "Tour Date",
+    "participants": "Number of Participants",
+    "participant": "participant",
+    "participantsPlural": "participants",
+    "email": "Email",
+    "phone": "Phone",
+    "total": "Total Amount",
+    "notes": "Notes",
+    "nextSteps": "What's next?",
+    "steps": {
+      "emailSent": "Booking confirmation sent to your email",
+      "contactSoon": "A representative will contact you soon for final confirmation and payment",
+      "bookingNumber": "Your booking number"
+    },
+    "contactTitle": "Questions? Contact us",
+    "backHome": "Back to Homepage"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "subtitle": "Please read carefully before making a booking",
+    "general": "General",
+    "payment": "Payment",
+    "cancellation": "Cancellation Policy",
+    "age": "Suitable for All Ages",
+    "liability": "Liability",
+    "privacy": "Privacy and Data Security",
+    "contact": "Contact",
+    "backToBooking": "Back to Booking Form",
+    "scrollTop": "Back to Top",
+    "lastUpdated": "Last Updated",
+    "selectPayment": "Select payment method:",
+    "clickForDetails": "Click for payment details"
+  },
+  "admin": {
+    "title": "Tour Management",
+    "name": "Chilik Rosenberg",
+    "tabs": {
+      "tours": "Manage Dates",
+      "bookings": "Bookings"
+    },
+    "password": "Password",
+    "login": "Login",
+    "loginTitle": "Admin Login"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions"
+  },
+  "footer": {
+    "contact": "Contact",
+    "quickLinks": "Quick Links",
+    "about": "About the Tours",
+    "aboutText": "Culinary tours in Bnei Brak with Chilik Rosenberg. An authentic experience of flavors, aromas, and stories from the heart of Haredi Bnei Brak.",
+    "register": "Register for Tour",
+    "terms": "Terms and Conditions",
+    "faqs": "FAQs",
+    "aboutLink": "About",
+    "copyright": "All Rights Reserved - Chilik Rosenberg | Bnei Brak Tours"
+  }
+}
