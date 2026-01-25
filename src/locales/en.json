@@ -281,5 +281,130 @@
       "question": "Where can I buy ready-made food for Shabbat?",
       "answer": "During the tour we'll visit the best places to buy ready-made food and you'll get my warm recommendations."
     }
+  },
+  "helpHub": {
+    "questions": "Questions?",
+    "register": "Register"
+  },
+  "confirmation": {
+    "title": "Booking Sent Successfully!",
+    "thankYou": "Thank you very much",
+    "bookingReference": "Booking Reference",
+    "saveForReference": "Save this number for inquiries",
+    "bookingDetails": "Booking Details",
+    "tourDate": "Tour Date",
+    "participants": "Participants",
+    "participant": "Participant",
+    "participantsPlural": "Participants",
+    "email": "Email",
+    "phone": "Phone",
+    "totalPayment": "Total Payment",
+    "perPerson": "per person",
+    "notes": "Notes",
+    "nextSteps": {
+      "title": "What's Next?",
+      "emailSent": "Booking confirmation has been sent to your email",
+      "contactSoon": "A representative will contact you soon for final confirmation and payment",
+      "bookingNumber": "Your booking number"
+    },
+    "contact": {
+      "title": "Questions? Contact Us",
+      "whatsapp": "Send WhatsApp Message"
+    },
+    "backToHome": "Back to Homepage"
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "subtitle": "Please read carefully before booking",
+    "section1": {
+      "title": "General",
+      "tours": "Tours take place on Thursday evenings",
+      "duration": "Tour duration: 2.5 to 3 hours",
+      "includes": "The price includes all food, drinks, alcohol, and treats"
+    },
+    "section2": {
+      "title": "Payment",
+      "prepayment": "Payment is made in advance",
+      "price": "Price",
+      "priceAmount": "250 NIS",
+      "perPerson": "per person",
+      "selectMethod": "Select payment method:",
+      "bit": "Bit",
+      "credit": "Credit Card",
+      "bank": "Bank Transfer",
+      "clickForDetails": "Click for payment details"
+    },
+    "section3": {
+      "title": "Cancellation Policy",
+      "option1": {
+        "title": "Cancellation up to 7 days before the tour",
+        "desc": "No charge - full refund"
+      },
+      "option2": {
+        "title": "Cancellation between 7 days and 48 hours before the tour",
+        "desc": "50% refund of the payment amount"
+      },
+      "option3": {
+        "title": "Cancellation less than 48 hours before the tour",
+        "desc": "No refund"
+      },
+      "postpone": {
+        "title": "Postponement Option",
+        "desc": "In case of cancellation, you can postpone the tour to another date at no extra cost (subject to availability)"
+      }
+    },
+    "section4": {
+      "title": "Suitable for All Ages",
+      "allAges": "The tour is suitable for all ages!",
+      "babies": "Mothers are welcome to bring babies",
+      "families": "Families with children - welcome!"
+    },
+    "section5": {
+      "title": "Liability",
+      "responsibility": "Participants are responsible for themselves during the tour",
+      "valuables": "The tour organizer is not responsible for valuables or personal damages"
+    },
+    "section6": {
+      "title": "Privacy & Data Security",
+      "secure": "Personal information is stored securely and will not be transferred to third parties",
+      "purpose": "Information is used solely for managing the booking",
+      "storage": "Data is stored on secure Firebase servers"
+    },
+    "section7": {
+      "title": "Contact",
+      "questions": "For questions about terms of use:",
+      "name": "Chilik Rosenberg",
+      "whatsapp": "Send WhatsApp Message"
+    },
+    "lastUpdated": "Last updated: January 2026",
+    "backToBooking": "Back to Booking Form",
+    "backToTop": "Back to Top",
+    "paymentModal": {
+      "bit": {
+        "title": "Bit Payment",
+        "line1": "Transfer 250 NIS (per participant) to phone:",
+        "phone": "050-580-4367",
+        "name": "Name: Chilik Rosenberg",
+        "line4": "After payment, send a screenshot of the confirmation via WhatsApp"
+      },
+      "credit": {
+        "title": "Credit Card Payment",
+        "line1": "For credit card payment, please contact:",
+        "phone": "Phone: 050-580-4367",
+        "whatsapp": "WhatsApp: 050-580-4367",
+        "line4": "We'll send you a secure payment link"
+      },
+      "bank": {
+        "title": "Bank Transfer",
+        "details": "Bank account details:",
+        "bankName": "Bank: [Bank Name]",
+        "accountNumber": "Account Number: [Account Number]",
+        "branchNumber": "Branch Number: [Branch Number]",
+        "beneficiary": "Beneficiary: Chilik Rosenberg",
+        "confirmation": "After transfer, send confirmation via WhatsApp: 050-580-4367"
+      },
+      "openWhatsapp": "Open WhatsApp Chat",
+      "close": "Close"
+    }
   }
 }

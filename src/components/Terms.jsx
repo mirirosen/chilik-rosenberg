@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { ArrowUp, Phone, MessageCircle, XCircle } from '../utils/icons';
+import { useTranslation } from 'react-i18next';
 
 const Terms = () => {
+  const { t } = useTranslation();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
 
@@ -27,38 +29,38 @@ const Terms = () => {
     switch (selectedPaymentMethod) {
       case 'bit':
         return {
-          title: 'תשלום ב-Bit',
+          title: t('terms.paymentModal.bit.title'),
           icon: '💳',
           instructions: [
-            'העבר 250 ₪ (לכל משתתף) לטלפון:',
-            '050-580-4367',
-            'שם: חיליק רוזנברג',
-            'לאחר התשלום, שלח צילום מסך של האישור בוואטסאפ'
+            t('terms.paymentModal.bit.line1'),
+            t('terms.paymentModal.bit.phone'),
+            t('terms.paymentModal.bit.name'),
+            t('terms.paymentModal.bit.line4')
           ]
         };
       case 'credit':
         return {
-          title: 'תשלום בכרטיס אשראי',
+          title: t('terms.paymentModal.credit.title'),
           icon: '💳',
           instructions: [
-            'לתשלום בכרטיס אשראי, אנא צור קשר:',
-            'טלפון: 050-580-4367',
-            'WhatsApp: 050-580-4367',
-            'נשלח לך קישור תשלום מאובטח'
+            t('terms.paymentModal.credit.line1'),
+            t('terms.paymentModal.credit.phone'),
+            t('terms.paymentModal.credit.whatsapp'),
+            t('terms.paymentModal.credit.line4')
           ]
         };
       case 'bank':
         return {
-          title: 'העברה בנקאית',
+          title: t('terms.paymentModal.bank.title'),
           icon: '🏦',
           instructions: [
-            'פרטי חשבון הבנק:',
-            'בנק: [שם הבנק]',
-            'מספר חשבון: [מספר חשבון]',
-            'מספר סניף: [מספר סניף]',
-            'שם המוטב: חיליק רוזנברג',
+            t('terms.paymentModal.bank.details'),
+            t('terms.paymentModal.bank.bankName'),
+            t('terms.paymentModal.bank.accountNumber'),
+            t('terms.paymentModal.bank.branchNumber'),
+            t('terms.paymentModal.bank.beneficiary'),
             '',
-            'לאחר ההעברה, שלח אישור בוואטסאפ: 050-580-4367'
+            t('terms.paymentModal.bank.confirmation')
           ]
         };
       default:
@@ -72,7 +74,7 @@ const Terms = () => {
       <header className="bg-brand-dark-lighter border-b border-white/10 px-6 py-6 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-4xl mx-auto">
           <a href="/" className="text-2xl md:text-3xl font-black text-brand-gold font-serif tracking-tighter">
-            חיליק רוזנברג | סיורים בבני ברק
+            {t('header.title')}
           </a>
         </div>
       </header>
@@ -82,10 +84,10 @@ const Terms = () => {
         {/* Page Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-serif text-brand-gold font-bold mb-4">
-            תנאי שימוש ותקנון
+            {t('terms.title')}
           </h1>
           <p className="text-xl text-gray-400">
-            נא לקרוא בעיון לפני ביצוע הזמנה
+            {t('terms.subtitle')}
           </p>
         </div>
 
@@ -94,19 +96,19 @@ const Terms = () => {
           {/* Section 1: כללי */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              1. כללי
+              1. {t('terms.section1.title')}
             </h2>
             <ul className="space-y-3 text-gray-300 text-right">
               <li className="flex items-start gap-3 justify-end">
-                <span>הסיורים מתקיימים בימי חמישי בערב</span>
+                <span>{t('terms.section1.tours')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>משך הסיור: בין 2.5 ל-3 שעות</span>
+                <span>{t('terms.section1.duration')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>המחיר כולל את כל האוכל, משקאות, אלכוהול ופינוקים</span>
+                <span>{t('terms.section1.includes')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
             </ul>
@@ -115,42 +117,42 @@ const Terms = () => {
           {/* Section 2: תשלום */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              2. תשלום
+              2. {t('terms.section2.title')}
             </h2>
             <div className="space-y-4 text-right mb-6">
               <p className="text-gray-300 text-right">
-                • התשלום מבוצע מראש
+                • {t('terms.section2.prepayment')}
               </p>
               <p className="text-gray-300 text-right">
-                • המחיר: <span className="text-brand-gold font-bold text-xl">250 ש"ח</span> לאדם
+                • {t('terms.section2.price')}: <span className="text-brand-gold font-bold text-xl">{t('terms.section2.priceAmount')}</span> {t('terms.section2.perPerson')}
               </p>
             </div>
             
             <div className="space-y-3">
-              <p className="text-sm font-bold text-white mb-3 text-right">בחר אמצעי תשלום:</p>
+              <p className="text-sm font-bold text-white mb-3 text-right">{t('terms.section2.selectMethod')}</p>
               
               <button
                 onClick={() => handlePaymentClick('bit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-lg font-bold">Bit 💳</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
+                <span className="text-lg font-bold">{t('terms.section2.bit')} 💳</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">{t('terms.section2.clickForDetails')} →</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('credit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-lg font-bold">כרטיס אשראי 💳</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
+                <span className="text-lg font-bold">{t('terms.section2.credit')} 💳</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">{t('terms.section2.clickForDetails')} →</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('bank')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-lg font-bold">העברה בנקאית 🏦</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
+                <span className="text-lg font-bold">{t('terms.section2.bank')} 🏦</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">{t('terms.section2.clickForDetails')} →</span>
               </button>
             </div>
           </section>
@@ -158,42 +160,42 @@ const Terms = () => {
           {/* Section 3: מדיניות ביטולים - IMPORTANT */}
           <section className="bg-red-500/5 border-2 border-red-500/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              3. מדיניות ביטולים ⚠️
+              3. {t('terms.section3.title')} ⚠️
             </h2>
             <div className="space-y-4 text-right">
               <div className="bg-brand-dark border border-green-500/30 rounded-2xl p-6">
                 <p className="text-green-400 font-bold text-lg mb-2">
-                  ✓ ביטול עד 7 ימים לפני מועד הסיור
+                  ✓ {t('terms.section3.option1.title')}
                 </p>
                 <p className="text-gray-300">
-                  ללא עלות - החזר מלא של התשלום
+                  {t('terms.section3.option1.desc')}
                 </p>
               </div>
 
               <div className="bg-brand-dark border border-yellow-500/30 rounded-2xl p-6">
                 <p className="text-yellow-400 font-bold text-lg mb-2">
-                  ⚠️ ביטול בין 7 ימים לבין 48 שעות לפני הסיור
+                  ⚠️ {t('terms.section3.option2.title')}
                 </p>
                 <p className="text-gray-300">
-                  החזר של 50% מסכום התשלום
+                  {t('terms.section3.option2.desc')}
                 </p>
               </div>
 
               <div className="bg-brand-dark border border-red-500/30 rounded-2xl p-6">
                 <p className="text-red-400 font-bold text-lg mb-2">
-                  ✗ ביטול פחות מ-48 שעות לפני הסיור
+                  ✗ {t('terms.section3.option3.title')}
                 </p>
                 <p className="text-gray-300">
-                  ללא החזר כספי
+                  {t('terms.section3.option3.desc')}
                 </p>
               </div>
 
               <div className="bg-brand-dark border border-blue-500/30 rounded-2xl p-6 mt-4">
                 <p className="text-blue-400 font-bold text-lg mb-2">
-                  🔄 אפשרות דחייה
+                  🔄 {t('terms.section3.postpone.title')}
                 </p>
                 <p className="text-gray-300">
-                  בכל מקרה של ביטול, ניתן לדחות את הסיור למועד אחר ללא עלות נוספת (בכפוף לזמינות)
+                  {t('terms.section3.postpone.desc')}
                 </p>
               </div>
             </div>
@@ -202,20 +204,20 @@ const Terms = () => {
           {/* Section 4: מתאים לכל הגילאים */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              4. מתאים לכל הגילאים
+              4. {t('terms.section4.title')}
             </h2>
             <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 text-right">
               <div className="space-y-3">
                 <p className="text-green-400 font-bold text-lg">
-                  👨‍👩‍👧‍👦 הסיור מתאים לכל גיל!
+                  👨‍👩‍👧‍👦 {t('terms.section4.allAges')}
                 </p>
                 <ul className="space-y-2 text-gray-300">
                   <li className="flex items-start gap-3 justify-end">
-                    <span>אמהות מוזמנות להגיע גם עם תינוקות</span>
+                    <span>{t('terms.section4.babies')}</span>
                     <div className="text-green-400 mt-1">👶</div>
                   </li>
                   <li className="flex items-start gap-3 justify-end">
-                    <span>משפחות עם ילדים - מוזמנים בברכה!</span>
+                    <span>{t('terms.section4.families')}</span>
                     <div className="text-green-400 mt-1">👨‍👩‍👧‍👦</div>
                   </li>
                 </ul>
@@ -226,15 +228,15 @@ const Terms = () => {
           {/* Section 5: אחריות */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              5. אחריות
+              5. {t('terms.section5.title')}
             </h2>
             <ul className="space-y-3 text-gray-300 text-right">
               <li className="flex items-start gap-3 justify-end">
-                <span>המשתתפים אחראים על עצמם במהלך הסיור</span>
+                <span>{t('terms.section5.responsibility')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>מארגן הסיור אינו אחראי לחפצי ערך או לנזקים אישיים</span>
+                <span>{t('terms.section5.valuables')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
             </ul>
@@ -243,19 +245,19 @@ const Terms = () => {
           {/* Section 6: פרטיות */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right">
-              6. פרטיות ואבטחת מידע
+              6. {t('terms.section6.title')}
             </h2>
             <ul className="space-y-3 text-gray-300 text-right">
               <li className="flex items-start gap-3 justify-end">
-                <span>הפרטים האישיים נשמרים במאובטח ולא יועברו לצדדים שלישיים</span>
+                <span>{t('terms.section6.secure')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>השימוש בפרטים הוא לצורך ניהול ההזמנה בלבד</span>
+                <span>{t('terms.section6.purpose')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>המידע מאוחסן בשרתי Firebase המאובטחים</span>
+                <span>{t('terms.section6.storage')}</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
             </ul>
@@ -264,14 +266,14 @@ const Terms = () => {
           {/* Section 7: יצירת קשר */}
           <section className="bg-brand-gold/10 border-2 border-brand-gold/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-center">
-              יצירת קשר
+              {t('terms.section7.title')}
             </h2>
             <div className="text-center space-y-4">
               <p className="text-xl text-white font-bold">
-                לשאלות בנוגע לתנאי השימוש:
+                {t('terms.section7.questions')}
               </p>
               <div>
-                <p className="text-lg text-white font-bold mb-2">חיליק רוזנברג</p>
+                <p className="text-lg text-white font-bold mb-2">{t('terms.section7.name')}</p>
               </div>
               <div className="flex items-center justify-center gap-3">
                 <Phone size={20} className="text-brand-gold" />
@@ -290,7 +292,7 @@ const Terms = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-full text-sm font-bold hover:bg-green-700 transition-all"
                 >
-                  <span>שלח הודעת WhatsApp</span>
+                  <span>{t('terms.section7.whatsapp')}</span>
                   <MessageCircle size={18} />
                 </a>
               </div>
@@ -299,7 +301,7 @@ const Terms = () => {
 
           {/* Last Updated */}
           <div className="text-center text-sm text-gray-500 py-6">
-            <p>עדכון אחרון: ינואר 2026</p>
+            <p>{t('terms.lastUpdated')}</p>
           </div>
         </div>
 
@@ -309,14 +311,14 @@ const Terms = () => {
             onClick={goBack}
             className="bg-brand-gold text-brand-dark px-12 py-4 rounded-full font-black text-lg hover:scale-105 transition-all"
           >
-            חזרה לטופס הרשמה
+            {t('terms.backToBooking')}
           </button>
           
           <button
             onClick={scrollToTop}
             className="bg-transparent border-2 border-white/20 text-white px-12 py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all flex items-center justify-center gap-2"
           >
-            חזרה למעלה
+            {t('terms.backToTop')}
             <ArrowUp size={20} />
           </button>
         </div>
@@ -326,7 +328,7 @@ const Terms = () => {
       <footer className="border-t border-white/5 py-12 text-center">
         <div className="max-w-4xl mx-auto px-6">
           <p className="text-xs text-gray-500 tracking-widest">
-            © 2026 כל הזכויות שמורות - חיליק רוזנברג | סיורים בבני ברק
+            © 2026 {t('header.title')}
           </p>
         </div>
       </footer>
@@ -382,7 +384,7 @@ const Terms = () => {
                     rel="noopener noreferrer"
                     className="bg-green-600 text-white px-6 py-4 rounded-full font-bold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-2"
                   >
-                    <span>פתח שיחה בוואטסאפ</span>
+                    <span>{t('terms.paymentModal.openWhatsapp')}</span>
                     <MessageCircle size={20} />
                   </a>
                   
@@ -390,7 +392,7 @@ const Terms = () => {
                     onClick={closePaymentModal}
                     className="border-2 border-white/20 text-white px-6 py-4 rounded-full font-bold hover:border-brand-gold hover:text-brand-gold transition-all"
                   >
-                    סגור
+                    {t('terms.paymentModal.close')}
                   </button>
                 </div>
               </>

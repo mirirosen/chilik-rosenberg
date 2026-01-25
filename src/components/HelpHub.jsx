@@ -1,7 +1,10 @@
 import { MessageCircle, HelpCircle } from '../utils/icons';
 import { whatsappNumber } from '../data/content';
+import { useTranslation } from 'react-i18next';
 
 const HelpHub = () => {
+  const { t } = useTranslation();
+
   const openFaqSection = () => {
     const el = document.getElementById('faq');
     if (el) {
@@ -16,7 +19,7 @@ const HelpHub = () => {
         className="hub-btn hub-btn-faq text-center"
       >
         <HelpCircle size={22} />
-        <span>שאלות?</span>
+        <span>{t('helpHub.questions')}</span>
       </button>
       
       <a 
@@ -26,7 +29,7 @@ const HelpHub = () => {
         className="hub-btn hub-btn-whatsapp pulse text-center"
       >
         <MessageCircle size={24} />
-        <span>להרשמה</span>
+        <span>{t('helpHub.register')}</span>
       </a>
     </div>
   );
