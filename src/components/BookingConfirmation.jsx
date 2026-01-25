@@ -38,51 +38,52 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
             </h2>
 
             {/* Tour Date */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Calendar size={20} />
+                <span className="text-sm">תאריך הסיור</span>
+              </div>
               <div className="text-xl font-bold text-white">
                 {formatDateHebrew(bookingData.tourDate)}
-              </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <span className="text-sm">תאריך הסיור</span>
-                <Calendar size={20} />
               </div>
             </div>
 
             {/* Participants */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Users size={20} />
+                <span className="text-sm">מספר משתתפים</span>
+              </div>
               <div className="text-xl font-bold text-white">
                 {bookingData.participants} {bookingData.participants === 1 ? 'משתתף' : 'משתתפים'}
-              </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <span className="text-sm">מספר משתתפים</span>
-                <Users size={20} />
               </div>
             </div>
 
             {/* Email */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Mail size={20} />
+                <span className="text-sm">אימייל</span>
+              </div>
               <div className="text-lg text-white" dir="ltr">
                 {bookingData.email}
-              </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <span className="text-sm">אימייל</span>
-                <Mail size={20} />
               </div>
             </div>
 
             {/* Phone */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Phone size={20} />
+                <span className="text-sm">טלפון</span>
+              </div>
               <div className="text-lg text-white" dir="ltr">
                 {bookingData.phone}
-              </div>
-              <div className="flex items-center gap-2 text-gray-400">
-                <span className="text-sm">טלפון</span>
-                <Phone size={20} />
               </div>
             </div>
 
             {/* Total Price */}
-            <div className="flex items-center justify-between bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-6 mt-6">
+            <div className="flex flex-row-reverse items-center justify-between bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-6 mt-6">
+              <div className="text-sm text-gray-400">סה"כ לתשלום</div>
               <div className="text-right">
                 <div className="text-3xl font-black text-brand-gold">
                   ₪{bookingData.totalPrice}
@@ -91,7 +92,6 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
                   {bookingData.participants} × ₪{bookingData.pricePerPerson}
                 </div>
               </div>
-              <div className="text-sm text-gray-400">סה"כ לתשלום</div>
             </div>
 
             {/* Notes */}

@@ -188,14 +188,14 @@ const AdminBookings = () => {
                   {/* Left Side - Main Info */}
                   <div className="flex-1 space-y-4">
                     {/* Header */}
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-row-reverse items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 font-mono">
+                          {booking.bookingId}
+                        </span>
                         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${statusBadge.bg} ${statusBadge.text} border ${statusBadge.border}`}>
                           {statusBadge.icon}
                           {statusBadge.label}
-                        </span>
-                        <span className="text-xs text-gray-500 font-mono">
-                          {booking.bookingId}
                         </span>
                       </div>
                       

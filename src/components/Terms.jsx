@@ -131,26 +131,26 @@ const Terms = () => {
               
               <button
                 onClick={() => handlePaymentClick('bit')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">Bit 💳</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('credit')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">כרטיס אשראי 💳</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
               </button>
               
               <button
                 onClick={() => handlePaymentClick('bank')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
               >
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
                 <span className="text-lg font-bold">העברה בנקאית 🏦</span>
+                <span className="text-sm text-gray-400 group-hover:text-brand-gold">לחץ לפרטי תשלום →</span>
               </button>
             </div>
           </section>
@@ -274,6 +274,7 @@ const Terms = () => {
                 <p className="text-lg text-white font-bold mb-2">חיליק רוזנברג</p>
               </div>
               <div className="flex items-center justify-center gap-3">
+                <Phone size={20} className="text-brand-gold" />
                 <a 
                   href="tel:0505804367" 
                   className="text-brand-gold hover:text-brand-gold/80 font-bold text-xl transition-colors"
@@ -281,7 +282,6 @@ const Terms = () => {
                 >
                   050-580-4367
                 </a>
-                <Phone size={20} className="text-brand-gold" />
               </div>
               <div>
                 <a 
@@ -290,8 +290,8 @@ const Terms = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-full text-sm font-bold hover:bg-green-700 transition-all"
                 >
-                  <MessageCircle size={18} />
                   <span>שלח הודעת WhatsApp</span>
+                  <MessageCircle size={18} />
                 </a>
               </div>
             </div>
@@ -316,8 +316,8 @@ const Terms = () => {
             onClick={scrollToTop}
             className="bg-transparent border-2 border-white/20 text-white px-12 py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all flex items-center justify-center gap-2"
           >
-            <ArrowUp size={20} />
             חזרה למעלה
+            <ArrowUp size={20} />
           </button>
         </div>
       </main>
@@ -382,8 +382,8 @@ const Terms = () => {
                     rel="noopener noreferrer"
                     className="bg-green-600 text-white px-6 py-4 rounded-full font-bold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-2"
                   >
-                    <MessageCircle size={20} />
                     <span>פתח שיחה בוואטסאפ</span>
+                    <MessageCircle size={20} />
                   </a>
                   
                   <button

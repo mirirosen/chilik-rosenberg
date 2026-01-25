@@ -193,30 +193,30 @@ const Admin = () => {
     <div className="min-h-screen bg-brand-dark text-white">
       {/* Header */}
       <header className="bg-brand-dark-lighter border-b border-white/10 px-6 py-6 sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+        <div className="max-w-6xl mx-auto flex flex-row-reverse justify-between items-center">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-serif text-brand-gold font-bold">
-              ניהול סיורים
-            </h1>
             <span className="hidden md:inline-block text-sm text-gray-400 bg-brand-dark px-4 py-2 rounded-full">
               חיליק רוזנברג
             </span>
+            <h1 className="text-2xl md:text-3xl font-serif text-brand-gold font-bold">
+              ניהול סיורים
+            </h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-row-reverse items-center gap-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2 rounded-full text-sm font-bold hover:bg-red-500/20 transition-all"
+            >
+              <LogOut size={16} />
+              <span className="hidden md:inline">יציאה</span>
+            </button>
             <a 
               href="/" 
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
               לאתר הראשי
             </a>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2 rounded-full text-sm font-bold hover:bg-red-500/20 transition-all"
-            >
-              <span className="hidden md:inline">יציאה</span>
-              <LogOut size={16} />
-            </button>
           </div>
         </div>
       </header>
@@ -312,32 +312,9 @@ const Admin = () => {
                 ) : (
                   // Thursday date - show controls
                   <div className="bg-brand-dark border border-white/10 rounded-2xl p-6">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                      {/* Selected Date Info */}
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-white mb-1">
-                          {formatDateHebrew(selectedDate)}
-                        </div>
-                        <div className="text-xs text-gray-400">{selectedDate}</div>
-                      </div>
-
-                      {/* Status Badge */}
-                      <div className="text-center">
-                        <span
-                          className={`inline-block px-6 py-2 rounded-full text-sm font-bold ${
-                            getStatus(selectedDate).status === 'available'
-                              ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                              : getStatus(selectedDate).status === 'soldOut'
-                              ? 'bg-red-500/20 text-red-400 border border-red-500/50'
-                              : 'bg-gray-500/20 text-gray-400 border border-gray-500/50'
-                          }`}
-                        >
-                          {getStatus(selectedDate).label}
-                        </span>
-                      </div>
-
+                    <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-4">
                       {/* Action Buttons */}
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 order-last md:order-none">
                         <button
                           onClick={() => toggleBlocked(selectedDate)}
                           disabled={saving}
@@ -363,6 +340,29 @@ const Admin = () => {
                           <span>{getStatus(selectedDate).status === 'soldOut' ? 'פנה מקום' : 'אזל'}</span>
                           {getStatus(selectedDate).status === 'soldOut' ? <CheckCircle size={16} /> : <XCircle size={16} />}
                         </button>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="text-center">
+                        <span
+                          className={`inline-block px-6 py-2 rounded-full text-sm font-bold ${
+                            getStatus(selectedDate).status === 'available'
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                              : getStatus(selectedDate).status === 'soldOut'
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/50'
+                              : 'bg-gray-500/20 text-gray-400 border border-gray-500/50'
+                          }`}
+                        >
+                          {getStatus(selectedDate).label}
+                        </span>
+                      </div>
+
+                      {/* Selected Date Info */}
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-white mb-1">
+                          {formatDateHebrew(selectedDate)}
+                        </div>
+                        <div className="text-xs text-gray-400">{selectedDate}</div>
                       </div>
                     </div>
                   </div>
@@ -442,38 +442,9 @@ const Admin = () => {
                   key={i}
                   className="bg-brand-dark border border-white/10 rounded-2xl p-6 hover:border-brand-gold/30 transition-all"
                 >
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                    {/* Date Info */}
-                    <div className="flex items-center gap-4 text-right md:w-1/3">
-                      <div className="text-center">
-                        <div className="text-3xl font-black text-white">{item.day}</div>
-                        <div className="text-xs text-gray-400">{item.month}</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-white">
-                          {formatDateHebrew(item.dateStr)}
-                        </div>
-                        <div className="text-xs text-gray-400">{item.dateStr}</div>
-                      </div>
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="md:w-1/3 text-center">
-                      <span
-                        className={`inline-block px-6 py-2 rounded-full text-sm font-bold ${
-                          status.status === 'available'
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/50'
-                            : status.status === 'soldOut'
-                            ? 'bg-red-500/20 text-red-400 border border-red-500/50'
-                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/50'
-                        }`}
-                      >
-                        {status.label}
-                      </span>
-                    </div>
-
+                  <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-4">
                     {/* Action Buttons */}
-                    <div className="flex gap-3 md:w-1/3 justify-end">
+                    <div className="flex gap-3 md:w-1/3 justify-end order-last md:order-none">
                         <button
                           onClick={() => toggleBlocked(item.dateStr)}
                           disabled={saving}
@@ -499,6 +470,35 @@ const Admin = () => {
                         <span>{status.status === 'soldOut' ? 'פנה מקום' : 'אזל'}</span>
                         {status.status === 'soldOut' ? <CheckCircle size={16} /> : <XCircle size={16} />}
                       </button>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="md:w-1/3 text-center">
+                      <span
+                        className={`inline-block px-6 py-2 rounded-full text-sm font-bold ${
+                          status.status === 'available'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                            : status.status === 'soldOut'
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/50'
+                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/50'
+                        }`}
+                      >
+                        {status.label}
+                      </span>
+                    </div>
+
+                    {/* Date Info */}
+                    <div className="flex items-center gap-4 text-right md:w-1/3">
+                      <div className="text-center">
+                        <div className="text-3xl font-black text-white">{item.day}</div>
+                        <div className="text-xs text-gray-400">{item.month}</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-white">
+                          {formatDateHebrew(item.dateStr)}
+                        </div>
+                        <div className="text-xs text-gray-400">{item.dateStr}</div>
+                      </div>
                     </div>
                   </div>
                 </div>

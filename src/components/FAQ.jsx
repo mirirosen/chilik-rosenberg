@@ -23,14 +23,14 @@ const FAQ = () => {
           >
             <button 
               onClick={() => handleFAQToggle(i)} 
-              className="w-full p-8 text-right flex items-center justify-between hover:bg-white/5"
+              className="w-full p-8 text-right flex flex-row-reverse items-center justify-between hover:bg-white/5"
             >
-              <h4 className="text-xl font-bold text-brand-gold font-serif text-right">
-                {faq.q}
-              </h4>
               <ChevronDown 
                 className={`text-gray-400 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}
               />
+              <h4 className="text-xl font-bold text-brand-gold font-serif text-right">
+                {faq.q}
+              </h4>
             </button>
             
             {openFaq === i && (
