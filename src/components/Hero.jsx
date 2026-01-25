@@ -112,6 +112,20 @@ const Hero = () => {
           >
             הרשמה לסיור
           </button>
+          
+          {/* Terms Link Below Button */}
+          <p className="text-center mt-6 text-sm text-gray-400">
+            לפני ההרשמה, מומלץ לקרוא את{' '}
+            <button 
+              onClick={() => {
+                window.history.pushState({}, '', '/terms');
+                window.location.href = '/terms';
+              }}
+              className="text-brand-gold hover:underline transition-all"
+            >
+              תנאי השימוש והתקנון
+            </button>
+          </p>
         </div>
       </div>
       

@@ -102,7 +102,7 @@ const Terms = () => {
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">
-                <span>משך הסיור: כ-3-4 שעות</span>
+                <span>משך הסיור: בין 2.5 ל-3 שעות</span>
                 <div className="text-brand-gold mt-1">•</div>
               </li>
               <li className="flex items-start gap-3 justify-end">

@@ -36,6 +36,15 @@ const Header = () => {
           </button>
           <button 
             onClick={() => {
+              window.history.pushState({}, '', '/terms');
+              window.location.href = '/terms';
+            }} 
+            className="nav-link text-gray-400 hover:text-white"
+          >
+            תקנון
+          </button>
+          <button 
+            onClick={() => {
               window.history.pushState({}, '', '/booking');
               window.location.href = '/booking';
             }} 
@@ -85,6 +94,16 @@ const Header = () => {
           className="text-3xl text-white font-serif"
         >
           מה אוכלים?
+        </button>
+        <button 
+          onClick={() => {
+            setMobileMenuOpen(false);
+            window.history.pushState({}, '', '/terms');
+            window.location.href = '/terms';
+          }} 
+          className="text-2xl text-gray-300 font-serif"
+        >
+          תקנון ותנאי שימוש
         </button>
         <button 
           onClick={() => {
