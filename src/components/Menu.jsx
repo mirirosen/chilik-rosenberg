@@ -1,17 +1,26 @@
+import { useTranslation } from 'react-i18next';
 import { foods } from '../data/content';
 import { getIcon } from '../utils/iconMapper';
 
 const Menu = () => {
+  const { t } = useTranslation();
+
+  // Food keys mapping
+  const foodKeys = ['cholent', 'fish', 'kugel', 'liver', 'challenge', 'blintzes'];
 
   return (
     <section id="menu" className="py-32 bg-brand-dark-section text-center border-y border-white/5 overflow-hidden">
       <h2 className="text-5xl font-serif text-brand-gold mb-4 italic font-bold text-center">
-        מה נאכל בסיור שלי?
+        {t('menu.title')}
       </h2>
+      <p className="text-xl text-gray-300 mb-12 text-center font-light">
+        {t('menu.subtitle')}
+      </p>
       
       <div className="flex flex-row flex-nowrap overflow-x-auto gap-8 pb-12 px-8 custom-scroll scroll-smooth w-full text-center">
         {foods.map((food, i) => {
           const IconComponent = getIcon(food.icon);
+          const foodKey = foodKeys[i];
           
           return (
             <article 
@@ -22,10 +31,10 @@ const Menu = () => {
                 <IconComponent size={48} />
               </div>
               <h4 className="text-3xl font-bold mb-4 font-serif text-brand-gold text-center">
-                {food.title}
+                {t(`menu.items.${foodKey}.title`)}
               </h4>
               <p className="text-gray-400 leading-relaxed font-light text-center">
-                {food.desc}
+                {t(`menu.items.${foodKey}.desc`)}
               </p>
             </article>
           );

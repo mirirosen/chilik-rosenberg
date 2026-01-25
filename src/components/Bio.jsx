@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import profileImage from '../assets/hilik-profile.jpeg';
 
 const Bio = () => {
+  const { t } = useTranslation();
+
   return (
     <section 
       id="about" 
@@ -9,17 +12,17 @@ const Bio = () => {
       <div className="w-full md:w-1/2 relative text-right">
         <img 
           src={profileImage} 
-          alt="חיליק" 
+          alt={t('bio.title')}
           className="rounded-5xl w-full shadow-2xl border-2 border-brand-gold/20" 
         />
       </div>
       
       <article className="w-full md:w-1/2 text-right">
         <h2 className="text-5xl font-serif text-brand-gold mb-4 italic font-bold text-right">
-          נעים להכיר, אני חיליק.
+          {t('bio.title')}
         </h2>
         <p className="text-xl text-gray-200 mb-6 leading-relaxed font-serif text-right">
-          נולדתי ואני חי את כל חיי בעיר האהובה עליי, בני ברק. למשפחה ליטאית שורשית, למדתי בישיבת פונוביז'. אני אוהב את החרדיות ונהנה לארח אתכם בה – כמובן עם כל האוכל היהודי משמח הלבבות.
+          {t('bio.text')}
         </p>
       </article>
     </section>

@@ -145,5 +145,141 @@
     "faqs": "FAQs",
     "aboutLink": "About",
     "copyright": "All Rights Reserved - Chilik Rosenberg | Bnei Brak Tours"
+  },
+  "bio": {
+    "title": "Nice to meet you, I'm Chilik.",
+    "text": "I was born and have lived my entire life in my beloved city, Bnei Brak. From a deep-rooted Lithuanian family, I studied at Ponevezh Yeshiva. I love the Haredi world and enjoy hosting you in it – of course with all the heart-warming Jewish food.",
+    "cta": "Let's discover together"
+  },
+  "journey": {
+    "title": "What will we experience along the way?",
+    "subtitle": "Nine fascinating stations from the Haredi heart of Bnei Brak",
+    "stations": {
+      "streams": {
+        "title": "Haredi Streams",
+        "desc": "We'll learn about the differences between Hasidim and Lithuanians and the fascinating social structure."
+      },
+      "shidduch": {
+        "title": "World of Matchmaking",
+        "desc": "How do you build a Jewish home? From the meeting in the hotel lobby to the wedding."
+      },
+      "architecture": {
+        "title": "Creative Construction",
+        "desc": "The flying balconies and architectural solutions to Bnei Brak's density."
+      },
+      "books": {
+        "title": "Bookstores",
+        "desc": "Visiting the Jewish book institutions where the written word reigns supreme."
+      },
+      "charity": {
+        "title": "Gemachs and Charity",
+        "desc": "A glimpse into the amazing world of lending pacifiers to charity boxes."
+      },
+      "yeshiva": {
+        "title": "Yeshivas and Cheders",
+        "desc": "We'll experience up close what really happens all day in a yeshiva and how a Haredi child grows up."
+      },
+      "bakery": {
+        "title": "Vizhnitz Bakery",
+        "desc": "We'll enter the heart of the mythological bakery and see how challah is braided."
+      },
+      "volunteering": {
+        "title": "Volunteering and Charity",
+        "desc": "We'll meet the organizations that drive Haredi society - charity as a way of life."
+      },
+      "internet": {
+        "title": "Internet Rooms",
+        "desc": "How technology meets tradition and how people surf the web in Bnei Brak?"
+      }
+    }
+  },
+  "menu": {
+    "title": "What will we eat?",
+    "subtitle": "A culinary celebration of authentic Jewish flavors",
+    "items": {
+      "cholent": {
+        "title": "My Cholent",
+        "desc": "Rich slow-cooked stew with tender meat, kishke, and homey flavors."
+      },
+      "fish": {
+        "title": "Fish Feast & Ceviche",
+        "desc": "Premium fish platter: fresh salmon ceviche, red tuna ceviche, and exquisite herring."
+      },
+      "kugel": {
+        "title": "Jerusalem Kugel",
+        "desc": "The authentic Jerusalem kugel - brown, spicy, and seasoned with coarse black pepper."
+      },
+      "liver": {
+        "title": "Traditional Chopped Liver",
+        "desc": "Chopped liver in a velvety texture with caramelized onions and plenty of Jewish love."
+      },
+      "challenge": {
+        "title": "Bakery Showdown",
+        "desc": "Blind taste test between challah giants: HaZvi Bakery vs. Vizhnitz. Who will win?"
+      },
+      "blintzes": {
+        "title": "Legendary Blintzes",
+        "desc": "Warm and sweet rich cheese blintzes that perfectly round out the meal."
+      }
+    }
+  },
+  "media": {
+    "title": "See me in the media",
+    "mako": "Mako",
+    "kan": "Kan 11",
+    "reshet": "Reshet 13",
+    "readArticle": "Read the article",
+    "watchEpisode": "Watch episode",
+    "watchSeries": "Watch series"
+  },
+  "bookingSection": {
+    "title": "When is the tour?",
+    "subtitle": "Tours take place every Thursday evening",
+    "selectDate": "Select a date",
+    "nextThursday": "Next Thursday",
+    "soldOut": "Sold Out",
+    "blocked": "Blocked",
+    "available": "Available",
+    "registerNow": "Click to register now",
+    "privateTour": "Interested in a private tour?",
+    "contactUs": "Contact us",
+    "thursdaysOnly": "Tours take place only on Thursdays"
+  },
+  "ratings": {
+    "stars": "Rated 5.0/5 based on 28 verified reviews",
+    "reason1": {
+      "title": "An Insider's Perspective",
+      "desc": "My tour is based on deep familiarity with the alleys where I grew up. This is not an external guide, but a rare glimpse into my Haredi life."
+    },
+    "reason2": {
+      "title": "Exclusive Tastings",
+      "desc": "We'll only visit the best places for Jewish food, spots that are passed along by word of mouth in Bnei Brak. Shhh... keep the secret too."
+    },
+    "reason3": {
+      "title": "Bridge Between Worlds",
+      "desc": "A tour full of humor and open dialogue. Here, every question is welcomed with a smile."
+    }
+  },
+  "faqs": {
+    "q1": {
+      "question": "Can a private tour be arranged?",
+      "answer": "Absolutely! I offer custom tours for groups of 10 participants or more on any day of the week by prior arrangement."
+    },
+    "q2": {
+      "question": "What happens in Bnei Brak on Thursday evening?",
+      "answer": "Thursday evening in Bnei Brak is 'Friday night eve' - the magical time when the city comes alive with preparations for Shabbat."
+    },
+    "q3": {
+      "question": "How long does the tour last and where do we meet?",
+      "answer": "The tour lasts between two and a half to three hours. Exact meeting details will be sent to you after registration is closed."
+    },
+    "q4": {
+      "question": "What should I wear for the tour?",
+      "answer": "It's important to come in respectful and modest clothing so we can enter the most secret places."
+    },
+    "q5": {
+      "question": "Where can I buy ready-made food for Shabbat?",
+      "answer": "During the tour we'll visit the best places to buy ready-made food and you'll get my warm recommendations."
+    }
   }
 }

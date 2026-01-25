@@ -1,10 +1,12 @@
 import { useState, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from '../utils/icons';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew } from '../utils/dateUtils';
 import { handleWhatsApp } from '../utils/whatsapp';
 
 const BookingSection = () => {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState('');
   const cloudData = useFirebaseData();
   const scrollContainerRef = useRef(null);
@@ -13,15 +15,15 @@ const BookingSection = () => {
 
   const getStatus = (dateStr) => {
     if (!cloudData) {
-      return { text: 'בודק...', color: 'text-gray-500' };
+      return { text: t('common.loading'), color: 'text-gray-500' };
     }
     if (cloudData.blocked?.includes(dateStr)) {
-      return { text: 'אין סיור', color: 'text-gray-500' };
+      return { text: t('bookingSection.blocked'), color: 'text-gray-500' };
     }
     if (cloudData.soldOut?.includes(dateStr)) {
-      return { text: 'אזל המקום', color: 'text-red-500' };
+      return { text: t('bookingSection.soldOut'), color: 'text-red-500' };
     }
-    return { text: 'נותרו מקומות', color: 'text-green-400' };
+    return { text: t('bookingSection.available'), color: 'text-green-400' };
   };
 
   const scrollDates = (direction) => {
@@ -40,9 +42,12 @@ const BookingSection = () => {
   return (
     <section id="dates-anchor" className="py-32 max-w-5xl mx-auto px-6 text-center text-right">
       <div className="bg-brand-dark-lighter p-8 md:p-24 rounded-5xl md:rounded-7xl border border-white/5 shadow-2xl relative overflow-hidden text-center">
-        <h2 className="text-4xl md:text-7xl font-bold text-brand-gold font-serif mb-12 text-center">
-          מתי ניפגש לסיור?
+        <h2 className="text-4xl md:text-7xl font-bold text-brand-gold font-serif mb-8 text-center">
+          {t('bookingSection.title')}
         </h2>
+        <p className="text-lg text-gray-300 mb-12 text-center font-light">
+          {t('bookingSection.subtitle')}
+        </p>
         
         <div className="relative group mx-auto text-center">
           {/* Right Arrow (in RTL, right = previous) */}
@@ -107,27 +112,27 @@ const BookingSection = () => {
               {!isThursday(selectedDate) ? (
                 <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl max-w-md mx-auto text-center">
                   <p className="text-red-400 font-bold mb-4 text-center">
-                    הסיורים הקבועים שלי מתקיימים בימי חמישי בערב.
+                    {t('bookingSection.thursdaysOnly')}
                   </p>
                   <div className="flex flex-col gap-3 text-center">
                     <button 
                       onClick={handleThursdayCorrection} 
                       className="bg-white text-black py-3 px-6 rounded-full font-bold text-sm hover:bg-brand-gold transition-all text-center"
                     >
-                      שנה ליום חמישי הקרוב
+                      {t('bookingSection.nextThursday')}
                     </button>
                     <button 
                       onClick={() => handleWhatsApp(null, true)} 
                       className="border border-white/20 text-white py-3 px-6 rounded-full font-bold text-sm hover:bg-white hover:text-black transition-all text-center"
                     >
-                      תיאום סיור פרטי לקבוצה
+                      {t('bookingSection.privateTour')}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div>
                   <p className="text-xl md:text-2xl text-white mb-6 font-serif italic font-bold">
-                    בחרתם את ה-{formatDateHebrew(selectedDate)}
+                    {t('bookingSection.selectDate')}: {formatDateHebrew(selectedDate)}
                   </p>
                   <button 
                     onClick={() => {
@@ -136,7 +141,7 @@ const BookingSection = () => {
                     }} 
                     className="bg-brand-gold text-brand-dark px-10 md:px-14 py-4 rounded-full font-black text-xl md:text-2xl shadow-xl hover:scale-105 transition-all text-center"
                   >
-                    לחצו להרשמה עכשיו
+                    {t('bookingSection.registerNow')}
                   </button>
                 </div>
               )}

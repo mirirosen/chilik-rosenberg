@@ -32,10 +32,10 @@ const BookingForm = ({ onSuccess }) => {
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
 
   const getDateStatus = (dateStr) => {
-    if (!cloudData) return { available: true, label: 'בודק...' };
-    if (cloudData.blocked?.includes(dateStr)) return { available: false, label: 'אין סיור' };
-    if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: 'אזל המקום' };
-    return { available: true, label: 'זמין' };
+    if (!cloudData) return { available: true, label: t('common.loading') };
+    if (cloudData.blocked?.includes(dateStr)) return { available: false, label: t('bookingSection.blocked') };
+    if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: t('bookingSection.soldOut') };
+    return { available: true, label: t('bookingSection.available') };
   };
 
   const availableDates = thursdays.filter(t => getDateStatus(t.dateStr).available);
@@ -81,55 +81,55 @@ const BookingForm = ({ onSuccess }) => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'שם מלא הוא שדה חובה';
+      newErrors.name = t('booking.validation.nameRequired');
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'טלפון / WhatsApp הוא שדה חובה';
+      newErrors.phone = t('booking.validation.phoneRequired');
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = 'מספר טלפון לא תקין (פורמט: 05X-XXXXXXX)';
+      newErrors.phone = t('booking.validation.phoneInvalid');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'כתובת אימייל היא שדה חובה';
+      newErrors.email = t('booking.validation.emailRequired');
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'כתובת אימייל לא תקינה';
+      newErrors.email = t('booking.validation.emailInvalid');
     }
 
     if (!formData.howDidYouHear) {
-      newErrors.howDidYouHear = 'יש לבחור כיצד הגעת אלינו';
+      newErrors.howDidYouHear = t('booking.validation.howRequired');
     }
 
     if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'תאריך לידה הוא שדה חובה';
+      newErrors.dateOfBirth = t('booking.validation.dobRequired');
     } else {
       const age = validateAge(formData.dateOfBirth);
       if (age < 18) {
-        newErrors.dateOfBirth = 'הרשמה מותרת רק למעל גיל 18';
+        newErrors.dateOfBirth = t('booking.validation.ageRestriction');
       }
     }
 
     if (!formData.tourDate) {
-      newErrors.tourDate = 'יש לבחור תאריך סיור';
+      newErrors.tourDate = t('booking.validation.dateRequired');
     } else if (!validateThursdayDate(formData.tourDate)) {
       const date = new Date(formData.tourDate + 'T00:00:00');
       if (date.getDay() !== 4) {
-        newErrors.tourDate = 'ניתן לבחור רק ימי חמישי';
+        newErrors.tourDate = t('booking.validation.thursdayOnly');
       } else {
-        newErrors.tourDate = 'התאריך שנבחר אינו זמין (חסום או אזל המקום)';
+        newErrors.tourDate = t('booking.validation.dateUnavailable');
       }
     }
 
     if (formData.participants < 1 || formData.participants > 20) {
-      newErrors.participants = 'מספר המשתתפים חייב להיות בין 1 ל-20';
+      newErrors.participants = t('booking.validation.participantsRange');
     }
 
     if (!formData.paymentMethod) {
-      newErrors.paymentMethod = 'יש לבחור אמצעי תשלום';
+      newErrors.paymentMethod = t('booking.validation.paymentRequired');
     }
 
     if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = 'יש לאשר את תנאי השימוש והתקנון';
+      newErrors.agreeToTerms = t('booking.validation.termsRequired');
     }
 
     setErrors(newErrors);
@@ -276,7 +276,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* How Did You Hear About Us */}
         <div>
           <label htmlFor="howDidYouHear" className="block text-sm font-bold mb-2 text-right">
-            איך הגעת אלינו? <span className="text-red-400">*</span>
+            {t('booking.form.howDidYouHear')} <span className="text-red-400">*</span>
           </label>
           <select
             id="howDidYouHear"
@@ -285,12 +285,12 @@ const BookingForm = ({ onSuccess }) => {
             className={`w-full bg-brand-dark border ${errors.howDidYouHear ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-right`}
             disabled={isSubmitting}
           >
-            <option value="">בחר אפשרות</option>
-            <option value="friend">המלצה מחבר/ה</option>
-            <option value="google">חיפוש בגוגל</option>
-            <option value="facebook">פייסבוק</option>
-            <option value="instagram">אינסטגרם</option>
-            <option value="other">אחר</option>
+            <option value="">{t('booking.form.howDidYouHear')}</option>
+            <option value="friend">{t('booking.howOptions.friend')}</option>
+            <option value="google">{t('booking.howOptions.google')}</option>
+            <option value="facebook">{t('booking.howOptions.facebook')}</option>
+            <option value="instagram">{t('booking.howOptions.instagram')}</option>
+            <option value="other">{t('booking.howOptions.other')}</option>
           </select>
           {errors.howDidYouHear && <p className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}
         </div>
@@ -298,7 +298,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Date of Birth */}
         <div>
           <label htmlFor="dateOfBirth" className="block text-sm font-bold mb-2 text-right">
-            תאריך לידה <span className="text-red-400">*</span>
+            {t('booking.form.dateOfBirth')} <span className="text-red-400">*</span>
           </label>
           <input
             type="date"
@@ -311,14 +311,14 @@ const BookingForm = ({ onSuccess }) => {
             disabled={isSubmitting}
           />
           {errors.dateOfBirth && <p className="text-red-400 text-sm mt-1 text-right">{errors.dateOfBirth}</p>}
-          <p className="text-xs text-gray-400 mt-1 text-right">חובה להיות מעל גיל 18</p>
+          <p className="text-xs text-gray-400 mt-1 text-right">{t('booking.validation.ageRestriction')}</p>
         </div>
 
         {/* Tour Date Selection - Date Picker (Thursdays Only) */}
         <div>
           <label htmlFor="tourDate" className="block text-sm font-bold mb-2 text-right">
             <Calendar size={16} className="inline mr-2" />
-            תאריך הסיור <span className="text-red-400">*</span>
+            {t('booking.form.tourDate')} <span className="text-red-400">*</span>
           </label>
           <input
             type="date"
@@ -332,9 +332,9 @@ const BookingForm = ({ onSuccess }) => {
               if (selectedDate) {
                 const date = new Date(selectedDate + 'T00:00:00');
                 if (date.getDay() !== 4) {
-                  setErrors(prev => ({ ...prev, tourDate: 'ניתן לבחור רק ימי חמישי' }));
+                  setErrors(prev => ({ ...prev, tourDate: t('booking.validation.thursdayOnly') }));
                 } else if (!validateThursdayDate(selectedDate)) {
-                  setErrors(prev => ({ ...prev, tourDate: 'התאריך שנבחר אינו זמין (חסום או אזל המקום)' }));
+                  setErrors(prev => ({ ...prev, tourDate: t('booking.validation.dateUnavailable') }));
                 }
               }
             }}
@@ -346,8 +346,8 @@ const BookingForm = ({ onSuccess }) => {
           {errors.tourDate && <p className="text-red-400 text-sm mt-1 text-right">{errors.tourDate}</p>}
           <div className="mt-2 bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
             <p className="text-xs text-blue-300 text-right">
-              💡 ניתן לבחור רק ימי חמישי. תאריכים זמינים: {availableDates.length > 0 ? availableDates.slice(0, 3).map(d => formatDateHebrew(d.dateStr)).join(', ') : 'אין תאריכים זמינים'}
-              {availableDates.length > 3 && ' ועוד...'}
+              💡 {t('booking.validation.thursdayOnly')} {availableDates.length > 0 ? availableDates.slice(0, 3).map(d => formatDateHebrew(d.dateStr)).join(', ') : t('common.loading')}
+              {availableDates.length > 3 && '...'}
             </p>
           </div>
         </div>
@@ -356,7 +356,7 @@ const BookingForm = ({ onSuccess }) => {
         <div>
           <label htmlFor="participants" className="block text-sm font-bold mb-2 text-right">
             <Users size={16} className="inline mr-2" />
-            מספר משתתפים <span className="text-red-400">*</span>
+            {t('booking.form.participants')} <span className="text-red-400">*</span>
             <span className="text-xs text-gray-400 font-normal ml-2">(1-20)</span>
           </label>
           <div className="flex items-center gap-3">
@@ -385,7 +385,7 @@ const BookingForm = ({ onSuccess }) => {
                   handleInputChange('participants', value);
                 } else if (value > 20) {
                   handleInputChange('participants', 20);
-                  setErrors(prev => ({ ...prev, participants: 'מספר המשתתפים חייב להיות בין 1 ל-20' }));
+                  setErrors(prev => ({ ...prev, participants: t('booking.validation.participantsRange') }));
                 } else {
                   handleInputChange('participants', 1);
                 }
@@ -425,23 +425,23 @@ const BookingForm = ({ onSuccess }) => {
 
         {/* Price Display */}
         <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-4 text-center">
-          <div className="text-sm text-gray-300 mb-1">מחיר כולל</div>
+          <div className="text-sm text-gray-300 mb-1">{t('booking.price.total')}</div>
           <div className="text-3xl font-black text-brand-gold">
             ₪{totalPrice}
           </div>
           <div className="text-xs text-gray-400 mt-1">
-            {formData.participants} × ₪{PRICE_PER_PERSON} לאדם
+            {formData.participants} × ₪{PRICE_PER_PERSON} {t('booking.price.perPerson')}
           </div>
         </div>
 
         {/* Payment Method */}
         <div>
           <label className="block text-sm font-bold mb-3 text-right">
-            אמצעי תשלום <span className="text-red-400">*</span>
+            {t('booking.form.paymentMethod')} <span className="text-red-400">*</span>
           </label>
           <div className="space-y-3">
             <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">Bit</span>
+              <span className="text-white">{t('booking.paymentMethods.bit')}</span>
               <input
                 type="radio"
                 name="paymentMethod"
@@ -453,7 +453,7 @@ const BookingForm = ({ onSuccess }) => {
               />
             </label>
             <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">אשראי</span>
+              <span className="text-white">{t('booking.paymentMethods.credit')}</span>
               <input
                 type="radio"
                 name="paymentMethod"
@@ -465,7 +465,7 @@ const BookingForm = ({ onSuccess }) => {
               />
             </label>
             <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">העברה בנקאית</span>
+              <span className="text-white">{t('booking.paymentMethods.bankTransfer')}</span>
               <input
                 type="radio"
                 name="paymentMethod"
@@ -478,20 +478,13 @@ const BookingForm = ({ onSuccess }) => {
             </label>
           </div>
           {errors.paymentMethod && <p className="text-red-400 text-sm mt-1 text-right">{errors.paymentMethod}</p>}
-          {formData.paymentMethod && (
-            <div className="mt-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 text-sm text-blue-300 text-right">
-              {formData.paymentMethod === 'bit' && '💳 תקבל הודעת Bit לאחר האישור'}
-              {formData.paymentMethod === 'credit' && '💳 פרטי כרטיס האשראי יתבקשו לאחר האישור'}
-              {formData.paymentMethod === 'bank_transfer' && '🏦 פרטי העברה בנקאית יישלחו לאחר האישור'}
-            </div>
-          )}
         </div>
 
         {/* Notes Field */}
         <div>
           <label htmlFor="notes" className="block text-sm font-bold mb-2 text-right">
             <MessageSquare size={16} className="inline mr-2" />
-            הערות / בקשות מיוחדות (אופציונלי)
+            {t('booking.form.notes')}
           </label>
           <textarea
             id="notes"
@@ -515,7 +508,8 @@ const BookingForm = ({ onSuccess }) => {
               disabled={isSubmitting}
             />
             <span className={`text-sm text-right ${errors.agreeToTerms ? 'text-red-400' : 'text-gray-300'}`}>
-              אני מאשר/ת את <a 
+              {t('booking.form.agreeToTerms').split('תנאי השימוש והתקנון')[0]}
+              <a 
                 href="/terms" 
                 target="_blank"
                 rel="noopener noreferrer"
@@ -524,7 +518,8 @@ const BookingForm = ({ onSuccess }) => {
                   e.preventDefault();
                   window.open('/terms', '_blank');
                 }}
-              >תנאי השימוש והתקנון</a> (כולל מדיניות הביטולים) <span className="text-red-400">*</span>
+              >{t('header.terms')}</a>
+              {t('booking.form.agreeToTerms').split('תנאי השימוש והתקנון')[1]} <span className="text-red-400">*</span>
             </span>
           </label>
           {errors.agreeToTerms && <p className="text-red-400 text-sm mt-1 text-right">{errors.agreeToTerms}</p>}
@@ -564,11 +559,11 @@ const BookingForm = ({ onSuccess }) => {
         {/* Contact Information */}
         <div className="bg-brand-dark-lighter border border-brand-gold/30 rounded-3xl p-6 mt-8">
           <h3 className="text-lg font-bold text-brand-gold text-center mb-4">
-            לשאלות ובירורים:
+            {t('booking.contact.title')}
           </h3>
           <div className="space-y-3 text-center">
             <div>
-              <p className="text-white font-bold text-lg">חיליק רוזנברג</p>
+              <p className="text-white font-bold text-lg">{t('booking.contact.name')}</p>
             </div>
             <div className="flex items-center justify-center gap-3">
               <a 
@@ -588,7 +583,7 @@ const BookingForm = ({ onSuccess }) => {
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-green-700 transition-all"
               >
                 <MessageSquare size={18} />
-                <span>שלח הודעת WhatsApp</span>
+                <span>{t('booking.contact.whatsapp')}</span>
               </a>
             </div>
           </div>
