@@ -1,22 +1,32 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../utils/firebase';
-import { useFirebaseData } from '../hooks/useFirebaseData';
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, increment } from 'firebase/firestore';
+import { db, APP_ID } from '../utils/firebase';
+import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew } from '../utils/dateUtils';
 import { sendBookingEmails } from '../utils/emailService';
-import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus } from '../utils/icons';
+import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus, Lock, CheckCircle } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
 
 const BookingForm = ({ onSuccess }) => {
   const { t } = useTranslation();
+  
+  // Get pre-filled data from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefilledDate = urlParams.get('date');
+  const prefilledParticipants = urlParams.get('participants');
+  
+  // Determine if fields should be locked
+  const isDateLocked = !!prefilledDate;
+  const isParticipantsLocked = !!prefilledParticipants;
+  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
-    participants: 1,
-    tourDate: '',
+    participants: prefilledParticipants ? parseInt(prefilledParticipants) : 1,
+    tourDate: prefilledDate || '',
     notes: '',
     howDidYouHear: '',
     dateOfBirth: '',
@@ -27,18 +37,52 @@ const BookingForm = ({ onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [redirecting, setRedirecting] = useState(false);
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
 
+  // Redirect to date selection if no pre-filled data
+  useEffect(() => {
+    if (!prefilledDate || !prefilledParticipants) {
+      setRedirecting(true);
+      // Redirect to homepage date selection
+      setTimeout(() => {
+        window.location.href = '/#date-selection';
+      }, 1500);
+    }
+  }, [prefilledDate, prefilledParticipants]);
+
   const getDateStatus = (dateStr) => {
-    if (!cloudData) return { available: true, label: t('common.loading') };
-    if (cloudData.blocked?.includes(dateStr)) return { available: false, label: t('bookingSection.blocked') };
-    if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: t('bookingSection.soldOut') };
-    return { available: true, label: t('bookingSection.available') };
+    if (!cloudData) return { available: true, label: t('common.loading'), availableSpots: 0 };
+    if (cloudData.blocked?.includes(dateStr)) return { available: false, label: t('bookingSection.blocked'), availableSpots: 0 };
+    if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
+    
+    // Check capacity
+    const availableSpots = getAvailableSpots(cloudData, dateStr);
+    if (availableSpots <= 0) {
+      return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
+    }
+    
+    return { available: true, label: t('bookingSection.available'), availableSpots };
   };
 
   const availableDates = thursdays.filter(t => getDateStatus(t.dateStr).available);
+
+  // Get capacity info for selected date
+  const selectedDateCapacity = useMemo(() => {
+    if (!formData.tourDate || !cloudData) return null;
+    
+    const effectiveMax = getEffectiveMax(cloudData, formData.tourDate);
+    const currentRegs = getCurrentRegistrations(cloudData, formData.tourDate);
+    const available = getAvailableSpots(cloudData, formData.tourDate);
+    
+    return {
+      max: effectiveMax,
+      current: currentRegs,
+      available: available
+    };
+  }, [formData.tourDate, cloudData]);
 
   const validatePhone = (phone) => {
     // Israeli phone format: 05X-XXXXXXX or 05XXXXXXXX
@@ -75,6 +119,28 @@ const BookingForm = ({ onSuccess }) => {
     // Check if date is not blocked or sold out
     const status = getDateStatus(dateStr);
     return status.available;
+  };
+
+  // Validate capacity for the booking
+  const validateCapacity = (dateStr, participants) => {
+    if (!cloudData) return { valid: true };
+    
+    const availableSpots = getAvailableSpots(cloudData, dateStr);
+    
+    if (participants > availableSpots) {
+      if (availableSpots <= 0) {
+        return { 
+          valid: false, 
+          message: t('booking.validation.noSpotsAvailable') || 'אין מקומות פנויים לתאריך זה'
+        };
+      }
+      return { 
+        valid: false, 
+        message: `${t('booking.validation.notEnoughSpots') || 'נותרו רק'} ${availableSpots} ${t('booking.validation.spotsAvailable') || 'מקומות פנויים'}`
+      };
+    }
+    
+    return { valid: true };
   };
 
   const validateForm = () => {
@@ -124,6 +190,14 @@ const BookingForm = ({ onSuccess }) => {
       newErrors.participants = t('booking.validation.participantsRange');
     }
 
+    // Validate capacity
+    if (formData.tourDate && formData.participants) {
+      const capacityCheck = validateCapacity(formData.tourDate, formData.participants);
+      if (!capacityCheck.valid) {
+        newErrors.participants = capacityCheck.message;
+      }
+    }
+
     if (!formData.paymentMethod) {
       newErrors.paymentMethod = t('booking.validation.paymentRequired');
     }
@@ -136,11 +210,63 @@ const BookingForm = ({ onSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Update tour date registration count
+  const updateTourRegistrations = async (dateStr, participantCount) => {
+    if (!db) return;
+    
+    try {
+      const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
+      const tourDoc = await getDoc(tourDocRef);
+      
+      if (tourDoc.exists()) {
+        // Update existing document
+        await setDoc(tourDocRef, {
+          currentRegistrations: increment(participantCount)
+        }, { merge: true });
+      } else {
+        // Create new document with default values
+        await setDoc(tourDocRef, {
+          date: dateStr,
+          useGlobalMax: true,
+          customMax: null,
+          currentRegistrations: participantCount
+        });
+      }
+      
+      // Check if tour is now full and auto-mark as sold out
+      const globalMax = cloudData?.globalMaxParticipants || 30;
+      const tourData = tourDoc.exists() ? tourDoc.data() : { useGlobalMax: true, currentRegistrations: 0 };
+      const effectiveMax = tourData.useGlobalMax ? globalMax : (tourData.customMax || globalMax);
+      const newRegistrations = (tourData.currentRegistrations || 0) + participantCount;
+      
+      if (newRegistrations >= effectiveMax) {
+        // Auto mark as sold out
+        const globalDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
+        const currentSoldOut = cloudData?.soldOut || [];
+        
+        if (!currentSoldOut.includes(dateStr)) {
+          await setDoc(globalDocRef, {
+            soldOut: [...currentSoldOut, dateStr]
+          }, { merge: true });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating tour registrations:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
 
     if (!validateForm()) {
+      return;
+    }
+
+    // Double-check capacity before submitting (in case it changed)
+    const finalCapacityCheck = validateCapacity(formData.tourDate, formData.participants);
+    if (!finalCapacityCheck.valid) {
+      setSubmitError(finalCapacityCheck.message);
       return;
     }
 
@@ -175,6 +301,9 @@ const BookingForm = ({ onSuccess }) => {
       // Save to Firestore
       const docRef = await addDoc(collection(db, 'bookings'), bookingData);
       console.log('Booking saved with ID:', docRef.id);
+
+      // Update tour date registrations count
+      await updateTourRegistrations(formData.tourDate, formData.participants);
 
       // Send emails (non-blocking - don't wait for this)
       sendBookingEmails({
@@ -212,11 +341,88 @@ const BookingForm = ({ onSuccess }) => {
 
   const totalPrice = formData.participants * PRICE_PER_PERSON;
 
+  // Show redirect message if no pre-filled data
+  if (redirecting) {
+    return (
+      <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center">
+        <div className="text-6xl mb-6">🔄</div>
+        <h2 className="text-2xl font-bold text-white mb-4" dir="rtl">
+          מפנה לבחירת תאריך...
+        </h2>
+        <p className="text-gray-400 mb-6" dir="rtl">
+          יש לבחור תאריך ומספר משתתפים לפני מילוי טופס ההרשמה
+        </p>
+        <div className="animate-spin w-8 h-8 border-4 border-brand-gold border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl">
       <h2 className="text-3xl md:text-5xl font-serif text-brand-gold text-center mb-8 font-bold">
         {t('booking.title')}
       </h2>
+
+      {/* Pre-filled Summary Card */}
+      {(isDateLocked || isParticipantsLocked) && (
+        <div className="bg-brand-gold/10 border-2 border-brand-gold/50 rounded-3xl p-6 mb-8" dir="rtl">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <CheckCircle size={24} className="text-green-400" />
+            <h3 className="text-lg font-bold text-white">פרטי ההזמנה שנבחרו</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {isDateLocked && (
+              <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Calendar size={20} className="text-brand-gold" />
+                  <span className="text-sm text-gray-400">תאריך הסיור</span>
+                </div>
+                <p className="text-xl font-bold text-brand-gold">
+                  {formatDateHebrew(formData.tourDate)}
+                </p>
+                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
+                  <Lock size={12} />
+                  <span>נעול</span>
+                </div>
+              </div>
+            )}
+            
+            {isParticipantsLocked && (
+              <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Users size={20} className="text-brand-gold" />
+                  <span className="text-sm text-gray-400">מספר משתתפים</span>
+                </div>
+                <p className="text-3xl font-black text-brand-gold">
+                  {formData.participants}
+                </p>
+                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
+                  <Lock size={12} />
+                  <span>נעול</span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Total Price Preview */}
+          <div className="mt-4 pt-4 border-t border-white/10 text-center">
+            <span className="text-gray-400 text-sm">סה"כ לתשלום: </span>
+            <span className="text-2xl font-black text-brand-gold">₪{totalPrice}</span>
+          </div>
+          
+          {/* Change Selection Button */}
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = '/#date-selection';
+            }}
+            className="w-full mt-4 bg-transparent border border-white/20 text-gray-400 py-2 rounded-full text-sm hover:text-white hover:border-white/40 transition-all"
+          >
+            שנה בחירה
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
@@ -314,114 +520,135 @@ const BookingForm = ({ onSuccess }) => {
           <p className="text-xs text-gray-400 mt-1 text-right">{t('booking.validation.ageRestriction')}</p>
         </div>
 
-        {/* Tour Date Selection - Date Picker (Thursdays Only) */}
-        <div>
-          <label htmlFor="tourDate" className="block text-sm font-bold mb-2 text-right">
-            <Calendar size={16} className="inline mr-2" />
-            {t('booking.form.tourDate')} <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="date"
-            id="tourDate"
-            value={formData.tourDate}
-            onChange={(e) => {
-              const selectedDate = e.target.value;
-              handleInputChange('tourDate', selectedDate);
-              
-              // Validate on change
-              if (selectedDate) {
-                const date = new Date(selectedDate + 'T00:00:00');
-                if (date.getDay() !== 4) {
-                  setErrors(prev => ({ ...prev, tourDate: t('booking.validation.thursdayOnly') }));
-                } else if (!validateThursdayDate(selectedDate)) {
-                  setErrors(prev => ({ ...prev, tourDate: t('booking.validation.dateUnavailable') }));
-                }
-              }
-            }}
-            min={new Date().toISOString().split('T')[0]}
-            className={`w-full bg-brand-dark border ${errors.tourDate ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center`}
-            style={{ colorScheme: 'dark' }}
-            disabled={isSubmitting}
-          />
-          {errors.tourDate && <p className="text-red-400 text-sm mt-1 text-right">{errors.tourDate}</p>}
-          <div className="mt-2 bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
-            <p className="text-xs text-blue-300 text-right">
-              💡 {t('booking.validation.thursdayOnly')} {availableDates.length > 0 ? availableDates.slice(0, 3).map(d => formatDateHebrew(d.dateStr)).join(', ') : t('common.loading')}
-              {availableDates.length > 3 && '...'}
-            </p>
-          </div>
-        </div>
-
-        {/* Number of Participants - Manual Input with +/- Buttons */}
-        <div>
-          <label htmlFor="participants" className="block text-sm font-bold mb-2 text-right">
-            <Users size={16} className="inline mr-2" />
-            {t('booking.form.participants')} <span className="text-red-400">*</span>
-            <span className="text-xs text-gray-400 font-normal ml-2">(1-20)</span>
-          </label>
-          <div className="flex items-center gap-3">
-            {/* Decrement Button */}
-            <button
-              type="button"
-              onClick={() => {
-                const newValue = Math.max(1, parseInt(formData.participants) - 1);
-                handleInputChange('participants', newValue);
-              }}
-              disabled={isSubmitting || formData.participants <= 1}
-              className="bg-brand-dark border border-white/20 text-brand-gold rounded-xl p-4 hover:bg-brand-gold hover:text-brand-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-brand-dark disabled:hover:text-brand-gold"
-              aria-label="Decrease participants"
-            >
-              <Minus size={20} />
-            </button>
-
-            {/* Number Input */}
+        {/* Tour Date - Locked if pre-filled */}
+        {!isDateLocked ? (
+          <div>
+            <label htmlFor="tourDate" className="block text-sm font-bold mb-2 text-right">
+              <Calendar size={16} className="inline mr-2" />
+              {t('booking.form.tourDate')} <span className="text-red-400">*</span>
+            </label>
             <input
-              type="number"
-              id="participants"
-              value={formData.participants}
+              type="date"
+              id="tourDate"
+              value={formData.tourDate}
               onChange={(e) => {
-                const value = parseInt(e.target.value) || 1;
-                if (value >= 1 && value <= 20) {
-                  handleInputChange('participants', value);
-                } else if (value > 20) {
-                  handleInputChange('participants', 20);
-                  setErrors(prev => ({ ...prev, participants: t('booking.validation.participantsRange') }));
-                } else {
-                  handleInputChange('participants', 1);
+                const selectedDate = e.target.value;
+                handleInputChange('tourDate', selectedDate);
+                
+                // Validate on change
+                if (selectedDate) {
+                  const date = new Date(selectedDate + 'T00:00:00');
+                  if (date.getDay() !== 4) {
+                    setErrors(prev => ({ ...prev, tourDate: t('booking.validation.thursdayOnly') }));
+                  } else if (!validateThursdayDate(selectedDate)) {
+                    setErrors(prev => ({ ...prev, tourDate: t('booking.validation.dateUnavailable') }));
+                  }
                 }
               }}
-              onBlur={(e) => {
-                // Ensure valid value on blur
-                const value = parseInt(e.target.value);
-                if (isNaN(value) || value < 1) {
-                  handleInputChange('participants', 1);
-                } else if (value > 20) {
-                  handleInputChange('participants', 20);
-                }
-              }}
-              min="1"
-              max="20"
-              className={`flex-1 bg-brand-dark border ${errors.participants ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white text-center text-2xl font-bold outline-none focus:border-brand-gold`}
+              min={new Date().toISOString().split('T')[0]}
+              className={`w-full bg-brand-dark border ${errors.tourDate ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center`}
               style={{ colorScheme: 'dark' }}
               disabled={isSubmitting}
             />
-
-            {/* Increment Button */}
-            <button
-              type="button"
-              onClick={() => {
-                const newValue = Math.min(20, parseInt(formData.participants) + 1);
-                handleInputChange('participants', newValue);
-              }}
-              disabled={isSubmitting || formData.participants >= 20}
-              className="bg-brand-dark border border-white/20 text-brand-gold rounded-xl p-4 hover:bg-brand-gold hover:text-brand-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-brand-dark disabled:hover:text-brand-gold"
-              aria-label="Increase participants"
-            >
-              <Plus size={20} />
-            </button>
+            {errors.tourDate && <p className="text-red-400 text-sm mt-1 text-right">{errors.tourDate}</p>}
+            <div className="mt-2 bg-blue-500/10 border border-blue-500/30 rounded-2xl p-3">
+              <p className="text-xs text-blue-300 text-right">
+                💡 {t('booking.validation.thursdayOnly')} {availableDates.length > 0 ? availableDates.slice(0, 3).map(d => formatDateHebrew(d.dateStr)).join(', ') : t('common.loading')}
+                {availableDates.length > 3 && '...'}
+              </p>
+            </div>
           </div>
-          {errors.participants && <p className="text-red-400 text-sm mt-1 text-right">{errors.participants}</p>}
-        </div>
+        ) : (
+          // Locked Date Display - Hidden field for form submission
+          <input type="hidden" name="tourDate" value={formData.tourDate} />
+        )}
+
+        {/* Participants - Locked if pre-filled */}
+        {!isParticipantsLocked ? (
+          <div>
+            <label htmlFor="participants" className="block text-sm font-bold mb-2 text-right">
+              <Users size={16} className="inline mr-2" />
+              {t('booking.form.participants')} <span className="text-red-400">*</span>
+              <span className="text-xs text-gray-400 font-normal ml-2">
+                (1-{selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20})
+              </span>
+            </label>
+            <div className="flex items-center gap-3">
+              {/* Decrement Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newValue = Math.max(1, parseInt(formData.participants) - 1);
+                  handleInputChange('participants', newValue);
+                }}
+                disabled={isSubmitting || formData.participants <= 1}
+                className="bg-brand-dark border border-white/20 text-brand-gold rounded-xl p-4 hover:bg-brand-gold hover:text-brand-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-brand-dark disabled:hover:text-brand-gold"
+                aria-label="Decrease participants"
+              >
+                <Minus size={20} />
+              </button>
+
+              {/* Number Input */}
+              <input
+                type="number"
+                id="participants"
+                value={formData.participants}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
+                  
+                  if (value >= 1 && value <= maxAllowed) {
+                    handleInputChange('participants', value);
+                  } else if (value > maxAllowed) {
+                    handleInputChange('participants', maxAllowed);
+                    if (selectedDateCapacity && selectedDateCapacity.available < 20) {
+                      setErrors(prev => ({ ...prev, participants: `נותרו רק ${selectedDateCapacity.available} מקומות פנויים` }));
+                    } else {
+                      setErrors(prev => ({ ...prev, participants: t('booking.validation.participantsRange') }));
+                    }
+                  } else {
+                    handleInputChange('participants', 1);
+                  }
+                }}
+                onBlur={(e) => {
+                  // Ensure valid value on blur
+                  const value = parseInt(e.target.value);
+                  const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
+                  
+                  if (isNaN(value) || value < 1) {
+                    handleInputChange('participants', 1);
+                  } else if (value > maxAllowed) {
+                    handleInputChange('participants', maxAllowed);
+                  }
+                }}
+                min="1"
+                max={selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20}
+                className={`flex-1 bg-brand-dark border ${errors.participants ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white text-center text-2xl font-bold outline-none focus:border-brand-gold`}
+                style={{ colorScheme: 'dark' }}
+                disabled={isSubmitting}
+              />
+
+              {/* Increment Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
+                  const newValue = Math.min(maxAllowed, parseInt(formData.participants) + 1);
+                  handleInputChange('participants', newValue);
+                }}
+                disabled={isSubmitting || formData.participants >= (selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20)}
+                className="bg-brand-dark border border-white/20 text-brand-gold rounded-xl p-4 hover:bg-brand-gold hover:text-brand-dark transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-brand-dark disabled:hover:text-brand-gold"
+                aria-label="Increase participants"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+            {errors.participants && <p className="text-red-400 text-sm mt-1 text-right">{errors.participants}</p>}
+          </div>
+        ) : (
+          // Locked Participants - Hidden field for form submission
+          <input type="hidden" name="participants" value={formData.participants} />
+        )}
 
         {/* Price Display */}
         <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-4 text-center">
@@ -535,7 +762,7 @@ const BookingForm = ({ onSuccess }) => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting || availableDates.length === 0}
+          disabled={isSubmitting || (selectedDateCapacity && selectedDateCapacity.available <= 0)}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
@@ -544,12 +771,11 @@ const BookingForm = ({ onSuccess }) => {
         <button
           type="button"
           onClick={() => {
-            window.history.pushState({}, '', '/');
-            window.location.href = '/';
+            window.location.href = '/#date-selection';
           }}
           className="w-full bg-transparent border-2 border-white/20 text-white py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all"
         >
-          {t('booking.form.backToHome')}
+          חזרה לבחירת תאריך
         </button>
 
         <p className="text-center text-sm text-gray-400">

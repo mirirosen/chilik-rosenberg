@@ -37,5 +37,8 @@ export {
   Clock,
   Plus,
   Minus,
-  Globe
+  Globe,
+  Settings,
+  Edit2,
+  RotateCcw
 } from 'lucide-react';

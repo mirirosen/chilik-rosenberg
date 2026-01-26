@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../utils/firebase';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc, increment } from 'firebase/firestore';
+import { db, APP_ID } from '../utils/firebase';
+import { useFirebaseData, getEffectiveMax, getCurrentRegistrations } from '../hooks/useFirebaseData';
 import { formatDateHebrew } from '../utils/dateUtils';
 import { Calendar, Users, Phone, Mail, MessageSquare, CheckCircle, XCircle, Clock } from '../utils/icons';
 
@@ -9,6 +10,8 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, upcoming, past
   const [updating, setUpdating] = useState(null);
+  
+  const cloudData = useFirebaseData();
 
   useEffect(() => {
     // Real-time listener for bookings
@@ -32,14 +35,95 @@ const AdminBookings = () => {
     return () => unsubscribe();
   }, []);
 
-  const updateBookingStatus = async (bookingId, newStatus) => {
+  // Update tour date registrations count
+  const updateTourRegistrations = async (dateStr, delta) => {
+    if (!db || !dateStr) return;
+    
+    try {
+      const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
+      const tourDoc = await getDoc(tourDocRef);
+      
+      if (tourDoc.exists()) {
+        await setDoc(tourDocRef, {
+          currentRegistrations: increment(delta)
+        }, { merge: true });
+      } else {
+        // Create document if it doesn't exist (shouldn't happen normally)
+        const newCount = Math.max(0, delta);
+        await setDoc(tourDocRef, {
+          date: dateStr,
+          useGlobalMax: true,
+          customMax: null,
+          currentRegistrations: newCount
+        });
+      }
+      
+      // Check and update sold-out status
+      await checkAndUpdateSoldOut(dateStr, delta);
+    } catch (error) {
+      console.error('Error updating tour registrations:', error);
+    }
+  };
+
+  // Check and auto-update sold-out status based on capacity
+  const checkAndUpdateSoldOut = async (dateStr, delta) => {
+    if (!db || !cloudData) return;
+    
+    try {
+      const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
+      const tourDoc = await getDoc(tourDocRef);
+      const tourData = tourDoc.exists() ? tourDoc.data() : { useGlobalMax: true, currentRegistrations: 0 };
+      
+      const globalMax = cloudData.globalMaxParticipants || 30;
+      const effectiveMax = tourData.useGlobalMax ? globalMax : (tourData.customMax || globalMax);
+      const newRegistrations = (tourData.currentRegistrations || 0) + delta;
+      
+      const globalDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
+      const currentSoldOut = cloudData.soldOut || [];
+      const isSoldOut = currentSoldOut.includes(dateStr);
+      
+      if (newRegistrations >= effectiveMax && !isSoldOut) {
+        // Auto mark as sold out
+        await setDoc(globalDocRef, {
+          soldOut: [...currentSoldOut, dateStr]
+        }, { merge: true });
+      } else if (newRegistrations < effectiveMax && isSoldOut) {
+        // Remove from sold out (spots freed up)
+        await setDoc(globalDocRef, {
+          soldOut: currentSoldOut.filter(d => d !== dateStr)
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error('Error checking/updating sold-out status:', error);
+    }
+  };
+
+  const updateBookingStatus = async (bookingId, newStatus, booking) => {
     setUpdating(bookingId);
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
+      const oldStatus = booking.status;
+      
       await updateDoc(bookingRef, {
         status: newStatus,
         updatedAt: new Date()
       });
+
+      // Update registration count based on status change
+      const participants = booking.participants || 0;
+      
+      // Calculate delta based on status transitions
+      // Only confirmed bookings count towards registrations
+      if (oldStatus === 'confirmed' && newStatus !== 'confirmed') {
+        // Was confirmed, now not confirmed - subtract
+        await updateTourRegistrations(booking.tourDate, -participants);
+      } else if (oldStatus !== 'confirmed' && newStatus === 'confirmed') {
+        // Was not confirmed, now confirmed - add
+        await updateTourRegistrations(booking.tourDate, participants);
+      }
+      // If both old and new are not 'confirmed', no change needed
+      // If both old and new are 'confirmed', no change needed (shouldn't happen)
+      
     } catch (error) {
       console.error('Error updating booking:', error);
       alert('שגיאה בעדכון ההזמנה');
@@ -92,6 +176,7 @@ const AdminBookings = () => {
     }
   };
 
+  // Calculate stats including confirmed participants per tour
   const stats = {
     total: bookings.length,
     pending: bookings.filter(b => b.status === 'pending').length,
@@ -99,7 +184,10 @@ const AdminBookings = () => {
     cancelled: bookings.filter(b => b.status === 'cancelled').length,
     totalRevenue: bookings
       .filter(b => b.status === 'confirmed')
-      .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+      .reduce((sum, b) => sum + (b.totalPrice || 0), 0),
+    totalParticipants: bookings
+      .filter(b => b.status === 'confirmed')
+      .reduce((sum, b) => sum + (b.participants || 0), 0)
   };
 
   if (loading) {
@@ -113,7 +201,7 @@ const AdminBookings = () => {
   return (
     <div className="space-y-8">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-blue-400 mb-2">{stats.total}</div>
           <div className="text-sm text-gray-400">סה"כ הזמנות</div>
@@ -127,6 +215,11 @@ const AdminBookings = () => {
         <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-green-400 mb-2">{stats.confirmed}</div>
           <div className="text-sm text-gray-400">מאושרות</div>
+        </div>
+        
+        <div className="bg-purple-500/10 border border-purple-500/30 rounded-3xl p-6 text-center">
+          <div className="text-4xl font-black text-purple-400 mb-2">{stats.totalParticipants}</div>
+          <div className="text-sm text-gray-400">משתתפים מאושרים</div>
         </div>
         
         <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-3xl p-6 text-center">
@@ -179,6 +272,12 @@ const AdminBookings = () => {
           filteredBookings.map((booking) => {
             const statusBadge = getStatusBadge(booking.status);
             
+            // Get tour capacity info
+            const tourCapacity = cloudData ? {
+              max: getEffectiveMax(cloudData, booking.tourDate),
+              current: getCurrentRegistrations(cloudData, booking.tourDate)
+            } : null;
+            
             return (
               <div
                 key={booking.id}
@@ -216,6 +315,12 @@ const AdminBookings = () => {
                             {formatDateHebrew(booking.tourDate)}
                           </div>
                           <div className="text-xs text-gray-400">{booking.tourDate}</div>
+                          {/* Tour capacity info */}
+                          {tourCapacity && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              קיבולת: {tourCapacity.current}/{tourCapacity.max}
+                            </div>
+                          )}
                         </div>
                         <Calendar size={20} className="text-brand-gold" />
                       </div>
@@ -274,7 +379,7 @@ const AdminBookings = () => {
                     <div className="flex flex-col gap-2">
                       {booking.status !== 'confirmed' && (
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                          onClick={() => updateBookingStatus(booking.id, 'confirmed', booking)}
                           disabled={updating === booking.id}
                           className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-3 rounded-full text-sm font-bold hover:bg-green-600 transition-all disabled:opacity-50"
                         >
@@ -285,7 +390,7 @@ const AdminBookings = () => {
 
                       {booking.status !== 'cancelled' && (
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                          onClick={() => updateBookingStatus(booking.id, 'cancelled', booking)}
                           disabled={updating === booking.id}
                           className="flex items-center justify-center gap-2 bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-3 rounded-full text-sm font-bold hover:bg-red-500/30 transition-all disabled:opacity-50"
                         >
@@ -296,7 +401,7 @@ const AdminBookings = () => {
 
                       {booking.status === 'confirmed' && (
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'pending')}
+                          onClick={() => updateBookingStatus(booking.id, 'pending', booking)}
                           disabled={updating === booking.id}
                           className="flex items-center justify-center gap-2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-4 py-3 rounded-full text-sm font-bold hover:bg-yellow-500/30 transition-all disabled:opacity-50"
                         >

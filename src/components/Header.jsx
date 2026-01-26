@@ -15,6 +15,22 @@ const Header = () => {
     }
   };
 
+  // Navigate to date selection section
+  const goToDateSelection = () => {
+    setMobileMenuOpen(false);
+    
+    if (window.location.pathname === '/') {
+      // Already on homepage - just scroll
+      const element = document.getElementById('date-selection');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // On another page - navigate to homepage with hash
+      window.location.href = '/#date-selection';
+    }
+  };
+
   return (
     <>
       {/* Main Header */}
@@ -34,7 +50,7 @@ const Header = () => {
           <button onClick={() => scrollToSection('menu')} className="nav-link">
             {t('header.menu')}
           </button>
-          <button onClick={() => scrollToSection('dates-anchor')} className="nav-link text-brand-gold">
+          <button onClick={() => scrollToSection('date-selection')} className="nav-link text-brand-gold">
             {t('header.dates')}
           </button>
           <button 
@@ -48,10 +64,7 @@ const Header = () => {
           </button>
           <LanguageSwitcher />
           <button 
-            onClick={() => {
-              window.history.pushState({}, '', '/booking');
-              window.location.href = '/booking';
-            }} 
+            onClick={goToDateSelection}
             className="bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all"
           >
             {t('header.register')}
@@ -113,11 +126,7 @@ const Header = () => {
         <LanguageSwitcher mobile={true} />
         
         <button 
-          onClick={() => {
-            setMobileMenuOpen(false);
-            window.history.pushState({}, '', '/booking');
-            window.location.href = '/booking';
-          }} 
+          onClick={goToDateSelection}
           className="bg-brand-gold text-black px-12 py-4 rounded-full font-black text-xl shadow-lg"
         >
           {t('header.register')}

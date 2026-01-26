@@ -4,6 +4,19 @@ const Footer = () => {
     window.location.href = '/terms';
   };
 
+  const goToDateSelection = () => {
+    if (window.location.pathname === '/') {
+      // Already on homepage - just scroll
+      const element = document.getElementById('date-selection');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // On another page - navigate to homepage with hash
+      window.location.href = '/#date-selection';
+    }
+  };
+
   return (
     <footer className="py-16 pb-32 border-t border-white/5 bg-brand-dark-section">
       <div className="max-w-6xl mx-auto px-6">
@@ -12,24 +25,36 @@ const Footer = () => {
           {/* Contact Info */}
           <div className="text-right">
             <h3 className="text-brand-gold font-bold text-xl mb-4 font-serif">
-              יצירת קשר
+              חיליק רוזנברג - סיורים קולינריים
             </h3>
             <div className="space-y-2 text-gray-400">
-              <p className="text-white font-bold">חיליק רוזנברג</p>
+              <p className="flex items-center gap-2 justify-end">
+                <span>רחוב לחי 11, בני ברק</span>
+                <span className="text-brand-gold">📍</span>
+              </p>
               <a 
                 href="tel:0505804367" 
-                className="block hover:text-brand-gold transition-colors"
+                className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
                 dir="ltr"
               >
-                050-580-4367
+                <span dir="ltr">050-580-4367</span>
+                <span className="text-brand-gold">📞</span>
               </a>
               <a 
                 href="https://wa.me/972505804367" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block hover:text-brand-gold transition-colors"
+                className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
               >
-                WhatsApp
+                <span>WhatsApp</span>
+                <span className="text-green-500">💬</span>
+              </a>
+              <a 
+                href="mailto:hr20192022@gmail.com" 
+                className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
+              >
+                <span>hr20192022@gmail.com</span>
+                <span className="text-brand-gold">✉️</span>
               </a>
             </div>
           </div>
@@ -41,10 +66,7 @@ const Footer = () => {
             </h3>
             <div className="space-y-2 text-gray-400">
               <button 
-                onClick={() => {
-                  window.history.pushState({}, '', '/booking');
-                  window.location.href = '/booking';
-                }}
+                onClick={goToDateSelection}
                 className="block hover:text-brand-gold transition-colors text-right"
               >
                 הרשמה לסיור
@@ -60,7 +82,11 @@ const Footer = () => {
                 className="block hover:text-brand-gold transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                  if (window.location.pathname === '/') {
+                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/#about';
+                  }
                 }}
               >
                 אודות
@@ -70,7 +96,11 @@ const Footer = () => {
                 className="block hover:text-brand-gold transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+                  if (window.location.pathname === '/') {
+                    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/#faq';
+                  }
                 }}
               >
                 שאלות נפוצות

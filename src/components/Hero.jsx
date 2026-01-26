@@ -42,8 +42,8 @@ const Hero = () => {
   // NAVIGATION HELPER
   // ============================================
   
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
+  const scrollToDateSelection = () => {
+    const element = document.getElementById('date-selection');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -101,13 +101,10 @@ const Hero = () => {
           {t('hero.subtitle')}
         </p>
         
-        {/* CTA Button - Gold Glow Effect */}
+        {/* CTA Button - Gold Glow Effect - Now scrolls to date selection */}
         <div className="hero-button pb-20">
           <button 
-            onClick={() => {
-              window.history.pushState({}, '', '/booking');
-              window.location.href = '/booking';
-            }} 
+            onClick={scrollToDateSelection}
             className="bg-brand-gold text-brand-dark px-14 py-6 rounded-full font-black text-3xl shadow-2xl hover:scale-110 hover:shadow-brand-gold/60 transition-all duration-300 block mx-auto relative z-20 cursor-pointer"
             style={{ boxShadow: '0 0 40px rgba(233, 196, 106, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5)' }}
             aria-label="Book a tour"
