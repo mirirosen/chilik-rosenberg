@@ -10,7 +10,7 @@ export const useScrollProgress = () => {
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
-      
+
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);

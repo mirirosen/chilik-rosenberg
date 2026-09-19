@@ -5,83 +5,83 @@
 @tailwind utilities;
 
 @layer base {
-  html, body { 
+  html, body {
     @apply min-h-full bg-brand-dark text-brand-text font-sans overflow-x-hidden;
-    scroll-behavior: smooth; 
+    scroll-behavior: smooth;
   }
 
-  section { 
-    scroll-margin-top: 100px; 
+  section {
+    scroll-margin-top: 100px;
   }
 
-  h1, h2, h3, h4 { 
+  h1, h2, h3, h4 {
     @apply font-serif;
   }
 }
 
 @layer components {
   /* Header Styles */
-  .main-header { 
+  .main-header {
     @apply border-b backdrop-blur-md;
     background-color: rgb(18 18 20 / 0.98);
     border-bottom-color: rgb(233 196 106 / 0.1);
   }
 
-  .nav-link { 
+  .nav-link {
     @apply relative transition-all duration-300 font-bold cursor-pointer border-0 bg-transparent;
   }
 
-  .nav-link::after { 
+  .nav-link::after {
     @apply content-[''] absolute -bottom-0.5 right-0 w-0 h-0.5 bg-brand-gold transition-all duration-300;
   }
 
-  .nav-link:hover::after { 
+  .nav-link:hover::after {
     @apply w-full;
   }
 
   /* Hub Buttons */
-  .hub-btn { 
+  .hub-btn {
     @apply h-[52px] w-[140px] flex items-center justify-center rounded-full transition-all duration-300 shadow-hub font-extrabold gap-2 border border-white/10 text-sm no-underline cursor-pointer whitespace-nowrap;
   }
 
-  .hub-btn-whatsapp { 
+  .hub-btn-whatsapp {
     @apply bg-whatsapp text-white;
   }
 
-  .hub-btn-faq { 
+  .hub-btn-faq {
     @apply bg-brand-gold text-brand-dark;
   }
 
-  .pulse { 
+  .pulse {
     @apply animate-pulse-green;
   }
 
   /* Media Cards */
-  .media-card { 
+  .media-card {
     @apply bg-white/[0.03] border border-white/5 border-r-[6px] rounded-4xl transition-all;
     transition-duration: 400ms;
   }
 
-  .media-card:hover { 
+  .media-card:hover {
     @apply -translate-y-1 bg-white/[0.06];
   }
 
   /* Horizontal Scroll Support */
-  .dates-wrapper { 
+  .dates-wrapper {
     @apply flex flex-row flex-nowrap overflow-x-auto gap-4 pb-4;
-    direction: rtl !important; 
-    -webkit-overflow-scrolling: touch; 
+    direction: rtl !important;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .date-card { 
+  .date-card {
     @apply flex-none w-[8.5rem] rounded-4xl transition-all duration-300 cursor-pointer;
   }
 
-  .custom-scroll::-webkit-scrollbar { 
+  .custom-scroll::-webkit-scrollbar {
     @apply h-[5px];
   }
 
-  .custom-scroll::-webkit-scrollbar-thumb { 
+  .custom-scroll::-webkit-scrollbar-thumb {
     @apply bg-brand-gold rounded-lg;
   }
 
@@ -91,12 +91,12 @@
   }
 
   /* Fade In Animation */
-  .react-content { 
+  .react-content {
     @apply opacity-0 transition-opacity ease-in;
     transition-duration: 600ms;
   }
 
-  .react-content.loaded { 
+  .react-content.loaded {
     @apply opacity-100;
   }
 
@@ -144,4 +144,70 @@
       transform: translateY(0);
     }
   }
+}
+
+/* Figma-aligned homepage shell. Scope is limited to Header and Hero. */
+.main-header {
+  background: rgba(255,255,255,.98);
+  border-bottom-color: rgba(78,77,80,.18);
+  color: #4E4D50;
+  backdrop-filter: blur(12px);
+}
+.main-header .nav-link { color:#4E4D50; }
+.main-header .nav-link::after { background:#EEBC26; }
+.figma-hero { background: #333234 url('/src/assets/figma-food-table.jpg') center/cover no-repeat; }
+.figma-hero-overlay { background: linear-gradient(90deg,rgba(35,34,36,.97),rgba(51,49,51,.83) 58%,rgba(51,49,51,.58)); }
+.figma-title { text-shadow: 0 3px 24px rgba(0,0,0,.3); }
+.figma-eyebrow::before { content:''; display:inline-block; width:52px; height:1px; margin-left:18px; vertical-align:middle; background:#A0948E; }
+@media (max-width:767px) {
+  .main-header { height:72px; }
+  .figma-brand span { max-width:120px; }
+  .figma-header-cta { max-width:128px; font-size:13px; }
+  .figma-hero { min-height:820px; padding-top:72px; }
+  .figma-hero-overlay { background:linear-gradient(180deg,rgba(35,34,36,.8),rgba(35,34,36,.92)); }
+}
+.figma-portrait {
+  border-radius: 48% 48% 0 0 / 28% 28% 0 0;
+  filter: drop-shadow(0 22px 35px rgba(0,0,0,.34));
+}
+.figma-portrait::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow: inset 0 0 22px 12px rgba(46,45,47,.12);
+}
+@media (max-width: 760px) {
+  .figma-brand { order:3; }
+  .figma-menu { order:2; }
+  .figma-header-cta { order:1; }
+  .figma-cta { display:none; }
+  .figma-hero { min-height:648px; }
+  .figma-hero > .relative { min-height:648px; padding-top:68px; padding-bottom:335px; }
+  .figma-title { font-size:43px; line-height:.98; margin-bottom:16px; }
+  .figma-eyebrow { font-size:12px; margin-bottom:17px; }
+  .figma-eyebrow::before { width:22px; margin-left:10px; }
+  .figma-portrait { width:255px; height:365px; border-radius:0; filter:none; }
+  .figma-portrait::after { display:none; }
+}
+/* Proportional match to the measurable 403x720 Figma frame. */
+@media (max-width: 760px) {
+  .figma-header-cta { width:38.7%; max-width:none; }
+  .figma-menu { width:13.6%; }
+  .figma-brand { width:47.7%; padding-left:18px; padding-right:12px; }
+  .figma-hero { background-position:center center; }
+  .figma-hero > .relative { padding-left:28px; padding-right:28px; }
+  .figma-portrait { width:67%; height:52.5%; }
+}
+@media (min-width: 761px) {
+  .figma-hero { min-height:calc(100vh - 88px); }
+  .figma-hero > .relative { min-height:calc(100vh - 88px); padding-top:5.5vh; padding-bottom:44vh; }
+  .figma-portrait { width:min(45vw,650px); height:68vh; }
+  .figma-title { font-size:clamp(58px,5.7vw,92px); line-height:.96; }
+}
+/* Desktop source frame is 1920px wide: 132px header + 976px hero. Scale proportionally. */
+@media (min-width: 761px) {
+  .main-header { height:clamp(88px,6.875vw,132px); }
+  .figma-hero { min-height:50.833vw; padding-top:clamp(88px,6.875vw,132px); }
+  .figma-hero > .relative { min-height:50.833vw; }
 }

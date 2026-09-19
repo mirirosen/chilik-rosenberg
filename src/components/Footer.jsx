@@ -32,25 +32,25 @@ const Footer = () => {
                 <span>רחוב לחי 11, בני ברק</span>
                 <span className="text-brand-gold">📍</span>
               </p>
-              <a 
-                href="tel:0505804367" 
+              <a
+                href="tel:0506724312"
                 className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
                 dir="ltr"
               >
-                <span dir="ltr">050-580-4367</span>
+                <span dir="ltr">050-672-4312</span>
                 <span className="text-brand-gold">📞</span>
               </a>
-              <a 
-                href="https://wa.me/972505804367" 
-                target="_blank" 
+              <a
+                href="https://wa.me/972506724312"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
               >
                 <span>WhatsApp</span>
                 <span className="text-green-500">💬</span>
               </a>
-              <a 
-                href="mailto:hr20192022@gmail.com" 
+              <a
+                href="mailto:hr20192022@gmail.com"
                 className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
               >
                 <span>hr20192022@gmail.com</span>
@@ -65,20 +65,20 @@ const Footer = () => {
               קישורים מהירים
             </h3>
             <div className="space-y-2 text-gray-400">
-              <button 
+              <button
                 onClick={goToDateSelection}
                 className="block hover:text-brand-gold transition-colors text-right"
               >
                 הרשמה לסיור
               </button>
-              <button 
+              <button
                 onClick={handleTermsClick}
                 className="block hover:text-brand-gold transition-colors text-right"
               >
                 תנאי שימוש ותקנון
               </button>
-              <a 
-                href="#about" 
+              <a
+                href="#about"
                 className="block hover:text-brand-gold transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
@@ -91,8 +91,8 @@ const Footer = () => {
               >
                 אודות
               </a>
-              <a 
-                href="#faq" 
+              <a
+                href="#faq"
                 className="block hover:text-brand-gold transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
@@ -114,7 +114,7 @@ const Footer = () => {
               אודות הסיורים
             </h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              סיורים קולינריים בבני ברק עם חיליק רוזנברג. 
+              סיורים קולינריים בבני ברק עם חיליק רוזנברג.
               חוויה אותנטית של טעמים, ריחות וסיפורים מהלב החרדי של בני ברק.
             </p>
           </div>
@@ -126,7 +126,7 @@ const Footer = () => {
             <div className="text-xs text-gray-500 tracking-wider">
               © 2026 סיורי חיליק רוזנברג - כל הזכויות שמורות
             </div>
-            <button 
+            <button
               onClick={handleTermsClick}
               className="text-xs text-gray-400 hover:text-brand-gold transition-colors underline"
             >

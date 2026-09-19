@@ -144,10 +144,10 @@ const Terms = () => {
                 {t('terms.section2.price')}: <span className="text-brand-gold font-bold text-xl">{t('terms.section2.priceAmount')}</span> {t('terms.section2.perPerson')} <span className="text-brand-gold">•</span>
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <p className="text-sm font-bold text-white mb-3 text-right" dir="rtl">{t('terms.section2.selectMethod')}</p>
-              
+
               <button
                 onClick={() => handlePaymentClick('bit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
@@ -155,7 +155,7 @@ const Terms = () => {
                 <span className="text-lg font-bold">💳 {t('terms.section2.bit')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
-              
+
               <button
                 onClick={() => handlePaymentClick('credit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
@@ -163,7 +163,7 @@ const Terms = () => {
                 <span className="text-lg font-bold">💳 {t('terms.section2.credit')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
-              
+
               <button
                 onClick={() => handlePaymentClick('bank')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
@@ -179,7 +179,7 @@ const Terms = () => {
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚠️ מדיניות ביטול רכישה .3
             </h2>
-            
+
             {/* 3.1 - תקופות ביטול והחזר כספי */}
             <div className="mb-6">
               <h3 className="text-lg font-bold text-white mb-4 text-right" dir="rtl">תקופות ביטול והחזר כספי :1</h3>
@@ -213,7 +213,7 @@ const Terms = () => {
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl"><strong>ביטול ההזמנה חייב להיעשות בהודעה בכתב בלבד</strong> <span className="text-brand-gold">📝</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">דרכי יצירת קשר לביטול: <span className="text-brand-gold">📞</span></p>
-                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0505804367 <span className="text-green-500">💬</span></p>
+                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0506724312 <span className="text-green-500">💬</span></p>
                 <p className="text-brand-gold text-right pr-6" dir="rtl">דוא"ל: hr20192022@gmail.com <span className="text-brand-gold">✉️</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">יש לציין בבקשת הביטול: <strong>מספר ההזמנה, תאריך הסיור, שם המזמין</strong> <span className="text-brand-gold">📋</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">תקבל/י אישור על הביטול בתוך 24 שעות <span className="text-brand-gold">⏰</span></p>
@@ -247,7 +247,7 @@ const Terms = () => {
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               📋 מדיניות אספקת השירות .4
             </h2>
-            
+
             {/* 4.1 - מועדי הסיורים */}
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">מועדי הסיורים :1</h3>
@@ -317,7 +317,7 @@ const Terms = () => {
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚖️ אחריות ושיפוי .5
             </h2>
-            
+
             {/* 5.1 - אחריות כללית */}
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">אחריות כללית :1</h3>
@@ -419,16 +419,16 @@ const Terms = () => {
               <p className="text-xl text-white font-bold">
                 {t('terms.section7.questions')}
               </p>
-              
+
               {/* Business Details Card */}
               <div className="bg-brand-dark border border-brand-gold/30 rounded-2xl p-6 space-y-4">
                 <p className="text-2xl text-brand-gold font-bold">חיליק רוזנברג</p>
                 <p className="text-lg text-white font-semibold">סיורים קולינריים בבני ברק</p>
-                
+
                 <div className="space-y-3 text-gray-300">
                   <p dir="rtl" className="text-right">כתובת: <strong>רחוב לחי 11, בני ברק</strong> 📍</p>
                   <p dir="rtl">
-                    טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">050-580-4367</a> 📞
+                    טלפון/WhatsApp: <a href="tel:0506724312" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">050-672-4312</a> 📞
                   </p>
                   <p dir="rtl">
                     דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:text-brand-gold/80 font-bold transition-colors">hr20192022@gmail.com</a> ✉️
@@ -438,9 +438,9 @@ const Terms = () => {
 
               {/* WhatsApp Button */}
               <div>
-                <a 
-                  href="https://wa.me/972505804367?text=שלום, יש לי שאלה בנוגע לתנאי השימוש" 
-                  target="_blank" 
+                <a
+                  href="https://wa.me/972506724312?text=שלום, יש לי שאלה בנוגע לתנאי השימוש"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 flex-row-reverse bg-green-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-green-700 transition-all"
                 >
@@ -465,7 +465,7 @@ const Terms = () => {
           >
             הרשמה לסיור
           </button>
-          
+
           <button
             onClick={scrollToTop}
             className="bg-transparent border-2 border-white/20 text-white px-12 py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all flex items-center justify-center gap-2 flex-row-reverse"
@@ -482,7 +482,7 @@ const Terms = () => {
           <p className="text-brand-gold font-bold text-lg">חיליק רוזנברג - סיורים קולינריים</p>
           <div className="text-gray-400 text-sm space-y-1">
             <p dir="rtl">כתובת: רחוב לחי 11, בני ברק 📍</p>
-            <p dir="rtl">טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:underline" dir="ltr">050-580-4367</a> 📞</p>
+            <p dir="rtl">טלפון/WhatsApp: <a href="tel:0506724312" className="text-brand-gold hover:underline" dir="ltr">050-672-4312</a> 📞</p>
             <p dir="rtl">דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:underline">hr20192022@gmail.com</a> ✉️</p>
           </div>
           <p className="text-xs text-gray-500 tracking-widest pt-4 border-t border-white/10">
@@ -493,11 +493,11 @@ const Terms = () => {
 
       {/* Payment Instructions Modal */}
       {showPaymentModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-6"
           onClick={closePaymentModal}
         >
-          <div 
+          <div
             dir="rtl"
             className="bg-brand-dark border-2 border-brand-gold rounded-3xl p-8 max-w-md w-full relative animate-in zoom-in duration-300"
             onClick={(e) => e.stopPropagation()}
@@ -521,11 +521,11 @@ const Terms = () => {
 
                 <div className="space-y-3 text-right bg-brand-dark-lighter rounded-2xl p-6 border border-white/10" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                   {getPaymentInstructions().instructions.map((instruction, index) => (
-                    <p 
-                      key={index} 
+                    <p
+                      key={index}
                       dir="rtl"
                       className={`text-right ${
-                        instruction.includes('050-580-4367') || instruction.includes('חיליק רוזנברג')
+                        instruction.includes('050-672-4312') || instruction.includes('050-580-4367') || instruction.includes('חיליק רוזנברג')
                           ? 'text-brand-gold font-bold text-xl'
                           : instruction === ''
                           ? 'h-2'
@@ -539,7 +539,7 @@ const Terms = () => {
 
                 <div className="mt-6 flex flex-col gap-3">
                   <a
-                    href="https://wa.me/972505804367?text=שלום, אני מעוניין/ת בפרטי תשלום לסיור"
+                    href="https://wa.me/972506724312?text=שלום, אני מעוניין/ת בפרטי תשלום לסיור"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-green-600 text-white px-6 py-4 rounded-full font-bold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-2 flex-row-reverse"
@@ -547,7 +547,7 @@ const Terms = () => {
                     <MessageCircle size={20} />
                     <span>{t('terms.paymentModal.openWhatsapp')}</span>
                   </a>
-                  
+
                   <button
                     onClick={closePaymentModal}
                     className="border-2 border-white/20 text-white px-6 py-4 rounded-full font-bold hover:border-brand-gold hover:text-brand-gold transition-all"

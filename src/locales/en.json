@@ -17,14 +17,22 @@
     "terms": "Terms",
     "register": "Register for Tour",
     "toWebsite": "To Main Site",
-    "logout": "Logout"
+    "logout": "Logout",
+    "figmaName": "Chilik Rosenberg",
+    "figmaTagline": "Bnei Brak tours",
+    "figmaUpcoming": "Upcoming tours",
+    "menuLabel": "Menu"
   },
   "hero": {
     "badge": "An Experience Like No Other",
     "title": "Culinary Tour in Bnei Brak",
     "subtitle": "Flavors, Stories, and Tradition at the Heart of the City",
     "cta": "Register for Tour",
-    "termsReminder": "Before registering, please read the terms and conditions"
+    "termsReminder": "Before registering, please read the terms and conditions",
+    "figmaEyebrow": "Chilik Rosenberg invites you",
+    "figmaTitle": "Experience the Haredi world as you have never known it",
+    "figmaDescription": "Culinary and cultural tours and talks from a Haredi resident of Bnei Brak, offering a direct, deep, lighthearted and funny view into the Haredi world.",
+    "figmaCta": "Join a tour"
   },
   "booking": {
     "title": "Register for Tour",

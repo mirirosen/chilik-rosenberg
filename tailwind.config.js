@@ -9,12 +9,12 @@ export default {
       colors: {
         // Brand Colors
         brand: {
-          dark: '#121214',          // Main background
-          'dark-lighter': '#1E1E24', // Card backgrounds
+          dark: '#4E4D50',          // Main background
+          'dark-lighter': '#5B595C', // Card backgrounds
           'dark-alt': '#1a1a1c',     // Alternative dark (rating bar)
           'dark-section': '#0a0a0a', // Section backgrounds
-          gold: '#E9C46A',           // Primary brand color
-          text: '#EAEAE0',           // Light text color
+          gold: '#EEBC26',           // Primary brand color
+          text: '#E8E8E8',           // Light text color
         },
         // Integration Colors
         whatsapp: '#25D366',

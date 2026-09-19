@@ -1,26 +1,43 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, increment, updateDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew } from '../utils/dateUtils';
-import { sendBookingEmails } from '../utils/emailService';
+// NOTE: Email sending moved to after payment confirmation - see AdminBookings.jsx
+// import { sendBookingEmails } from '../utils/emailService';
+import { createMorningPayment } from '../services/morningPayment';
 import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus, Lock, CheckCircle } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
 
+// Debug mode - set to true to show debug panel
+const DEBUG_MODE = process.env.NODE_ENV === 'development' || true;
+
+// Debug logging helper
+const debugLog = (category, message, data = null) => {
+  const timestamp = new Date().toISOString();
+  const prefix = `[${timestamp}] [BookingForm] [${category}]`;
+
+  if (data) {
+    console.log(`${prefix} ${message}`, data);
+  } else {
+    console.log(`${prefix} ${message}`);
+  }
+};
+
 const BookingForm = ({ onSuccess }) => {
   const { t } = useTranslation();
-  
+
   // Get pre-filled data from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const prefilledDate = urlParams.get('date');
   const prefilledParticipants = urlParams.get('participants');
-  
+
   // Determine if fields should be locked
   const isDateLocked = !!prefilledDate;
   const isParticipantsLocked = !!prefilledParticipants;
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -29,22 +46,66 @@ const BookingForm = ({ onSuccess }) => {
     tourDate: prefilledDate || '',
     notes: '',
     howDidYouHear: '',
-    dateOfBirth: '',
     paymentMethod: '',
     agreeToTerms: false
   });
-  
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
 
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState({});
+  const [showDebug, setShowDebug] = useState(false);
+
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
+
+  // Environment check logging on mount
+  useEffect(() => {
+    console.log('='.repeat(60));
+    console.log('=== BOOKING FORM ENVIRONMENT CHECK ===');
+    console.log('='.repeat(60));
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Firebase DB configured:', !!db);
+    console.log('Firebase APP_ID:', APP_ID);
+    console.log('Current URL:', window.location.href);
+    console.log('URL Params - date:', prefilledDate);
+    console.log('URL Params - participants:', prefilledParticipants);
+    console.log('Browser:', navigator.userAgent);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('DEBUG_MODE:', DEBUG_MODE);
+    console.log('='.repeat(60));
+
+    setDebugInfo(prev => ({
+      ...prev,
+      environment: process.env.NODE_ENV,
+      firebaseConfigured: !!db,
+      appId: APP_ID,
+      url: window.location.href,
+      prefilledDate,
+      prefilledParticipants,
+      initTimestamp: new Date().toISOString()
+    }));
+  }, [prefilledDate, prefilledParticipants]);
+
+  // Log when cloudData changes
+  useEffect(() => {
+    if (cloudData) {
+      debugLog('DATA', 'Cloud data loaded:', {
+        globalMaxParticipants: cloudData.globalMaxParticipants,
+        blockedDates: cloudData.blocked?.length || 0,
+        soldOutDates: cloudData.soldOut?.length || 0,
+        tourDatesCount: Object.keys(cloudData.tourDates || {}).length
+      });
+    }
+  }, [cloudData]);
 
   // Redirect to date selection if no pre-filled data
   useEffect(() => {
     if (!prefilledDate || !prefilledParticipants) {
+      debugLog('REDIRECT', 'Missing prefilled data, redirecting to date selection');
       setRedirecting(true);
       // Redirect to homepage date selection
       setTimeout(() => {
@@ -57,13 +118,13 @@ const BookingForm = ({ onSuccess }) => {
     if (!cloudData) return { available: true, label: t('common.loading'), availableSpots: 0 };
     if (cloudData.blocked?.includes(dateStr)) return { available: false, label: t('bookingSection.blocked'), availableSpots: 0 };
     if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
-    
+
     // Check capacity
     const availableSpots = getAvailableSpots(cloudData, dateStr);
     if (availableSpots <= 0) {
       return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
     }
-    
+
     return { available: true, label: t('bookingSection.available'), availableSpots };
   };
 
@@ -72,11 +133,11 @@ const BookingForm = ({ onSuccess }) => {
   // Get capacity info for selected date
   const selectedDateCapacity = useMemo(() => {
     if (!formData.tourDate || !cloudData) return null;
-    
+
     const effectiveMax = getEffectiveMax(cloudData, formData.tourDate);
     const currentRegs = getCurrentRegistrations(cloudData, formData.tourDate);
     const available = getAvailableSpots(cloudData, formData.tourDate);
-    
+
     return {
       max: effectiveMax,
       current: currentRegs,
@@ -95,27 +156,15 @@ const BookingForm = ({ onSuccess }) => {
     return emailRegex.test(email);
   };
 
-  const validateAge = (dateOfBirth) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1;
-    }
-    return age;
-  };
-
   const validateThursdayDate = (dateStr) => {
     if (!dateStr) return false;
-    
+
     // Check if it's a Thursday
     const date = new Date(dateStr + 'T00:00:00');
     if (date.getDay() !== 4) {
       return false;
     }
-    
+
     // Check if date is not blocked or sold out
     const status = getDateStatus(dateStr);
     return status.available;
@@ -124,134 +173,215 @@ const BookingForm = ({ onSuccess }) => {
   // Validate capacity for the booking
   const validateCapacity = (dateStr, participants) => {
     if (!cloudData) return { valid: true };
-    
+
     const availableSpots = getAvailableSpots(cloudData, dateStr);
-    
+
     if (participants > availableSpots) {
-      if (availableSpots <= 0) {
-        return { 
-          valid: false, 
-          message: t('booking.validation.noSpotsAvailable') || 'אין מקומות פנויים לתאריך זה'
-        };
-      }
-      return { 
-        valid: false, 
-        message: `${t('booking.validation.notEnoughSpots') || 'נותרו רק'} ${availableSpots} ${t('booking.validation.spotsAvailable') || 'מקומות פנויים'}`
+      return {
+        valid: false,
+        message: t('booking.validation.noSpotsAvailable') || 'אין מספיק מקומות פנויים לתאריך זה'
       };
     }
-    
+
     return { valid: true };
   };
 
   const validateForm = () => {
+    console.log('');
+    console.log('=== FORM VALIDATION STARTED ===');
+    debugLog('VALIDATE', 'Starting form validation with data:', {
+      name: formData.name ? '✓ provided' : '✗ missing',
+      phone: formData.phone ? '✓ provided' : '✗ missing',
+      email: formData.email ? '✓ provided' : '✗ missing',
+      tourDate: formData.tourDate || '✗ missing',
+      participants: formData.participants,
+      paymentMethod: formData.paymentMethod || '✗ missing',
+      howDidYouHear: formData.howDidYouHear || '✗ missing',
+      agreeToTerms: formData.agreeToTerms
+    });
+
     const newErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = t('booking.validation.nameRequired');
+      debugLog('VALIDATE', '❌ Name validation failed: empty');
+    } else {
+      debugLog('VALIDATE', '✅ Name validation passed');
     }
 
     if (!formData.phone.trim()) {
       newErrors.phone = t('booking.validation.phoneRequired');
+      debugLog('VALIDATE', '❌ Phone validation failed: empty');
     } else if (!validatePhone(formData.phone)) {
       newErrors.phone = t('booking.validation.phoneInvalid');
+      debugLog('VALIDATE', '❌ Phone validation failed: invalid format', { phone: formData.phone });
+    } else {
+      debugLog('VALIDATE', '✅ Phone validation passed');
     }
 
     if (!formData.email.trim()) {
       newErrors.email = t('booking.validation.emailRequired');
+      debugLog('VALIDATE', '❌ Email validation failed: empty');
     } else if (!validateEmail(formData.email)) {
       newErrors.email = t('booking.validation.emailInvalid');
+      debugLog('VALIDATE', '❌ Email validation failed: invalid format', { email: formData.email });
+    } else {
+      debugLog('VALIDATE', '✅ Email validation passed');
     }
 
     if (!formData.howDidYouHear) {
       newErrors.howDidYouHear = t('booking.validation.howRequired');
-    }
-
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = t('booking.validation.dobRequired');
+      debugLog('VALIDATE', '❌ HowDidYouHear validation failed: empty');
     } else {
-      const age = validateAge(formData.dateOfBirth);
-      if (age < 18) {
-        newErrors.dateOfBirth = t('booking.validation.ageRestriction');
-      }
+      debugLog('VALIDATE', '✅ HowDidYouHear validation passed');
     }
 
     if (!formData.tourDate) {
       newErrors.tourDate = t('booking.validation.dateRequired');
+      debugLog('VALIDATE', '❌ TourDate validation failed: empty');
     } else if (!validateThursdayDate(formData.tourDate)) {
       const date = new Date(formData.tourDate + 'T00:00:00');
       if (date.getDay() !== 4) {
         newErrors.tourDate = t('booking.validation.thursdayOnly');
+        debugLog('VALIDATE', '❌ TourDate validation failed: not Thursday', { day: date.getDay() });
       } else {
         newErrors.tourDate = t('booking.validation.dateUnavailable');
+        debugLog('VALIDATE', '❌ TourDate validation failed: date unavailable');
       }
+    } else {
+      debugLog('VALIDATE', '✅ TourDate validation passed');
     }
 
     if (formData.participants < 1 || formData.participants > 20) {
       newErrors.participants = t('booking.validation.participantsRange');
+      debugLog('VALIDATE', '❌ Participants validation failed: out of range', { participants: formData.participants });
+    } else {
+      debugLog('VALIDATE', '✅ Participants range validation passed');
     }
 
     // Validate capacity
     if (formData.tourDate && formData.participants) {
+      debugLog('VALIDATE', 'Checking capacity...', { date: formData.tourDate, participants: formData.participants });
       const capacityCheck = validateCapacity(formData.tourDate, formData.participants);
       if (!capacityCheck.valid) {
         newErrors.participants = capacityCheck.message;
+        debugLog('VALIDATE', '❌ Capacity validation failed:', capacityCheck.message);
+      } else {
+        debugLog('VALIDATE', '✅ Capacity validation passed');
       }
     }
 
     if (!formData.paymentMethod) {
       newErrors.paymentMethod = t('booking.validation.paymentRequired');
+      debugLog('VALIDATE', '❌ PaymentMethod validation failed: empty');
+    } else {
+      debugLog('VALIDATE', '✅ PaymentMethod validation passed:', formData.paymentMethod);
     }
 
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = t('booking.validation.termsRequired');
+      debugLog('VALIDATE', '❌ AgreeToTerms validation failed: not checked');
+    } else {
+      debugLog('VALIDATE', '✅ AgreeToTerms validation passed');
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(newErrors).length === 0;
+
+    if (isValid) {
+      console.log('=== ✅ FORM VALIDATION PASSED ===');
+    } else {
+      console.log('=== ❌ FORM VALIDATION FAILED ===');
+      console.log('Validation errors:', newErrors);
+    }
+    console.log('');
+
+    return isValid;
   };
 
   // Update tour date registration count
   const updateTourRegistrations = async (dateStr, participantCount) => {
-    if (!db) return;
-    
+    console.log('');
+    console.log('=== UPDATING TOUR REGISTRATIONS ===');
+    debugLog('REGISTRATIONS', 'Starting registration update:', { dateStr, participantCount });
+
+    if (!db) {
+      debugLog('REGISTRATIONS', '❌ Firebase DB not configured');
+      return;
+    }
+
+    const startTime = performance.now();
+
     try {
       const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
+      debugLog('REGISTRATIONS', 'Fetching tour document...');
       const tourDoc = await getDoc(tourDocRef);
-      
+
+      debugLog('REGISTRATIONS', 'Tour document exists:', tourDoc.exists());
+      if (tourDoc.exists()) {
+        debugLog('REGISTRATIONS', 'Current tour data:', tourDoc.data());
+      }
+
       if (tourDoc.exists()) {
         // Update existing document
+        debugLog('REGISTRATIONS', 'Updating existing document with increment:', participantCount);
         await setDoc(tourDocRef, {
           currentRegistrations: increment(participantCount)
         }, { merge: true });
+        debugLog('REGISTRATIONS', '✅ Document updated');
       } else {
         // Create new document with default values
+        debugLog('REGISTRATIONS', 'Creating new document with initial count:', participantCount);
         await setDoc(tourDocRef, {
           date: dateStr,
           useGlobalMax: true,
           customMax: null,
           currentRegistrations: participantCount
         });
+        debugLog('REGISTRATIONS', '✅ New document created');
       }
-      
+
       // Check if tour is now full and auto-mark as sold out
       const globalMax = cloudData?.globalMaxParticipants || 30;
       const tourData = tourDoc.exists() ? tourDoc.data() : { useGlobalMax: true, currentRegistrations: 0 };
       const effectiveMax = tourData.useGlobalMax ? globalMax : (tourData.customMax || globalMax);
       const newRegistrations = (tourData.currentRegistrations || 0) + participantCount;
-      
+
+      debugLog('REGISTRATIONS', 'Capacity check:', {
+        globalMax,
+        effectiveMax,
+        previousRegistrations: tourData.currentRegistrations || 0,
+        newRegistrations,
+        isFull: newRegistrations >= effectiveMax
+      });
+
       if (newRegistrations >= effectiveMax) {
         // Auto mark as sold out
+        debugLog('REGISTRATIONS', '⚠️ Tour is now FULL - auto-marking as sold out');
         const globalDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
         const currentSoldOut = cloudData?.soldOut || [];
-        
+
         if (!currentSoldOut.includes(dateStr)) {
           await setDoc(globalDocRef, {
             soldOut: [...currentSoldOut, dateStr]
           }, { merge: true });
+          debugLog('REGISTRATIONS', '✅ Tour marked as sold out');
+        } else {
+          debugLog('REGISTRATIONS', 'Tour already marked as sold out');
         }
       }
+
+      const endTime = performance.now();
+      debugLog('REGISTRATIONS', `✅ Registration update complete in ${(endTime - startTime).toFixed(2)}ms`);
+      console.log('=== TOUR REGISTRATIONS UPDATED ===');
+      console.log('');
     } catch (error) {
-      console.error('Error updating tour registrations:', error);
+      console.error('❌ Error updating tour registrations:', error);
+      debugLog('REGISTRATIONS', '❌ ERROR:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
     }
   };
 
@@ -259,23 +389,62 @@ const BookingForm = ({ onSuccess }) => {
     e.preventDefault();
     setSubmitError('');
 
+    console.log('');
+    console.log('='.repeat(60));
+    console.log('=== BOOKING FORM SUBMISSION STARTED ===');
+    console.log('='.repeat(60));
+    console.log('Timestamp:', new Date().toISOString());
+
+    debugLog('SUBMIT', 'Form data:', {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      tourDate: formData.tourDate,
+      participants: formData.participants,
+      paymentMethod: formData.paymentMethod,
+      howDidYouHear: formData.howDidYouHear,
+      notes: formData.notes ? 'provided' : 'empty',
+      agreeToTerms: formData.agreeToTerms,
+      totalPrice: formData.participants * PRICE_PER_PERSON
+    });
+
+    // Update debug info
+    setDebugInfo(prev => ({
+      ...prev,
+      lastSubmitAttempt: new Date().toISOString(),
+      formData: { ...formData, notes: formData.notes ? '[provided]' : '[empty]' }
+    }));
+
+    // Validate form
+    debugLog('SUBMIT', 'Running form validation...');
     if (!validateForm()) {
+      debugLog('SUBMIT', '❌ Form validation failed - aborting submission');
+      setDebugInfo(prev => ({ ...prev, lastError: 'Form validation failed' }));
       return;
     }
+    debugLog('SUBMIT', '✅ Form validation passed');
 
     // Double-check capacity before submitting (in case it changed)
+    debugLog('SUBMIT', 'Double-checking capacity...');
     const finalCapacityCheck = validateCapacity(formData.tourDate, formData.participants);
     if (!finalCapacityCheck.valid) {
+      debugLog('SUBMIT', '❌ Capacity check failed:', finalCapacityCheck.message);
       setSubmitError(finalCapacityCheck.message);
+      setDebugInfo(prev => ({ ...prev, lastError: 'Capacity check failed: ' + finalCapacityCheck.message }));
       return;
     }
+    debugLog('SUBMIT', '✅ Capacity check passed');
 
     setIsSubmitting(true);
+    const submitStartTime = performance.now();
 
     try {
       // Generate booking ID
       const bookingId = `BK${Date.now()}`;
       const totalPrice = formData.participants * PRICE_PER_PERSON;
+
+      debugLog('SUBMIT', 'Generated booking ID:', bookingId);
+      debugLog('SUBMIT', 'Total price:', totalPrice);
 
       // Prepare booking data
       const bookingData = {
@@ -287,44 +456,122 @@ const BookingForm = ({ onSuccess }) => {
         tourDate: formData.tourDate,
         notes: formData.notes.trim(),
         howDidYouHear: formData.howDidYouHear,
-        dateOfBirth: formData.dateOfBirth,
-        paymentMethod: formData.paymentMethod,
+        paymentMethod: 'whatsapp_contact', // Emergency: all bookings via WhatsApp
         totalPrice,
         pricePerPerson: PRICE_PER_PERSON,
-        status: 'pending', // pending, confirmed, cancelled
-        paymentStatus: 'pending', // pending, completed, failed (for future Morning integration)
-        morningBookingId: null, // Will be filled when Morning API is integrated
+        status: 'pending_contact', // pending_contact, confirmed, cancelled
+        paymentStatus: 'awaiting_contact', // awaiting_contact, paid, failed
+        morningBookingId: null, // Will be filled when Morning API is fixed
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
+      console.log('');
+      console.log('=== SAVING TO FIREBASE ===');
+      debugLog('FIREBASE', 'Booking data to save:', bookingData);
+      debugLog('FIREBASE', 'Collection path: bookings');
+
+      const firebaseStartTime = performance.now();
+
       // Save to Firestore
       const docRef = await addDoc(collection(db, 'bookings'), bookingData);
-      console.log('Booking saved with ID:', docRef.id);
+
+      const firebaseEndTime = performance.now();
+      const firebaseDuration = (firebaseEndTime - firebaseStartTime).toFixed(2);
+
+      console.log('✅ Booking saved to Firebase');
+      debugLog('FIREBASE', `Document saved in ${firebaseDuration}ms`);
+      debugLog('FIREBASE', 'Firestore Document ID:', docRef.id);
+
+      setDebugInfo(prev => ({
+        ...prev,
+        lastBookingId: bookingId,
+        firestoreId: docRef.id,
+        firebaseSaveTime: firebaseDuration + 'ms'
+      }));
 
       // Update tour date registrations count
+      debugLog('SUBMIT', 'Updating tour registrations...');
       await updateTourRegistrations(formData.tourDate, formData.participants);
 
-      // Send emails (non-blocking - don't wait for this)
-      sendBookingEmails({
-        ...bookingData,
-        tourDate: formatDateHebrew(formData.tourDate)
-      }).then(results => {
-        if (!results.admin.success || !results.customer.success) {
-          console.warn('Email sending had issues:', results);
-        }
-      });
+      // ========================================
+      // EMERGENCY WHATSAPP REDIRECT
+      // Payment system temporarily disabled - redirect to WhatsApp
+      // ========================================
 
-      // Call success callback with booking data
+      console.log('');
+      console.log('=== EMERGENCY WHATSAPP REDIRECT ===');
+      debugLog('PAYMENT', 'Payment method selected:', formData.paymentMethod);
+      debugLog('PAYMENT', 'Amount:', totalPrice);
+      debugLog('PAYMENT', 'Redirecting to WhatsApp due to payment system issue');
+
+      const submitEndTime = performance.now();
+      const totalDuration = (submitEndTime - submitStartTime).toFixed(2);
+
+      console.log('');
+      console.log('='.repeat(60));
+      console.log('=== ✅ BOOKING SAVED - REDIRECTING TO WHATSAPP ===');
+      console.log('='.repeat(60));
+      console.log('Booking ID:', bookingId);
+      console.log('Firestore ID:', docRef.id);
+      console.log('Total Duration:', totalDuration + 'ms');
+      console.log('');
+
+      setDebugInfo(prev => ({
+        ...prev,
+        submissionComplete: true,
+        totalDuration: totalDuration + 'ms',
+        redirectMethod: 'whatsapp',
+      }));
+
+      // Build WhatsApp message with booking details
+      const shortBookingId = docRef.id.substring(0, 8);
+      const whatsappMessage = encodeURIComponent(
+        `שלום! אני מעוניין/ת להירשם לסיור קולינרי\n\n` +
+        `📋 פרטי ההזמנה:\n` +
+        `שם: ${formData.name}\n` +
+        `תאריך סיור: ${formData.tourDate}\n` +
+        `מספר משתתפים: ${formData.participants}\n` +
+        `סכום: ${totalPrice} ₪\n` +
+        `מספר הזמנה: ${shortBookingId}\n\n` +
+        `נא לאשר את ההזמנה ולשלוח פרטי תשלום. תודה!`
+      );
+
+      debugLog('SUBMIT', 'Opening WhatsApp with message...');
+
+      // Open WhatsApp
+      window.location.href = `https://wa.me/972506724312?text=${whatsappMessage}`;
+      return; // Stop execution here
+
+      // Call success callback with booking data (only if not redirecting - currently unreachable)
       if (onSuccess) {
+        debugLog('SUBMIT', 'Calling onSuccess callback...');
         onSuccess({
           ...bookingData,
-          firestoreId: docRef.id
+          firestoreId: docRef.id,
         });
       }
 
     } catch (error) {
-      console.error('Error creating booking:', error);
+      console.log('');
+      console.log('='.repeat(60));
+      console.log('=== ❌ BOOKING SUBMISSION FAILED ===');
+      console.log('='.repeat(60));
+      console.error('Error details:', error);
+      debugLog('ERROR', 'Submission error:', {
+        message: error.message,
+        code: error.code,
+        name: error.name,
+        stack: error.stack
+      });
+
+      setDebugInfo(prev => ({
+        ...prev,
+        lastError: error.message,
+        errorCode: error.code,
+        errorStack: error.stack
+      }));
+
       setSubmitError('אירעה שגיאה בשמירת ההזמנה. אנא נסה שוב או צור קשר טלפונית.');
     } finally {
       setIsSubmitting(false);
@@ -363,6 +610,20 @@ const BookingForm = ({ onSuccess }) => {
         {t('booking.title')}
       </h2>
 
+      {/* Temporary Payment Issue Notice */}
+      <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-6 mb-6" dir="rtl">
+        <div className="flex items-center gap-3 mb-3 justify-end">
+          <h3 className="text-xl font-bold text-yellow-400">תקלה זמנית במערכת התשלומים</h3>
+          <span className="text-3xl">⚠️</span>
+        </div>
+        <p className="text-white text-right mb-3">
+          כרגע ישנה תקלה זמנית במערכת התשלומים האוטומטית.
+        </p>
+        <p className="text-yellow-300 text-right text-sm">
+          לאחר מילוי הטופס, תועבר/י ישירות לוואטסאפ שלנו לסיום ההזמנה ותיאום התשלום.
+        </p>
+      </div>
+
       {/* Pre-filled Summary Card */}
       {(isDateLocked || isParticipantsLocked) && (
         <div className="bg-brand-gold/10 border-2 border-brand-gold/50 rounded-3xl p-6 mb-8" dir="rtl">
@@ -370,7 +631,7 @@ const BookingForm = ({ onSuccess }) => {
             <CheckCircle size={24} className="text-green-400" />
             <h3 className="text-lg font-bold text-white">פרטי ההזמנה שנבחרו</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {isDateLocked && (
               <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
@@ -387,7 +648,7 @@ const BookingForm = ({ onSuccess }) => {
                 </div>
               </div>
             )}
-            
+
             {isParticipantsLocked && (
               <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -404,13 +665,13 @@ const BookingForm = ({ onSuccess }) => {
               </div>
             )}
           </div>
-          
+
           {/* Total Price Preview */}
           <div className="mt-4 pt-4 border-t border-white/10 text-center">
             <span className="text-gray-400 text-sm">סה"כ לתשלום: </span>
             <span className="text-2xl font-black text-brand-gold">₪{totalPrice}</span>
           </div>
-          
+
           {/* Change Selection Button */}
           <button
             type="button"
@@ -501,25 +762,6 @@ const BookingForm = ({ onSuccess }) => {
           {errors.howDidYouHear && <p className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}
         </div>
 
-        {/* Date of Birth */}
-        <div>
-          <label htmlFor="dateOfBirth" className="block text-sm font-bold mb-2 text-right">
-            {t('booking.form.dateOfBirth')} <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="date"
-            id="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-            max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-            className={`w-full bg-brand-dark border ${errors.dateOfBirth ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center`}
-            style={{ colorScheme: 'dark' }}
-            disabled={isSubmitting}
-          />
-          {errors.dateOfBirth && <p className="text-red-400 text-sm mt-1 text-right">{errors.dateOfBirth}</p>}
-          <p className="text-xs text-gray-400 mt-1 text-right">{t('booking.validation.ageRestriction')}</p>
-        </div>
-
         {/* Tour Date - Locked if pre-filled */}
         {!isDateLocked ? (
           <div>
@@ -534,7 +776,7 @@ const BookingForm = ({ onSuccess }) => {
               onChange={(e) => {
                 const selectedDate = e.target.value;
                 handleInputChange('tourDate', selectedDate);
-                
+
                 // Validate on change
                 if (selectedDate) {
                   const date = new Date(selectedDate + 'T00:00:00');
@@ -596,16 +838,12 @@ const BookingForm = ({ onSuccess }) => {
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 1;
                   const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
-                  
+
                   if (value >= 1 && value <= maxAllowed) {
                     handleInputChange('participants', value);
                   } else if (value > maxAllowed) {
                     handleInputChange('participants', maxAllowed);
-                    if (selectedDateCapacity && selectedDateCapacity.available < 20) {
-                      setErrors(prev => ({ ...prev, participants: `נותרו רק ${selectedDateCapacity.available} מקומות פנויים` }));
-                    } else {
-                      setErrors(prev => ({ ...prev, participants: t('booking.validation.participantsRange') }));
-                    }
+                    setErrors(prev => ({ ...prev, participants: t('booking.validation.participantsRange') }));
                   } else {
                     handleInputChange('participants', 1);
                   }
@@ -614,7 +852,7 @@ const BookingForm = ({ onSuccess }) => {
                   // Ensure valid value on blur
                   const value = parseInt(e.target.value);
                   const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
-                  
+
                   if (isNaN(value) || value < 1) {
                     handleInputChange('participants', 1);
                   } else if (value > maxAllowed) {
@@ -736,8 +974,8 @@ const BookingForm = ({ onSuccess }) => {
             />
             <span className={`text-sm text-right ${errors.agreeToTerms ? 'text-red-400' : 'text-gray-300'}`}>
               {t('booking.form.agreeToTerms').split('תנאי השימוש והתקנון')[0]}
-              <a 
-                href="/terms" 
+              <a
+                href="/terms"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-gold underline hover:text-brand-gold/80"
@@ -759,13 +997,20 @@ const BookingForm = ({ onSuccess }) => {
           </div>
         )}
 
-        {/* Submit Button */}
+        {/* Submit Button - WhatsApp Redirect */}
         <button
           type="submit"
           disabled={isSubmitting || (selectedDateCapacity && selectedDateCapacity.available <= 0)}
-          className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full bg-green-500 text-white py-5 rounded-full font-black text-xl hover:bg-green-600 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
         >
-          {isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
+          {isSubmitting ? (
+            'שומר פרטים...'
+          ) : (
+            <>
+              <span className="text-2xl">💬</span>
+              <span>שלח הזמנה ופנה לוואטסאפ</span>
+            </>
+          )}
         </button>
 
         <button
@@ -779,7 +1024,7 @@ const BookingForm = ({ onSuccess }) => {
         </button>
 
         <p className="text-center text-sm text-gray-400">
-          לאחר שליחת ההזמנה תקבל אישור במייל
+          לאחר שליחת ההזמנה תועבר/י לוואטסאפ לתיאום התשלום
         </p>
 
         {/* Contact Information */}
@@ -792,19 +1037,19 @@ const BookingForm = ({ onSuccess }) => {
               <p className="text-white font-bold text-lg">{t('booking.contact.name')}</p>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <a 
-                href="tel:0505804367" 
+              <a
+                href="tel:0506724312"
                 className="text-brand-gold hover:text-brand-gold/80 font-bold text-xl transition-colors"
                 dir="ltr"
               >
-                050-580-4367
+                050-672-4312
               </a>
               <Phone size={20} className="text-brand-gold" />
             </div>
             <div>
-              <a 
-                href="https://wa.me/972505804367" 
-                target="_blank" 
+              <a
+                href="https://wa.me/972506724312"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-green-700 transition-all"
               >
@@ -815,6 +1060,125 @@ const BookingForm = ({ onSuccess }) => {
           </div>
         </div>
       </form>
+
+      {/* Debug Panel - Only visible when DEBUG_MODE is true */}
+      {DEBUG_MODE && (
+        <>
+          {/* Debug Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setShowDebug(!showDebug)}
+            className="fixed bottom-4 left-4 bg-red-600 text-white px-4 py-2 rounded-full z-50 text-sm font-bold shadow-lg hover:bg-red-700 transition-all"
+          >
+            🐛 {showDebug ? 'Hide Debug' : 'Debug'}
+          </button>
+
+          {/* Debug Panel */}
+          {showDebug && (
+            <div className="fixed bottom-16 left-4 bg-gray-900/95 text-white p-4 rounded-lg max-w-md z-50 max-h-[70vh] overflow-auto border border-red-500/50 shadow-xl" dir="ltr">
+              <h3 className="font-bold mb-3 text-red-400 flex items-center gap-2">
+                🐛 Debug Panel
+                <span className="text-xs text-gray-400">BookingForm</span>
+              </h3>
+
+              <div className="space-y-3 text-xs font-mono">
+                {/* Environment */}
+                <div className="bg-gray-800 p-2 rounded">
+                  <div className="text-yellow-400 font-bold mb-1">Environment</div>
+                  <div>Mode: {debugInfo.environment || 'unknown'}</div>
+                  <div>Firebase: {debugInfo.firebaseConfigured ? '✅ Connected' : '❌ Not Connected'}</div>
+                  <div>APP_ID: {debugInfo.appId || 'N/A'}</div>
+                </div>
+
+                {/* Form State */}
+                <div className="bg-gray-800 p-2 rounded">
+                  <div className="text-blue-400 font-bold mb-1">Form State</div>
+                  <div>Name: {formData.name ? '✅' : '❌'}</div>
+                  <div>Email: {formData.email ? '✅' : '❌'}</div>
+                  <div>Phone: {formData.phone ? '✅' : '❌'}</div>
+                  <div>Date: {formData.tourDate || 'Not selected'}</div>
+                  <div>Participants: {formData.participants}</div>
+                  <div>Payment: {formData.paymentMethod || 'Not selected'}</div>
+                  <div>Terms: {formData.agreeToTerms ? '✅' : '❌'}</div>
+                </div>
+
+                {/* Capacity */}
+                {selectedDateCapacity && (
+                  <div className="bg-gray-800 p-2 rounded">
+                    <div className="text-green-400 font-bold mb-1">Capacity</div>
+                    <div>Max: {selectedDateCapacity.max}</div>
+                    <div>Current: {selectedDateCapacity.current}</div>
+                    <div>Available: {selectedDateCapacity.available}</div>
+                  </div>
+                )}
+
+                {/* Last Submission */}
+                {debugInfo.lastSubmitAttempt && (
+                  <div className="bg-gray-800 p-2 rounded">
+                    <div className="text-purple-400 font-bold mb-1">Last Submission</div>
+                    <div>Time: {debugInfo.lastSubmitAttempt}</div>
+                    {debugInfo.lastBookingId && <div>Booking ID: {debugInfo.lastBookingId}</div>}
+                    {debugInfo.firestoreId && <div>Firestore ID: {debugInfo.firestoreId}</div>}
+                    {debugInfo.firebaseSaveTime && <div>Firebase Save: {debugInfo.firebaseSaveTime}</div>}
+                    {debugInfo.totalDuration && <div>Total Time: {debugInfo.totalDuration}</div>}
+                  </div>
+                )}
+
+                {/* Errors */}
+                {debugInfo.lastError && (
+                  <div className="bg-red-900/50 p-2 rounded border border-red-500">
+                    <div className="text-red-400 font-bold mb-1">❌ Last Error</div>
+                    <div className="break-all">{debugInfo.lastError}</div>
+                    {debugInfo.errorCode && <div>Code: {debugInfo.errorCode}</div>}
+                  </div>
+                )}
+
+                {/* Email Results */}
+                {debugInfo.emailResults && (
+                  <div className="bg-gray-800 p-2 rounded">
+                    <div className="text-cyan-400 font-bold mb-1">Email Results</div>
+                    <div>Admin: {debugInfo.emailResults.admin?.success ? '✅' : '❌'}</div>
+                    <div>Customer: {debugInfo.emailResults.customer?.success ? '✅' : '❌'}</div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log('=== MANUAL DEBUG DUMP ===');
+                      console.log('Form Data:', formData);
+                      console.log('Cloud Data:', cloudData);
+                      console.log('Debug Info:', debugInfo);
+                      console.log('Errors:', errors);
+                      console.log('Selected Date Capacity:', selectedDateCapacity);
+                      console.log('=========================');
+                    }}
+                    className="bg-blue-600 px-3 py-1 rounded text-xs hover:bg-blue-700"
+                  >
+                    Log State
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => console.clear()}
+                    className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-700"
+                  >
+                    Clear Console
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDebugInfo({})}
+                    className="bg-yellow-600 px-3 py-1 rounded text-xs hover:bg-yellow-700"
+                  >
+                    Reset Debug
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
