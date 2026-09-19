@@ -137,7 +137,7 @@ const BookingSection = () => {
       `תודה!`
     );
     
-    const whatsappUrl = `https://wa.me/972505804367?text=${whatsappMessage}`;
+    const whatsappUrl = `https://wa.me/972506724312?text=${whatsappMessage}`;
     
     const message = customMessage || 
       (availableSpots > 0 
