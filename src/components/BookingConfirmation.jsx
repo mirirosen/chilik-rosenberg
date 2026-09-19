@@ -134,13 +134,13 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
           <h3 className="text-lg font-bold text-brand-gold mb-3">{t('confirmation.contact.title')}</h3>
           <div className="space-y-2 text-gray-300">
             <p className="flex items-center justify-center gap-2">
-              <a href="tel:0505804367" className="text-brand-gold hover:underline" dir="ltr">
-                050-580-4367
+              <a href="tel:0506724312" className="text-brand-gold hover:underline" dir="ltr">
+                050-672-4312
               </a>
               <Phone size={16} />
             </p>
             <p className="flex items-center justify-center gap-2">
-              <a href="https://wa.me/972505804367" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
+              <a href="https://wa.me/972506724312" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
                 {t('confirmation.contact.whatsapp')}
               </a>
               <MessageCircle size={16} className="text-green-400" />
