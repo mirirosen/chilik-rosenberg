@@ -205,3 +205,9 @@
   .figma-portrait { width:min(45vw,650px); height:68vh; }
   .figma-title { font-size:clamp(58px,5.7vw,92px); line-height:.96; }
 }
+/* Desktop source frame is 1920px wide: 132px header + 976px hero. Scale proportionally. */
+@media (min-width: 761px) {
+  .main-header { height:clamp(88px,6.875vw,132px); }
+  .figma-hero { min-height:50.833vw; padding-top:clamp(88px,6.875vw,132px); }
+  .figma-hero > .relative { min-height:50.833vw; }
+}
