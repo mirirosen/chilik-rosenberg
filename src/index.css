@@ -190,3 +190,18 @@
   .figma-portrait { width:255px; height:365px; border-radius:0; filter:none; }
   .figma-portrait::after { display:none; }
 }
+/* Proportional match to the measurable 403x720 Figma frame. */
+@media (max-width: 760px) {
+  .figma-header-cta { width:38.7%; max-width:none; }
+  .figma-menu { width:13.6%; }
+  .figma-brand { width:47.7%; padding-left:18px; padding-right:12px; }
+  .figma-hero { background-position:center center; }
+  .figma-hero > .relative { padding-left:28px; padding-right:28px; }
+  .figma-portrait { width:67%; height:52.5%; }
+}
+@media (min-width: 761px) {
+  .figma-hero { min-height:calc(100vh - 88px); }
+  .figma-hero > .relative { min-height:calc(100vh - 88px); padding-top:5.5vh; padding-bottom:44vh; }
+  .figma-portrait { width:min(45vw,650px); height:68vh; }
+  .figma-title { font-size:clamp(58px,5.7vw,92px); line-height:.96; }
+}
