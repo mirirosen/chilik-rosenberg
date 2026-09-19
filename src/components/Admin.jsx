@@ -16,7 +16,7 @@ const Admin = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [activeTab, setActiveTab] = useState('tours'); // 'tours' or 'bookings'
-  
+
   // Capacity management state
   const [editingGlobalMax, setEditingGlobalMax] = useState(false);
   const [tempGlobalMax, setTempGlobalMax] = useState(30);
@@ -65,13 +65,13 @@ const Admin = () => {
 
   const saveGlobalMax = async () => {
     if (!db || !cloudData) return;
-    
+
     setSaving(true);
     setSuccessMessage('');
 
     try {
       const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
-      
+
       await setDoc(docRef, {
         ...cloudData,
         globalMaxParticipants: tempGlobalMax
@@ -95,13 +95,13 @@ const Admin = () => {
 
   const saveTourMax = async (dateStr, useGlobal, customMax) => {
     if (!db) return;
-    
+
     setSaving(true);
     setSuccessMessage('');
 
     try {
       const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
-      
+
       await setDoc(docRef, {
         date: dateStr,
         useGlobalMax: useGlobal,
@@ -137,19 +137,19 @@ const Admin = () => {
 
   const toggleBlocked = async (dateStr) => {
     if (!db || !cloudData) return;
-    
+
     setSaving(true);
     setSuccessMessage('');
 
     try {
       const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
-      
+
       const currentBlocked = cloudData.blocked || [];
       const currentSoldOut = cloudData.soldOut || [];
-      
+
       let newBlocked;
       let newSoldOut = currentSoldOut;
-      
+
       if (currentBlocked.includes(dateStr)) {
         // Unblock the date
         newBlocked = currentBlocked.filter(d => d !== dateStr);
@@ -178,19 +178,19 @@ const Admin = () => {
 
   const toggleSoldOut = async (dateStr) => {
     if (!db || !cloudData) return;
-    
+
     setSaving(true);
     setSuccessMessage('');
 
     try {
       const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
-      
+
       const currentBlocked = cloudData.blocked || [];
       const currentSoldOut = cloudData.soldOut || [];
-      
+
       let newSoldOut;
       let newBlocked = currentBlocked;
-      
+
       if (currentSoldOut.includes(dateStr)) {
         // Mark as available
         newSoldOut = currentSoldOut.filter(d => d !== dateStr);
@@ -230,12 +230,12 @@ const Admin = () => {
 
   const stats = useMemo(() => {
     if (!cloudData) return { available: 0, soldOut: 0, blocked: 0, totalRegistrations: 0, totalCapacity: 0, fullTours: 0 };
-    
+
     const globalMax = cloudData.globalMaxParticipants || 30;
     let totalRegistrations = 0;
     let totalCapacity = 0;
     let fullTours = 0;
-    
+
     thursdays.forEach(({ dateStr }) => {
       const status = getStatus(dateStr);
       if (status.status !== 'blocked') {
@@ -243,13 +243,13 @@ const Admin = () => {
         const current = getCurrentRegistrations(cloudData, dateStr);
         totalCapacity += max;
         totalRegistrations += current;
-        
+
         if (current >= max) {
           fullTours++;
         }
       }
     });
-    
+
     return {
       available: thursdays.filter(t => getStatus(t.dateStr).status === 'available').length,
       soldOut: cloudData.soldOut?.length || 0,
@@ -273,7 +273,7 @@ const Admin = () => {
           <h1 className="text-4xl font-serif text-brand-gold text-center mb-8 font-bold">
             כניסת מנהל
           </h1>
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-bold mb-2 text-right">
@@ -305,8 +305,8 @@ const Admin = () => {
           </form>
 
           <div className="mt-8 text-center">
-            <a 
-              href="/" 
+            <a
+              href="/"
               className="text-sm text-gray-400 hover:text-brand-gold transition-colors"
             >
               ← חזרה לאתר
@@ -331,7 +331,7 @@ const Admin = () => {
               ניהול סיורים
             </h1>
           </div>
-          
+
           <div className="flex flex-row-reverse items-center gap-4">
             <button
               onClick={handleLogout}
@@ -340,8 +340,8 @@ const Admin = () => {
               <LogOut size={16} />
               <span className="hidden md:inline">יציאה</span>
             </button>
-            <a 
-              href="/" 
+            <a
+              href="/"
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
               לאתר הראשי
@@ -392,7 +392,7 @@ const Admin = () => {
                 {successMessage}
               </div>
             )}
-            
+
             {error && (
               <div className="mb-6 bg-red-500/10 border border-red-500/50 rounded-2xl p-4 text-red-400 text-center animate-in fade-in">
                 {error}
@@ -407,13 +407,13 @@ const Admin = () => {
                 <h2 className="text-xl font-bold text-brand-gold">הגדרות קיבולת כללית</h2>
                 <Settings size={24} className="text-brand-gold" />
               </div>
-              
+
               <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-6">
                 <div className="text-right">
                   <label className="text-white font-bold text-lg block mb-1">מקסימום משתתפים לסיור</label>
                   <p className="text-gray-400 text-sm">ברירת מחדל לכל הסיורים (ניתן לשנות לכל סיור בנפרד)</p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   {editingGlobalMax ? (
                     <>
@@ -424,7 +424,7 @@ const Admin = () => {
                       >
                         <Minus size={20} />
                       </button>
-                      
+
                       <input
                         type="number"
                         value={tempGlobalMax}
@@ -433,7 +433,7 @@ const Admin = () => {
                         min="1"
                         max="100"
                       />
-                      
+
                       <button
                         onClick={() => setTempGlobalMax(Math.min(100, tempGlobalMax + 1))}
                         className="bg-brand-dark text-white w-12 h-12 rounded-full text-2xl font-bold hover:bg-brand-dark-lighter transition-all flex items-center justify-center border border-white/20"
@@ -441,7 +441,7 @@ const Admin = () => {
                       >
                         <Plus size={20} />
                       </button>
-                      
+
                       <div className="flex gap-2 mr-4">
                         <button
                           onClick={saveGlobalMax}
@@ -490,21 +490,21 @@ const Admin = () => {
                 </div>
                 <div className="text-sm text-gray-400">מקסימום כללי</div>
               </div>
-              
+
               <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-6 text-center">
                 <div className="text-4xl font-black text-green-400 mb-2">
                   {stats.totalAvailable}
                 </div>
                 <div className="text-sm text-gray-400">מקומות פנויים</div>
               </div>
-              
+
               <div className="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-6 text-center">
                 <div className="text-4xl font-black text-blue-400 mb-2">
                   {stats.totalRegistrations}
                 </div>
                 <div className="text-sm text-gray-400">סה"כ נרשמים</div>
               </div>
-              
+
               <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-6 text-center">
                 <div className="text-4xl font-black text-red-400 mb-2">
                   {stats.fullTours}
@@ -518,7 +518,7 @@ const Admin = () => {
               <h2 className="text-xl font-bold text-brand-gold mb-6 text-right">
                 בחירת תאריך מהירה
               </h2>
-              
+
               <div className="flex flex-col md:flex-row gap-6 items-center">
                 <div className="w-full md:w-1/3">
                   <label htmlFor="datepicker" className="block text-sm font-bold mb-2 text-right text-gray-300">
@@ -649,7 +649,7 @@ const Admin = () => {
               <h2 className="text-2xl font-serif text-brand-gold mb-6 text-right font-bold">
                 סיורי חמישי הקרובים
               </h2>
-              
+
               {saving && (
                 <div className="text-center text-brand-gold mb-4 animate-pulse">
                   שומר שינויים...
@@ -665,7 +665,7 @@ const Admin = () => {
                   const isUsingGlobal = usesGlobalMax(cloudData, item.dateStr);
                   const isEditing = editingTourMax === item.dateStr;
                   const isFull = currentRegs >= effectiveMax;
-                  
+
                   return (
                     <div
                       key={i}
@@ -750,7 +750,7 @@ const Admin = () => {
                                     >
                                       <Minus size={14} />
                                     </button>
-                                    
+
                                     <input
                                       type="number"
                                       value={tempTourMax}
@@ -759,7 +759,7 @@ const Admin = () => {
                                       min="1"
                                       max="100"
                                     />
-                                    
+
                                     <button
                                       onClick={() => setTempTourMax(Math.min(100, tempTourMax + 1))}
                                       className="bg-brand-dark-lighter text-white w-8 h-8 rounded-full flex items-center justify-center border border-white/20 hover:border-brand-gold"
@@ -767,7 +767,7 @@ const Admin = () => {
                                     >
                                       <Plus size={14} />
                                     </button>
-                                    
+
                                     <button
                                       onClick={() => saveTourMax(item.dateStr, false, tempTourMax)}
                                       disabled={saving}
@@ -775,7 +775,7 @@ const Admin = () => {
                                     >
                                       שמור
                                     </button>
-                                    
+
                                     <button
                                       onClick={() => setEditingTourMax(null)}
                                       className="text-gray-400 hover:text-white px-3 py-2 text-sm"
@@ -792,7 +792,7 @@ const Admin = () => {
                                       <Edit2 size={14} />
                                       <span>ערוך קיבולת</span>
                                     </button>
-                                    
+
                                     {!isUsingGlobal && (
                                       <button
                                         onClick={() => resetToGlobalMax(item.dateStr)}
@@ -818,7 +818,7 @@ const Admin = () => {
                                     style={{ width: `${Math.min(100, (currentRegs / effectiveMax) * 100)}%` }}
                                   />
                                 </div>
-                                
+
                                 {/* Numbers */}
                                 <div className="flex items-center gap-2">
                                   <span className={`text-2xl font-black ${isFull ? 'text-red-400' : 'text-brand-gold'}`}>
@@ -827,16 +827,16 @@ const Admin = () => {
                                   <span className="text-gray-400">/</span>
                                   <span className="text-xl font-bold text-white">{effectiveMax}</span>
                                 </div>
-                                
+
                                 {/* Type Badge */}
                                 <span className={`text-xs px-2 py-1 rounded-full ${
-                                  isUsingGlobal 
-                                    ? 'bg-gray-500/20 text-gray-400' 
+                                  isUsingGlobal
+                                    ? 'bg-gray-500/20 text-gray-400'
                                     : 'bg-blue-500/20 text-blue-400'
                                 }`}>
                                   {isUsingGlobal ? 'כללי' : 'מותאם'}
                                 </span>
-                                
+
                                 {/* Full Badge */}
                                 {isFull && status.status === 'available' && (
                                   <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-bold animate-pulse">

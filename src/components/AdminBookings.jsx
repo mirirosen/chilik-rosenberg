@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc, increment } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { db, APP_ID } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations } from '../hooks/useFirebaseData';
 import { formatDateHebrew } from '../utils/dateUtils';
-import { Calendar, Users, Phone, Mail, MessageSquare, CheckCircle, XCircle, Clock } from '../utils/icons';
+import { sendBookingEmails } from '../utils/emailService';
+import { checkMorningPaymentStatus } from '../services/morningPayment';
+import { Calendar, Users, Phone, Mail, MessageSquare, CheckCircle, XCircle, Clock, CreditCard, Building } from '../utils/icons';
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, upcoming, past
   const [updating, setUpdating] = useState(null);
-  
+  const [sendingEmail, setSendingEmail] = useState(null);
+  const [checkingPayment, setCheckingPayment] = useState(null);
+
   const cloudData = useFirebaseData();
 
   useEffect(() => {
     // Real-time listener for bookings
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
-    
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const bookingsData = [];
       snapshot.forEach((doc) => {
@@ -38,11 +42,11 @@ const AdminBookings = () => {
   // Update tour date registrations count
   const updateTourRegistrations = async (dateStr, delta) => {
     if (!db || !dateStr) return;
-    
+
     try {
       const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
       const tourDoc = await getDoc(tourDocRef);
-      
+
       if (tourDoc.exists()) {
         await setDoc(tourDocRef, {
           currentRegistrations: increment(delta)
@@ -57,7 +61,7 @@ const AdminBookings = () => {
           currentRegistrations: newCount
         });
       }
-      
+
       // Check and update sold-out status
       await checkAndUpdateSoldOut(dateStr, delta);
     } catch (error) {
@@ -68,20 +72,20 @@ const AdminBookings = () => {
   // Check and auto-update sold-out status based on capacity
   const checkAndUpdateSoldOut = async (dateStr, delta) => {
     if (!db || !cloudData) return;
-    
+
     try {
       const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
       const tourDoc = await getDoc(tourDocRef);
       const tourData = tourDoc.exists() ? tourDoc.data() : { useGlobalMax: true, currentRegistrations: 0 };
-      
+
       const globalMax = cloudData.globalMaxParticipants || 30;
       const effectiveMax = tourData.useGlobalMax ? globalMax : (tourData.customMax || globalMax);
       const newRegistrations = (tourData.currentRegistrations || 0) + delta;
-      
+
       const globalDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
       const currentSoldOut = cloudData.soldOut || [];
       const isSoldOut = currentSoldOut.includes(dateStr);
-      
+
       if (newRegistrations >= effectiveMax && !isSoldOut) {
         // Auto mark as sold out
         await setDoc(globalDocRef, {
@@ -103,7 +107,7 @@ const AdminBookings = () => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
       const oldStatus = booking.status;
-      
+
       await updateDoc(bookingRef, {
         status: newStatus,
         updatedAt: new Date()
@@ -111,7 +115,7 @@ const AdminBookings = () => {
 
       // Update registration count based on status change
       const participants = booking.participants || 0;
-      
+
       // Calculate delta based on status transitions
       // Only confirmed bookings count towards registrations
       if (oldStatus === 'confirmed' && newStatus !== 'confirmed') {
@@ -123,7 +127,7 @@ const AdminBookings = () => {
       }
       // If both old and new are not 'confirmed', no change needed
       // If both old and new are 'confirmed', no change needed (shouldn't happen)
-      
+
     } catch (error) {
       console.error('Error updating booking:', error);
       alert('שגיאה בעדכון ההזמנה');
@@ -132,9 +136,131 @@ const AdminBookings = () => {
     }
   };
 
+  // Confirm payment and send confirmation emails
+  const confirmPaymentAndSendEmail = async (bookingId, booking) => {
+    console.log('=== CONFIRMING PAYMENT & SENDING EMAILS ===');
+    console.log('Booking ID:', bookingId);
+
+    setSendingEmail(bookingId);
+
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      const oldStatus = booking.status;
+
+      // 1. Update booking status to confirmed and payment to paid
+      await updateDoc(bookingRef, {
+        status: 'confirmed',
+        paymentStatus: 'paid',
+        paidAt: serverTimestamp(),
+        confirmedBy: 'admin',
+        updatedAt: serverTimestamp(),
+      });
+
+      console.log('✅ Booking status updated to confirmed + paid');
+
+      // 2. Update registration count if status changed
+      const participants = booking.participants || 0;
+      if (oldStatus !== 'confirmed') {
+        await updateTourRegistrations(booking.tourDate, participants);
+      }
+
+      // 3. Send confirmation emails
+      console.log('Sending confirmation emails...');
+      const emailResults = await sendBookingEmails({
+        ...booking,
+        id: bookingId,
+        tourDate: formatDateHebrew(booking.tourDate),
+        paymentStatus: 'paid',
+      });
+
+      console.log('Email results:', emailResults);
+
+      if (emailResults.admin?.success && emailResults.customer?.success) {
+        console.log('✅ All emails sent successfully');
+        alert('✅ ההזמנה אושרה ונשלחו מיילים ללקוח ולאדמין');
+      } else if (emailResults.customer?.success) {
+        console.log('⚠️ Customer email sent, admin email failed');
+        alert('ההזמנה אושרה. המייל ללקוח נשלח, אך המייל לאדמין נכשל.');
+      } else if (emailResults.admin?.success) {
+        console.log('⚠️ Admin email sent, customer email failed');
+        alert('ההזמנה אושרה. המייל לאדמין נשלח, אך המייל ללקוח נכשל.');
+      } else {
+        console.error('❌ All emails failed');
+        alert('ההזמנה אושרה, אך שליחת המיילים נכשלה. בדוק את הקונסול.');
+      }
+
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      alert('שגיאה באישור התשלום: ' + error.message);
+    } finally {
+      setSendingEmail(null);
+    }
+  };
+
+  // Check Morning payment status
+  const checkPaymentStatus = async (bookingId, booking) => {
+    if (!booking.morningDocumentId) {
+      alert('אין מסמך Morning מקושר להזמנה זו');
+      return;
+    }
+
+    setCheckingPayment(bookingId);
+
+    try {
+      const result = await checkMorningPaymentStatus(booking.morningDocumentId);
+
+      if (result.success) {
+        // Update booking with latest status
+        const bookingRef = doc(db, 'bookings', bookingId);
+        await updateDoc(bookingRef, {
+          morningPaymentStatus: result.status,
+          morningStatusText: result.statusText,
+          lastPaymentCheck: serverTimestamp(),
+        });
+
+        if (result.isPaid) {
+          // Automatically confirm and send email
+          const shouldConfirm = window.confirm(
+            `התשלום אושר במורנינג (${result.statusText})!\n\n` +
+            `האם לאשר את ההזמנה ולשלוח מייל אישור ללקוח?`
+          );
+
+          if (shouldConfirm) {
+            await confirmPaymentAndSendEmail(bookingId, booking);
+          }
+        } else {
+          alert(`סטטוס תשלום: ${result.statusText}`);
+        }
+      } else {
+        alert('שגיאה בבדיקת סטטוס התשלום: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error checking payment:', error);
+      alert('שגיאה בבדיקת התשלום: ' + error.message);
+    } finally {
+      setCheckingPayment(null);
+    }
+  };
+
+  // Get payment status badge
+  const getPaymentStatusBadge = (paymentStatus) => {
+    switch (paymentStatus) {
+      case 'paid':
+        return { bg: 'bg-green-500/20', text: 'text-green-400', label: 'שולם' };
+      case 'awaiting_payment':
+        return { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'ממתין לתשלום' };
+      case 'manual_required':
+        return { bg: 'bg-orange-500/20', text: 'text-orange-400', label: 'דרוש אישור ידני' };
+      case 'failed':
+        return { bg: 'bg-red-500/20', text: 'text-red-400', label: 'נכשל' };
+      default:
+        return { bg: 'bg-gray-500/20', text: 'text-gray-400', label: 'ממתין' };
+    }
+  };
+
   const getFilteredBookings = () => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     switch (filter) {
       case 'upcoming':
         return bookings.filter(b => b.tourDate >= today);
@@ -206,22 +332,22 @@ const AdminBookings = () => {
           <div className="text-4xl font-black text-blue-400 mb-2">{stats.total}</div>
           <div className="text-sm text-gray-400">סה"כ הזמנות</div>
         </div>
-        
+
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-yellow-400 mb-2">{stats.pending}</div>
           <div className="text-sm text-gray-400">ממתינות</div>
         </div>
-        
+
         <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-green-400 mb-2">{stats.confirmed}</div>
           <div className="text-sm text-gray-400">מאושרות</div>
         </div>
-        
+
         <div className="bg-purple-500/10 border border-purple-500/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-purple-400 mb-2">{stats.totalParticipants}</div>
           <div className="text-sm text-gray-400">משתתפים מאושרים</div>
         </div>
-        
+
         <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-3xl p-6 text-center">
           <div className="text-4xl font-black text-brand-gold mb-2">₪{stats.totalRevenue.toLocaleString()}</div>
           <div className="text-sm text-gray-400">סה"כ הכנסות</div>
@@ -271,13 +397,13 @@ const AdminBookings = () => {
         ) : (
           filteredBookings.map((booking) => {
             const statusBadge = getStatusBadge(booking.status);
-            
+
             // Get tour capacity info
             const tourCapacity = cloudData ? {
               max: getEffectiveMax(cloudData, booking.tourDate),
               current: getCurrentRegistrations(cloudData, booking.tourDate)
             } : null;
-            
+
             return (
               <div
                 key={booking.id}
@@ -297,7 +423,7 @@ const AdminBookings = () => {
                           {statusBadge.label}
                         </span>
                       </div>
-                      
+
                       <div className="text-right">
                         <div className="text-2xl font-black text-white">{booking.name}</div>
                         <div className="text-sm text-gray-400">
@@ -363,6 +489,85 @@ const AdminBookings = () => {
                         <p className="text-white text-right text-sm">{booking.notes}</p>
                       </div>
                     )}
+
+                    {/* Morning Payment Details */}
+                    {(booking.morningDocumentId || booking.paymentStatus) && (
+                      <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4">
+                        <div className="flex items-center gap-2 text-blue-400 mb-3">
+                          <CreditCard size={16} />
+                          <span className="text-sm font-bold">פרטי תשלום</span>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                          {/* Payment Status */}
+                          {booking.paymentStatus && (
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPaymentStatusBadge(booking.paymentStatus).bg} ${getPaymentStatusBadge(booking.paymentStatus).text}`}>
+                                {getPaymentStatusBadge(booking.paymentStatus).label}
+                              </span>
+                              <span className="text-gray-400">סטטוס תשלום:</span>
+                            </div>
+                          )}
+
+                          {/* Payment Method */}
+                          {booking.paymentMethod && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-white">
+                                {booking.paymentMethod === 'bit' ? 'ביט' :
+                                 booking.paymentMethod === 'credit' ? 'אשראי' :
+                                 booking.paymentMethod === 'bank_transfer' ? 'העברה בנקאית' :
+                                 booking.paymentMethod}
+                              </span>
+                              <span className="text-gray-400">אמצעי תשלום:</span>
+                            </div>
+                          )}
+
+                          {/* Morning Document ID */}
+                          {booking.morningDocumentId && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-white font-mono text-xs">{booking.morningDocumentId}</span>
+                              <span className="text-gray-400">מסמך Morning:</span>
+                            </div>
+                          )}
+
+                          {/* Morning Document Number */}
+                          {booking.morningDocumentNumber && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-white font-bold">{booking.morningDocumentNumber}</span>
+                              <span className="text-gray-400">מס' חשבונית:</span>
+                            </div>
+                          )}
+
+                          {/* Morning Error */}
+                          {booking.morningError && (
+                            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 mt-2">
+                              <span className="text-red-400 text-xs">שגיאה: {booking.morningError}</span>
+                            </div>
+                          )}
+
+                          {/* Morning Links */}
+                          {booking.morningDocumentId && (
+                            <div className="flex gap-2 mt-3">
+                              <a
+                                href={`https://app.greeninvoice.co.il/documents/${booking.morningDocumentId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline text-xs"
+                              >
+                                צפה במורנינג →
+                              </a>
+                              <button
+                                onClick={() => checkPaymentStatus(booking.id, booking)}
+                                disabled={checkingPayment === booking.id}
+                                className="text-purple-400 hover:underline text-xs disabled:opacity-50"
+                              >
+                                {checkingPayment === booking.id ? 'בודק...' : 'בדוק סטטוס'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Side - Actions */}
@@ -377,14 +582,36 @@ const AdminBookings = () => {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-2">
+                      {/* Confirm Payment & Send Email - Main CTA */}
+                      {booking.status !== 'confirmed' && booking.paymentStatus !== 'paid' && (
+                        <button
+                          onClick={() => confirmPaymentAndSendEmail(booking.id, booking)}
+                          disabled={sendingEmail === booking.id}
+                          className="flex items-center justify-center gap-2 bg-brand-gold text-brand-dark px-4 py-3 rounded-full text-sm font-bold hover:scale-105 transition-all disabled:opacity-50"
+                        >
+                          {sendingEmail === booking.id ? (
+                            <>
+                              <div className="animate-spin w-4 h-4 border-2 border-brand-dark border-t-transparent rounded-full"></div>
+                              שולח...
+                            </>
+                          ) : (
+                            <>
+                              <Mail size={16} />
+                              אשר תשלום + שלח מייל
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {/* Simple status update (without email) */}
                       {booking.status !== 'confirmed' && (
                         <button
                           onClick={() => updateBookingStatus(booking.id, 'confirmed', booking)}
                           disabled={updating === booking.id}
-                          className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-3 rounded-full text-sm font-bold hover:bg-green-600 transition-all disabled:opacity-50"
+                          className="flex items-center justify-center gap-2 bg-green-500/20 text-green-400 border border-green-500/30 px-4 py-3 rounded-full text-sm font-bold hover:bg-green-500/30 transition-all disabled:opacity-50"
                         >
                           <CheckCircle size={16} />
-                          אשר הזמנה
+                          אשר (ללא מייל)
                         </button>
                       )}
 

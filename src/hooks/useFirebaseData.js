@@ -18,7 +18,7 @@ export const useFirebaseData = () => {
     }
 
     const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
-    
+
     const unsubscribe = onSnapshot(
       docRef,
       (snapshot) => {
@@ -52,7 +52,7 @@ export const useFirebaseData = () => {
     }
 
     const collectionRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates');
-    
+
     const unsubscribe = onSnapshot(
       collectionRef,
       (snapshot) => {
@@ -92,14 +92,14 @@ export const useFirebaseData = () => {
  */
 export const getEffectiveMax = (cloudData, dateStr) => {
   if (!cloudData) return 30;
-  
+
   const tourData = cloudData.tourDates?.[dateStr];
   const globalMax = cloudData.globalMaxParticipants || 30;
-  
+
   if (!tourData || tourData.useGlobalMax) {
     return globalMax;
   }
-  
+
   return tourData.customMax || globalMax;
 };
 

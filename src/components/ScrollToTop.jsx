@@ -11,8 +11,8 @@ const ScrollToTop = () => {
   if (!showScrollTop) return null;
 
   return (
-    <button 
-      onClick={scrollToTop} 
+    <button
+      onClick={scrollToTop}
       className="fixed bottom-6 right-6 z-[1100] bg-white/10 text-brand-gold p-4 rounded-full backdrop-blur-md border border-white/10 shadow-2xl floating-btn flex items-center justify-center hover:bg-white/20 transition-all"
     >
       <ArrowUp size={24} />

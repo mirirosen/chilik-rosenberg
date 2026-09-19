@@ -21,8 +21,8 @@ class ErrorBoundary extends Component {
           <h2 className="text-brand-gold text-2xl font-serif mb-4">
             אופס, משהו קטן השתבש...
           </h2>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="bg-brand-gold text-black px-8 py-2 rounded-full font-bold"
           >
             רענן דף

@@ -22,13 +22,13 @@ const getInitialLanguage = () => {
   if (saved && (saved === 'he' || saved === 'en')) {
     return saved;
   }
-  
+
   // Check session cache
   const cachedCountry = sessionStorage.getItem('detectedCountry');
   if (cachedCountry) {
     return cachedCountry === 'IL' ? 'he' : 'en';
   }
-  
+
   // Use browser language as temporary fallback
   return detectFromBrowserLanguage();
 };
@@ -41,7 +41,7 @@ i18n
     resources,
     fallbackLng: 'he',
     lng: getInitialLanguage(),
-    
+
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
@@ -81,16 +81,16 @@ export const initGeoLanguageDetection = async () => {
     console.log('User has saved language preference, skipping geolocation');
     return savedLanguage;
   }
-  
+
   try {
     const detectedLang = await detectUserLanguage();
-    
+
     // Only change if different from current
     if (detectedLang !== i18n.language) {
       console.log('Updating language based on geolocation:', detectedLang);
       i18n.changeLanguage(detectedLang);
     }
-    
+
     return detectedLang;
   } catch (error) {
     console.error('Geolocation language detection failed:', error);

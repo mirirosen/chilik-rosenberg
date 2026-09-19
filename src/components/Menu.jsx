@@ -6,7 +6,12 @@ const Menu = () => {
   const { t } = useTranslation();
 
   // Food keys mapping
-  const foodKeys = ['cholent', 'fish', 'kugel', 'liver', 'challenge', 'blintzes'];
+  const foodKeys = ['cholent', 'fish', 'kugel', 'potatoKugel', 'liver', 'challenge', 'blintzes'];
+
+  // Emoji icons for items that don't have Lucide icons
+  const emojiIcons = {
+    'pot': '🍲'
+  };
 
   return (
     <section id="menu" className="py-32 bg-brand-dark-section text-center border-y border-white/5 overflow-hidden">
@@ -16,19 +21,31 @@ const Menu = () => {
       <p className="text-xl text-gray-300 mb-12 text-center font-light">
         {t('menu.subtitle')}
       </p>
-      
+
       <div className="flex flex-row flex-nowrap overflow-x-auto gap-8 pb-12 px-8 custom-scroll scroll-smooth w-full text-center">
         {foods.map((food, i) => {
-          const IconComponent = getIcon(food.icon);
           const foodKey = foodKeys[i];
-          
+          const isEmoji = emojiIcons[food.icon];
+          const IconComponent = !isEmoji ? getIcon(food.icon) : null;
+
           return (
-            <article 
-              key={i} 
-              className="flex-shrink-0 w-80 md:w-96 bg-brand-dark-lighter rounded-6xl p-12 border border-white/5 shadow-2xl flex flex-col items-center text-center"
+            <article
+              key={i}
+              className="flex-shrink-0 w-80 md:w-96 bg-brand-dark-lighter rounded-6xl p-12 border border-white/5 shadow-2xl flex flex-col items-center text-center relative"
             >
+              {/* NEW badge for new items */}
+              {food.isNew && (
+                <span className="absolute top-6 right-6 bg-brand-gold text-brand-dark px-3 py-1 rounded-full text-xs font-black">
+                  חדש!
+                </span>
+              )}
+
               <div className="text-brand-gold mb-6 flex justify-center w-full text-center">
-                <IconComponent size={48} />
+                {isEmoji ? (
+                  <span className="text-5xl">{emojiIcons[food.icon]}</span>
+                ) : (
+                  <IconComponent size={48} />
+                )}
               </div>
               <h4 className="text-3xl font-bold mb-4 font-serif text-brand-gold text-center">
                 {t(`menu.items.${foodKey}.title`)}

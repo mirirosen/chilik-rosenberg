@@ -22,14 +22,14 @@ export const isThursday = (dateStr) => {
 export const getUpcomingThursdays = (count = 9) => {
   const d = new Date();
   d.setHours(12, 0, 0, 0);
-  
+
   let diff = (4 - d.getDay() + 7) % 7;
   if (diff === 0 && new Date().getHours() >= 20) {
     diff = 7;
   }
-  
+
   d.setDate(d.getDate() + diff);
-  
+
   const list = [];
   for (let i = 0; i < count; i++) {
     const dateStr = d.toLocaleDateString('en-CA');
@@ -40,7 +40,7 @@ export const getUpcomingThursdays = (count = 9) => {
     });
     d.setDate(d.getDate() + 7);
   }
-  
+
   return list;
 };
 

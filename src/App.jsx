@@ -18,15 +18,18 @@ import Admin from './components/Admin';
 import BookingForm from './components/BookingForm';
 import BookingConfirmation from './components/BookingConfirmation';
 import Terms from './components/Terms';
+import PaymentInstructions from './components/PaymentInstructions';
+import DesignDemo from './components/DesignDemo';
 
 function App() {
   const { i18n } = useTranslation();
-  const [currentRoute, setCurrentRoute] = useState('home'); // 'home', 'admin', 'booking', 'confirmation', 'terms'
+  const [currentRoute, setCurrentRoute] = useState('home'); // 'home', 'admin', 'booking', 'confirmation', 'terms', 'payment', 'design-demo'
   const [bookingData, setBookingData] = useState(null);
   const [isDetectingLanguage, setIsDetectingLanguage] = useState(true);
 
   // Geolocation-based language detection on first load
   useEffect(() => {
+    const detectionTimeout = window.setTimeout(() => setIsDetectingLanguage(false), 3000);
     const detectLanguage = async () => {
       // Only detect if no saved preference
       const savedLanguage = localStorage.getItem('language');
@@ -40,11 +43,13 @@ function App() {
       } catch (error) {
         console.error('Language detection error:', error);
       } finally {
+        window.clearTimeout(detectionTimeout);
         setIsDetectingLanguage(false);
       }
     };
 
     detectLanguage();
+    return () => window.clearTimeout(detectionTimeout);
   }, []);
 
   useEffect(() => {
@@ -64,6 +69,10 @@ function App() {
         setCurrentRoute('booking');
       } else if (path === '/terms' || path === '/תנאים') {
         setCurrentRoute('terms');
+      } else if (path === '/payment-instructions') {
+        setCurrentRoute('payment');
+      } else if (path === '/design-demo') {
+        setCurrentRoute('design-demo');
       } else {
         setCurrentRoute('home');
       }
@@ -89,7 +98,7 @@ function App() {
     // Listen for route changes
     window.addEventListener('popstate', checkRoute);
     window.addEventListener('hashchange', handleHashScroll);
-    
+
     return () => {
       window.removeEventListener('popstate', checkRoute);
       window.removeEventListener('hashchange', handleHashScroll);
@@ -132,6 +141,24 @@ function App() {
     return <Terms />;
   }
 
+  // Render design demo page
+  if (currentRoute === 'design-demo') {
+    return <DesignDemo />;
+  }
+
+  // Render payment instructions page
+  if (currentRoute === 'payment') {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-brand-dark text-white">
+          <Header />
+          <PaymentInstructions />
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   // Render booking form
   if (currentRoute === 'booking') {
     return (
@@ -151,8 +178,8 @@ function App() {
   if (currentRoute === 'confirmation' && bookingData) {
     return (
       <ErrorBoundary>
-        <BookingConfirmation 
-          bookingData={bookingData} 
+        <BookingConfirmation
+          bookingData={bookingData}
           onBackToHome={handleBackToHome}
         />
       </ErrorBoundary>
