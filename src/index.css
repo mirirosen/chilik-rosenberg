@@ -159,13 +159,21 @@
 .figma-hero-overlay { background: linear-gradient(90deg,rgba(35,34,36,.97),rgba(51,49,51,.83) 58%,rgba(51,49,51,.58)); }
 .figma-title { text-shadow: 0 3px 24px rgba(0,0,0,.3); }
 .figma-eyebrow::before { content:''; display:inline-block; width:52px; height:1px; margin-left:18px; vertical-align:middle; background:#A0948E; }
-.figma-portrait img { box-shadow:0 30px 70px rgba(0,0,0,.25); filter:saturate(.84); }
 @media (max-width:767px) {
   .main-header { height:72px; }
   .figma-brand span { max-width:120px; }
   .figma-header-cta { max-width:128px; font-size:13px; }
   .figma-hero { min-height:820px; padding-top:72px; }
   .figma-hero-overlay { background:linear-gradient(180deg,rgba(35,34,36,.8),rgba(35,34,36,.92)); }
-  .figma-portrait { margin-top:-45px; opacity:.9; }
-  .figma-portrait img { height:330px; width:235px; }
+}
+.figma-portrait {
+  border-radius: 48% 48% 0 0 / 28% 28% 0 0;
+  filter: drop-shadow(0 22px 35px rgba(0,0,0,.34));
+}
+.figma-portrait::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow: inset 0 0 22px 12px rgba(46,45,47,.12);
 }

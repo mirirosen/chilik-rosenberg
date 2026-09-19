@@ -11,27 +11,27 @@ const Hero = () => {
   return (
     <header className="figma-hero relative min-h-[760px] md:min-h-[720px] overflow-hidden pt-24 text-white">
       <div className="figma-hero-overlay absolute inset-0" aria-hidden="true" />
-      <div className="relative z-10 mx-auto grid min-h-[660px] max-w-7xl grid-cols-1 items-center gap-8 px-6 pb-0 pt-20 md:grid-cols-[1.25fr_.75fr] md:px-16 md:pt-10">
-        <div className="text-right">
+      <div className="relative z-10 mx-auto flex min-h-[660px] max-w-5xl flex-col items-center px-6 pb-[340px] pt-20 text-center md:min-h-[632px] md:px-16 md:pb-[290px] md:pt-16">
+        <div className="max-w-3xl">
           <p className="figma-eyebrow mb-6 text-sm font-medium tracking-[.38em] text-white/85">
             {t('hero.figmaEyebrow')}
           </p>
           <h1 className="figma-title mb-7 max-w-3xl font-serif text-5xl font-medium leading-[1.05] text-white md:text-7xl">
             {t('hero.figmaTitle')}
           </h1>
-          <p className="max-w-2xl text-base font-light leading-8 text-white/90 md:text-lg md:leading-9">
+          <p className="mx-auto max-w-2xl text-base font-light leading-8 text-white/90 md:text-lg md:leading-9">
             {t('hero.figmaDescription')}
           </p>
           <button
             onClick={scrollToDateSelection}
-            className="figma-cta mt-10 inline-flex min-w-44 items-center justify-between gap-10 bg-brand-gold px-8 py-5 text-lg font-bold text-brand-dark transition hover:brightness-105"
+            className="figma-cta mt-6 inline-flex min-w-44 items-center justify-between gap-10 bg-brand-gold px-8 py-5 text-lg font-bold text-brand-dark transition hover:brightness-105"
             aria-label={t('hero.cta')}
           >
             <span>{t('hero.figmaCta')}</span><span aria-hidden="true">←</span>
           </button>
         </div>
-        <div className="figma-portrait self-end justify-self-center md:justify-self-end">
-          <img src={profileImage} alt={t('header.title')} className="h-[390px] w-[280px] rounded-t-[150px] object-cover object-top md:h-[520px] md:w-[370px]" />
+        <div className="figma-portrait absolute bottom-0 left-1/2 h-[300px] w-[235px] -translate-x-1/2 overflow-hidden md:h-[260px] md:w-[200px]">
+          <img src={profileImage} alt={t('header.title')} className="h-full w-full object-cover object-top" />
         </div>
       </div>
     </header>
