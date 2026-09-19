@@ -793,17 +793,17 @@ const BookingForm = ({ onSuccess }) => {
             </div>
             <div className="flex items-center justify-center gap-3">
               <a 
-                href="tel:0505804367" 
+                href="tel:0506724312"
                 className="text-brand-gold hover:text-brand-gold/80 font-bold text-xl transition-colors"
                 dir="ltr"
               >
-                050-580-4367
+                050-672-4312
               </a>
               <Phone size={20} className="text-brand-gold" />
             </div>
             <div>
               <a 
-                href="https://wa.me/972505804367" 
+                href="https://wa.me/972506724312"
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-green-700 transition-all"

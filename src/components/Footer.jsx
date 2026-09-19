@@ -33,15 +33,15 @@ const Footer = () => {
                 <span className="text-brand-gold">📍</span>
               </p>
               <a 
-                href="tel:0505804367" 
+                href="tel:0506724312"
                 className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"
                 dir="ltr"
               >
-                <span dir="ltr">050-580-4367</span>
+                <span dir="ltr">050-672-4312</span>
                 <span className="text-brand-gold">📞</span>
               </a>
               <a 
-                href="https://wa.me/972505804367" 
+                href="https://wa.me/972506724312"
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 justify-end hover:text-brand-gold transition-colors"

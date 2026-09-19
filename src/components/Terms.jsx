@@ -213,7 +213,7 @@ const Terms = () => {
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl"><strong>ביטול ההזמנה חייב להיעשות בהודעה בכתב בלבד</strong> <span className="text-brand-gold">📝</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">דרכי יצירת קשר לביטול: <span className="text-brand-gold">📞</span></p>
-                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0505804367 <span className="text-green-500">💬</span></p>
+                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0506724312 <span className="text-green-500">💬</span></p>
                 <p className="text-brand-gold text-right pr-6" dir="rtl">דוא"ל: hr20192022@gmail.com <span className="text-brand-gold">✉️</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">יש לציין בבקשת הביטול: <strong>מספר ההזמנה, תאריך הסיור, שם המזמין</strong> <span className="text-brand-gold">📋</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">תקבל/י אישור על הביטול בתוך 24 שעות <span className="text-brand-gold">⏰</span></p>
@@ -428,7 +428,7 @@ const Terms = () => {
                 <div className="space-y-3 text-gray-300">
                   <p dir="rtl" className="text-right">כתובת: <strong>רחוב לחי 11, בני ברק</strong> 📍</p>
                   <p dir="rtl">
-                    טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">050-580-4367</a> 📞
+                    טלפון/WhatsApp: <a href="tel:0506724312" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">050-672-4312</a> 📞
                   </p>
                   <p dir="rtl">
                     דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:text-brand-gold/80 font-bold transition-colors">hr20192022@gmail.com</a> ✉️
@@ -439,7 +439,7 @@ const Terms = () => {
               {/* WhatsApp Button */}
               <div>
                 <a 
-                  href="https://wa.me/972505804367?text=שלום, יש לי שאלה בנוגע לתנאי השימוש" 
+                  href="https://wa.me/972506724312?text=שלום, יש לי שאלה בנוגע לתנאי השימוש"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 flex-row-reverse bg-green-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-green-700 transition-all"
@@ -482,7 +482,7 @@ const Terms = () => {
           <p className="text-brand-gold font-bold text-lg">חיליק רוזנברג - סיורים קולינריים</p>
           <div className="text-gray-400 text-sm space-y-1">
             <p dir="rtl">כתובת: רחוב לחי 11, בני ברק 📍</p>
-            <p dir="rtl">טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:underline" dir="ltr">050-580-4367</a> 📞</p>
+            <p dir="rtl">טלפון/WhatsApp: <a href="tel:0506724312" className="text-brand-gold hover:underline" dir="ltr">050-672-4312</a> 📞</p>
             <p dir="rtl">דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:underline">hr20192022@gmail.com</a> ✉️</p>
           </div>
           <p className="text-xs text-gray-500 tracking-widest pt-4 border-t border-white/10">
@@ -525,7 +525,7 @@ const Terms = () => {
                       key={index} 
                       dir="rtl"
                       className={`text-right ${
-                        instruction.includes('050-580-4367') || instruction.includes('חיליק רוזנברג')
+                        instruction.includes('050-672-4312') || instruction.includes('050-580-4367') || instruction.includes('חיליק רוזנברג')
                           ? 'text-brand-gold font-bold text-xl'
                           : instruction === ''
                           ? 'h-2'
@@ -539,7 +539,7 @@ const Terms = () => {
 
                 <div className="mt-6 flex flex-col gap-3">
                   <a
-                    href="https://wa.me/972505804367?text=שלום, אני מעוניין/ת בפרטי תשלום לסיור"
+                    href="https://wa.me/972506724312?text=שלום, אני מעוניין/ת בפרטי תשלום לסיור"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-green-600 text-white px-6 py-4 rounded-full font-bold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-2 flex-row-reverse"

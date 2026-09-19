@@ -390,8 +390,8 @@
       "credit": {
         "title": "Credit Card Payment",
         "line1": "For credit card payment, please contact:",
-        "phone": "Phone: 050-580-4367",
-        "whatsapp": "WhatsApp: 050-580-4367",
+        "phone": "Phone: 050-672-4312",
+        "whatsapp": "WhatsApp: 050-672-4312",
         "line4": "We'll send you a secure payment link"
       },
       "bank": {
@@ -401,7 +401,7 @@
         "accountNumber": "Account Number: [Account Number]",
         "branchNumber": "Branch Number: [Branch Number]",
         "beneficiary": "Beneficiary: Chilik Rosenberg",
-        "confirmation": "After transfer, send confirmation via WhatsApp: 050-580-4367"
+        "confirmation": "After transfer, send confirmation via WhatsApp: 050-672-4312"
       },
       "openWhatsapp": "Open WhatsApp Chat",
       "close": "Close"
