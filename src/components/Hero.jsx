@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import profileImage from '../assets/hilik-profile.jpeg';
+import profileImage from '../assets/hilik-standing.webp';
 
 const Hero = () => {
   const { t } = useTranslation();
@@ -30,8 +30,8 @@ const Hero = () => {
             <span>{t('hero.figmaCta')}</span><span aria-hidden="true">←</span>
           </button>
         </div>
-        <div className="figma-portrait absolute bottom-0 left-1/2 h-[300px] w-[235px] -translate-x-1/2 overflow-hidden md:h-[260px] md:w-[200px]">
-          <img src={profileImage} alt={t('header.title')} className="h-full w-full object-cover object-top" />
+        <div className="figma-portrait absolute bottom-0 left-1/2 h-[300px] w-[235px] -translate-x-1/2 overflow-hidden md:h-[360px] md:w-[280px]">
+          <img src={profileImage} alt={t('header.title')} className="h-full w-full object-contain object-bottom" />
         </div>
       </div>
     </header>

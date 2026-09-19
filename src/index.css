@@ -155,7 +155,7 @@
 }
 .main-header .nav-link { color:#4E4D50; }
 .main-header .nav-link::after { background:#EEBC26; }
-.figma-hero { background: #333234 url('/hero-images/img1.jpg') center/cover no-repeat; }
+.figma-hero { background: #333234 url('/src/assets/figma-food-table.jpg') center/cover no-repeat; }
 .figma-hero-overlay { background: linear-gradient(90deg,rgba(35,34,36,.97),rgba(51,49,51,.83) 58%,rgba(51,49,51,.58)); }
 .figma-title { text-shadow: 0 3px 24px rgba(0,0,0,.3); }
 .figma-eyebrow::before { content:''; display:inline-block; width:52px; height:1px; margin-left:18px; vertical-align:middle; background:#A0948E; }
@@ -187,6 +187,6 @@
   .figma-title { font-size:43px; line-height:.98; margin-bottom:16px; }
   .figma-eyebrow { font-size:12px; margin-bottom:17px; }
   .figma-eyebrow::before { width:22px; margin-left:10px; }
-  .figma-portrait { width:235px; height:340px; border-radius:0; filter:none; }
-  .figma-portrait::after { box-shadow:inset 0 0 18px 10px rgba(46,45,47,.08); }
+  .figma-portrait { width:255px; height:365px; border-radius:0; filter:none; }
+  .figma-portrait::after { display:none; }
 }
