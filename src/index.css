@@ -303,3 +303,19 @@
  .target-site .main-header .nav-link:nth-child(-n+4){ display:none; }
  .target-site .main-header>div { margin-inline-start:auto; }
 }
+/* Figma correction: Chilik's portrait owns roughly half of the hero, rather than reading as a narrow overlay. */
+@media(min-width:1200px){
+ .target-hero { grid-template-columns:50% 50%; }
+ .target-hero__person { width:80%;height:100%;right:0;bottom:0;object-fit:cover;object-position:center 18%;clip-path:polygon(5% 0,100% 0,100% 100%,0 100%); }
+ .target-hero__visual:after { background:linear-gradient(90deg,transparent 78%,#555457); }
+ .target-hero__copy { padding-inline:clamp(42px,5vw,90px); }
+}
+@media(max-width:1199px) and (min-width:768px){
+ .target-hero { grid-template-columns:50% 50%; }
+ .target-hero__person { width:72%;height:100%;right:0;bottom:0;object-position:center 18%; }
+ .target-hero__copy { padding-inline:38px; }
+}
+@media(max-width:767px){
+ .target-hero__visual { min-height:430px; }
+ .target-hero__person { width:62%;height:100%;right:0;bottom:0;object-position:center 18%; }
+}
