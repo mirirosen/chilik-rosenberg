@@ -797,7 +797,7 @@ const BookingForm = ({ onSuccess }) => {
                 className="text-brand-gold hover:text-brand-gold/80 font-bold text-xl transition-colors"
                 dir="ltr"
               >
-                050-580-4367
+                050-672-4312
               </a>
               <Phone size={20} className="text-brand-gold" />
             </div>
