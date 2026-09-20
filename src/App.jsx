@@ -109,19 +109,6 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Show loading screen while detecting language (only for first-time visitors)
-  if (isDetectingLanguage) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-brand-dark">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-brand-gold border-b-4 border-transparent mx-auto mb-6"></div>
-          <p className="text-white text-xl font-serif">טוען / Loading...</p>
-          <p className="text-gray-400 text-sm mt-2">מזהה מיקום / Detecting location...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Render admin interface
   if (currentRoute === 'admin') {
     return <Admin />;
@@ -162,7 +149,7 @@ function App() {
   // Render main site
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-brand-dark text-white">
+      <div className="target-site min-h-screen">
         <Header />
         <Hero />
         <RatingBar />

@@ -145,3 +145,179 @@
     }
   }
 }
+
+/* Figma "סופי 2" visual system. Functionality remains in the existing React flows. */
+:root { --target-ink:#4c4b4d; --target-paper:#f5f4f4; --target-muted:#a69c98; --target-gold:#efbc26; }
+.target-site { background:var(--target-paper); color:var(--target-ink); }
+.target-site .main-header { height:72px; padding:0 clamp(24px,5vw,96px); background:rgba(255,255,255,.96); border-color:#e5e2df; color:var(--target-ink); box-shadow:none; }
+.target-site .main-header>a { color:var(--target-ink); font-size:1.05rem; letter-spacing:0; }
+.target-site .main-header .nav-link { color:#595557; font-weight:500; }
+.target-site .main-header .nav-link::after { background:var(--target-gold); }
+.target-site .main-header .header-cta { background:var(--target-gold); color:#403d3d; border-radius:4px; padding:.7rem 1.4rem; }
+.target-hero { min-height:690px; margin-top:72px; display:grid; grid-template-columns:minmax(280px,42%) 1fr; background:#555457; overflow:hidden; position:relative; direction:ltr; }
+.target-hero__portrait { position:relative; min-height:690px; background:linear-gradient(180deg,#a56a2e,#74471e); overflow:hidden; }
+.target-hero__portrait:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 70%,#555457); }
+.target-hero__portrait img { width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.82) contrast(1.03); }
+.target-hero__copy { direction:rtl; text-align:right; padding:clamp(60px,8vw,130px) clamp(35px,8vw,155px) 70px 42px; display:flex;flex-direction:column;align-items:flex-start;justify-content:center; }
+/* EN (ltr) hero copy: don't inherit the hardcoded rtl direction (was clipping text). */
+html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left; }
+.target-eyebrow { font:500 .78rem Heebo,sans-serif!important; letter-spacing:.12em; color:var(--target-gold)!important; margin:0 0 22px!important; }
+.target-hero h1 { color:#fff; font-size:clamp(3rem,5.3vw,6.4rem); line-height:.98; max-width:780px; margin:0 0 25px; font-weight:500; }
+.target-hero__subtitle { color:#fff!important;font:400 clamp(1.1rem,1.7vw,1.8rem)/1.55 'Frank Ruhl Libre',serif!important; max-width:640px;margin:0 0 32px!important; }
+.target-button { background:var(--target-gold); color:#403d3d;padding:14px 30px;border-radius:4px;font-weight:700;box-shadow:0 8px 24px rgb(0 0 0/.15); }
+.target-terms { color:#ddd;font-size:.75rem;margin-top:14px;text-decoration:underline; }
+.target-intro { max-width:1150px;margin:auto;padding:100px 30px 80px;text-align:center; }
+.target-intro__lead { max-width:850px;margin:0 auto 45px;font:400 1.2rem/1.9 'Frank Ruhl Libre',serif;color:#6a6564; }
+.target-tour-picks { display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:730px;margin:auto; }
+.target-tour-pick { height:240px;position:relative;overflow:hidden;border-radius:5px; }
+.target-tour-pick:after { content:"";position:absolute;inset:0;background:rgb(0 0 0/.32); }
+.target-tour-pick img { width:100%;height:100%;object-fit:cover;transition:.45s; }
+.target-tour-pick:hover img { transform:scale(1.04); }
+.target-tour-pick span { position:absolute;inset:0;z-index:1;display:grid;place-items:center;color:#fff;font:500 2rem 'Frank Ruhl Libre',serif; }
+.target-highlights { background:#ebeae9;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:70px auto 0;max-width:1000px;text-align:right; }
+.target-highlights article { padding:30px;background:#ebeae9; }
+.target-highlights h2 { font-size:1.08rem;margin-bottom:10px; }
+.target-highlights p { color:#777;line-height:1.7;font-size:.9rem; }
+.target-bio { display:grid;grid-template-columns:1.05fr .95fr;min-height:590px;background:#4c4b4d;color:#fff;align-items:center;overflow:hidden; }
+.target-bio>div { padding:70px clamp(40px,9vw,170px) 70px 55px; }
+.target-bio h2,.target-section-heading h2 { font-size:clamp(2.7rem,4vw,5rem);line-height:1.05;margin-bottom:25px;font-weight:500; }
+.target-bio p:not(.target-eyebrow) { line-height:1.85;color:#e6e3e0;max-width:650px; }
+.target-bio img { width:100%;height:590px;object-fit:cover;object-position:center 25%; }
+.target-journey,.target-menu { padding:110px clamp(24px,7vw,120px); }
+.target-section-heading { max-width:720px;margin:0 auto 55px;text-align:center; }
+.target-section-heading>p:not(.target-eyebrow) { color:#857f7c;line-height:1.7; }
+.target-journey__grid { display:grid;grid-template-columns:repeat(3,1fr);max-width:1180px;margin:auto;border-top:1px solid #d8d4d1;border-right:1px solid #d8d4d1; }
+.target-journey__grid article { padding:34px;border-left:1px solid #d8d4d1;border-bottom:1px solid #d8d4d1;min-height:230px;background:#faf9f8; }
+.target-journey__grid b { color:var(--target-gold);font-size:.75rem; }
+.target-journey__grid h3 { font-size:1.4rem;margin:22px 0 12px; }
+.target-journey__grid p { color:#807976;line-height:1.65;font-size:.9rem; }
+.target-menu { background:#eeecea; }
+.target-menu__rail { display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1250px;margin:auto; }
+.target-menu__rail article { background:#fff;border-radius:5px;overflow:hidden; }
+.target-menu__rail img { width:100%;height:245px;object-fit:cover; }
+.target-menu__rail article:nth-child(even) img { object-position:center 70%; }
+.target-menu__rail div { padding:25px; }
+.target-menu__rail h3 { font-size:1.35rem;margin-bottom:8px; }
+.target-menu__rail p { color:#7c7471;font-size:.9rem;line-height:1.6; }
+/* Existing transactional and informational sections recolored to the target system. */
+.target-site #date-selection,.target-site #media,.target-site #faq { color:var(--target-ink);background:var(--target-paper); }
+.target-site #date-selection>div { background:#ebeae9;border-color:#ddd;border-radius:8px;box-shadow:none; }
+.target-site #date-selection h2,.target-site #media h2,.target-site #faq>h2 { color:var(--target-ink);font-style:normal; }
+.target-site #date-selection h3,.target-site #date-selection p { color:#635f5e; }
+.target-site #date-selection .bg-brand-dark,.target-site #date-selection .bg-brand-dark-lighter { background:#fff;color:var(--target-ink); }
+.target-site #media .media-card,.target-site #faq article { background:#fff;border:1px solid #ddd;border-radius:5px;color:var(--target-ink); }
+.target-site #media h4,.target-site #faq h4 { color:var(--target-ink); }
+.target-site #faq article>div { color:#6f6966; }
+.target-site footer { background:#4c4b4d;color:#fff; }
+@media (max-width:767px){
+ .target-site .main-header { height:62px;padding:0 18px; }
+ .target-site .main-header .md\\:hidden { color:var(--target-ink); }
+ .target-hero { margin-top:62px;display:flex;flex-direction:column;min-height:0; }
+ .target-hero__portrait { min-height:420px;order:2; }
+ .target-hero__portrait:after { background:linear-gradient(180deg,#555457,transparent 25%); }
+ .target-hero__copy { padding:55px 28px 45px;order:1; }
+ .target-hero h1 { font-size:3.2rem; }
+ .target-tour-picks,.target-highlights,.target-journey__grid,.target-menu__rail,.target-bio { grid-template-columns:1fr; }
+ .target-intro { padding:65px 18px; }
+ .target-tour-pick { height:200px; }
+ .target-highlights { margin-top:45px; }
+ .target-bio>div { padding:65px 28px; }
+ .target-bio img { height:440px; }
+ .target-journey,.target-menu { padding:75px 18px; }
+ .target-menu__rail { display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:14px; }
+ .target-menu__rail article { flex:0 0 82%;scroll-snap-align:center; }
+ .target-journey__grid article { min-height:190px; }
+}
+/* Review fixes: first render never waits on third-party geolocation; compact navigation stays readable. */
+.target-site .main-header>div { gap:clamp(12px,1.8vw,30px); }
+.target-site .main-header .nav-link { white-space:nowrap; }
+.target-site .main-header [class*="rounded-full"] { transform:scale(.86); transform-origin:center; }
+@media (max-width:1100px) and (min-width:768px){
+ .target-site .main-header { padding-inline:28px; }
+ .target-site .main-header>div { gap:10px;font-size:.72rem; }
+ .target-site .main-header>a { font-size:.9rem;max-width:180px; }
+}
+/* Pixel review round 2: match the visible Final 2 geometry rather than an interpreted split portrait. */
+.target-hero { grid-template-columns:minmax(520px,52%) 1fr; min-height:650px; }
+.target-hero__visual { position:relative; min-height:650px; overflow:hidden; background:#7a4e28; }
+.target-hero__food { width:100%;height:100%;object-fit:cover;object-position:center;transform:rotate(-90deg) scale(1.35);filter:saturate(.9) contrast(1.08); }
+.target-hero__visual:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 65%,#555457); }
+.target-hero__person { position:absolute;z-index:2;bottom:-5%;right:-5%;width:48%;height:92%;object-fit:cover;object-position:center 20%;clip-path:polygon(10% 0,100% 0,100% 100%,0 100%);filter:saturate(.85); }
+.target-hero__copy { padding-right:clamp(45px,6vw,105px); }
+.target-bio { background:var(--target-paper);color:var(--target-ink);min-height:500px; }
+.target-bio>div { order:2; }
+.target-bio img { order:1;height:500px;object-position:center 18%; }
+.target-bio p:not(.target-eyebrow) { color:#6c6663; }
+.target-menu__rail { display:flex;overflow-x:auto;scroll-snap-type:x mandatory; }
+.target-menu__rail article { flex:0 0 290px;scroll-snap-align:center; }
+.target-site footer .text-gray-400 { color:#d1ccca; }
+@media(max-width:767px){
+ .target-hero { display:flex;min-height:0; }
+ .target-hero__visual { min-height:390px;order:2; }
+ .target-hero__food { transform:rotate(-90deg) scale(1.7); }
+ .target-hero__person { width:58%;height:94%;right:2%; }
+ .target-bio>div { order:1; }
+ .target-bio img { order:2; }
+ /* Mobile: keep HelpHub floating buttons visible but compact so they don't cover content. */
+ .target-site .fixed.bottom-6.right-6 { right:12px!important;bottom:12px!important;gap:8px!important; }
+ .target-site .hub-btn { width:auto;min-width:0;height:44px;padding:0 14px;font-size:.78rem; }
+ .target-site .hub-btn svg { width:18px;height:18px; }
+}
+.target-hero__food { transform:none;object-position:center 54%; }
+.target-hero__visual:before { content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgb(42 25 16/.16),transparent 60%); }
+.target-hero__person { width:42%;height:88%;right:0;bottom:0; }
+@media(max-width:767px){
+ .target-hero__food { transform:none;object-position:center; }
+ .target-hero__person { width:54%;height:90%;right:0; }
+}
+/* Hostile UX review: clearer focus, fewer collisions, stronger readability. */
+.target-site :where(button,a,input,select,textarea):focus-visible { outline:3px solid #1373e6;outline-offset:3px; }
+.target-site .main-header { min-height:72px; }
+.target-site .main-header .nav-link { font-size:.84rem; }
+.target-site #date-selection .date-card { min-width:136px;border-color:#cac5c1; }
+.target-site #date-selection .date-card:not(.date-card--selected) { color:#3d3a39; }
+.target-site #date-selection .text-gray-400 { color:#68615e; }
+.target-site #date-selection input,.target-site #date-selection select { border-color:#aaa29e; }
+.target-site #faq button { min-height:64px; }
+.target-site #faq article>div { line-height:1.8; }
+.target-site footer a,.target-site footer button { min-height:32px; }
+@media(min-width:768px){
+ .target-site .fixed.bottom-6.right-6 { right:28px;bottom:22px;gap:10px; }
+ .target-site .hub-btn { width:auto;min-width:122px;height:46px;padding:0 20px;box-shadow:0 6px 18px rgb(0 0 0/.22); }
+}
+/* Tablet: keep all nav links visible (was hiding 4/5 links); compact spacing instead. */
+@media(max-width:1190px) and (min-width:768px){
+ .target-site .main-header>div { gap:10px; margin-inline-start:auto; }
+ .target-site .main-header>a { max-width:none;white-space:nowrap;font-size:.95rem; }
+ .target-site .main-header .nav-link { font-size:.78rem; white-space:nowrap; }
+ .target-site .main-header .header-cta { padding:.5rem 1rem; font-size:.82rem; white-space:nowrap; }
+}
+@media(max-width:767px){
+ .target-hero__copy { min-height:485px;justify-content:center; }
+ .target-hero__subtitle { font-size:1.15rem!important; }
+ .target-button { width:100%;min-height:52px; }
+ .target-tour-pick { height:215px; }
+ .target-section-heading h2 { font-size:2.55rem; }
+ .target-site #date-selection { padding-inline:14px; }
+ .target-site #date-selection>div { padding-inline:16px; }
+ .target-site footer { padding-bottom:48px; }
+}
+@media(prefers-reduced-motion:reduce){
+ .target-site * { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
+}
+/* Figma correction: Chilik's portrait owns roughly half of the hero, rather than reading as a narrow overlay. */
+@media(min-width:1200px){
+ .target-hero { grid-template-columns:50% 50%; }
+ .target-hero__person { width:80%;height:100%;right:0;bottom:0;object-fit:cover;object-position:center 18%;clip-path:polygon(5% 0,100% 0,100% 100%,0 100%); }
+ .target-hero__visual:after { background:linear-gradient(90deg,transparent 78%,#555457); }
+ .target-hero__copy { padding-inline:clamp(42px,5vw,90px); }
+}
+@media(max-width:1199px) and (min-width:768px){
+ .target-hero { grid-template-columns:50% 50%; }
+ .target-hero__person { width:72%;height:100%;right:0;bottom:0;object-position:center 18%; }
+ .target-hero__copy { padding-inline:38px; }
+}
+@media(max-width:767px){
+ .target-hero__visual { min-height:430px; }
+ .target-hero__person { width:62%;height:100%;right:0;bottom:0;object-position:center 18%; }
+}

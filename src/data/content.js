@@ -126,7 +126,7 @@ export const mediaLinks = [
   }
 ];
 
-export const whatsappNumber = "972505804367";
+export const whatsappNumber = "972506724312";
 
 export const siteMetadata = {
   title: "חיליק רוזנברג | סיורים בבני ברק - מסע קולינרי ותרבותי בלב העיר",

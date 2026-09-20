@@ -18,8 +18,10 @@ export const isThursday = (dateStr) => {
 
 /**
  * Generate list of upcoming Thursdays
+ * @param {number} count
+ * @param {string} lang - 'he' or 'en' for month names
  */
-export const getUpcomingThursdays = (count = 9) => {
+export const getUpcomingThursdays = (count = 9, lang = 'he') => {
   const d = new Date();
   d.setHours(12, 0, 0, 0);
   
@@ -36,7 +38,7 @@ export const getUpcomingThursdays = (count = 9) => {
     list.push({
       dateStr,
       day: d.getDate(),
-      month: d.toLocaleDateString('he-IL', { month: 'short' })
+      month: d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', { month: 'short' })
     });
     d.setDate(d.getDate() + 7);
   }
@@ -45,10 +47,13 @@ export const getUpcomingThursdays = (count = 9) => {
 };
 
 /**
- * Format date to Hebrew locale
+ * Format date to Hebrew or English locale
+ * @param {string} dateStr
+ * @param {string} lang - 'he' or 'en'
  */
-export const formatDateHebrew = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString('he-IL', {
+export const formatDateHebrew = (dateStr, lang = 'he') => {
+  return new Date(dateStr).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
+    weekday: 'long',
     day: 'numeric',
     month: 'long'
   });

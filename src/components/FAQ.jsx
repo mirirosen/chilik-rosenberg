@@ -27,6 +27,9 @@ const FAQ = () => {
           >
             <button 
               onClick={() => handleFAQToggle(i)} 
+              aria-expanded={openFaq === i}
+              aria-controls={`faq-answer-${key}`}
+              id={`faq-question-${key}`}
               className="w-full p-8 text-right flex flex-row-reverse items-center justify-between hover:bg-white/5"
             >
               <ChevronDown 
@@ -38,7 +41,12 @@ const FAQ = () => {
             </button>
             
             {openFaq === i && (
-              <div className="px-8 pb-8 text-gray-400 leading-relaxed border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 font-light text-right">
+              <div 
+                id={`faq-answer-${key}`}
+                role="region"
+                aria-labelledby={`faq-question-${key}`}
+                className="px-8 pb-8 text-gray-400 leading-relaxed border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 font-light text-right"
+              >
                 {t(`faqs.${key}.answer`)}
               </div>
             )}

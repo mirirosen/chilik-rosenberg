@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Payment secrets are managed with Firebase Secret Manager; never commit .env files.
+functions/.env*
+.env
+.env.*
+!.env.example

@@ -9,7 +9,9 @@ import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew 
 const PRICE_PER_PERSON = 250;
 
 const BookingSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+  const fmtDate = (d) => formatDateHebrew(d, i18n.language);
   const [selectedDate, setSelectedDate] = useState('');
   const [participants, setParticipants] = useState(1);
   const [isChecking, setIsChecking] = useState(false);
@@ -18,7 +20,7 @@ const BookingSection = () => {
   const cloudData = useFirebaseData();
   const scrollContainerRef = useRef(null);
 
-  const thursdays = useMemo(() => getUpcomingThursdays(9), []);
+  const thursdays = useMemo(() => getUpcomingThursdays(9, i18n.language), [i18n.language]);
 
   // Get status for a date (blocked, soldOut, or available)
   const getStatus = (dateStr) => {
@@ -98,12 +100,12 @@ const BookingSection = () => {
       const soldOut = globalData.soldOut || [];
       
       if (blocked.includes(selectedDate)) {
-        showNoSpotsError(selectedDate, participants, 0, 'התאריך חסום להרשמה');
+        showNoSpotsError(selectedDate, participants, 0, t('bookingSection.blockedDate'));
         return;
       }
       
       if (soldOut.includes(selectedDate)) {
-        showNoSpotsError(selectedDate, participants, 0, 'אזל המקום לתאריך זה');
+        showNoSpotsError(selectedDate, participants, 0, t('bookingSection.soldOutDate'));
         return;
       }
       
@@ -117,7 +119,7 @@ const BookingSection = () => {
       
     } catch (error) {
       console.error('Error checking capacity:', error);
-      alert('שגיאה בבדיקת זמינות. אנא נסה שוב.');
+      alert(t('bookingSection.availabilityCheckError'));
     } finally {
       setIsChecking(false);
     }
@@ -125,28 +127,27 @@ const BookingSection = () => {
 
   // Show error modal when not enough spots
   const showNoSpotsError = (date, requestedParticipants, availableSpots, customMessage = null) => {
-    const formattedDate = formatDateHebrew(date);
+    const formattedDate = fmtDate(date);
     
     // Create WhatsApp message
     const whatsappMessage = encodeURIComponent(
-      `שלום חיליק,\n\n` +
-      `ניסיתי לרשום ${requestedParticipants} אנשים לסיור בתאריך ${formattedDate} ` +
-      `אך אין מספיק מקומות פנויים.\n\n` +
-      `נותרו ${availableSpots} מקומות בלבד.\n\n` +
-      `האם ניתן לסייע?\n\n` +
-      `תודה!`
+      t('bookingSection.whatsappMessage', {
+        count: requestedParticipants,
+        date: formattedDate,
+        available: availableSpots
+      })
     );
     
-    const whatsappUrl = `https://wa.me/972505804367?text=${whatsappMessage}`;
+    const whatsappUrl = `https://wa.me/972506724312?text=${whatsappMessage}`;
     
-    const message = customMessage || 
-      (availableSpots > 0 
-        ? `מצטערים, אין מספיק מקומות פנויים לתאריך ${formattedDate}.\n\nביקשת: ${requestedParticipants} מקומות\nפנויים: ${availableSpots} מקומות בלבד`
-        : `מצטערים, אין מקומות פנויים לתאריך ${formattedDate}.`);
+    const message = customMessage ||
+      (availableSpots > 0
+        ? t('bookingSection.notEnoughSpots', { date: formattedDate, requested: requestedParticipants, available: availableSpots })
+        : t('bookingSection.noSpots', { date: formattedDate }));
     
     setErrorModal({
       show: true,
-      title: 'אין מקומות פנויים',
+      title: t('bookingSection.errorTitle'),
       message,
       whatsappUrl
     });
@@ -184,12 +185,12 @@ const BookingSection = () => {
         <div className="mb-8">
           <div className="flex items-center justify-center gap-3 mb-6">
             <span className="bg-brand-gold text-brand-dark w-8 h-8 rounded-full flex items-center justify-center font-black text-lg">1</span>
-            <h3 className="text-xl md:text-2xl font-bold text-white" dir="rtl">
-              בחירת תאריך סיור
+            <h3 className="text-xl md:text-2xl font-bold text-white" dir={dir}>
+              {t('bookingSection.step1Title')}
             </h3>
           </div>
-          <p className="text-gray-400 text-sm mb-6" dir="rtl">
-            הסיורים מתקיימים בימי חמישי בערב
+          <p className="text-gray-400 text-sm mb-6" dir={dir}>
+            {t('bookingSection.step1Subtitle')}
           </p>
           
           {/* Date Cards Carousel */}
@@ -198,7 +199,7 @@ const BookingSection = () => {
             <button 
               onClick={() => scrollDates('right')} 
               className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
-              aria-label="גלול ימינה"
+              aria-label={t('bookingSection.scrollRight')}
             >
               <ChevronRight size={24} />
             </button>
@@ -215,19 +216,23 @@ const BookingSection = () => {
                 const isAvailable = status.available;
                 
                 return (
-                  <div
+                  <button
                     key={i}
+                    type="button"
                     onClick={() => isAvailable && setSelectedDate(item.dateStr)}
+                    disabled={!isAvailable}
+                    aria-pressed={active}
+                    aria-label={t('bookingSection.dateCardLabel', { date: fmtDate(item.dateStr) })}
                     className={`date-card h-40 md:h-44 border flex flex-col items-center justify-center transition-all text-center ${
                       !isAvailable 
                         ? 'bg-gray-800/50 border-gray-700 cursor-not-allowed opacity-60' 
                         : active 
-                          ? 'bg-brand-gold text-black scale-110 shadow-inner cursor-pointer' 
+                          ? 'date-card--selected bg-brand-gold text-black scale-110 shadow-inner cursor-pointer' 
                           : 'bg-brand-dark border-white/10 hover:border-brand-gold cursor-pointer'
                     }`}
                   >
                     <span className="text-[10px] font-black opacity-60 uppercase">
-                      חמישי
+                      {t('bookingSection.thursday')}
                     </span>
                     <span className="text-4xl md:text-5xl font-black">
                       {item.day}
@@ -235,15 +240,15 @@ const BookingSection = () => {
                     <span className="text-xs md:text-sm font-bold">
                       {item.month}
                     </span>
-                    <div className={`mt-3 text-[9px] font-black uppercase ${status.color}`}>
+                    <span className={`mt-3 text-[9px] font-black uppercase ${status.color}`}>
                       {status.text}
-                    </div>
+                    </span>
                     {isAvailable && status.spots && (
-                      <div className="text-[8px] text-gray-400 mt-1">
-                        {status.spots} מקומות
-                      </div>
+                      <span className="text-[8px] text-gray-400 mt-1">
+                        {t('bookingSection.spotsLeft', { count: status.spots })}
+                      </span>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -252,7 +257,7 @@ const BookingSection = () => {
             <button 
               onClick={() => scrollDates('left')} 
               className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 z-10 bg-brand-gold text-black p-3 rounded-full shadow-2xl hover:bg-white transition-all"
-              aria-label="גלול שמאלה"
+              aria-label={t('bookingSection.scrollLeft')}
             >
               <ChevronLeft size={24} />
             </button>
@@ -275,7 +280,7 @@ const BookingSection = () => {
         {selectedDate && !isThursday(selectedDate) && (
           <div className="animate-in fade-in zoom-in duration-300 mb-8">
             <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl max-w-md mx-auto">
-              <p className="text-red-400 font-bold mb-4" dir="rtl">
+              <p className="text-red-400 font-bold mb-4" dir={dir}>
                 {t('bookingSection.thursdaysOnly')}
               </p>
               <button 
@@ -295,16 +300,16 @@ const BookingSection = () => {
               <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-6 max-w-lg mx-auto">
                 <div className="flex items-center justify-center gap-3 mb-3">
                   <Calendar size={24} className="text-green-400" />
-                  <p className="text-xl text-white font-bold" dir="rtl">
-                    {formatDateHebrew(selectedDate)}
+                  <p className="text-xl text-white font-bold" dir={dir}>
+                    {fmtDate(selectedDate)}
                   </p>
                 </div>
-                <p className="text-green-400 font-bold" dir="rtl">
-                  ✓ תאריך זמין
+                <p className="text-green-400 font-bold" dir={dir}>
+                  {t('bookingSection.dateAvailable')}
                 </p>
                 {selectedDateCapacity && (
-                  <p className="text-green-300 text-sm mt-2" dir="rtl">
-                    נותרו {selectedDateCapacity.available} מקומות פנויים מתוך {selectedDateCapacity.max}
+                  <p className="text-green-300 text-sm mt-2" dir={dir}>
+                    {t('bookingSection.spotsRemainingOf', { available: selectedDateCapacity.available, max: selectedDateCapacity.max })}
                   </p>
                 )}
               </div>
@@ -312,15 +317,15 @@ const BookingSection = () => {
               <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-6 max-w-lg mx-auto">
                 <div className="flex items-center justify-center gap-3 mb-3">
                   <XCircle size={24} className="text-red-400" />
-                  <p className="text-xl text-white font-bold" dir="rtl">
-                    {formatDateHebrew(selectedDate)}
+                  <p className="text-xl text-white font-bold" dir={dir}>
+                    {fmtDate(selectedDate)}
                   </p>
                 </div>
-                <p className="text-red-400 font-bold" dir="rtl">
-                  ⚠️ תאריך זה אזל
+                <p className="text-red-400 font-bold" dir={dir}>
+                  {t('bookingSection.dateSoldOut')}
                 </p>
-                <p className="text-red-300 text-sm mt-2" dir="rtl">
-                  אנא בחר תאריך אחר
+                <p className="text-red-300 text-sm mt-2" dir={dir}>
+                  {t('bookingSection.chooseAnotherDate')}
                 </p>
               </div>
             )}
@@ -334,8 +339,8 @@ const BookingSection = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mb-8">
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="bg-brand-gold text-brand-dark w-8 h-8 rounded-full flex items-center justify-center font-black text-lg">2</span>
-              <h3 className="text-xl md:text-2xl font-bold text-white" dir="rtl">
-                מספר משתתפים
+              <h3 className="text-xl md:text-2xl font-bold text-white" dir={dir}>
+                {t('bookingSection.step2Title')}
               </h3>
             </div>
             
@@ -362,7 +367,7 @@ const BookingSection = () => {
                     min="1"
                     max="20"
                   />
-                  <p className="text-gray-400 text-sm mt-2">משתתפים</p>
+                  <p className="text-gray-400 text-sm mt-2">{t('bookingSection.participants')}</p>
                 </div>
                 
                 <button 
@@ -376,23 +381,23 @@ const BookingSection = () => {
               
               {/* Price Display */}
               <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-4 mb-6">
-                <div className="text-sm text-gray-300 mb-1" dir="rtl">סה"כ לתשלום</div>
+                <div className="text-sm text-gray-300 mb-1" dir={dir}>{t('bookingSection.totalToPay')}</div>
                 <div className="text-4xl font-black text-brand-gold">
                   ₪{totalPrice.toLocaleString()}
                 </div>
-                <div className="text-xs text-gray-400 mt-1" dir="rtl">
-                  {participants} × ₪{PRICE_PER_PERSON} לאדם
+                <div className="text-xs text-gray-400 mt-1" dir={dir}>
+                  {t('bookingSection.perPerson', { count: participants, price: PRICE_PER_PERSON })}
                 </div>
               </div>
               
               {/* Warning if requesting more than available */}
               {selectedDateCapacity && participants > selectedDateCapacity.available && (
                 <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-4 mb-6">
-                  <p className="text-yellow-400 font-bold text-sm" dir="rtl">
-                    ⚠️ מספר המשתתפים גדול ממספר המקומות הפנויים
+                  <p className="text-yellow-400 font-bold text-sm" dir={dir}>
+                    {t('bookingSection.tooManyParticipants')}
                   </p>
-                  <p className="text-yellow-300 text-xs mt-2" dir="rtl">
-                    נותרו {selectedDateCapacity.available} מקומות בלבד
+                  <p className="text-yellow-300 text-xs mt-2" dir={dir}>
+                    {t('bookingSection.onlySpotsLeft', { count: selectedDateCapacity.available })}
                   </p>
                 </div>
               )}
@@ -407,8 +412,8 @@ const BookingSection = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-center gap-3 mb-6">
               <span className="bg-brand-gold text-brand-dark w-8 h-8 rounded-full flex items-center justify-center font-black text-lg">3</span>
-              <h3 className="text-xl md:text-2xl font-bold text-white" dir="rtl">
-                המשך להרשמה
+              <h3 className="text-xl md:text-2xl font-bold text-white" dir={dir}>
+                {t('bookingSection.step3Title')}
               </h3>
             </div>
             
@@ -420,18 +425,18 @@ const BookingSection = () => {
               {isChecking ? (
                 <span className="flex items-center gap-3">
                   <span className="animate-spin">⏳</span>
-                  בודק זמינות...
+                  {t('bookingSection.checkingAvailability')}
                 </span>
               ) : (
                 <span className="flex items-center gap-3">
-                  המשך להרשמה
+                  {t('bookingSection.continueCta')}
                   <Users size={24} />
                 </span>
               )}
             </button>
             
-            <p className="text-gray-400 text-sm mt-4" dir="rtl">
-              לאחר לחיצה, תועבר לטופס ההרשמה עם הפרטים שבחרת
+            <p className="text-gray-400 text-sm mt-4" dir={dir}>
+              {t('bookingSection.afterClickNote')}
             </p>
           </div>
         )}
@@ -445,9 +450,9 @@ const BookingSection = () => {
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
           onClick={() => setErrorModal({ show: false, title: '', message: '', whatsappUrl: '' })}
         >
-          <div 
+          <div
             className="bg-brand-dark-lighter border-2 border-red-500/50 rounded-3xl p-8 max-w-md w-full animate-in zoom-in duration-300"
-            dir="rtl"
+            dir={dir}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -474,10 +479,10 @@ const BookingSection = () => {
             {/* WhatsApp Option */}
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 mb-6">
               <p className="text-yellow-400 font-bold mb-2 text-center">
-                💬 רוצה לנסות בכל זאת?
+                {t('bookingSection.tryAnyway')}
               </p>
               <p className="text-yellow-300 text-sm text-center">
-                שלח הודעה לחיליק ב-WhatsApp ונראה מה אפשר לעשות
+                {t('bookingSection.sendWhatsappNote')}
               </p>
             </div>
             
@@ -490,7 +495,7 @@ const BookingSection = () => {
                 className="flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-4 rounded-full text-lg font-bold hover:bg-green-600 transition-all"
               >
                 <MessageCircle size={20} />
-                <span>שלח הודעה ב-WhatsApp</span>
+                <span>{t('bookingSection.sendWhatsapp')}</span>
               </a>
               
               <button
@@ -501,7 +506,7 @@ const BookingSection = () => {
                 }}
                 className="bg-brand-dark border border-white/20 text-white px-6 py-3 rounded-full font-bold hover:bg-white/10 transition-all"
               >
-                בחר תאריך אחר
+                {t('bookingSection.pickAnotherDate')}
               </button>
             </div>
           </div>

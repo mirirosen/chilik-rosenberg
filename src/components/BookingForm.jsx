@@ -5,22 +5,25 @@ import { db, APP_ID } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew } from '../utils/dateUtils';
 import { sendBookingEmails } from '../utils/emailService';
+import { clearIdempotencyKey, createCreditPayment, getPaymentStatus, makeIdempotencyKey, paymentsConfigured } from '../utils/paymentService';
 import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus, Lock, CheckCircle } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
 
 const BookingForm = ({ onSuccess }) => {
   const { t } = useTranslation();
-  
+
   // Get pre-filled data from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const prefilledDate = urlParams.get('date');
   const prefilledParticipants = urlParams.get('participants');
-  
+  const paymentResult = urlParams.get('payment');
+  const paymentBookingId = urlParams.get('id');
+
   // Determine if fields should be locked
   const isDateLocked = !!prefilledDate;
   const isParticipantsLocked = !!prefilledParticipants;
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -33,17 +36,20 @@ const BookingForm = ({ onSuccess }) => {
     paymentMethod: '',
     agreeToTerms: false
   });
-  
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const [paymentRedirect, setPaymentRedirect] = useState(false);
+  const [paymentReturnState, setPaymentReturnState] = useState(paymentResult === 'success' ? 'checking' : paymentResult === 'failed' ? 'failed' : null);
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
 
   // Redirect to date selection if no pre-filled data
   useEffect(() => {
+    if (paymentResult) return;
     if (!prefilledDate || !prefilledParticipants) {
       setRedirecting(true);
       // Redirect to homepage date selection
@@ -51,19 +57,38 @@ const BookingForm = ({ onSuccess }) => {
         window.location.href = '/#date-selection';
       }, 1500);
     }
-  }, [prefilledDate, prefilledParticipants]);
+  }, [prefilledDate, prefilledParticipants, paymentResult]);
+
+  useEffect(() => {
+    if (paymentResult !== 'success' || !paymentBookingId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const check = async () => {
+      try {
+        const state = await getPaymentStatus(paymentBookingId);
+        if (cancelled) return;
+        if (state.paymentStatus === 'paid') return setPaymentReturnState('paid');
+        if (['failed', 'cancelled', 'expired'].includes(state.paymentStatus)) return setPaymentReturnState('failed');
+      } catch { /* provider redirect can arrive before the webhook */ }
+      attempts += 1;
+      if (!cancelled && attempts < 10) setTimeout(check, 1500);
+      else if (!cancelled) setPaymentReturnState('pending');
+    };
+    check();
+    return () => { cancelled = true; };
+  }, [paymentResult, paymentBookingId]);
 
   const getDateStatus = (dateStr) => {
     if (!cloudData) return { available: true, label: t('common.loading'), availableSpots: 0 };
     if (cloudData.blocked?.includes(dateStr)) return { available: false, label: t('bookingSection.blocked'), availableSpots: 0 };
     if (cloudData.soldOut?.includes(dateStr)) return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
-    
+
     // Check capacity
     const availableSpots = getAvailableSpots(cloudData, dateStr);
     if (availableSpots <= 0) {
       return { available: false, label: t('bookingSection.soldOut'), availableSpots: 0 };
     }
-    
+
     return { available: true, label: t('bookingSection.available'), availableSpots };
   };
 
@@ -72,11 +97,11 @@ const BookingForm = ({ onSuccess }) => {
   // Get capacity info for selected date
   const selectedDateCapacity = useMemo(() => {
     if (!formData.tourDate || !cloudData) return null;
-    
+
     const effectiveMax = getEffectiveMax(cloudData, formData.tourDate);
     const currentRegs = getCurrentRegistrations(cloudData, formData.tourDate);
     const available = getAvailableSpots(cloudData, formData.tourDate);
-    
+
     return {
       max: effectiveMax,
       current: currentRegs,
@@ -100,7 +125,7 @@ const BookingForm = ({ onSuccess }) => {
     const birthDate = new Date(dateOfBirth);
     const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       return age - 1;
     }
@@ -109,13 +134,13 @@ const BookingForm = ({ onSuccess }) => {
 
   const validateThursdayDate = (dateStr) => {
     if (!dateStr) return false;
-    
+
     // Check if it's a Thursday
     const date = new Date(dateStr + 'T00:00:00');
     if (date.getDay() !== 4) {
       return false;
     }
-    
+
     // Check if date is not blocked or sold out
     const status = getDateStatus(dateStr);
     return status.available;
@@ -124,22 +149,22 @@ const BookingForm = ({ onSuccess }) => {
   // Validate capacity for the booking
   const validateCapacity = (dateStr, participants) => {
     if (!cloudData) return { valid: true };
-    
+
     const availableSpots = getAvailableSpots(cloudData, dateStr);
-    
+
     if (participants > availableSpots) {
       if (availableSpots <= 0) {
-        return { 
-          valid: false, 
+        return {
+          valid: false,
           message: t('booking.validation.noSpotsAvailable') || 'אין מקומות פנויים לתאריך זה'
         };
       }
-      return { 
-        valid: false, 
+      return {
+        valid: false,
         message: `${t('booking.validation.notEnoughSpots') || 'נותרו רק'} ${availableSpots} ${t('booking.validation.spotsAvailable') || 'מקומות פנויים'}`
       };
     }
-    
+
     return { valid: true };
   };
 
@@ -213,11 +238,11 @@ const BookingForm = ({ onSuccess }) => {
   // Update tour date registration count
   const updateTourRegistrations = async (dateStr, participantCount) => {
     if (!db) return;
-    
+
     try {
       const tourDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'tourDates', dateStr);
       const tourDoc = await getDoc(tourDocRef);
-      
+
       if (tourDoc.exists()) {
         // Update existing document
         await setDoc(tourDocRef, {
@@ -232,18 +257,18 @@ const BookingForm = ({ onSuccess }) => {
           currentRegistrations: participantCount
         });
       }
-      
+
       // Check if tour is now full and auto-mark as sold out
       const globalMax = cloudData?.globalMaxParticipants || 30;
       const tourData = tourDoc.exists() ? tourDoc.data() : { useGlobalMax: true, currentRegistrations: 0 };
       const effectiveMax = tourData.useGlobalMax ? globalMax : (tourData.customMax || globalMax);
       const newRegistrations = (tourData.currentRegistrations || 0) + participantCount;
-      
+
       if (newRegistrations >= effectiveMax) {
         // Auto mark as sold out
         const globalDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'settings', 'global');
         const currentSoldOut = cloudData?.soldOut || [];
-        
+
         if (!currentSoldOut.includes(dateStr)) {
           await setDoc(globalDocRef, {
             soldOut: [...currentSoldOut, dateStr]
@@ -273,6 +298,23 @@ const BookingForm = ({ onSuccess }) => {
     setIsSubmitting(true);
 
     try {
+      if (formData.paymentMethod === 'credit') {
+        if (!paymentsConfigured) throw new Error('payment-not-configured');
+        setPaymentRedirect(true);
+        const paymentBooking = {
+          name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(),
+          participants: parseInt(formData.participants), tourDate: formData.tourDate, notes: formData.notes.trim(),
+          howDidYouHear: formData.howDidYouHear, dateOfBirth: formData.dateOfBirth
+        }
+        try {
+          const result = await createCreditPayment(paymentBooking, makeIdempotencyKey(paymentBooking));
+          window.location.assign(result.paymentUrl);
+        } catch (error) {
+          clearIdempotencyKey(paymentBooking);
+          throw error;
+        }
+        return;
+      }
       // Generate booking ID
       const bookingId = `BK${Date.now()}`;
       const totalPrice = formData.participants * PRICE_PER_PERSON;
@@ -325,7 +367,8 @@ const BookingForm = ({ onSuccess }) => {
 
     } catch (error) {
       console.error('Error creating booking:', error);
-      setSubmitError('אירעה שגיאה בשמירת ההזמנה. אנא נסה שוב או צור קשר טלפונית.');
+      setPaymentRedirect(false);
+      setSubmitError(error.message === 'payment-not-configured' ? 'תשלום בכרטיס עדיין לא הוגדר. אפשר לבחור Bit או העברה בנקאית, או ליצור קשר ב-WhatsApp.' : error.message === 'capacity-exceeded' ? 'לא נשארו מספיק מקומות. אנא בחרו תאריך אחר.' : 'לא הצלחנו לפתוח תשלום מאובטח. לא בוצע חיוב. אפשר לנסות שוב או לבחור אמצעי תשלום אחר.');
     } finally {
       setIsSubmitting(false);
     }
@@ -340,6 +383,20 @@ const BookingForm = ({ onSuccess }) => {
   };
 
   const totalPrice = formData.participants * PRICE_PER_PERSON;
+
+  if (paymentReturnState) {
+    const copy = paymentReturnState === 'paid'
+      ? { icon: '✓', title: 'התשלום התקבל וההזמנה אושרה', detail: `מספר הזמנה: ${paymentBookingId}` }
+      : paymentReturnState === 'failed'
+        ? { icon: '!', title: 'התשלום לא הושלם', detail: 'לא בוצע חיוב. אפשר לחזור ולנסות שוב או לבחור אמצעי תשלום אחר.' }
+        : paymentReturnState === 'pending'
+          ? { icon: '…', title: 'התשלום עדיין בבדיקה', detail: 'אין לבצע תשלום נוסף. נעדכן את ההזמנה אוטומטית כשהאישור יגיע.' }
+          : { icon: '…', title: 'מאמת את התשלום', detail: 'נא להמתין. אין לרענן או לשלם שוב.' };
+    return <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir="rtl">
+      <div className="text-6xl mb-6">{copy.icon}</div><h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
+      <p className="text-gray-300 mb-6">{copy.detail}</p><a className="target-button inline-flex" href="/">חזרה לעמוד הראשי</a>
+    </div>;
+  }
 
   // Show redirect message if no pre-filled data
   if (redirecting) {
@@ -370,7 +427,7 @@ const BookingForm = ({ onSuccess }) => {
             <CheckCircle size={24} className="text-green-400" />
             <h3 className="text-lg font-bold text-white">פרטי ההזמנה שנבחרו</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {isDateLocked && (
               <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
@@ -387,7 +444,7 @@ const BookingForm = ({ onSuccess }) => {
                 </div>
               </div>
             )}
-            
+
             {isParticipantsLocked && (
               <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -404,13 +461,13 @@ const BookingForm = ({ onSuccess }) => {
               </div>
             )}
           </div>
-          
+
           {/* Total Price Preview */}
           <div className="mt-4 pt-4 border-t border-white/10 text-center">
             <span className="text-gray-400 text-sm">סה"כ לתשלום: </span>
             <span className="text-2xl font-black text-brand-gold">₪{totalPrice}</span>
           </div>
-          
+
           {/* Change Selection Button */}
           <button
             type="button"
@@ -534,7 +591,7 @@ const BookingForm = ({ onSuccess }) => {
               onChange={(e) => {
                 const selectedDate = e.target.value;
                 handleInputChange('tourDate', selectedDate);
-                
+
                 // Validate on change
                 if (selectedDate) {
                   const date = new Date(selectedDate + 'T00:00:00');
@@ -596,7 +653,7 @@ const BookingForm = ({ onSuccess }) => {
                 onChange={(e) => {
                   const value = parseInt(e.target.value) || 1;
                   const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
-                  
+
                   if (value >= 1 && value <= maxAllowed) {
                     handleInputChange('participants', value);
                   } else if (value > maxAllowed) {
@@ -614,7 +671,7 @@ const BookingForm = ({ onSuccess }) => {
                   // Ensure valid value on blur
                   const value = parseInt(e.target.value);
                   const maxAllowed = selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20;
-                  
+
                   if (isNaN(value) || value < 1) {
                     handleInputChange('participants', 1);
                   } else if (value > maxAllowed) {
@@ -736,8 +793,8 @@ const BookingForm = ({ onSuccess }) => {
             />
             <span className={`text-sm text-right ${errors.agreeToTerms ? 'text-red-400' : 'text-gray-300'}`}>
               {t('booking.form.agreeToTerms').split('תנאי השימוש והתקנון')[0]}
-              <a 
-                href="/terms" 
+              <a
+                href="/terms"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand-gold underline hover:text-brand-gold/80"
@@ -765,7 +822,7 @@ const BookingForm = ({ onSuccess }) => {
           disabled={isSubmitting || (selectedDateCapacity && selectedDateCapacity.available <= 0)}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
+          {paymentRedirect ? 'מעביר לתשלום מאובטח…' : isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
         </button>
 
         <button
@@ -792,19 +849,19 @@ const BookingForm = ({ onSuccess }) => {
               <p className="text-white font-bold text-lg">{t('booking.contact.name')}</p>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <a 
-                href="tel:0505804367" 
+              <a
+                href="tel:0506724312"
                 className="text-brand-gold hover:text-brand-gold/80 font-bold text-xl transition-colors"
                 dir="ltr"
               >
-                050-580-4367
+                050-672-4312
               </a>
               <Phone size={20} className="text-brand-gold" />
             </div>
             <div>
-              <a 
-                href="https://wa.me/972505804367" 
-                target="_blank" 
+              <a
+                href="https://wa.me/972506724312"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-green-700 transition-all"
               >
