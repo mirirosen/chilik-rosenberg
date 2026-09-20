@@ -5,6 +5,7 @@ import { db, APP_ID } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew } from '../utils/dateUtils';
 import { sendBookingEmails } from '../utils/emailService';
+import { clearIdempotencyKey, createCreditPayment, getPaymentStatus, makeIdempotencyKey, paymentsConfigured } from '../utils/paymentService';
 import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus, Lock, CheckCircle } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
@@ -16,6 +17,8 @@ const BookingForm = ({ onSuccess }) => {
   const urlParams = new URLSearchParams(window.location.search);
   const prefilledDate = urlParams.get('date');
   const prefilledParticipants = urlParams.get('participants');
+  const paymentResult = urlParams.get('payment');
+  const paymentBookingId = urlParams.get('id');
 
   // Determine if fields should be locked
   const isDateLocked = !!prefilledDate;
@@ -38,12 +41,15 @@ const BookingForm = ({ onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const [paymentRedirect, setPaymentRedirect] = useState(false);
+  const [paymentReturnState, setPaymentReturnState] = useState(paymentResult === 'success' ? 'checking' : paymentResult === 'failed' ? 'failed' : null);
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
 
   // Redirect to date selection if no pre-filled data
   useEffect(() => {
+    if (paymentResult) return;
     if (!prefilledDate || !prefilledParticipants) {
       setRedirecting(true);
       // Redirect to homepage date selection
@@ -51,7 +57,26 @@ const BookingForm = ({ onSuccess }) => {
         window.location.href = '/#date-selection';
       }, 1500);
     }
-  }, [prefilledDate, prefilledParticipants]);
+  }, [prefilledDate, prefilledParticipants, paymentResult]);
+
+  useEffect(() => {
+    if (paymentResult !== 'success' || !paymentBookingId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const check = async () => {
+      try {
+        const state = await getPaymentStatus(paymentBookingId);
+        if (cancelled) return;
+        if (state.paymentStatus === 'paid') return setPaymentReturnState('paid');
+        if (['failed', 'cancelled', 'expired'].includes(state.paymentStatus)) return setPaymentReturnState('failed');
+      } catch { /* provider redirect can arrive before the webhook */ }
+      attempts += 1;
+      if (!cancelled && attempts < 10) setTimeout(check, 1500);
+      else if (!cancelled) setPaymentReturnState('pending');
+    };
+    check();
+    return () => { cancelled = true; };
+  }, [paymentResult, paymentBookingId]);
 
   const getDateStatus = (dateStr) => {
     if (!cloudData) return { available: true, label: t('common.loading'), availableSpots: 0 };
@@ -273,6 +298,23 @@ const BookingForm = ({ onSuccess }) => {
     setIsSubmitting(true);
 
     try {
+      if (formData.paymentMethod === 'credit') {
+        if (!paymentsConfigured) throw new Error('payment-not-configured');
+        setPaymentRedirect(true);
+        const paymentBooking = {
+          name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(),
+          participants: parseInt(formData.participants), tourDate: formData.tourDate, notes: formData.notes.trim(),
+          howDidYouHear: formData.howDidYouHear, dateOfBirth: formData.dateOfBirth
+        }
+        try {
+          const result = await createCreditPayment(paymentBooking, makeIdempotencyKey(paymentBooking));
+          window.location.assign(result.paymentUrl);
+        } catch (error) {
+          clearIdempotencyKey(paymentBooking);
+          throw error;
+        }
+        return;
+      }
       // Generate booking ID
       const bookingId = `BK${Date.now()}`;
       const totalPrice = formData.participants * PRICE_PER_PERSON;
@@ -325,7 +367,8 @@ const BookingForm = ({ onSuccess }) => {
 
     } catch (error) {
       console.error('Error creating booking:', error);
-      setSubmitError('אירעה שגיאה בשמירת ההזמנה. אנא נסה שוב או צור קשר טלפונית.');
+      setPaymentRedirect(false);
+      setSubmitError(error.message === 'payment-not-configured' ? 'תשלום בכרטיס עדיין לא הוגדר. אפשר לבחור Bit או העברה בנקאית, או ליצור קשר ב-WhatsApp.' : error.message === 'capacity-exceeded' ? 'לא נשארו מספיק מקומות. אנא בחרו תאריך אחר.' : 'לא הצלחנו לפתוח תשלום מאובטח. לא בוצע חיוב. אפשר לנסות שוב או לבחור אמצעי תשלום אחר.');
     } finally {
       setIsSubmitting(false);
     }
@@ -340,6 +383,20 @@ const BookingForm = ({ onSuccess }) => {
   };
 
   const totalPrice = formData.participants * PRICE_PER_PERSON;
+
+  if (paymentReturnState) {
+    const copy = paymentReturnState === 'paid'
+      ? { icon: '✓', title: 'התשלום התקבל וההזמנה אושרה', detail: `מספר הזמנה: ${paymentBookingId}` }
+      : paymentReturnState === 'failed'
+        ? { icon: '!', title: 'התשלום לא הושלם', detail: 'לא בוצע חיוב. אפשר לחזור ולנסות שוב או לבחור אמצעי תשלום אחר.' }
+        : paymentReturnState === 'pending'
+          ? { icon: '…', title: 'התשלום עדיין בבדיקה', detail: 'אין לבצע תשלום נוסף. נעדכן את ההזמנה אוטומטית כשהאישור יגיע.' }
+          : { icon: '…', title: 'מאמת את התשלום', detail: 'נא להמתין. אין לרענן או לשלם שוב.' };
+    return <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir="rtl">
+      <div className="text-6xl mb-6">{copy.icon}</div><h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
+      <p className="text-gray-300 mb-6">{copy.detail}</p><a className="target-button inline-flex" href="/">חזרה לעמוד הראשי</a>
+    </div>;
+  }
 
   // Show redirect message if no pre-filled data
   if (redirecting) {
@@ -765,7 +822,7 @@ const BookingForm = ({ onSuccess }) => {
           disabled={isSubmitting || (selectedDateCapacity && selectedDateCapacity.available <= 0)}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
+          {paymentRedirect ? 'מעביר לתשלום מאובטח…' : isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
         </button>
 
         <button

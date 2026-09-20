@@ -12,5 +12,12 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  },
+  "firestore": {
+    "indexes": "firestore.indexes.json"
   }
 }
