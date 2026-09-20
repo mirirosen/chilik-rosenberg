@@ -153,12 +153,14 @@
 .target-site .main-header>a { color:var(--target-ink); font-size:1.05rem; letter-spacing:0; }
 .target-site .main-header .nav-link { color:#595557; font-weight:500; }
 .target-site .main-header .nav-link::after { background:var(--target-gold); }
-.target-site .main-header .bg-brand-gold { background:var(--target-gold); color:#403d3d; border-radius:4px; padding:.7rem 1.4rem; }
+.target-site .main-header .header-cta { background:var(--target-gold); color:#403d3d; border-radius:4px; padding:.7rem 1.4rem; }
 .target-hero { min-height:690px; margin-top:72px; display:grid; grid-template-columns:minmax(280px,42%) 1fr; background:#555457; overflow:hidden; position:relative; direction:ltr; }
 .target-hero__portrait { position:relative; min-height:690px; background:linear-gradient(180deg,#a56a2e,#74471e); overflow:hidden; }
 .target-hero__portrait:after { content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 70%,#555457); }
 .target-hero__portrait img { width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.82) contrast(1.03); }
 .target-hero__copy { direction:rtl; text-align:right; padding:clamp(60px,8vw,130px) clamp(35px,8vw,155px) 70px 42px; display:flex;flex-direction:column;align-items:flex-start;justify-content:center; }
+/* EN (ltr) hero copy: don't inherit the hardcoded rtl direction (was clipping text). */
+html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left; }
 .target-eyebrow { font:500 .78rem Heebo,sans-serif!important; letter-spacing:.12em; color:var(--target-gold)!important; margin:0 0 22px!important; }
 .target-hero h1 { color:#fff; font-size:clamp(3rem,5.3vw,6.4rem); line-height:.98; max-width:780px; margin:0 0 25px; font-weight:500; }
 .target-hero__subtitle { color:#fff!important;font:400 clamp(1.1rem,1.7vw,1.8rem)/1.55 'Frank Ruhl Libre',serif!important; max-width:640px;margin:0 0 32px!important; }
@@ -256,7 +258,10 @@
  .target-hero__person { width:58%;height:94%;right:2%; }
  .target-bio>div { order:1; }
  .target-bio img { order:2; }
- .target-site .fixed.bottom-6.right-6 { position:static!important;display:none!important; }
+ /* Mobile: keep HelpHub floating buttons visible but compact so they don't cover content. */
+ .target-site .fixed.bottom-6.right-6 { right:12px!important;bottom:12px!important;gap:8px!important; }
+ .target-site .hub-btn { width:auto;min-width:0;height:44px;padding:0 14px;font-size:.78rem; }
+ .target-site .hub-btn svg { width:18px;height:18px; }
 }
 .target-hero__food { transform:none;object-position:center 54%; }
 .target-hero__visual:before { content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgb(42 25 16/.16),transparent 60%); }
@@ -270,7 +275,7 @@
 .target-site .main-header { min-height:72px; }
 .target-site .main-header .nav-link { font-size:.84rem; }
 .target-site #date-selection .date-card { min-width:136px;border-color:#cac5c1; }
-.target-site #date-selection .date-card:not(.bg-brand-gold) { color:#3d3a39; }
+.target-site #date-selection .date-card:not(.date-card--selected) { color:#3d3a39; }
 .target-site #date-selection .text-gray-400 { color:#68615e; }
 .target-site #date-selection input,.target-site #date-selection select { border-color:#aaa29e; }
 .target-site #faq button { min-height:64px; }
@@ -280,9 +285,12 @@
  .target-site .fixed.bottom-6.right-6 { right:28px;bottom:22px;gap:10px; }
  .target-site .hub-btn { width:auto;min-width:122px;height:46px;padding:0 20px;box-shadow:0 6px 18px rgb(0 0 0/.22); }
 }
+/* Tablet: keep all nav links visible (was hiding 4/5 links); compact spacing instead. */
 @media(max-width:1190px) and (min-width:768px){
- .target-site .main-header>div { gap:8px; }
- .target-site .main-header .nav-link:nth-child(2),.target-site .main-header .nav-link:nth-child(3){ display:none; }
+ .target-site .main-header>div { gap:10px; margin-inline-start:auto; }
+ .target-site .main-header>a { max-width:none;white-space:nowrap;font-size:.95rem; }
+ .target-site .main-header .nav-link { font-size:.78rem; white-space:nowrap; }
+ .target-site .main-header .header-cta { padding:.5rem 1rem; font-size:.82rem; white-space:nowrap; }
 }
 @media(max-width:767px){
  .target-hero__copy { min-height:485px;justify-content:center; }
@@ -296,12 +304,6 @@
 }
 @media(prefers-reduced-motion:reduce){
  .target-site * { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
-}
-/* Re-judge fix: at tablet widths the brand must not wrap and compete with navigation. */
-@media(max-width:1190px) and (min-width:768px){
- .target-site .main-header>a { max-width:none;white-space:nowrap;font-size:.78rem; }
- .target-site .main-header .nav-link:nth-child(-n+4){ display:none; }
- .target-site .main-header>div { margin-inline-start:auto; }
 }
 /* Figma correction: Chilik's portrait owns roughly half of the hero, rather than reading as a narrow overlay. */
 @media(min-width:1200px){

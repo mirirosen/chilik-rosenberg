@@ -1,6 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 const Footer = () => {
+  const { t, i18n } = useTranslation();
+  const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+
   const handleTermsClick = () => {
-    window.history.pushState({}, '', '/terms');
     window.location.href = '/terms';
   };
 
@@ -23,9 +27,9 @@ const Footer = () => {
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 text-right">
           {/* Contact Info */}
-          <div className="text-right">
+          <div className="text-right" dir={dir}>
             <h3 className="text-brand-gold font-bold text-xl mb-4 font-serif">
-              חיליק רוזנברג - סיורים קולינריים
+              {t('footer.title')}
             </h3>
             <div className="space-y-2 text-gray-400">
               <p className="flex items-center gap-2 justify-end">
@@ -60,22 +64,22 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="text-right">
+          <div className="text-right" dir={dir}>
             <h3 className="text-brand-gold font-bold text-xl mb-4 font-serif">
-              קישורים מהירים
+              {t('footer.quickLinks')}
             </h3>
             <div className="space-y-2 text-gray-400">
               <button
                 onClick={goToDateSelection}
                 className="block hover:text-brand-gold transition-colors text-right"
               >
-                הרשמה לסיור
+                {t('footer.register')}
               </button>
               <button
                 onClick={handleTermsClick}
                 className="block hover:text-brand-gold transition-colors text-right"
               >
-                תנאי שימוש ותקנון
+                {t('footer.terms')}
               </button>
               <a
                 href="#about"
@@ -89,7 +93,7 @@ const Footer = () => {
                   }
                 }}
               >
-                אודות
+                {t('footer.aboutLink')}
               </a>
               <a
                 href="#faq"
@@ -103,19 +107,18 @@ const Footer = () => {
                   }
                 }}
               >
-                שאלות נפוצות
+                {t('footer.faqs')}
               </a>
             </div>
           </div>
 
           {/* About */}
-          <div className="text-right">
+          <div className="text-right" dir={dir}>
             <h3 className="text-brand-gold font-bold text-xl mb-4 font-serif">
-              אודות הסיורים
+              {t('footer.about')}
             </h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              סיורים קולינריים בבני ברק עם חיליק רוזנברג.
-              חוויה אותנטית של טעמים, ריחות וסיפורים מהלב החרדי של בני ברק.
+              {t('footer.aboutText')}
             </p>
           </div>
         </div>
@@ -123,14 +126,14 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row-reverse justify-between items-center gap-4 text-center md:text-right">
-            <div className="text-xs text-gray-500 tracking-wider">
-              © 2026 סיורי חיליק רוזנברג - כל הזכויות שמורות
+            <div className="text-xs text-gray-500 tracking-wider" dir={dir}>
+              © 2026 {t('footer.copyright')}
             </div>
             <button
               onClick={handleTermsClick}
               className="text-xs text-gray-400 hover:text-brand-gold transition-colors underline"
             >
-              תנאי שימוש ומדיניות ביטולים
+              {t('footer.terms')}
             </button>
           </div>
         </div>

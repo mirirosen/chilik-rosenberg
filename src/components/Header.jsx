@@ -55,7 +55,6 @@ const Header = () => {
           </button>
           <button 
             onClick={() => {
-              window.history.pushState({}, '', '/terms');
               window.location.href = '/terms';
             }} 
             className="nav-link text-gray-400 hover:text-white"
@@ -65,7 +64,7 @@ const Header = () => {
           <LanguageSwitcher />
           <button 
             onClick={goToDateSelection}
-            className="bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all"
+            className="header-cta bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all"
           >
             {t('header.register')}
           </button>
@@ -75,7 +74,7 @@ const Header = () => {
         <button 
           className="md:hidden text-brand-gold" 
           onClick={() => setMobileMenuOpen(true)}
-          aria-label="תפריט"
+          aria-label={t('header.menuButton')}
         >
           <Menu size={32} />
         </button>
@@ -115,7 +114,6 @@ const Header = () => {
         <button 
           onClick={() => {
             setMobileMenuOpen(false);
-            window.history.pushState({}, '', '/terms');
             window.location.href = '/terms';
           }} 
           className="text-2xl text-gray-300 font-serif"
