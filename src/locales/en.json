@@ -50,6 +50,23 @@
       "credit": "Credit Card",
       "bankTransfer": "Bank Transfer"
     },
+    "payment": {
+      "redirecting": "Redirecting you to a secure payment page…",
+      "redirectingSub": "Please don't close this window — it takes a few seconds",
+      "createFailed": "Could not create the payment page. You can try again or choose Bit / bank transfer.",
+      "cancelled": "Payment was cancelled — your booking was saved, you can retry anytime.",
+      "verifying": "Verifying your payment…",
+      "verifyingSub": "Checking with the payment provider — this takes a few seconds",
+      "failed": "Payment was not completed",
+      "failedSub": "No charge was made. You can try again or reach us on WhatsApp.",
+      "timeout": "Payment under review",
+      "timeoutSub": "We received your booking and the payment is being verified with the payment provider. We'll be in touch shortly.",
+      "missingBooking": "No booking found to verify",
+      "backToBooking": "Back to the booking form",
+      "backToHome": "Back to homepage",
+      "contactWhatsapp": "Chat with us on WhatsApp",
+      "whatsappMessage": "Hi, regarding booking {{bookingId}} — the payment is under review"
+    },
     "howOptions": {
       "friend": "Friend's recommendation",
       "google": "Google search",

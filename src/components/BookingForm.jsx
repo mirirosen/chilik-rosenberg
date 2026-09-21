@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, increment } from 'firebase/firestore';
-import { db, APP_ID } from '../utils/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, APP_ID, functions } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew } from '../utils/dateUtils';
 import { sendBookingEmails } from '../utils/emailService';
@@ -38,6 +39,10 @@ const BookingForm = ({ onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const [redirectingToPayment, setRedirectingToPayment] = useState(false);
+
+  // Grow cancelUrl returns here with ?payment=cancelled after an aborted checkout
+  const paymentCancelled = urlParams.get('payment') === 'cancelled';
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
@@ -292,7 +297,7 @@ const BookingForm = ({ onSuccess }) => {
         totalPrice,
         pricePerPerson: PRICE_PER_PERSON,
         status: 'pending', // pending, confirmed, cancelled
-        paymentStatus: 'pending', // pending, completed, failed (for future Morning integration)
+        paymentStatus: 'pending', // pending → redirected → completed | failed | pending_review (Grow credit flow)
         morningBookingId: null, // Will be filled when Morning API is integrated
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -315,7 +320,30 @@ const BookingForm = ({ onSuccess }) => {
         }
       });
 
-      // Call success callback with booking data
+      // Credit-card flow: hand off to Grow's hosted payment page.
+      // Manual flows (Bit / bank transfer) are unchanged below.
+      if (formData.paymentMethod === 'credit') {
+        setRedirectingToPayment(true);
+        try {
+          const createGrowPayment = httpsCallable(functions, 'createGrowPayment');
+          const { data } = await createGrowPayment({ bookingId: docRef.id });
+          if (!data?.url) throw new Error('Grow returned no payment URL');
+          // Full-page redirect to Grow's secure payment page (URL valid ~10 min).
+          // Grow redirects back to /payment/success via the configured successUrl.
+          window.location.href = data.url;
+          return;
+        } catch (error) {
+          console.error('Grow payment creation failed:', error);
+          setRedirectingToPayment(false);
+          // Booking stays paymentStatus:'pending' — user can retry or pick another method.
+          setSubmitError(t('booking.payment.createFailed'));
+          return;
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+
+      // Call success callback with booking data (manual flows only)
       if (onSuccess) {
         onSuccess({
           ...bookingData,
@@ -357,11 +385,34 @@ const BookingForm = ({ onSuccess }) => {
     );
   }
 
+  // Show payment-redirect interstitial while the Grow payment page is being created
+  if (redirectingToPayment) {
+    return (
+      <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" dir="rtl">
+        <div className="text-6xl mb-6">💳</div>
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {t('booking.payment.redirecting')}
+        </h2>
+        <p className="text-gray-400 mb-6">
+          {t('booking.payment.redirectingSub')}
+        </p>
+        <div className="animate-spin w-8 h-8 border-4 border-brand-gold border-t-transparent rounded-full mx-auto"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl">
       <h2 className="text-3xl md:text-5xl font-serif text-brand-gold text-center mb-8 font-bold">
         {t('booking.title')}
       </h2>
+
+      {/* Shown when Grow redirects back after an aborted checkout */}
+      {paymentCancelled && (
+        <div className="bg-yellow-500/10 border border-yellow-500/40 rounded-3xl p-4 mb-8 text-center" dir="rtl">
+          <p className="text-yellow-300">{t('booking.payment.cancelled')}</p>
+        </div>
+      )}
 
       {/* Pre-filled Summary Card */}
       {(isDateLocked || isParticipantsLocked) && (

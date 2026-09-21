@@ -17,11 +17,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Admin from './components/Admin';
 import BookingForm from './components/BookingForm';
 import BookingConfirmation from './components/BookingConfirmation';
+import PaymentSuccess from './components/PaymentSuccess';
 import Terms from './components/Terms';
 
 function App() {
   const { i18n } = useTranslation();
-  const [currentRoute, setCurrentRoute] = useState('home'); // 'home', 'admin', 'booking', 'confirmation', 'terms'
+  const [currentRoute, setCurrentRoute] = useState('home'); // 'home', 'admin', 'booking', 'confirmation', 'terms', 'payment-success'
   const [bookingData, setBookingData] = useState(null);
   const [isDetectingLanguage, setIsDetectingLanguage] = useState(true);
 
@@ -62,6 +63,8 @@ function App() {
         setCurrentRoute('admin');
       } else if (path === '/booking') {
         setCurrentRoute('booking');
+      } else if (path === '/payment/success') {
+        setCurrentRoute('payment-success');
       } else if (path === '/terms' || path === '/תנאים') {
         setCurrentRoute('terms');
       } else {
@@ -130,6 +133,15 @@ function App() {
           </div>
           <Footer />
         </div>
+      </ErrorBoundary>
+    );
+  }
+
+  // Render payment verification page (Grow redirects back here after checkout)
+  if (currentRoute === 'payment-success') {
+    return (
+      <ErrorBoundary>
+        <PaymentSuccess onBackToHome={handleBackToHome} />
       </ErrorBoundary>
     );
   }
