@@ -1,4 +1,24 @@
 'use strict';
+/**
+ * Tranzila card-payment integration — Firebase Cloud Functions (2nd gen).
+ *
+ * SANDBOX-READY, NOT PRODUCTION-READY: requires the Tranzila terminal
+ * credentials (see TRANZILA_SETUP.md). With placeholder config the functions
+ * fail closed (4xx/5xx, no payment URL is ever issued).
+ *
+ * Endpoints (region europe-west1):
+ * - POST /createPayment        create booking (idempotent) + capacity hold, return { bookingId, paymentUrl }
+ * - POST /tranzilaWebhook      Tranzila's server-to-server notify POST (urlencoded).
+ *                              AUTHORITATIVE source of truth for "paid" — the
+ *                              success_url_address browser redirect is NOT.
+ *                              Verified: Response=000 + sum match + nonce match.
+ * - GET  /paymentStatus?id=…    polled by the booking form after redirect-back
+ * - (scheduled) expirePaymentHolds — releases 15-min capacity holds
+ *
+ * No card data ever touches our servers. No secrets are committed — terminal
+ * name is a non-secret param; the optional terminal password lives in Secret
+ * Manager. Never commit functions/.env.
+ */
 const { onRequest } = require('firebase-functions/v2/https');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const admin = require('firebase-admin');
@@ -7,13 +27,17 @@ const core = require('./payment-core');
 admin.initializeApp();
 const db = admin.firestore();
 
-const MORNING_CLIENT_ID = defineSecret('MORNING_SANDBOX_CLIENT_ID');
-const MORNING_CLIENT_SECRET = defineSecret('MORNING_SANDBOX_CLIENT_SECRET');
-const MORNING_WEBHOOK_SECRET = defineSecret('MORNING_SANDBOX_WEBHOOK_SECRET');
+// Tranzila terminal name (supplier), e.g. "chilik-tours". Non-secret: it appears in the payment URL.
+const TRANZILA_TERMINAL = defineString('TRANZILA_TERMINAL', { default: '' });
+// Terminal password — only needed when the terminal is configured to require it
+// in the payment request, and later for server-side handshake verification.
+const TRANZILA_PW = defineSecret('TRANZILA_PW');
+const TRANZILA_REQUIRE_PW = defineString('TRANZILA_REQUIRE_PW', { default: 'false' });
+// tranmode for the iframe payment page. Default 'AK' per Tranzila docs examples;
+// confirm the approved mode in my.tranzila.com during sandbox testing.
+const TRANZILA_TRANMODE = defineString('TRANZILA_TRANMODE', { default: 'AK' });
 const PUBLIC_SITE_URL = defineString('PUBLIC_SITE_URL', { default: 'https://www.chilik-tours.com' });
 const APP_ID = 'hilik-rosenberg-v1';
-const AUTH_URL = 'https://api.sandbox.morning.dev/idp/v1/oauth/token';
-const API_URL = 'https://sandbox.d.greeninvoice.co.il/api/v1';
 const allowedOrigins = new Set(['https://www.chilik-tours.com', 'https://chilik-tours.com', 'http://localhost:3000', 'http://localhost:5173']);
 
 function json(res, status, body) { res.status(status).set('Cache-Control', 'no-store').json(body); }
@@ -27,24 +51,24 @@ function cors(req, res) {
 function tourRef(date) { return db.doc(`artifacts/${APP_ID}/public/data/tourDates/${date}`); }
 function settingsRef() { return db.doc(`artifacts/${APP_ID}/public/data/settings/global`); }
 function bookingRef(id) { return db.doc(`bookings/${id}`); }
-async function morningToken() {
-  const r = await fetch(AUTH_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ grant_type: 'client_credentials', client_id: MORNING_CLIENT_ID.value(), client_secret: MORNING_CLIENT_SECRET.value() }) });
-  if (!r.ok) throw new Error(`morning-auth-${r.status}`);
-  return (await r.json()).accessToken;
-}
-async function createMorningForm(booking, notifyUrl) {
-  const token = await morningToken();
-  const base = PUBLIC_SITE_URL.value().replace(/\/$/, '');
-  const payload = core.paymentPayload(booking, { success: `${base}/booking?payment=success&id=${encodeURIComponent(booking.bookingId)}`, failure: `${base}/booking?payment=failed&id=${encodeURIComponent(booking.bookingId)}`, notify: notifyUrl });
-  const r = await fetch(`${API_URL}/payments/form`, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok || !data.success || !/^https:\/\//.test(data.url || '')) throw new Error(`morning-form-${r.status}-${data.errorCode || 'unknown'}`);
-  return { url: data.url, payload };
+
+function requireTranzilaConfig() {
+  if (!TRANZILA_TERMINAL.value()) {
+    const err = new Error('payment provider not configured');
+    err.status = 503;
+    throw err;
+  }
 }
 
-exports.createPayment = onRequest({ region: 'europe-west1', secrets: [MORNING_CLIENT_ID, MORNING_CLIENT_SECRET] }, async (req, res) => {
+function functionBaseUrl() {
+  return `https://europe-west1-${process.env.GCLOUD_PROJECT}.cloudfunctions.net`;
+}
+
+exports.createPayment = onRequest({ region: 'europe-west1' }, async (req, res) => {
   if (!cors(req, res)) return json(res, 403, { error: 'origin-not-allowed' });
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' });
+  try { requireTranzilaConfig(); } catch (e) { return json(res, e.status || 503, { error: 'payment-provider-not-configured' }); }
+
   const idem = req.get('x-idempotency-key');
   if (!/^[a-zA-Z0-9_-]{16,80}$/.test(idem || '')) return json(res, 400, { error: 'invalid-idempotency-key' });
   let validated;
@@ -53,8 +77,11 @@ exports.createPayment = onRequest({ region: 'europe-west1', secrets: [MORNING_CL
   const ref = bookingRef(bookingId);
   try {
     const existing = await ref.get();
-    if (existing.exists && existing.data().paymentUrl && existing.data().paymentStatus === 'awaiting_payment') return json(res, 200, { bookingId, paymentUrl: existing.data().paymentUrl, reused: true });
+    if (existing.exists && existing.data().paymentUrl && existing.data().paymentStatus === 'awaiting_payment') {
+      return json(res, 200, { bookingId, paymentUrl: existing.data().paymentUrl, reused: true });
+    }
     let createdNew = false;
+    const nonce = core.makePaymentNonce();
     await db.runTransaction(async tx => {
       const [booking, tour, settings] = await Promise.all([tx.get(ref), tx.get(tourRef(req.body.tourDate)), tx.get(settingsRef())]);
       if (booking.exists) return;
@@ -66,21 +93,63 @@ exports.createPayment = onRequest({ region: 'europe-west1', secrets: [MORNING_CL
       const current = td.currentRegistrations || 0;
       if (current + validated.participants > max) throw new Error('capacity-exceeded');
       const now = admin.firestore.Timestamp.now();
-      tx.set(ref, { bookingId, name: req.body.name.trim(), phone: req.body.phone.trim(), email: req.body.email.trim(), participants: validated.participants, tourDate: req.body.tourDate, notes: String(req.body.notes || '').trim().slice(0, 1000), howDidYouHear: String(req.body.howDidYouHear || '').slice(0, 80), dateOfBirth: String(req.body.dateOfBirth || ''), paymentMethod: 'credit', totalPrice: validated.amount, pricePerPerson: core.PRICE_PER_PERSON, status: 'payment_pending', paymentStatus: 'creating', idempotencyKeyHash: crypto.createHash('sha256').update(idem).digest('hex'), holdExpiresAt: admin.firestore.Timestamp.fromDate(core.holdExpiresAt()), createdAt: now, updatedAt: now });
+      tx.set(ref, {
+        bookingId,
+        name: req.body.name.trim(),
+        phone: req.body.phone.trim(),
+        email: req.body.email.trim(),
+        participants: validated.participants,
+        tourDate: req.body.tourDate,
+        notes: String(req.body.notes || '').trim().slice(0, 1000),
+        howDidYouHear: String(req.body.howDidYouHear || '').slice(0, 80),
+        dateOfBirth: String(req.body.dateOfBirth || ''),
+        paymentMethod: 'credit',
+        totalPrice: validated.amount,
+        pricePerPerson: core.PRICE_PER_PERSON,
+        status: 'payment_pending',
+        paymentStatus: 'creating',
+        tranzilaNonce: nonce,
+        idempotencyKeyHash: crypto.createHash('sha256').update(idem).digest('hex'),
+        holdExpiresAt: admin.firestore.Timestamp.fromDate(core.holdExpiresAt()),
+        createdAt: now,
+        updatedAt: now,
+      });
       tx.set(tourRef(req.body.tourDate), { date: req.body.tourDate, useGlobalMax: td.useGlobalMax !== false, customMax: td.customMax || null, currentRegistrations: current + validated.participants, updatedAt: now }, { merge: true });
     });
     const fresh = await ref.get();
     if (!createdNew && !fresh.data()?.paymentUrl) return json(res, 409, { error: 'payment-initiation-in-progress' });
     if (fresh.data()?.paymentUrl) return json(res, 200, { bookingId, paymentUrl: fresh.data().paymentUrl, reused: true });
-    const notifyUrl = `https://europe-west1-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/morningWebhook?id=${encodeURIComponent(bookingId)}`;
-    const form = await createMorningForm(fresh.data(), notifyUrl);
-    await ref.update({ paymentStatus: 'awaiting_payment', paymentUrl: form.url, morningRequestCreatedAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-    return json(res, 201, { bookingId, paymentUrl: form.url });
+
+    // Build the Tranzila payment-page URL server-side (terminal name + optional
+    // password never leave the server; the browser only gets the final URL).
+    const base = PUBLIC_SITE_URL.value().replace(/\/$/, '');
+    const notifyUrl = `${functionBaseUrl()}/tranzilaWebhook?id=${encodeURIComponent(bookingId)}`;
+    let paymentUrl;
+    try {
+      paymentUrl = core.buildTranzilaPaymentUrl({
+        terminal: TRANZILA_TERMINAL.value(),
+        booking: { bookingId, ...fresh.data() },
+        urls: {
+          success: `${base}/booking?payment=success&id=${encodeURIComponent(bookingId)}`,
+          failure: `${base}/booking?payment=failed&id=${encodeURIComponent(bookingId)}`,
+          notify: notifyUrl,
+        },
+        nonce: fresh.data().tranzilaNonce,
+        tranmode: TRANZILA_TRANMODE.value(),
+        tranzilaPW: TRANZILA_REQUIRE_PW.value() === 'true' ? TRANZILA_PW.value() : '',
+      });
+    } catch (e) {
+      console.error('createPayment: Tranzila URL build failed', { bookingId, err: String(e) });
+      await releaseHold(ref, 'initiation_failed').catch(() => {});
+      return json(res, 502, { error: 'payment-provider-unavailable' });
+    }
+    await ref.update({ paymentStatus: 'awaiting_payment', paymentUrl, tranzilaRequestCreatedAt: admin.firestore.FieldValue.serverTimestamp(), updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+    return json(res, 201, { bookingId, paymentUrl });
   } catch (e) {
     const snap = await ref.get().catch(() => null);
     if (snap?.exists && snap.data().paymentStatus === 'creating') await releaseHold(ref, 'initiation_failed').catch(() => {});
     const status = ['tour-unavailable', 'capacity-exceeded'].includes(e.message) ? 409 : 502;
-    return json(res, status, { error: e.message.startsWith('morning-') ? 'payment-provider-unavailable' : e.message });
+    return json(res, status, { error: e.message });
   }
 });
 
@@ -94,29 +163,76 @@ async function releaseHold(ref, reason) {
   });
 }
 
-exports.morningWebhook = onRequest({ region: 'europe-west1', secrets: [MORNING_WEBHOOK_SECRET] }, async (req, res) => {
+/**
+ * Tranzila server-to-server notify (notify_url_address). Body is
+ * application/x-www-form-urlencoded; parsed from the raw body so we never
+ * depend on framework body-parser behavior.
+ *
+ * Verification (see payment-core.verifyTranzilaNotify): Response=000, exact
+ * sum match, and the per-booking nonce echoed back. Tri-state outcome:
+ *   paid           -> status 'confirmed', paymentStatus 'paid'
+ *   declined/error -> paymentStatus 'failed'
+ *   suspicious     -> paymentStatus 'pending_review' (manual check in my.tranzila.com)
+ */
+exports.tranzilaWebhook = onRequest({ region: 'europe-west1', secrets: [TRANZILA_PW] }, async (req, res) => {
   if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' });
-  const raw = req.rawBody;
-  if (!core.verifyWebhookSignature(raw, req.get('x-webhook-signature'), MORNING_WEBHOOK_SECRET.value())) return json(res, 401, { error: 'invalid-signature' });
-  if (!core.isFreshTimestamp(req.get('x-webhook-timestamp'))) return json(res, 401, { error: 'stale-delivery' });
-  const deliveryId = req.get('x-webhook-delivery-id');
-  if (!deliveryId) return json(res, 400, { error: 'missing-delivery-id' });
-  const facts = core.webhookFacts({ ...req.body, bookingId: req.query.id || req.body?.bookingId });
-  if (!facts.bookingId || !facts.transactionId) return json(res, 400, { error: 'missing-payment-reference' });
+  let notify;
+  try { notify = core.parseTranzilaNotify(req.rawBody); }
+  catch (e) { return json(res, 400, { error: 'unparseable-body' }); }
+
+  const bookingId = String(req.query.id || notify.bookingId || '');
+  if (!/^BK-[a-f0-9]{20}$/.test(bookingId)) return json(res, 400, { error: 'missing-payment-reference' });
+
+  const ref = bookingRef(bookingId);
   try {
+    const snap = await ref.get();
+    if (!snap.exists) { console.error('tranzilaWebhook: unknown booking', bookingId); return json(res, 404, { error: 'booking-not-found' }); }
+    const booking = snap.data();
+
+    // Idempotency: already paid -> just acknowledge.
+    if (booking.paymentStatus === 'paid') return json(res, 200, { received: true, duplicate: true });
+
+    const verdict = core.verifyTranzilaNotify(notify, booking);
+
+    if (!verdict.ok && !verdict.approved) {
+      // Declined / cancelled / error at the payment page.
+      console.warn('tranzilaWebhook: not-approved callback', { bookingId, reason: verdict.reason });
+      await ref.update({ paymentStatus: 'failed', paymentFailureReason: verdict.reason, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      return json(res, 200, { received: true });
+    }
+    if (!verdict.ok) {
+      // Claims to be paid but identity/amount don't match ours -> manual review, never auto-paid.
+      console.error('tranzilaWebhook: suspicious paid callback', { bookingId, reason: verdict.reason });
+      await ref.update({ paymentStatus: 'pending_review', paymentFailureReason: verdict.reason, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      return json(res, 422, { error: 'verification-failed' });
+    }
+
+    // Delivery dedup: same Tranzila transaction delivered twice.
+    const deliveryId = notify.confirmationCode && notify.index
+      ? `tranzila-txn-${notify.confirmationCode}-${notify.index}`
+      : null;
     await db.runTransaction(async tx => {
-      const deliveryRef = db.doc(`paymentWebhookDeliveries/${deliveryId}`), delivery = await tx.get(deliveryRef);
-      if (delivery.exists) return;
-      const ref = bookingRef(facts.bookingId), booking = await tx.get(ref);
-      if (!booking.exists) throw new Error('booking-not-found');
-      const b = booking.data();
-      if (b.paymentStatus === 'paid') { tx.create(deliveryRef, { duplicate: true, createdAt: admin.firestore.Timestamp.now() }); return; }
-      if (facts.currency !== 'ILS' || facts.amount !== b.totalPrice) throw new Error('payment-mismatch');
-      tx.update(ref, { status: 'confirmed', paymentStatus: 'paid', morningTransactionId: facts.transactionId, paidAt: admin.firestore.Timestamp.now(), updatedAt: admin.firestore.Timestamp.now() });
-      tx.create(deliveryRef, { bookingId: facts.bookingId, transactionId: facts.transactionId, createdAt: admin.firestore.Timestamp.now() });
+      if (deliveryId) {
+        const deliveryRef = db.doc(`paymentWebhookDeliveries/${deliveryId}`);
+        if ((await tx.get(deliveryRef)).exists) return;
+        tx.create(deliveryRef, { bookingId, confirmationCode: notify.confirmationCode, createdAt: admin.firestore.Timestamp.now() });
+      }
+      const b = (await tx.get(ref)).data();
+      if (b.paymentStatus === 'paid') return;
+      tx.update(ref, {
+        status: 'confirmed',
+        paymentStatus: 'paid',
+        tranzilaConfirmationCode: notify.confirmationCode || null,
+        tranzilaIndex: notify.index || null,
+        paidAt: admin.firestore.Timestamp.now(),
+        updatedAt: admin.firestore.Timestamp.now(),
+      });
     });
     return json(res, 200, { received: true });
-  } catch (e) { return json(res, e.message === 'booking-not-found' ? 404 : 409, { error: e.message }); }
+  } catch (e) {
+    console.error('tranzilaWebhook: processing failed', { bookingId, err: String(e) });
+    return json(res, 500, { error: 'processing-failed' });
+  }
 });
 
 exports.paymentStatus = onRequest({ region: 'europe-west1' }, async (req, res) => {

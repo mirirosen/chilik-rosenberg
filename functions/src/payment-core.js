@@ -1,18 +1,35 @@
 'use strict';
+/**
+ * payment-core — shared, provider-specific logic for the Tranzila integration.
+ *
+ * Pure functions only (no Firebase / network). Covered by
+ * functions/test/payment-core.test.js — run `npm test` inside functions/.
+ *
+ * Tranzila integration model (docs.tranzila.com):
+ * - The payment page URL *is* the product: we build a signed iframe URL
+ *   (https://direct.tranzila.com/{terminal}/iframenew.php?...). No
+ *   server-to-server "create payment" call is needed.
+ * - After the customer pays, the browser returns to success_url_address /
+ *   fail_url_address, and Tranzila POSTs the transaction result
+ *   (application/x-www-form-urlencoded) to notify_url_address.
+ * - A notify POST is never trusted on shape alone. Verification is:
+ *     1. Response === '000' (Tranzila's approved code)
+ *     2. sum matches the booking's totalPrice exactly
+ *     3. paymentNonce matches the random nonce we stored on the booking
+ *        (unforgeable without reading our database)
+ *   Anything else -> 'failed' (declined) or 'pending_review' (suspicious),
+ *   never auto-'paid'.
+ */
 const crypto = require('crypto');
+const querystring = require('querystring');
 
 const PRICE_PER_PERSON = 250;
 const HOLD_MINUTES = 15;
 const FINAL_PAYMENT_STATES = new Set(['paid', 'failed', 'cancelled', 'expired']);
 
-function safeEqualHex(actual, expected) {
-  if (!/^[a-f0-9]{64}$/i.test(actual || '') || !/^[a-f0-9]{64}$/i.test(expected || '')) return false;
-  return crypto.timingSafeEqual(Buffer.from(actual, 'hex'), Buffer.from(expected, 'hex'));
-}
-function verifyWebhookSignature(rawBody, signature, secret) {
-  if (!secret || !Buffer.isBuffer(rawBody)) return false;
-  return safeEqualHex(signature, crypto.createHmac('sha256', secret).update(rawBody).digest('hex'));
-}
+const TRANZILA_DIRECT_BASE = 'https://direct.tranzila.com';
+const TRANZILA_APPROVED_RESPONSE = '000';
+
 function validateBookingInput(input) {
   const text = (v, max) => typeof v === 'string' && v.trim() && v.trim().length <= max;
   const participants = Number(input?.participants);
@@ -23,37 +40,100 @@ function validateBookingInput(input) {
   if (!Number.isInteger(participants) || participants < 1 || participants > 20) throw new Error('invalid-participants');
   return { participants, amount: participants * PRICE_PER_PERSON };
 }
-function paymentPayload(booking, urls, lang = 'he') {
-  return {
-    description: `Chilik tour booking ${booking.bookingId}`,
-    type: 320,
-    amount: booking.totalPrice,
-    currency: 'ILS',
-    vatType: 0,
-    lang: lang === 'en' ? 'en' : 'he',
-    maxPayments: 1,
-    group: 100,
-    client: { name: booking.name, emails: [booking.email], phone: booking.phone, mobile: booking.phone, country: 'IL', add: false },
-    income: [{ description: `Bnei Brak culinary tour - ${booking.tourDate}`, quantity: booking.participants, price: PRICE_PER_PERSON, currency: 'ILS', vatType: 0 }],
-    remarks: `Booking ${booking.bookingId}`,
-    successUrl: urls.success,
-    failureUrl: urls.failure,
-    notifyUrl: urls.notify,
-    custom: booking.bookingId,
-  };
-}
-function webhookFacts(payload) {
-  const tx = Array.isArray(payload?.transactions) ? payload.transactions[0] : null;
-  return {
-    bookingId: String(payload?.custom || payload?.bookingId || payload?.metadata?.bookingId || String(payload?.description || '').match(/BK-[a-f0-9]{20}/i)?.[0] || ''),
-    amount: Number(payload?.total ?? tx?.total),
-    currency: String(tx?.currency || payload?.currency || 'ILS'),
-    transactionId: String(tx?.gatewayTransactionId || tx?.id || payload?.transactionId || payload?.id || ''),
-  };
-}
-function isFreshTimestamp(value, now = Date.now(), toleranceMs = 5 * 60 * 1000) {
-  const time = Date.parse(value || '');
-  return Number.isFinite(time) && Math.abs(now - time) <= toleranceMs;
-}
+
 function holdExpiresAt(now = Date.now()) { return new Date(now + HOLD_MINUTES * 60 * 1000); }
-module.exports = { PRICE_PER_PERSON, HOLD_MINUTES, FINAL_PAYMENT_STATES, verifyWebhookSignature, validateBookingInput, paymentPayload, webhookFacts, isFreshTimestamp, holdExpiresAt };
+
+function makePaymentNonce() { return crypto.randomBytes(16).toString('hex'); }
+
+/**
+ * Build the Tranzila payment-page URL (iframe endpoint, works full-page too).
+ *
+ * @param {object} args
+ * @param {string} args.terminal   Tranzila terminal name (supplier), e.g. "chilik-tours"
+ * @param {object} args.booking    { bookingId, name, email, phone, totalPrice, tourDate, participants }
+ * @param {object} args.urls       { success, failure, notify } absolute HTTPS URLs
+ * @param {string} args.nonce      random per-booking nonce, echoed back in the notify POST
+ * @param {string} [args.tranmode] default 'AK' (charge; confirm against terminal config)
+ * @param {string} [args.tranzilaPW] optional terminal password — only sent when the
+ *        terminal is configured to require it (TRANZILA_REQUIRE_PW=true)
+ * @param {string} [args.lang]     'he' | 'en'
+ */
+function buildTranzilaPaymentUrl({ terminal, booking, urls, nonce, tranmode = 'AK', tranzilaPW = '', lang = 'he' }) {
+  if (!terminal || typeof terminal !== 'string') throw new Error('missing-terminal');
+  const total = Number(booking?.totalPrice);
+  if (!Number.isFinite(total) || total <= 0 || total > 20000) throw new Error('invalid-amount');
+  for (const [k, v] of Object.entries(urls || {})) {
+    if (!/^https:\/\//.test(String(v || ''))) throw new Error(`invalid-url:${k}`);
+  }
+  if (!/^[a-f0-9]{32}$/.test(nonce || '')) throw new Error('invalid-nonce');
+
+  const params = {
+    supplier: terminal,
+    sum: total.toFixed(2), // ILS major units — NOT agorot
+    currency: 1,           // 1 = ILS
+    cred_type: 1,          // regular (single) charge
+    tranmode,
+    contact: String(booking.name || '').trim().slice(0, 60),
+    email: String(booking.email || '').trim().slice(0, 80),
+    phone: String(booking.phone || '').replace(/[^\d]/g, '').slice(0, 15),
+    lang: lang === 'en' ? 'en' : 'he',
+    nologo: 1,
+    success_url_address: urls.success,
+    fail_url_address: urls.failure,
+    notify_url_address: urls.notify,
+    // Echoed back verbatim in the notify POST — the basis of verification:
+    bookingId: booking.bookingId,
+    paymentNonce: nonce,
+  };
+  if (tranzilaPW) params.TranzilaPW = tranzilaPW;
+  // Drop empty optionals so we never send `email=` etc.
+  for (const k of ['contact', 'email', 'phone']) if (!params[k]) delete params[k];
+
+  return `${TRANZILA_DIRECT_BASE}/${encodeURIComponent(terminal)}/iframenew.php?${querystring.stringify(params)}`;
+}
+
+/** Parse Tranzila's urlencoded notify POST body into a plain object. */
+function parseTranzilaNotify(rawBody) {
+  const b = querystring.parse(String(rawBody || ''));
+  const first = (v) => (Array.isArray(v) ? v[0] : v);
+  return {
+    response: String(first(b.Response) || ''),
+    sum: Number(first(b.sum)),
+    bookingId: String(first(b.bookingId) || ''),
+    paymentNonce: String(first(b.paymentNonce) || ''),
+    confirmationCode: String(first(b.ConfirmationCode) || ''),
+    index: String(first(b.index) || ''),
+  };
+}
+
+/**
+ * Verify a parsed notify against the booking. Tri-state:
+ * - { ok:true }                                   -> mark paid
+ * - { ok:false, approved:false } (declined/error)  -> mark failed
+ * - { ok:false, approved:true }  (suspicious paid) -> mark pending_review (manual)
+ */
+function verifyTranzilaNotify(notify, booking) {
+  if (!notify || notify.response !== TRANZILA_APPROVED_RESPONSE) {
+    return { ok: false, approved: false, reason: `not-approved (Response=${(notify && notify.response) || 'missing'})` };
+  }
+  const expected = Number(booking?.totalPrice).toFixed(2);
+  if (!Number.isFinite(notify.sum) || notify.sum.toFixed(2) !== expected) {
+    return { ok: false, approved: true, reason: `sum-mismatch (got ${notify.sum}, expected ${expected})` };
+  }
+  if (!notify.paymentNonce || notify.paymentNonce !== booking.tranzilaNonce) {
+    return { ok: false, approved: true, reason: 'nonce-mismatch' };
+  }
+  return { ok: true };
+}
+
+module.exports = {
+  PRICE_PER_PERSON,
+  HOLD_MINUTES,
+  FINAL_PAYMENT_STATES,
+  validateBookingInput,
+  holdExpiresAt,
+  makePaymentNonce,
+  buildTranzilaPaymentUrl,
+  parseTranzilaNotify,
+  verifyTranzilaNotify,
+};
