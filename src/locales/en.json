@@ -50,6 +50,19 @@
       "credit": "Credit Card",
       "bankTransfer": "Bank Transfer"
     },
+    "payment": {
+      "redirectingToSecure": "Redirecting to secure payment…",
+      "notConfigured": "Card payment is not set up yet. You can choose Bit or bank transfer, or contact us on WhatsApp.",
+      "createFailed": "Could not open the secure payment page. No charge was made. You can try again or choose another payment method.",
+      "paidTitle": "Payment received and booking confirmed",
+      "paidDetail": "Booking number: {{bookingId}}",
+      "failedTitle": "Payment was not completed",
+      "failedDetail": "No charge was made. You can go back and try again or choose another payment method.",
+      "pendingTitle": "Payment is still being verified",
+      "pendingDetail": "Do not pay again. We'll update the booking automatically once confirmed.",
+      "checkingTitle": "Verifying your payment",
+      "checkingDetail": "Please wait. Do not refresh or pay again."
+    },
     "howOptions": {
       "friend": "Friend's recommendation",
       "google": "Google search",

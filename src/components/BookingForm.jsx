@@ -368,7 +368,7 @@ const BookingForm = ({ onSuccess }) => {
     } catch (error) {
       console.error('Error creating booking:', error);
       setPaymentRedirect(false);
-      setSubmitError(error.message === 'payment-not-configured' ? 'תשלום בכרטיס עדיין לא הוגדר. אפשר לבחור Bit או העברה בנקאית, או ליצור קשר ב-WhatsApp.' : error.message === 'capacity-exceeded' ? 'לא נשארו מספיק מקומות. אנא בחרו תאריך אחר.' : 'לא הצלחנו לפתוח תשלום מאובטח. לא בוצע חיוב. אפשר לנסות שוב או לבחור אמצעי תשלום אחר.');
+      setSubmitError(error.message === 'payment-not-configured' ? t('booking.payment.notConfigured') : error.message === 'capacity-exceeded' ? t('booking.validation.dateUnavailable') : t('booking.payment.createFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -386,12 +386,12 @@ const BookingForm = ({ onSuccess }) => {
 
   if (paymentReturnState) {
     const copy = paymentReturnState === 'paid'
-      ? { icon: '✓', title: 'התשלום התקבל וההזמנה אושרה', detail: `מספר הזמנה: ${paymentBookingId}` }
+      ? { icon: '✓', title: t('booking.payment.paidTitle'), detail: t('booking.payment.paidDetail', { bookingId: paymentBookingId }) }
       : paymentReturnState === 'failed'
-        ? { icon: '!', title: 'התשלום לא הושלם', detail: 'לא בוצע חיוב. אפשר לחזור ולנסות שוב או לבחור אמצעי תשלום אחר.' }
+        ? { icon: '!', title: t('booking.payment.failedTitle'), detail: t('booking.payment.failedDetail') }
         : paymentReturnState === 'pending'
-          ? { icon: '…', title: 'התשלום עדיין בבדיקה', detail: 'אין לבצע תשלום נוסף. נעדכן את ההזמנה אוטומטית כשהאישור יגיע.' }
-          : { icon: '…', title: 'מאמת את התשלום', detail: 'נא להמתין. אין לרענן או לשלם שוב.' };
+          ? { icon: '…', title: t('booking.payment.pendingTitle'), detail: t('booking.payment.pendingDetail') }
+          : { icon: '…', title: t('booking.payment.checkingTitle'), detail: t('booking.payment.checkingDetail') };
     return <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir="rtl">
       <div className="text-6xl mb-6">{copy.icon}</div><h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
       <p className="text-gray-300 mb-6">{copy.detail}</p><a className="target-button inline-flex" href="/">חזרה לעמוד הראשי</a>
@@ -822,7 +822,7 @@ const BookingForm = ({ onSuccess }) => {
           disabled={isSubmitting || (selectedDateCapacity && selectedDateCapacity.available <= 0)}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {paymentRedirect ? 'מעביר לתשלום מאובטח…' : isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
+          {paymentRedirect ? t('booking.payment.redirectingToSecure') : isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
         </button>
 
         <button
