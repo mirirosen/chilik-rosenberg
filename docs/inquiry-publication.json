@@ -1,0 +1,189 @@
+{
+  "hostingVersion": "61f29d16c280c86a",
+  "hostingSite": "hilik-site",
+  "publishedUrl": "https://www.chilik-tours.com/",
+  "publishedAt": "2026-10-06T17:46:00.403Z",
+  "hostingConfigSha256": "ce36008198c4d27600bee406fb750e14498e9bcdacf9795285142e1677beb4ba",
+  "publicAssets": [
+    {
+      "path": "404.html",
+      "size": 547,
+      "sha256": "e8b03530860da0d1d60ff6a8cdd1c860eb8504719b4de66e904691a571f1662f"
+    },
+    {
+      "path": "assets/firebase-vendor-D00O-6IZ.js",
+      "size": 465400,
+      "sha256": "445ec783e17fc5a1b1e6d062d92349ae77df186b10fcfd95ecc5be2aa8418058"
+    },
+    {
+      "path": "assets/firebase-vendor-D00O-6IZ.js.map",
+      "size": 2216724,
+      "sha256": "63cc32a20ba9932e9155de23645ef9c06fe5b2c8f72b9bf3b111cd6c9436dcf4"
+    },
+    {
+      "path": "assets/hero-bg-DW8WJRQC.jpeg",
+      "size": 3345307,
+      "sha256": "f2032c31f9a01b9fc037795e871af2bc5567bf7fcb83d7e496038bb8241413f3"
+    },
+    {
+      "path": "assets/hilik-cutout-provided-2Q8nWLjr.png",
+      "size": 184571,
+      "sha256": "10a2ffc84e03ed72a3af1a68caf0328b915a332473e21c7a7c19f82b95b470d7"
+    },
+    {
+      "path": "assets/hilik-profile-D_WN1zB9.jpeg",
+      "size": 63934,
+      "sha256": "32a960d37f5554b1c24038ab55ee7af794a36fe5c3ad484ebd6b024ab572c37e"
+    },
+    {
+      "path": "assets/index-B4pTZUlI.css",
+      "size": 48703,
+      "sha256": "4f9e3a7e3303276a3c90bd43a89a873f81983ef05f9f999da6c8587c527b946f"
+    },
+    {
+      "path": "assets/index-DoIY4VPK.js",
+      "size": 412652,
+      "sha256": "6e6f8e74854a97e29ed7d079cfdbc34d8da1eb69084d553685dcc29bc5e49d73"
+    },
+    {
+      "path": "assets/index-DoIY4VPK.js.map",
+      "size": 1462242,
+      "sha256": "5476ead72656b9c4b24781280d09c693ba5a83cceeeec0c166d2cd1e11e01412"
+    },
+    {
+      "path": "assets/inquiry-index-DpQHxkUh.js",
+      "size": 233746,
+      "sha256": "a0001a4a61c3ab281c974654a65f4d2bed4c26a247e752384a52895408a2795f"
+    },
+    {
+      "path": "assets/inquiry-index-D_mT2IZl.css",
+      "size": 56489,
+      "sha256": "665cbab32e545b80b905dcdd18e5eec1e001be8ead1de29c09108c81cd9cc783"
+    },
+    {
+      "path": "assets/lucide-vendor-CQDLlmKy.js",
+      "size": 17655,
+      "sha256": "cd98964d384815f3ac9a83d506036477b2ddde51c78c91b7943c225e2466428d"
+    },
+    {
+      "path": "assets/lucide-vendor-CsfHJx1a.js",
+      "size": 27021,
+      "sha256": "c26b92b96bcc1f9dea4f77fc32bf0dd63071fb74114a27e02b6157eb9a2f46ff"
+    },
+    {
+      "path": "assets/lucide-vendor-CsfHJx1a.js.map",
+      "size": 62974,
+      "sha256": "edd6f6a7b2fbcf8d2276d6f39771ea784f88a51aa9b6f5ad8e2412d127bab0bf"
+    },
+    {
+      "path": "assets/react-vendor-DtIJkHhk.js",
+      "size": 133985,
+      "sha256": "ef5fa94d92a139878bfbcd627e430fdd6e2beaae07ced850354dfb88964b1a2d"
+    },
+    {
+      "path": "assets/react-vendor-DtIJkHhk.js.map",
+      "size": 328396,
+      "sha256": "fa6c46700806801db315bc8c72eaf65383bc2dab42a61f618b5edab0b8e05f94"
+    },
+    {
+      "path": "assets/react-vendor-eTQ9o51c.js",
+      "size": 133935,
+      "sha256": "7e3f03b83a699d3dc2bf97dde6d8c3cf80ad3ec343ec06bff00eac19f97f44f9"
+    },
+    {
+      "path": "hero-images/img1.jpg",
+      "size": 242486,
+      "sha256": "b38c07face626b0d6a0b028ae29df835c150c10214109b81bc72e19612a45b8b"
+    },
+    {
+      "path": "hero-images/img2.jpg",
+      "size": 187246,
+      "sha256": "ab25cbd3b1a0ca6bf5e889d739ff067e5e4a958e3b46a8e5c99eec5a6b61b73f"
+    },
+    {
+      "path": "hero-images/README.md",
+      "size": 1443,
+      "sha256": "ebdfb654d964b0749fde3113fe51f30f78971bea07b539b1c7e5679b8a3c6511"
+    },
+    {
+      "path": "images/food/blintzes-480.webp",
+      "size": 29588,
+      "sha256": "607fedd2779ad820d01999b5678368ed9673942fbd6cb978f1edde2c4ed025fe"
+    },
+    {
+      "path": "images/food/blintzes-960.webp",
+      "size": 92626,
+      "sha256": "173cddc5612e5a87c73a84be60fde58faa54ae5c43223485bb52c4d1bcc5fa31"
+    },
+    {
+      "path": "images/food/challenge-480.webp",
+      "size": 35486,
+      "sha256": "016395e82d8091e4643824278a72f5e9246b2485c6f8ed57ec6a96e5235cf9e0"
+    },
+    {
+      "path": "images/food/challenge-960.webp",
+      "size": 108678,
+      "sha256": "3784e442902919c979c682cef59bc3cf26816e17fa0a0cff611d76253b69078d"
+    },
+    {
+      "path": "images/food/cholent-480.webp",
+      "size": 26792,
+      "sha256": "381e6d3b130e6065de102345013aef6f625320c6f5a1a5829ea18df1a1f68252"
+    },
+    {
+      "path": "images/food/cholent-960.webp",
+      "size": 83156,
+      "sha256": "ec885f05b48ba43de31e5373fe94446ada06926868b04e864535d53ba5c5f652"
+    },
+    {
+      "path": "images/food/fish-480.webp",
+      "size": 37580,
+      "sha256": "1f7caec4fa6c6f9038cdd5946b6911dc0bea5073207310b3ad9a0b4ef7f4817b"
+    },
+    {
+      "path": "images/food/fish-960.webp",
+      "size": 113900,
+      "sha256": "eb4e968eecd95cf1b1dad61d7e7fbd8772cfbf06ce4a6eaa03b8298aa5649ed2"
+    },
+    {
+      "path": "images/food/kugel-480.webp",
+      "size": 29340,
+      "sha256": "ea8c4d48a33320b63b772fc972882b48f97955a09f0833a8d8d56f55f459f12f"
+    },
+    {
+      "path": "images/food/kugel-960.webp",
+      "size": 84716,
+      "sha256": "49f79933b06e7cdb240be1c84adf901baf62c8a7481792b3fdbf4e9587b78391"
+    },
+    {
+      "path": "images/food/liver-480.webp",
+      "size": 33086,
+      "sha256": "e39bb9a523b5ad38a4fe55d5bb84f0f642974ef51513a544c2ab1bd129ca9f06"
+    },
+    {
+      "path": "images/food/liver-960.webp",
+      "size": 103868,
+      "sha256": "20a97418f7d3699b04433651330df1011142431294e5c4206ad5200c009786a2"
+    },
+    {
+      "path": "index.html",
+      "size": 2107,
+      "sha256": "3e6feb8755a7342c1e4bfa5e1cf72e11d6da07d15b3e9d6c82e6e67355236620"
+    },
+    {
+      "path": "legacy-admin.html",
+      "size": 1313,
+      "sha256": "b9c6bb9cd099deafd30e22bd1f83ae2fec48b9183d357d23e16a6bfcb74216a3"
+    },
+    {
+      "path": "robots.txt",
+      "size": 74,
+      "sha256": "c766a33d2016605dbf58c109eb85fd58516b3d0ef3e18090af0f5062b30f0ca0"
+    },
+    {
+      "path": "sitemap.xml",
+      "size": 239,
+      "sha256": "cb55eb754328525661468abdd837886a9d90a1ac30fbf233cd1bf13f99e2ab35"
+    }
+  ]
+}
