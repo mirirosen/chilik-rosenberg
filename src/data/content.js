@@ -128,6 +128,68 @@ export const mediaLinks = [
 
 export const whatsappNumber = "972506724312";
 
+// Nine user-provided KEEP clips. Empty groups produce no public section.
+// See docs/TOUR_VIDEOS.md; additional assets arrive separately.
+export const tourVideos = [
+  { id: 'hilik-bnei-brak', items: [
+    {
+      id: 'MxVd7LEjkJyq1eXMAuuT',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/bneibrak-zoo-720p.mp4',
+      title: { he: 'סיור בבני ברק + מעדניית שאבעס', en: 'Bnei Brak tour + Shabes deli' },
+      durationSec: 90,
+    },
+    {
+      id: 'ZUh34zcXVyiUPmbWPWAR',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/bneibrak-150s.mp4',
+      title: { he: 'קידוש של שבת עם וויסקי ודגים', en: 'Shabbat kiddush with whiskey and fish' },
+      durationSec: 150,
+    },
+    {
+      id: 'XEN797qZSr8SCo5xshoP',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/bneibrak-120s.mp4',
+      title: { he: 'קידוש עם וויסקי ודגים בבני ברק', en: 'Kiddush with whiskey and fish in Bnei Brak' },
+      durationSec: 120,
+    },
+    {
+      id: 'חלק-49',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-49-hilik-invite-tour.mp4',
+      title: { he: 'חיליק מזמין לסיור', en: 'Hilik invites to the tour' },
+      durationSec: 44,
+    },
+    {
+      id: 'חלק-50',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-50-tourists-to-bnei-brak.mp4',
+      title: { he: 'תיירים לקראת בני ברק', en: 'Tourists heading to Bnei Brak' },
+      durationSec: 46,
+    },
+    {
+      id: 'חלק-51',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-51-hilik-street-tourists.mp4',
+      title: { he: 'חיליק ברחוב עם תיירים', en: 'Hilik on the street with tourists' },
+      durationSec: 44,
+    },
+    {
+      id: 'חלק-58',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-58-food-yapchik-tour.mp4',
+      title: { he: 'אוכל וסיור — יפצ׳יק', en: 'Food tour — yapchik' },
+      durationSec: 46,
+    },
+    {
+      id: 'חלק-59',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-59-hilik-gefilte-tasting.mp4',
+      title: { he: 'גפילטע וחריין עם חיליק', en: 'Gefilte fish and chrein with Hilik' },
+      durationSec: 44,
+    },
+    {
+      id: 'חלק-60',
+      src: 'https://storage.googleapis.com/hilik-site-tour-videos/hilik-bnei-brak/part-60-zac-samantha-tour-react.mp4',
+      title: { he: 'תגובת זאק וסמנתה לסיור', en: 'Zac and Samantha react to the tour' },
+      durationSec: 46,
+    },
+  ] },
+  { id: 'donkey-bnei-brak', items: [] },
+];
+
 export const siteMetadata = {
   title: "חיליק רוזנברג | סיורים בבני ברק - מסע קולינרי ותרבותי בלב העיר",
   description: "אני מזמין אתכם לסיור קולינרי בבני ברק בכל חמישי בערב. ראו אותי במאקו, כאן 11, ורשת 13. הצטרפו למסע מרתק בלב העיר החרדית הליטאית.",

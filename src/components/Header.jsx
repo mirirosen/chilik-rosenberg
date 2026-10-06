@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, X } from '../utils/icons';
 import LanguageSwitcher from './LanguageSwitcher';
 
-const Header = () => {
+const Header = ({ showVideos = false }) => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef(null);
@@ -45,6 +45,7 @@ const Header = () => {
     ['journey', 'header.journey'],
     ['menu', 'header.menu'],
     ['lectures', 'header.lectures'],
+    ...(showVideos ? [['videos', 'tourVideos.nav']] : []),
     ['date-selection', 'header.dates'],
   ];
 

@@ -8,7 +8,7 @@ export default {
   content: [
     './src/InquiryApp.jsx',
     './src/inquiry*.{js,jsx}',
-    './src/components/{Bio,FAQ,Footer,Header,Hero,InquirySection,Journey,LanguageSwitcher,Lectures,MediaSection,Menu,RatingBar,Terms,TourInclusions}.jsx',
+    './src/components/{Bio,FAQ,Footer,Header,Hero,InquirySection,Journey,LanguageSwitcher,Lectures,MediaSection,Menu,RatingBar,Terms,TourInclusions,TourVideos}.jsx',
     { raw: fs.readFileSync(new URL('./scripts/inquiry-published-utilities.txt', import.meta.url), 'utf8'), extension: 'html' },
   ],
 };

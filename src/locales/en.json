@@ -576,5 +576,15 @@
       "title": "Page Unavailable | Chilik Rosenberg",
       "description": "The requested address is unavailable."
     }
+  },
+  "tourVideos": {
+    "title": "Videos from the tours",
+    "nav": "Tour videos",
+    "groups": {
+      "hilik-bnei-brak": "Chilik in Bnei Brak",
+      "donkey-bnei-brak": "Donkey in Bnei Brak"
+    },
+    "unsupported": "Your browser does not support video playback.",
+    "openVideo": "Open the video"
   }
 }
