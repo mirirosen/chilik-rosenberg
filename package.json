@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:inquiry": "vitest run --cache=false",
+    "prepare:inquiry-legacy": "node scripts/prepare-inquiry-legacy.mjs",
+    "build:inquiry": "node scripts/prepare-inquiry-legacy.mjs && vite build --mode inquiry && node scripts/package-inquiry-release.mjs",
+    "verify:inquiry": "node scripts/verify-inquiry-publication.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -16,13 +20,17 @@
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-i18next": "^16.5.3"
+    "react-i18next": "^16.5.3",
+    "gsap": "^3.15.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
   }
 }

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { ArrowUp, Phone, MessageCircle, XCircle } from '../utils/icons';
 import { useTranslation } from 'react-i18next';
 
-const Terms = () => {
-  const { t } = useTranslation();
+const Terms = ({ inquiry = false }) => {
+  const { t, i18n } = useTranslation();
+  const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
 
   const goToDateSelection = () => {
@@ -77,10 +78,10 @@ const Terms = () => {
   );
 
   return (
-    <div dir="rtl" className="min-h-screen bg-brand-dark text-white" style={{ direction: 'rtl' }}>
+    <div dir={dir} className="terms-page min-h-screen bg-brand-dark text-white">
       {/* Header */}
       <header className="bg-brand-dark-lighter border-b border-white/10 px-6 py-6 sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto text-right">
+        <div className="max-w-4xl mx-auto text-start">
           <a href="/" className="text-2xl md:text-3xl font-black text-brand-gold font-serif tracking-tighter">
             {t('header.title')}
           </a>
@@ -88,7 +89,8 @@ const Terms = () => {
       </header>
 
       {/* Main Content */}
-      <main dir="rtl" className="max-w-4xl mx-auto px-6 py-12" style={{ direction: 'rtl', textAlign: 'right' }}>
+      <main dir={dir} className="max-w-4xl mx-auto px-6 py-12" style={{ textAlign: 'start' }}>
+        {inquiry && <p className="terms-inquiry-notice">{t('inquiry.notice')} {t('inquiry.paymentNotice')}</p>}
         {/* Page Title */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-serif text-brand-gold font-bold mb-4">
@@ -99,10 +101,12 @@ const Terms = () => {
           </p>
         </div>
 
+        {i18n.language !== 'he' && <p className="terms-language-notice mb-8 p-4 border border-brand-gold/40 rounded-2xl">{t('terms.ui.languageNotice')}</p>}
+
         {/* Content Sections */}
         <div className="space-y-8">
           {/* AGE RESTRICTION - PROMINENT WARNING */}
-          <section className="bg-red-500/20 border-2 border-red-500/50 rounded-3xl p-8">
+          <section lang="he" dir="rtl" className="bg-red-500/20 border-2 border-red-500/50 rounded-3xl p-8">
             <div className="text-center">
               <div className="text-6xl mb-4">⚠️</div>
               <h2 className="text-2xl font-serif text-red-400 font-bold mb-4">
@@ -121,65 +125,65 @@ const Terms = () => {
 
           {/* Section 1: כללי */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
-              כללי .1
+            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
+              1. {t('terms.section1.title')}
             </h2>
-            <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section1.tours')} <span className="text-brand-gold">•</span></p>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section1.duration')} <span className="text-brand-gold">•</span></p>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section1.includes')} <span className="text-brand-gold">•</span></p>
+            <div className="space-y-3" dir={dir} style={{ textAlign: 'start' }}>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section1.tours')} <span className="text-brand-gold">•</span></p>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section1.duration')} <span className="text-brand-gold">•</span></p>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section1.includes')} <span className="text-brand-gold">•</span></p>
             </div>
           </section>
 
           {/* Section 2: תשלום */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
-              תשלום .2
+            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
+              2. {t('terms.section2.title')}
             </h2>
-            <div className="space-y-4 mb-6" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
-              <p className="text-gray-300 text-right" dir="rtl">
+            <div className="space-y-4 mb-6" dir={dir} style={{ textAlign: 'start' }}>
+              <p className="text-gray-300 text-start" dir={dir}>
                 {t('terms.section2.prepayment')} <span className="text-brand-gold">•</span>
               </p>
-              <p className="text-gray-300 text-right" dir="rtl">
+              <p className="text-gray-300 text-start" dir={dir}>
                 {t('terms.section2.price')}: <span className="text-brand-gold font-bold text-xl">{t('terms.section2.priceAmount')}</span> {t('terms.section2.perPerson')} <span className="text-brand-gold">•</span>
               </p>
             </div>
-            
-            <div className="space-y-3">
-              <p className="text-sm font-bold text-white mb-3 text-right" dir="rtl">{t('terms.section2.selectMethod')}</p>
-              
+
+            {inquiry ? <p>{t('inquiry.paymentNotice')}</p> : <div className="space-y-3">
+              <p className="text-sm font-bold text-white mb-3 text-start" dir={dir}>{t('terms.section2.selectMethod')}</p>
+
               <button
                 onClick={() => handlePaymentClick('bit')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
               >
                 <span className="text-lg font-bold">💳 {t('terms.section2.bit')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
-              
+
               <button
                 onClick={() => handlePaymentClick('credit')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
               >
                 <span className="text-lg font-bold">💳 {t('terms.section2.credit')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
-              
+
               <button
                 onClick={() => handlePaymentClick('bank')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-right flex flex-row-reverse items-center justify-between group"
+                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
               >
                 <span className="text-lg font-bold">🏦 {t('terms.section2.bank')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
-            </div>
+            </div>}
           </section>
 
           {/* Section 3: מדיניות ביטול רכישה */}
-          <section className="bg-red-500/5 border-2 border-red-500/30 rounded-3xl p-8">
+          <section lang="he" dir="rtl" className="bg-red-500/5 border-2 border-red-500/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚠️ מדיניות ביטול רכישה .3
             </h2>
-            
+
             {/* 3.1 - תקופות ביטול והחזר כספי */}
             <div className="mb-6">
               <h3 className="text-lg font-bold text-white mb-4 text-right" dir="rtl">תקופות ביטול והחזר כספי :1</h3>
@@ -213,7 +217,7 @@ const Terms = () => {
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl"><strong>ביטול ההזמנה חייב להיעשות בהודעה בכתב בלבד</strong> <span className="text-brand-gold">📝</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">דרכי יצירת קשר לביטול: <span className="text-brand-gold">📞</span></p>
-                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0505804367 <span className="text-green-500">💬</span></p>
+                <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0506724312 <span className="text-green-500">💬</span></p>
                 <p className="text-brand-gold text-right pr-6" dir="rtl">דוא"ל: hr20192022@gmail.com <span className="text-brand-gold">✉️</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">יש לציין בבקשת הביטול: <strong>מספר ההזמנה, תאריך הסיור, שם המזמין</strong> <span className="text-brand-gold">📋</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">תקבל/י אישור על הביטול בתוך 24 שעות <span className="text-brand-gold">⏰</span></p>
@@ -243,11 +247,11 @@ const Terms = () => {
           </section>
 
           {/* Section 4: מדיניות אספקת השירות */}
-          <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               📋 מדיניות אספקת השירות .4
             </h2>
-            
+
             {/* 4.1 - מועדי הסיורים */}
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">מועדי הסיורים :1</h3>
@@ -313,11 +317,11 @@ const Terms = () => {
           </section>
 
           {/* Section 5: אחריות ושיפוי */}
-          <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚖️ אחריות ושיפוי .5
             </h2>
-            
+
             {/* 5.1 - אחריות כללית */}
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">אחריות כללית :1</h3>
@@ -400,52 +404,52 @@ const Terms = () => {
 
           {/* Section 6: פרטיות */}
           <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
-              🔒 פרטיות .6
+            <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
+              6. {t('terms.section6.title')}
             </h2>
-            <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section6.secure')} <span className="text-brand-gold">•</span></p>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section6.purpose')} <span className="text-brand-gold">•</span></p>
-              <p className="text-gray-300 text-right" dir="rtl">{t('terms.section6.storage')} <span className="text-brand-gold">•</span></p>
+            <div className="space-y-3" dir={dir} style={{ textAlign: 'start' }}>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.secure')} <span className="text-brand-gold">•</span></p>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.purpose')} <span className="text-brand-gold">•</span></p>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.storage')} <span className="text-brand-gold">•</span></p>
             </div>
           </section>
 
           {/* Section 7: יצירת קשר */}
           <section className="bg-brand-gold/10 border-2 border-brand-gold/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-center">
-              📞 יצירת קשר .7
+              7. {t('terms.section7.title')}
             </h2>
             <div className="text-center space-y-6">
               <p className="text-xl text-white font-bold">
                 {t('terms.section7.questions')}
               </p>
-              
+
               {/* Business Details Card */}
               <div className="bg-brand-dark border border-brand-gold/30 rounded-2xl p-6 space-y-4">
-                <p className="text-2xl text-brand-gold font-bold">חיליק רוזנברג</p>
-                <p className="text-lg text-white font-semibold">סיורים קולינריים בבני ברק</p>
-                
+                <p className="text-2xl text-brand-gold font-bold">{t('terms.section7.name')}</p>
+                <p className="text-lg text-white font-semibold">{t('terms.ui.service')}</p>
+
                 <div className="space-y-3 text-gray-300">
-                  <p dir="rtl" className="text-right">כתובת: <strong>רחוב לחי 11, בני ברק</strong> 📍</p>
-                  <p dir="rtl">
-                    טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">050-580-4367</a> 📞
+                  <p dir={dir} style={{ textAlign: 'start' }}>{t('terms.ui.addressLabel')}: <strong>{t('footer.address')}</strong> 📍</p>
+                  <p dir={dir}>
+                    {t('terms.ui.phoneLabel')}: <a href="tel:0506724312" className="text-brand-gold hover:text-brand-gold/80 font-bold text-lg transition-colors" dir="ltr">0506724312</a> 📞
                   </p>
-                  <p dir="rtl">
-                    דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:text-brand-gold/80 font-bold transition-colors">hr20192022@gmail.com</a> ✉️
+                  <p dir={dir}>
+                    {t('terms.ui.emailLabel')}: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:text-brand-gold/80 font-bold transition-colors">hr20192022@gmail.com</a> ✉️
                   </p>
                 </div>
               </div>
 
               {/* WhatsApp Button */}
               <div>
-                <a 
-                  href="https://wa.me/972505804367?text=שלום, יש לי שאלה בנוגע לתנאי השימוש" 
-                  target="_blank" 
+                <a
+                  href={`https://wa.me/972506724312?text=${encodeURIComponent(t('terms.ui.contactMessage'))}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 flex-row-reverse bg-green-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-green-700 transition-all"
                 >
                   <MessageCircle size={20} />
-                  <span>שלח הודעה ב-WhatsApp</span>
+                  <span>{t('terms.section7.whatsapp')}</span>
                 </a>
               </div>
             </div>
@@ -463,9 +467,9 @@ const Terms = () => {
             onClick={goToDateSelection}
             className="bg-brand-gold text-brand-dark px-12 py-4 rounded-full font-black text-lg hover:scale-105 transition-all"
           >
-            הרשמה לסיור
+            {t('terms.ui.register')}
           </button>
-          
+
           <button
             onClick={scrollToTop}
             className="bg-transparent border-2 border-white/20 text-white px-12 py-4 rounded-full font-bold text-lg hover:border-brand-gold hover:text-brand-gold transition-all flex items-center justify-center gap-2 flex-row-reverse"
@@ -479,33 +483,33 @@ const Terms = () => {
       {/* Footer */}
       <footer className="border-t border-white/5 py-12">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-4">
-          <p className="text-brand-gold font-bold text-lg">חיליק רוזנברג - סיורים קולינריים</p>
+          <p className="text-brand-gold font-bold text-lg">{t('footer.title')}</p>
           <div className="text-gray-400 text-sm space-y-1">
-            <p dir="rtl">כתובת: רחוב לחי 11, בני ברק 📍</p>
-            <p dir="rtl">טלפון/WhatsApp: <a href="tel:0505804367" className="text-brand-gold hover:underline" dir="ltr">050-580-4367</a> 📞</p>
-            <p dir="rtl">דוא"ל: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:underline">hr20192022@gmail.com</a> ✉️</p>
+            <p dir={dir}>{t('terms.ui.addressLabel')}: {t('footer.address')} 📍</p>
+            <p dir={dir}>{t('terms.ui.phoneLabel')}: <a href="tel:0506724312" className="text-brand-gold hover:underline" dir="ltr">0506724312</a> 📞</p>
+            <p dir={dir}>{t('terms.ui.emailLabel')}: <a href="mailto:hr20192022@gmail.com" className="text-brand-gold hover:underline">hr20192022@gmail.com</a> ✉️</p>
           </div>
           <p className="text-xs text-gray-500 tracking-widest pt-4 border-t border-white/10">
-            © 2026 {t('header.title')} - כל הזכויות שמורות
+            © 2026 {t('footer.copyright')}
           </p>
         </div>
       </footer>
 
       {/* Payment Instructions Modal */}
       {showPaymentModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-6"
           onClick={closePaymentModal}
         >
-          <div 
-            dir="rtl"
+          <div
+            dir={dir}
             className="bg-brand-dark border-2 border-brand-gold rounded-3xl p-8 max-w-md w-full relative animate-in zoom-in duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closePaymentModal}
               className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors"
-              aria-label="סגור"
+              aria-label={t('common.close')}
             >
               <XCircle size={32} />
             </button>
@@ -519,13 +523,13 @@ const Terms = () => {
                   </h3>
                 </div>
 
-                <div className="space-y-3 text-right bg-brand-dark-lighter rounded-2xl p-6 border border-white/10" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
+                <div className="space-y-3 text-start bg-brand-dark-lighter rounded-2xl p-6 border border-white/10" dir={dir} style={{ textAlign: 'start' }}>
                   {getPaymentInstructions().instructions.map((instruction, index) => (
-                    <p 
-                      key={index} 
-                      dir="rtl"
-                      className={`text-right ${
-                        instruction.includes('050-580-4367') || instruction.includes('חיליק רוזנברג')
+                    <p
+                      key={index}
+                      dir={dir}
+                      className={`text-start ${
+                        instruction.includes('0506724312') || instruction.includes('חיליק רוזנברג')
                           ? 'text-brand-gold font-bold text-xl'
                           : instruction === ''
                           ? 'h-2'
@@ -539,7 +543,7 @@ const Terms = () => {
 
                 <div className="mt-6 flex flex-col gap-3">
                   <a
-                    href="https://wa.me/972505804367?text=שלום, אני מעוניין/ת בפרטי תשלום לסיור"
+                    href={`https://wa.me/972506724312?text=${encodeURIComponent(t('terms.ui.paymentMessage'))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="bg-green-600 text-white px-6 py-4 rounded-full font-bold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-2 flex-row-reverse"
@@ -547,7 +551,7 @@ const Terms = () => {
                     <MessageCircle size={20} />
                     <span>{t('terms.paymentModal.openWhatsapp')}</span>
                   </a>
-                  
+
                   <button
                     onClick={closePaymentModal}
                     className="border-2 border-white/20 text-white px-6 py-4 rounded-full font-bold hover:border-brand-gold hover:text-brand-gold transition-all"

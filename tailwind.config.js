@@ -27,8 +27,8 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['Frank Ruhl Libre', 'serif'],
-        sans: ['Heebo', 'sans-serif'],
+        serif: ['Georgia', 'David', 'Segoe UI', 'Arial', 'sans-serif'],
+        sans: ['Segoe UI', 'Tahoma', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         '4xl': '2rem',

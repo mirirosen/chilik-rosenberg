@@ -1,0 +1,6 @@
+# Preserve the exact published HTML/config/text bytes on Windows checkouts.
+inquiry-index.html text eol=lf
+firebase.hosting.inquiry.json text eol=lf
+public/404.html text eol=lf
+public/robots.txt text eol=lf
+public/sitemap.xml text eol=lf

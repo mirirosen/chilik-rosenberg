@@ -1,0 +1,81 @@
+{
+  "version": "projects/hilik-site/sites/hilik-site/versions/369a1b401cc64076",
+  "release": "projects/hilik-site/sites/hilik-site/channels/live/releases/1781512124444000",
+  "files": [
+    {
+      "path": "assets/firebase-vendor-D00O-6IZ.js",
+      "size": 465400,
+      "sha256": "445ec783e17fc5a1b1e6d062d92349ae77df186b10fcfd95ecc5be2aa8418058"
+    },
+    {
+      "path": "assets/firebase-vendor-D00O-6IZ.js.map",
+      "size": 2216724,
+      "sha256": "63cc32a20ba9932e9155de23645ef9c06fe5b2c8f72b9bf3b111cd6c9436dcf4"
+    },
+    {
+      "path": "assets/hero-bg-DW8WJRQC.jpeg",
+      "size": 3345307,
+      "sha256": "f2032c31f9a01b9fc037795e871af2bc5567bf7fcb83d7e496038bb8241413f3"
+    },
+    {
+      "path": "assets/hilik-profile-D_WN1zB9.jpeg",
+      "size": 63934,
+      "sha256": "32a960d37f5554b1c24038ab55ee7af794a36fe5c3ad484ebd6b024ab572c37e"
+    },
+    {
+      "path": "assets/index-B4pTZUlI.css",
+      "size": 48703,
+      "sha256": "4f9e3a7e3303276a3c90bd43a89a873f81983ef05f9f999da6c8587c527b946f"
+    },
+    {
+      "path": "assets/index-DoIY4VPK.js",
+      "size": 412652,
+      "sha256": "6e6f8e74854a97e29ed7d079cfdbc34d8da1eb69084d553685dcc29bc5e49d73"
+    },
+    {
+      "path": "assets/index-DoIY4VPK.js.map",
+      "size": 1462242,
+      "sha256": "5476ead72656b9c4b24781280d09c693ba5a83cceeeec0c166d2cd1e11e01412"
+    },
+    {
+      "path": "assets/lucide-vendor-CsfHJx1a.js",
+      "size": 27021,
+      "sha256": "c26b92b96bcc1f9dea4f77fc32bf0dd63071fb74114a27e02b6157eb9a2f46ff"
+    },
+    {
+      "path": "assets/lucide-vendor-CsfHJx1a.js.map",
+      "size": 62974,
+      "sha256": "edd6f6a7b2fbcf8d2276d6f39771ea784f88a51aa9b6f5ad8e2412d127bab0bf"
+    },
+    {
+      "path": "assets/react-vendor-DtIJkHhk.js",
+      "size": 133985,
+      "sha256": "ef5fa94d92a139878bfbcd627e430fdd6e2beaae07ced850354dfb88964b1a2d"
+    },
+    {
+      "path": "assets/react-vendor-DtIJkHhk.js.map",
+      "size": 328396,
+      "sha256": "fa6c46700806801db315bc8c72eaf65383bc2dab42a61f618b5edab0b8e05f94"
+    },
+    {
+      "path": "hero-images/README.md",
+      "size": 1443,
+      "sha256": "ebdfb654d964b0749fde3113fe51f30f78971bea07b539b1c7e5679b8a3c6511"
+    },
+    {
+      "path": "hero-images/img1.jpg",
+      "size": 242486,
+      "sha256": "b38c07face626b0d6a0b028ae29df835c150c10214109b81bc72e19612a45b8b"
+    },
+    {
+      "path": "hero-images/img2.jpg",
+      "size": 187246,
+      "sha256": "ab25cbd3b1a0ca6bf5e889d739ff067e5e4a958e3b46a8e5c99eec5a6b61b73f"
+    },
+    {
+      "path": "index.html",
+      "size": 1313,
+      "sha256": "b9c6bb9cd099deafd30e22bd1f83ae2fec48b9183d357d23e16a6bfcb74216a3"
+    }
+  ]
+}
