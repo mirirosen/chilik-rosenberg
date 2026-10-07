@@ -5,7 +5,7 @@ import { focusArrived, waitForArrival } from './arrival';
 
 // Without a provider (tests, or anything rendered outside the site shell) goToInquiry is null and components
 // keep their original behaviour.
-const NavigationContext = createContext({ goToInquiry: null });
+const NavigationContext = createContext({ goToInquiry: null, cancelNavigation: () => {} });
 
 export function useNavigation() { return useContext(NavigationContext); }
 
@@ -29,10 +29,16 @@ export function NavigationProvider({ children }) {
     current.current = controller;
     const { signal } = controller;
     lifetime.current.signal.addEventListener('abort', () => controller.abort(), { once: true, signal });
-    // The visitor taking over (wheel, touch, pointer, other keys) cancels the pending focus.
+    // The visitor taking over (wheel, touch, pointer, any key) cancels the pending focus. The one exception is
+    // Enter or Space on the control that started this navigation (S3.5): its own activation keys, not every
+    // element's (Codex implementation review, round 2).
+    const initiator = document.activeElement;
     const cancel = () => controller.abort();
     for (const type of ['wheel', 'touchstart', 'pointerdown']) window.addEventListener(type, cancel, { passive: true, signal });
-    window.addEventListener('keydown', event => { if (event.key !== 'Enter' && event.key !== ' ') cancel(); }, { signal });
+    window.addEventListener('keydown', event => {
+      const ownActivation = (event.key === 'Enter' || event.key === ' ') && initiator && initiator !== document.body && event.target === initiator;
+      if (!ownActivation) cancel();
+    }, { signal });
 
     settle(section);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -49,6 +55,9 @@ export function NavigationProvider({ children }) {
     return result;
   }, []);
 
-  const value = useMemo(() => ({ goToInquiry }), [goToInquiry]);
+  // Any other site-controlled navigation (another section, opening the menu) replaces a pending arrival.
+  const cancelNavigation = useCallback(() => { current.current?.abort(); current.current = null; }, []);
+
+  const value = useMemo(() => ({ goToInquiry, cancelNavigation }), [goToInquiry, cancelNavigation]);
   return <NavigationContext.Provider value={value}>{children}</NavigationContext.Provider>;
 }

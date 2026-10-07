@@ -12,7 +12,7 @@ const Header = ({ showVideos = false }) => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef(null);
-  const { goToInquiry } = useNavigation();
+  const { goToInquiry, cancelNavigation } = useNavigation();
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -52,6 +52,7 @@ const Header = ({ showVideos = false }) => {
     if (dialog?.open) { dialog.close(); document.body.style.overflow = ''; }
     setMobileMenuOpen(false);
     if (id === 'date-selection' && goToInquiry) { goToInquiry(); return; }
+    cancelNavigation(); // another destination replaces a pending arrival at the inquiry
     const element = document.getElementById(id);
     if (element) {
       settle(element); // the destination is in its natural state before the scroll starts
@@ -87,7 +88,7 @@ const Header = ({ showVideos = false }) => {
             {t('header.register')}
           </button>
         </div>
-        <button type="button" className="mobile-menu-trigger xl:hidden text-brand-gold" onClick={() => setMobileMenuOpen(true)} aria-label={t('header.menuButton')} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-haspopup="dialog">
+        <button type="button" className="mobile-menu-trigger xl:hidden text-brand-gold" onClick={() => { cancelNavigation(); setMobileMenuOpen(true); }} aria-label={t('header.menuButton')} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-haspopup="dialog">
           <Menu size={32} aria-hidden="true" />
         </button>
         <a href="/#date-selection" className="mobile-header-cta xl:hidden" onClick={event => scrollToSection('date-selection', event)}>{t('header.upcomingTours')}</a>
