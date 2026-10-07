@@ -1,4 +1,6 @@
 import { gsap } from 'gsap';
+import { EASE, STAGGER } from './tokens';
+import { isSettled, registerEntrance, resetRegistry, setMotionActive, settleAll } from './registry';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
 const hoverQuery = `${motionQuery} and (hover: hover) and (pointer: fine)`;
@@ -36,42 +38,76 @@ function setupPressMotion(root) {
   };
 }
 
-// Progressive enhancement: nothing is hidden in CSS, and scroll targets are only
-// animated once they are visible. No scroll interception or booking UI selectors.
+// S1 (hero). Text lines move with transform only, so whichever element is the LCP is never hidden.
+function heroScene(root) {
+  const lines = [...root.querySelectorAll('[data-motion="hero-line"]')];
+  if (!lines.length) return () => {};
+  const tween = gsap.from(lines, {
+    y: 8, opacity: 0.92, duration: 0.48, stagger: 0.06,
+    ease: EASE.out, clearProps: 'transform,opacity',
+  });
+  lines.forEach(line => registerEntrance(line, tween, 'transform,opacity'));
+  return () => {};
+}
+
+// S2/S4 (reveals). Nothing is hidden in advance. The observer fires up to 160px before a block enters the
+// viewport; on a target's first notification, a block that is already in view (initial render, restored
+// scroll, history navigation) is recorded without animation; blocks a navigation settled are skipped even
+// if their notification was already queued.
+function revealScene(root, context) {
+  if (typeof IntersectionObserver !== 'function') return () => {};
+  let active = true;
+  const notified = new WeakSet();
+  const observer = new IntersectionObserver((entries) => {
+    if (!active) return; // Ignore queued notifications after route/preference cleanup.
+    const reveal = [];
+    for (const entry of entries) {
+      const target = entry.target;
+      if (isSettled(target)) { observer.unobserve(target); continue; }
+      const first = !notified.has(target);
+      notified.add(target);
+      if (!entry.isIntersecting) continue; // keep observing
+      observer.unobserve(target);
+      const top = entry.boundingClientRect ? entry.boundingClientRect.top : Infinity;
+      if (first && top < window.innerHeight) continue; // already visible: no entrance
+      reveal.push(target);
+    }
+    if (!reveal.length) return;
+    // Observer callbacks run later: explicitly capture their tweens for revert().
+    context.add(() => {
+      const groups = new Map();
+      reveal.forEach(target => groups.set(target.parentElement, [...(groups.get(target.parentElement) ?? []), target]));
+      groups.forEach(group => {
+        const tween = gsap.from(group, {
+          y: 8, opacity: 0.94, duration: 0.42,
+          stagger: { each: STAGGER.tight, amount: Math.min(0.16, (group.length - 1) * STAGGER.tight) },
+          ease: EASE.out, clearProps: 'transform,opacity',
+        });
+        group.forEach(target => registerEntrance(target, tween, 'transform,opacity'));
+      });
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px 160px 0px' });
+  root.querySelectorAll('[data-motion="reveal"]').forEach(target => observer.observe(target));
+  return () => { active = false; observer.disconnect(); };
+}
+
+// Progressive enhancement: nothing is hidden in CSS, entrances only use explicit data-motion targets,
+// and no scroll interception or booking UI selectors.
 export function setupHomeMotion(root) {
   if (!root || typeof window.matchMedia !== 'function') return () => {};
   const media = gsap.matchMedia();
   media.add(motionQuery, (context) => {
-    const cleanups = [setupPressMotion(root)];
-    gsap.from(root.querySelectorAll('.target-hero__copy > :not(button)'), {
-      y: 8, opacity: 0.92, duration: 0.48, stagger: 0.06,
-      ease: 'power2.out', clearProps: 'transform,opacity',
-    });
-
-    if (typeof IntersectionObserver !== 'function') return () => cleanups.forEach(cleanup => cleanup());
-    let active = true;
-    const observer = new IntersectionObserver((entries) => {
-      if (!active) return; // Ignore queued notifications after route/preference cleanup.
-      const visible = entries.filter(entry => entry.isIntersecting).map(entry => entry.target);
-      if (!visible.length) return;
-      visible.forEach(target => observer.unobserve(target));
-      // Observer callbacks run later: explicitly capture their tweens for revert().
-      context.add(() => {
-        gsap.from(visible, {
-          y: 8, opacity: 0.94, duration: 0.42,
-          stagger: { each: 0.04, amount: Math.min(0.16, (visible.length - 1) * 0.04) },
-          ease: 'power2.out', clearProps: 'transform,opacity',
-        });
-      });
-    }, { threshold: 0.12 });
-    root.querySelectorAll([
-      '.target-section-heading', '.target-intro__lead', '.target-tour-pick',
-      '.target-inclusions h2', '.target-inclusions li', '.target-journey__grid li',
-      '.target-menu__dish', '.target-lectures__content',
-      '.target-bio__introduction', '.target-bio__invitation', '#media .media-card',
-    ].join(',')).forEach(target => observer.observe(target));
-    cleanups.push(() => { active = false; observer.disconnect(); });
-    return () => cleanups.forEach(cleanup => cleanup());
+    const controller = new AbortController();
+    setMotionActive(true);
+    const cleanups = [setupPressMotion(root), heroScene(root), revealScene(root, context)];
+    // Back/forward cache: restore entrances to their natural state; press/hover tweens stay alive.
+    window.addEventListener('pageshow', event => { if (event.persisted) settleAll(); }, { signal: controller.signal });
+    return () => {
+      controller.abort();
+      cleanups.forEach(cleanup => cleanup());
+      setMotionActive(false);
+      resetRegistry();
+    };
   }, root);
 
   media.add(hoverQuery, () => {

@@ -51,6 +51,7 @@ const MediaSection = () => {
               <article 
                 key={i} 
                 className={`media-card p-8 flex flex-col items-start shadow-xl text-right ${classes.border}`}
+                data-motion="reveal"
               >
                 <div className={`mb-6 ${classes.icon}`}>
                   <IconComponent size={40} />

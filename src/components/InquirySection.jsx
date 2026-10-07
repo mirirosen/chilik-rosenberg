@@ -6,7 +6,7 @@ export default function InquirySection({ status = false, search = '' }) {
   const reference = status ? inquiryReference(search) : null;
   const draft = `${t('inquiry.draft')}${reference ? `\n${t('inquiry.reference')}: ${reference}` : ''}`;
   return <section id="date-selection" className="inquiry-section" aria-labelledby="inquiry-title">
-    <div className="target-section-heading inquiry-heading">
+    <div className="target-section-heading inquiry-heading" data-motion="reveal">
       <h2 id="inquiry-title">{t(status ? 'inquiry.statusTitle' : 'inquiry.title')}</h2>
       <p className="inquiry-notice">{t('inquiry.notice')}</p>
     </div>
