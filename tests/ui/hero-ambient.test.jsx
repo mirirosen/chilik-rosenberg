@@ -119,11 +119,11 @@ describe('hero ambient loop', () => {
 
   it('ignores a late rejection of an older attempt after a newer attempt succeeded', async () => {
     let rejectA;
-    // Attempt A (autoplay) stays pending.
+    // Attempt A (autoplay) stays pending; a pending start already counts as on.
     playImpl = function play() { plays += 1; return new Promise((_, r) => { rejectA = r; }); };
     render(<Hero />);
     await flushIdle();
-    expect(button('hero.ambientPlay')).toBeTruthy();
+    await act(async () => { fireEvent.click(button('hero.ambientPause')); });
     // Attempt B (explicit Play) succeeds while A is still pending.
     playImpl = function play() { plays += 1; this.dispatchEvent(new Event('playing')); return Promise.resolve(); };
     await act(async () => { fireEvent.click(button('hero.ambientPlay')); });
@@ -149,10 +149,12 @@ describe('hero ambient loop', () => {
   });
 
   it('suspends off screen and in a hidden tab, then resumes only if it was playing', async () => {
-    render(<Hero />);
+    const { container } = render(<Hero />);
     await flushIdle();
     await intersect(0);
-    expect(button('hero.ambientPlay')).toBeTruthy();
+    // Suspended, not stopped: the frames fade out, but the control still offers Pause (the loop is on).
+    expect(video(container).className).not.toContain('is-playing');
+    expect(button('hero.ambientPause')).toBeTruthy();
     await intersect(1);
     expect(plays).toBe(2);
     await setHidden(true);
@@ -162,6 +164,24 @@ describe('hero ambient loop', () => {
     await intersect(0); await intersect(1);
     await setHidden(true); await setHidden(false);
     expect(plays).toBe(3); // user pause is never overridden
+  });
+
+  it('treats a pending or stalled start as on: the control offers Pause, and Pause really stops it', async () => {
+    // A start that never renders a frame (slow network, no media pipeline): play() stays pending, no 'playing'.
+    playImpl = function play() { plays += 1; return new Promise(() => {}); };
+    const { container } = render(<Hero />);
+    await flushIdle();
+    expect(plays).toBe(1);
+    expect(video(container).className).not.toContain('is-playing'); // the poster stays visible
+    const control = button('hero.ambientPause');
+    control.focus();
+    await act(async () => { fireEvent.click(control); });
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(document.activeElement).toBe(button('hero.ambientPlay'));
+    expect(sessionStorage.getItem('chilik.ambientPaused')).toBe('1');
+    await intersect(0); await intersect(1);
+    await setHidden(true); await setHidden(false);
+    expect(plays).toBe(1); // pressing Pause on a stalled start is a real stop, never a second play()
   });
 
   it('remembers a user pause for the session across a remount', async () => {

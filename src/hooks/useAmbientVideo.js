@@ -10,6 +10,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 //                     scrolling back or returning to the tab never restarts the loop by itself.
 //   - suspension    — off screen or tab hidden. Not a stop: the loop resumes when visible again,
 //                     but only if it was playing (or about to) and no stop applies.
+//
+// Two states, kept apart: `on` is the intent (started and not stopped; a pending or stalled start counts) and
+// drives the control's name; `playing` is the media actually rendering frames and drives the fade over the
+// poster. A stalled network therefore offers Pause, and Pause really stops the attempt.
 const PAUSE_KEY = 'chilik.ambientPaused';
 const readUserPaused = () => { try { return sessionStorage.getItem(PAUSE_KEY) === '1'; } catch { return false; } };
 const writeUserPaused = paused => {
@@ -27,6 +31,7 @@ export function canAutoplayAmbient() {
 export function useAmbientVideo({ webm, mp4 }) {
   const ref = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const [on, setOn] = useState(false);
   const stop = useRef(readUserPaused() ? 'user' : null); // 'user' | 'preference' | null
   const wantsPlay = useRef(false); // true once the loop was started (auto or by Play) and not stopped since
   const loaded = useRef(false);
@@ -48,12 +53,14 @@ export function useAmbientVideo({ webm, mp4 }) {
     if (!video || disposed.current) return;
     load();
     const id = ++attempt.current;
+    setOn(true);
+    const refused = () => { wantsPlay.current = false; setOn(false); setPlaying(false); };
     let result;
-    try { result = video.play(); } catch { setPlaying(false); return; }
+    try { result = video.play(); } catch { refused(); return; }
     if (result && typeof result.then === 'function') {
       // Autoplay policy, unsupported media or an interrupting pause can reject: keep the poster and the Play
       // control. A result from an older attempt, or after unmount, is ignored.
-      result.then(() => {}, () => { if (!disposed.current && id === attempt.current) setPlaying(false); });
+      result.then(() => {}, () => { if (!disposed.current && id === attempt.current) refused(); });
     }
   }, [load]);
 
@@ -106,6 +113,7 @@ export function useAmbientVideo({ webm, mp4 }) {
         if (!event.matches) return; // motion allowed again: no automatic restart
         stop.current = stop.current ?? 'preference';
         wantsPlay.current = false;
+        setOn(false);
         pause();
       }, { signal });
     }
@@ -122,14 +130,15 @@ export function useAmbientVideo({ webm, mp4 }) {
   }, [play, pause]);
 
   const toggle = useCallback(() => {
-    if (playing) {
+    if (on) {
       stop.current = 'user'; wantsPlay.current = false; writeUserPaused(true);
+      setOn(false);
       pause();
     } else {
       stop.current = null; wantsPlay.current = true; writeUserPaused(false);
       play();
     }
-  }, [playing, play, pause]);
+  }, [on, play, pause]);
 
-  return { ref, playing, toggle };
+  return { ref, on, playing, toggle };
 }

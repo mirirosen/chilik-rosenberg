@@ -36,8 +36,8 @@ const Hero = () => {
         <button onClick={scrollToDateSelection} className="target-button" data-motion="hero-cta">{t('hero.cta')}</button>
         <a className="target-terms" href="/terms">{t('header.terms')}</a>
       </div>
-      <button type="button" className="target-hero__ambient-toggle" onClick={ambient.toggle} aria-label={t(ambient.playing ? 'hero.ambientPause' : 'hero.ambientPlay')}>
-        {ambient.playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+      <button type="button" className="target-hero__ambient-toggle" onClick={ambient.toggle} aria-label={t(ambient.on ? 'hero.ambientPause' : 'hero.ambientPlay')}>
+        {ambient.on ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
       </button>
       <div className="target-hero__person-frame" data-motion="hero-figure" aria-hidden="true">
         <img className="target-hero__person" src={profileImage} width="376" height="513" alt="" />
