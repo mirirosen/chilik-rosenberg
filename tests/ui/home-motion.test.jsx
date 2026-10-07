@@ -236,6 +236,18 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(button.style.getPropertyValue('--sheen-x')).toBe('');
   });
 
+  it('after a back/forward cache restore, a notification queued before freezing starts no entrance on a block in view', () => {
+    const { container } = render(<Fixture />);
+    const block = container.querySelector('.target-journey__grid li');
+    block.getBoundingClientRect = () => ({ top: 100, bottom: 200, left: 0, right: 100, width: 100, height: 100 });
+    const pageshow = new Event('pageshow'); Object.defineProperty(pageshow, 'persisted', { value: true });
+    window.dispatchEvent(pageshow);
+    // The queued notification arrives after pageshow, reporting the block as entering from below.
+    observers.at(-1).notify([{ target: block, isIntersecting: true, boundingClientRect: { top: window.innerHeight + 40 } }]);
+    expect(gsap.getTweensOf(block)).toHaveLength(0);
+    expect(block.getAttribute('style')).toBeNull();
+  });
+
   it('keeps one owner per property in the hero entrance (S1)', () => {
     const { container } = render(<Fixture />);
     const button = container.querySelector('.target-button');

@@ -138,8 +138,17 @@ export function setupHomeMotion(root) {
     const controller = new AbortController();
     setMotionActive(true);
     const cleanups = [setupPressMotion(root), heroScene(root), revealScene(root, context)];
-    // Back/forward cache: restore entrances to their natural state; press/hover tweens stay alive.
-    window.addEventListener('pageshow', event => { if (event.persisted) settleAll(); }, { signal: controller.signal });
+    // Back/forward cache: restore entrances to their natural state; press/hover tweens stay alive. Blocks in view at
+    // restore are recorded as settled too, so an observer notification queued before the page was frozen (delivered
+    // after pageshow) cannot start a new entrance on them (found by gate 8.12: the intro lead re-entered).
+    window.addEventListener('pageshow', event => {
+      if (!event.persisted) return;
+      settleAll();
+      root.querySelectorAll('[data-motion="reveal"]').forEach(block => {
+        const rect = block.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < window.innerHeight) settle(block);
+      });
+    }, { signal: controller.signal });
     arrivalRing = element => context.add(() => {
       const ring = gsap.timeline()
         .fromTo(element, { '--arrive': 0 }, { '--arrive': 1, duration: 0.3, ease: EASE.out })
