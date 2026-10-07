@@ -517,9 +517,10 @@ body.preprod a[aria-disabled="true"] { cursor: not-allowed; opacity: .65; }
 @media(max-height:650px) {
  .mobile-navigation__content { gap:12px;padding-block:72px 20px; }
 }
-/* N5: a short brand at phone width so the header fits on one line beside the menu button and the contact pill. */
+/* N5: a short brand until the full name fits on one line (measured: the full brand wraps to 2-3 lines up to
+   ~639px and fits from 640px), so the header never stacks the name beside the menu button and contact pill. */
 .header-brand__short { display:none; }
-@media(max-width:430px) {
+@media(max-width:639px) {
  .header-brand__full { display:none; }
  .header-brand__short { display:inline; }
 }
