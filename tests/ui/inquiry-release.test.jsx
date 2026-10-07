@@ -44,6 +44,13 @@ describe('approved public inquiry release', () => {
     expect(container.querySelector('.header-brand__short').textContent).toBe(expected);
   });
 
+  it.each(['he', 'en'])('opens the %s lectures WhatsApp link in a new tab with noopener and noreferrer (N8)', async lang => {
+    await i18n.changeLanguage(lang); render(<InquiryApp />);
+    const link = screen.getByRole('link', { name: i18n.t('lectures.cta'), exact: true });
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel').split(/\s+/).sort()).toEqual(['noopener', 'noreferrer']);
+  });
+
   it('links the hero terms as a real link, not a scripted button (M5)', async () => {
     await i18n.changeLanguage('he'); const { container } = render(<InquiryApp />);
     const terms = container.querySelector('.target-hero .target-terms');

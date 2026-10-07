@@ -18,6 +18,9 @@ describe('verified design sections', () => {
     expect(screen.getByRole('link', { name: he.intro.lectures }).getAttribute('href')).toBe('#lectures');
     expect(screen.getByRole('link', { name: he.menu.nextTours }).getAttribute('href')).toBe('#date-selection');
     expect(screen.getByRole('link', { name: he.lectures.cta }).getAttribute('href')).toBe('https://wa.me/972506724312');
+    const lectures = screen.getByRole('link', { name: he.lectures.cta });
+    expect(lectures.getAttribute('target')).toBe('_blank');
+    expect(lectures.getAttribute('rel').split(/\s+/).sort()).toEqual(['noopener', 'noreferrer']);
   });
   it('provides four inclusions, nine route stops and an identified real portrait', () => {
     const { container } = render(<><TourInclusions /><Journey /><Bio /></>);
