@@ -32,7 +32,7 @@ describe('approved public inquiry release', () => {
     await i18n.changeLanguage('en'); window.history.replaceState({}, '', url); const { container } = render(<InquiryApp />);
     expect(container.querySelector('input, select, textarea, form, .date-card')).toBeNull();
     expect(container.textContent).not.toContain('private@example.invalid');
-    expect(screen.getByRole('link', { name: 'Enquire on WhatsApp', exact: true })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Contact Chilik on WhatsApp', exact: true })).toBeTruthy();
     if (!url.startsWith('/booking?date=')) expect(screen.getByText(i18n.t('inquiry.statusNotice'), { exact: true })).toBeTruthy();
     expect(document.querySelector('meta[name="robots"]').content).toBe('noindex, nofollow');
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();

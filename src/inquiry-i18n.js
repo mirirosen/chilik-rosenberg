@@ -5,7 +5,7 @@ import en from './locales/en.json';
 
 const copy = {
   he: {
-    title: 'בירור על סיור', cta: 'פנייה לחיליק ב־WhatsApp', contact: 'פנייה לחיליק', short: 'בירור סיור',
+    title: 'בירור על סיור', cta: 'פנייה לחיליק ב־WhatsApp', contact: 'פנייה לחיליק', short: 'פנייה לחיליק', brandShort: 'חיליק רוזנברג',
     notice: 'הזמינות וההזמנה יאושרו אישית. פנייה אינה שומרת מקום ואינה גובה תשלום.',
     draftNotice: 'הכפתור פותח טיוטת הודעה. יש לשלוח אותה בעצמכם ב־WhatsApp.',
     draft: 'שלום חיליק, אשמח לברר פרטים וזמינות לסיור. אבקש לתאם אישית את ההזמנה.',
@@ -16,11 +16,11 @@ const copy = {
     paymentNotice: 'התשלום ותנאי ההזמנה מתואמים אישית עם חיליק. האתר אינו מבצע תשלום או הרשמה אוטומטית.',
   },
   en: {
-    title: 'Ask about a tour', cta: 'Enquire on WhatsApp', contact: 'Contact Chilik', short: 'Tour enquiry',
+    title: 'Ask about a tour', cta: 'Contact Chilik on WhatsApp', contact: 'Contact Chilik', short: 'Contact Chilik', brandShort: 'Chilik Rosenberg',
     notice: 'Availability and bookings are confirmed personally. An enquiry does not reserve a place or take payment.',
     draftNotice: 'This button opens a message draft. You must send it yourself in WhatsApp.',
     draft: 'Hi Chilik, I would like to ask about a tour and availability, and arrange the booking personally.',
-    call: 'Call Chilik', email: 'Enquire by email',
+    call: 'Call Chilik', email: 'Email Chilik',
     statusTitle: 'Check an existing booking',
     statusNotice: 'This site currently does not check payment or booking status. Contact Chilik with your booking details for enquiries or cancellation. This page does not confirm payment, cancellation or a reserved place.',
     reference: 'Booking reference from this link, for enquiries only',
@@ -32,7 +32,7 @@ function resource(base, lang) {
   const inquiry = copy[lang];
   return { ...base, inquiry,
     hero: { ...base.hero, cta: inquiry.contact },
-    header: { ...base.header, dates: inquiry.title, register: inquiry.contact, upcomingTours: inquiry.short },
+    header: { ...base.header, dates: inquiry.title, register: inquiry.contact, upcomingTours: inquiry.short, titleShort: inquiry.brandShort },
     menu: { ...base.menu, nextTours: inquiry.title },
     footer: { ...base.footer, register: inquiry.title },
     helpHub: { ...base.helpHub, register: inquiry.contact },

@@ -53,7 +53,8 @@ const Header = ({ showVideos = false }) => {
     <>
       <nav className="main-header fixed top-0 w-full z-[1000] px-6 md:px-16 py-4 flex justify-between items-center text-right" aria-label={t('header.menuButton')}>
         <a href="/" className="header-brand text-xl md:text-3xl font-black text-brand-gold font-serif tracking-tighter">
-          {t('header.title')}
+          <span className="header-brand__full">{t('header.title')}</span>
+          <span className="header-brand__short">{t('header.titleShort')}</span>
         </a>
         <div className="hidden xl:flex gap-8 text-gray-200 text-sm items-center">
           {sections.map(([id, label]) => (

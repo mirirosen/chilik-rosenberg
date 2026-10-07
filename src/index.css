@@ -514,3 +514,9 @@ body.preprod a[aria-disabled="true"] { cursor: not-allowed; opacity: .65; }
 @media(max-height:650px) {
  .mobile-navigation__content { gap:12px;padding-block:72px 20px; }
 }
+/* N5: a short brand at phone width so the header fits on one line beside the menu button and the contact pill. */
+.header-brand__short { display:none; }
+@media(max-width:430px) {
+ .header-brand__full { display:none; }
+ .header-brand__short { display:inline; }
+}
