@@ -75,7 +75,7 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(booking.getAttribute('style')).toBeNull();
     expect(gsap.getTweensOf(container.querySelector('.target-hero__person'))).toHaveLength(0);
     expect(container.querySelector('.target-hero__person').getAttribute('style')).toBeNull();
-    gsap.getTweensOf(cards[0])[0].progress(1);
+    cards.forEach(card => gsap.getTweensOf(card).forEach(tween => tween.progress(1)));
     expect(cards.every(card => card.style.opacity === '' && card.style.transform === '')).toBe(true);
   });
 
@@ -262,10 +262,48 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(card.vars.y).toBe(10);
     expect(card.vars.opacity).toBe(0.85);
     expect(card.vars.duration).toBe(0.42);
-    expect(card.vars.stagger.amount).toBeLessThanOrEqual(0.24);
+    expect(card.vars.delay).toBe(0);
+    expect(gsap.getTweensOf(cards[1])[0].vars.delay).toBeCloseTo(0.04);
+    expect(gsap.getTweensOf(cards[1])[0]).not.toBe(card); // one tween per element
     const head = gsap.getTweensOf(heading)[0];
     expect(head.vars.duration).toBe(0.7);
     expect(head.vars.ease).toBe('expo.out');
+  });
+
+  it('settling one element mid-entrance leaves its siblings animating to their natural state', () => {
+    const { container } = render(<Fixture />);
+    const [heading, subtitle] = container.querySelectorAll('[data-motion="hero-line"]');
+    const button = container.querySelector('.target-button');
+    gsap.globalTimeline.time(0.3); // mid-entrance
+    settle(heading);
+    expect(heading.style.transform).toBe('');
+    expect(gsap.getTweensOf(subtitle).length).toBe(1);
+    expect(gsap.getTweensOf(button).some(tween => tween.vars.opacity !== undefined)).toBe(true);
+    gsap.globalTimeline.time(3); // the rest finish naturally
+    expect(subtitle.style.transform).toBe('');
+    expect(button.style.opacity).toBe('');
+    expect(interaction(button)).toHaveLength(2); // press and hover still alive
+  });
+
+  it('settling one revealed card leaves the other card animating', () => {
+    const { container } = render(<Fixture />);
+    const [first, second] = container.querySelectorAll('li');
+    observers[0].notify([first, second].map(target => ({ target, isIntersecting: true, boundingClientRect: { top: window.innerHeight + 40 } })));
+    gsap.globalTimeline.time(gsap.globalTimeline.time() + 0.1);
+    settle(first);
+    expect(first.getAttribute('style') || '').not.toMatch(/opacity|transform|translate/);
+    expect(gsap.getTweensOf(second)).toHaveLength(1);
+    gsap.getTweensOf(second)[0].progress(1);
+    expect(second.style.opacity).toBe('');
+    expect(second.style.transform).toBe('');
+  });
+
+  it('records a block that is already visible on its first notification as settled', () => {
+    const { container } = render(<Fixture />);
+    const card = container.querySelector('li');
+    observers[0].notify([{ target: card, isIntersecting: true, boundingClientRect: { top: 10 } }]);
+    observers[0].notify([{ target: card, isIntersecting: true, boundingClientRect: { top: window.innerHeight + 40 } }]); // queued again
+    expect(gsap.getTweensOf(card)).toHaveLength(0);
   });
 
   it('fails open when optional browser APIs are absent', () => {

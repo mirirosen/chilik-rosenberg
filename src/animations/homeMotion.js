@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { DIST, DUR, EASE, STAGGER } from './tokens';
-import { isSettled, registerEntrance, resetRegistry, setMotionActive, settleAll } from './registry';
+import { isSettled, registerEntrance, resetRegistry, setMotionActive, settle, settleAll } from './registry';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
 const hoverQuery = `${motionQuery} and (hover: hover) and (pointer: fine)`;
@@ -48,23 +48,23 @@ function heroScene(root) {
   const food = root.querySelector('[data-motion="hero-food"]');
   if (!lines.length && !cta && !figure && !food) return () => {};
   const phone = window.matchMedia('(max-width: 767px)').matches;
-  const timeline = gsap.timeline({ defaults: { ease: EASE.soft } });
+  // One tween per element with an absolute delay (not a shared timeline), so settling one element never
+  // kills or strands the others (Codex implementation review, round 1).
+  const enter = (element, vars, props) => registerEntrance(element, gsap.from(element, { ease: EASE.soft, ...vars }), props);
   if (food && window.matchMedia('(min-width: 1200px)').matches) {
-    registerEntrance(food, timeline.from(food, { scale: 1.04, duration: 1.6, ease: EASE.settle, clearProps: 'transform' }, 0), 'transform');
+    enter(food, { scale: 1.04, duration: 1.6, delay: 0, ease: EASE.settle, clearProps: 'transform' }, 'transform');
   }
   lines.forEach(line => {
     const title = line.tagName === 'H1', eyebrow = line.classList.contains('target-eyebrow');
     const y = title ? DIST.l : eyebrow ? DIST.s : DIST.m;
-    const at = title ? 0.12 : eyebrow ? 0.05 : 0.22;
-    registerEntrance(line, timeline.from(line, { y, duration: title ? DUR.l : 0.6, clearProps: 'transform' }, at), 'transform');
+    const delay = title ? 0.12 : eyebrow ? 0.05 : 0.22;
+    enter(line, { y, duration: title ? DUR.l : 0.6, delay, clearProps: 'transform' }, 'transform');
   });
-  if (figure) {
-    registerEntrance(figure, timeline.from(figure, { y: phone ? DIST.m : DIST.l, duration: 0.9, clearProps: 'transform' }, 0.1), 'transform');
-  }
+  if (figure) enter(figure, { y: phone ? DIST.m : DIST.l, duration: 0.9, delay: 0.1, clearProps: 'transform' }, 'transform');
   if (cta) {
-    registerEntrance(cta, timeline.from(cta, { opacity: 0.6, duration: DUR.m, clearProps: 'opacity' }, 0.35), 'opacity');
+    enter(cta, { opacity: 0.6, duration: DUR.m, delay: 0.35, clearProps: 'opacity' }, 'opacity');
     // One slow sheen across the CTA (index.css: ::after driven by --sheen-x; resting outside the button).
-    registerEntrance(cta, timeline.fromTo(cta, { '--sheen-x': '-120%' }, { '--sheen-x': '120%', duration: 0.9, ease: 'power1.inOut', clearProps: '--sheen-x' }, 0.75), '--sheen-x');
+    registerEntrance(cta, gsap.fromTo(cta, { '--sheen-x': '-120%' }, { '--sheen-x': '120%', duration: 0.9, delay: 0.75, ease: 'power1.inOut', clearProps: '--sheen-x' }), '--sheen-x');
   }
   return () => {};
 }
@@ -88,7 +88,7 @@ function revealScene(root, context) {
       if (!entry.isIntersecting) continue; // keep observing
       observer.unobserve(target);
       const top = entry.boundingClientRect ? entry.boundingClientRect.top : Infinity;
-      if (first && top < window.innerHeight) continue; // already visible: no entrance
+      if (first && top < window.innerHeight) { settle(target); continue; } // already visible: recorded, no entrance
       reveal.push(target);
     }
     if (!reveal.length) return;
@@ -98,13 +98,15 @@ function revealScene(root, context) {
       reveal.forEach(target => groups.set(target.parentElement, [...(groups.get(target.parentElement) ?? []), target]));
       groups.forEach(group => {
         // S2/S4: a visible but quiet rise. Section headings settle slower; cards stagger per grid (cap .24s).
-        const heading = group.every(target => target.classList.contains('target-section-heading'));
-        const tween = gsap.from(group, {
-          y: DIST.m, opacity: 0.85, duration: heading ? DUR.l : DUR.m,
-          stagger: { each: STAGGER.tight, amount: Math.min(0.24, (group.length - 1) * STAGGER.tight) },
-          ease: heading ? EASE.settle : EASE.out, clearProps: 'transform,opacity',
+        // One tween per element (delay instead of a shared stagger), so settling one card never strands another.
+        group.forEach((target, index) => {
+          const heading = target.classList.contains('target-section-heading');
+          registerEntrance(target, gsap.from(target, {
+            y: DIST.m, opacity: 0.85, duration: heading ? DUR.l : DUR.m,
+            delay: Math.min(0.24, index * STAGGER.tight),
+            ease: heading ? EASE.settle : EASE.out, clearProps: 'transform,opacity',
+          }), 'transform,opacity');
         });
-        group.forEach(target => registerEntrance(target, tween, 'transform,opacity'));
       });
     });
   }, { threshold: 0.12, rootMargin: '0px 0px 160px 0px' });
