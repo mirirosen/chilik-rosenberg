@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import profileImage from '../assets/hilik-cutout-provided.png';
 import { Pause, Play } from '../utils/icons';
@@ -22,7 +22,8 @@ export const chapterAt = time => CHAPTERS.reduce((index, [, start], i) => (time 
 
 const Hero = () => {
   const { t } = useTranslation();
-  const ambient = useAmbientVideo(AMBIENT);
+  const posterRef = useRef(null);
+  const ambient = useAmbientVideo({ ...AMBIENT, posterRef });
   const { goToInquiry } = useNavigation();
   // Which chapter is on screen: follows the video's own clock (timeupdate, a few times a second), no extra loop.
   const [chapter, setChapter] = useState(0);
@@ -45,7 +46,7 @@ const Hero = () => {
         {/* The poster stays the LCP element; the video only fades in over it once it is playing. */}
         <picture>
           <source media="(max-width: 767px)" srcSet={AMBIENT.phonePoster} width="576" height="720" />
-          <img className="target-hero__food" data-motion="hero-food" src={AMBIENT.poster} width="1280" height="720" fetchpriority="high" alt="" />
+          <img ref={posterRef} className="target-hero__food" data-motion="hero-food" src={AMBIENT.poster} width="1280" height="720" fetchpriority="high" alt="" />
         </picture>
         <video ref={ambient.ref} className={`target-hero__food target-hero__ambient${ambient.playing ? ' is-playing' : ''}`} muted loop playsInline preload="none" disablePictureInPicture disableRemotePlayback tabIndex={-1} />
         <div className="target-hero__veil" />

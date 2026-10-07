@@ -236,4 +236,72 @@ describe('hero ambient loop', () => {
     expect(chapterAt(CHAPTERS[1][1] - 0.01)).toBe(0);
     expect(chapterAt(99)).toBe(4);
   });
+
+  describe('the automatic start waits for the poster to be painted (LCP)', () => {
+    let lcpCallbacks, disconnected, timeouts;
+    beforeEach(() => {
+      lcpCallbacks = []; disconnected = 0; timeouts = [];
+      class PO {
+        constructor(cb) { this.cb = cb; }
+        observe(opts) { if (opts.type === 'largest-contentful-paint') lcpCallbacks.push(this.cb); }
+        disconnect() { disconnected += 1; lcpCallbacks = lcpCallbacks.filter(cb => cb !== this.cb); }
+      }
+      PO.supportedEntryTypes = ['largest-contentful-paint'];
+      vi.stubGlobal('PerformanceObserver', PO);
+      const realSetTimeout = window.setTimeout.bind(window);
+      vi.spyOn(window, 'setTimeout').mockImplementation((fn, ms, ...rest) => {
+        if (ms === 3000) { timeouts.push(fn); return 900 + timeouts.length; }
+        return realSetTimeout(fn, ms, ...rest);
+      });
+    });
+    const paint = element => act(async () => { lcpCallbacks.forEach(cb => cb({ getEntries: () => [{ element }] })); });
+
+    it('does not play until the poster is reported as an LCP candidate, then plays once', async () => {
+      const { container } = render(<Hero />);
+      await flushIdle();
+      expect(plays).toBe(0);
+      expect(video(container).getAttribute('src')).toBeNull(); // nothing downloaded while waiting
+      await paint(container.querySelector('img.target-hero__food'));
+      expect(plays).toBe(1);
+      expect(disconnected).toBe(1);
+    });
+
+    it('an LCP entry for another element does not start it; the 3 s fallback does', async () => {
+      const { container } = render(<Hero />);
+      await flushIdle();
+      await paint(container.querySelector('h1'));
+      expect(plays).toBe(0);
+      expect(timeouts).toHaveLength(1);
+      await act(async () => { timeouts[0](); });
+      expect(plays).toBe(1);
+    });
+
+    it('an explicit Play is never delayed', async () => {
+      reduced = true; // no automatic start
+      render(<Hero />);
+      await flushIdle();
+      await act(async () => { fireEvent.click(button('hero.ambientPlay')); });
+      expect(plays).toBe(1);
+    });
+
+    it('unmounting while waiting cancels the start', async () => {
+      const view = render(<Hero />);
+      const poster = view.container.querySelector('img.target-hero__food');
+      await flushIdle();
+      view.unmount();
+      expect(disconnected).toBe(1);
+      await paint(poster);
+      expect(plays).toBe(0);
+    });
+
+    it('a Play pressed while waiting starts it once; the deferred start then does nothing', async () => {
+      const { container } = render(<Hero />);
+      await flushIdle();
+      expect(plays).toBe(0);
+      await act(async () => { fireEvent.click(button('hero.ambientPlay')); });
+      expect(plays).toBe(1);
+      await paint(container.querySelector('img.target-hero__food'));
+      expect(plays).toBe(1);
+    });
+  });
 });

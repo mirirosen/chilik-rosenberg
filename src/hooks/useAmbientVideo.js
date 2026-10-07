@@ -31,7 +31,12 @@ export function canAutoplayAmbient() {
 // Phones get their own 4:5 encode (each shot cropped around its subject); the choice is made once, when loading.
 export const PHONE_QUERY = '(max-width: 767px)';
 
-export function useAmbientVideo({ webm, mp4, phoneWebm, phoneMp4 }) {
+// The automatic start waits until the poster has been painted as a largest-contentful-paint candidate, so the
+// video (the same box) can never take its place as the LCP element (lcp.cjs found that in 1 of 22 runs). Browsers
+// without the LCP entry type start as before; a 3 s fallback covers a poster that is never reported.
+export const POSTER_PAINT_FALLBACK_MS = 3000;
+
+export function useAmbientVideo({ webm, mp4, phoneWebm, phoneMp4, posterRef }) {
   const ref = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [on, setOn] = useState(false);
@@ -84,12 +89,32 @@ export function useAmbientVideo({ webm, mp4, phoneWebm, phoneMp4 }) {
     video.addEventListener('playing', () => { if (!disposed.current) setPlaying(true); }, { signal });
     video.addEventListener('pause', () => { if (!disposed.current) setPlaying(false); }, { signal });
 
-    let idleId = null, timer = null;
+    let idleId = null, timer = null, lcpObserver = null, paintTimer = null;
+    const eligible = () => !disposed.current && stop.current === null && !document.hidden && inView.current && canAutoplayAmbient();
+    const afterPosterPaint = go => {
+      const poster = posterRef?.current;
+      const types = (typeof PerformanceObserver === 'function' && PerformanceObserver.supportedEntryTypes) || [];
+      if (!poster || !types.includes('largest-contentful-paint')) { go(); return; }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        lcpObserver?.disconnect(); lcpObserver = null;
+        if (paintTimer !== null) { window.clearTimeout(paintTimer); paintTimer = null; }
+        go();
+      };
+      lcpObserver = new PerformanceObserver(list => { if (list.getEntries().some(entry => entry.element === poster)) finish(); });
+      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+      paintTimer = window.setTimeout(finish, POSTER_PAINT_FALLBACK_MS);
+    };
     const start = () => {
       idleId = null; timer = null;
-      if (disposed.current || stop.current !== null || document.hidden || !inView.current || !canAutoplayAmbient()) return;
-      wantsPlay.current = true;
-      play();
+      if (!eligible()) return;
+      afterPosterPaint(() => {
+        if (!eligible() || wantsPlay.current) return; // re-checked meanwhile; a visitor's Play already started it
+        wantsPlay.current = true;
+        play();
+      });
     };
     const schedule = () => {
       if (disposed.current) return;
@@ -129,10 +154,12 @@ export function useAmbientVideo({ webm, mp4, phoneWebm, phoneMp4 }) {
       observer?.disconnect();
       if (idleId !== null && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idleId);
       if (timer !== null) window.clearTimeout(timer);
+      lcpObserver?.disconnect();
+      if (paintTimer !== null) window.clearTimeout(paintTimer);
       attempt.current += 1;
       if (loaded.current) video.pause();
     };
-  }, [play, pause]);
+  }, [play, pause, posterRef]);
 
   const toggle = useCallback(() => {
     if (on) {
