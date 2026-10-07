@@ -58,6 +58,13 @@ describe('approved public inquiry release', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('promises no automatic emails, reminders or post-payment confirmation on the inquiry terms page (M8)', async () => {
+    await i18n.changeLanguage('he'); window.history.replaceState({}, '', '/terms'); const { container } = render(<InquiryApp />);
+    for (const promise of ['מייל אישור', 'תזכורת', 'לאחר ביצוע התשלום', 'יישלחו במייל']) expect(container.textContent).not.toContain(promise);
+    expect(container.textContent).toContain('האתר אינו שולח מיילים או תזכורות אוטומטיים');
+    expect(container.textContent).toContain('השעה המדויקת של תחילת הסיור מתואמת אישית עם חיליק');
+  });
+
   it('pins the hosting-only target and sends admin to preserved legacy HTML', () => {
     const config = JSON.parse(fs.readFileSync('firebase.hosting.inquiry.json', 'utf8'));
     expect(Object.keys(config)).toEqual(['hosting']); expect(config.hosting.site).toBe('hilik-site');

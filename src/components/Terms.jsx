@@ -257,7 +257,9 @@ const Terms = ({ inquiry = false }) => {
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">מועדי הסיורים :1</h3>
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl">הסיורים מתקיימים <strong>בימי חמישי בלבד</strong> <span className="text-brand-gold">📅</span></p>
-                <p className="text-gray-300 text-right" dir="rtl">השעה המדויקת של תחילת הסיור תישלח במייל אישור ההזמנה <span className="text-brand-gold">⏰</span></p>
+                {inquiry
+                  ? <p className="text-gray-300 text-right" dir="rtl">השעה המדויקת של תחילת הסיור מתואמת אישית עם חיליק <span className="text-brand-gold">⏰</span></p>
+                  : <p className="text-gray-300 text-right" dir="rtl">השעה המדויקת של תחילת הסיור תישלח במייל אישור ההזמנה <span className="text-brand-gold">⏰</span></p>}
                 <p className="text-gray-300 text-right" dir="rtl">מומלץ להגיע <strong>10 דקות לפני</strong> שעת תחילת הסיור <span className="text-brand-gold">⏱️</span></p>
               </div>
             </div>
@@ -267,9 +269,13 @@ const Terms = ({ inquiry = false }) => {
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">נקודת מפגש :2</h3>
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl">נקודת המפגש משתנה בהתאם לסיור הספציפי <span className="text-brand-gold">📍</span></p>
-                <p className="text-gray-300 text-right" dir="rtl">פרטי נקודת המפגש המדויקת (כתובת וכיוונים) יישלחו במייל אישור <span className="text-brand-gold">✉️</span></p>
-                <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני הסיור</strong> - תישלח תזכורת עם כל הפרטים לנקודת המפגש <span className="text-brand-gold">📧</span></p>
-                <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני הסיור</strong> - תתקבל תזכורת SMS/WhatsApp נוספת <span className="text-green-500">💬</span></p>
+                {inquiry
+                  ? <p className="text-gray-300 text-right" dir="rtl">פרטי נקודת המפגש המדויקת (כתובת וכיוונים) מתואמים אישית עם חיליק <span className="text-brand-gold">💬</span></p>
+                  : <>
+                    <p className="text-gray-300 text-right" dir="rtl">פרטי נקודת המפגש המדויקת (כתובת וכיוונים) יישלחו במייל אישור <span className="text-brand-gold">✉️</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני הסיור</strong> - תישלח תזכורת עם כל הפרטים לנקודת המפגש <span className="text-brand-gold">📧</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני הסיור</strong> - תתקבל תזכורת SMS/WhatsApp נוספת <span className="text-green-500">💬</span></p>
+                  </>}
               </div>
             </div>
 
@@ -297,10 +303,14 @@ const Terms = ({ inquiry = false }) => {
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">אישור השתתפות :5</h3>
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
-                <p className="text-gray-300 text-right" dir="rtl">לאחר ביצוע התשלום - תקבל/י <strong>מייל אישור מיידי</strong> <span className="text-brand-gold">✅</span></p>
-                <p className="text-gray-300 text-right" dir="rtl">המייל יכלול: מספר הזמנה, תאריך הסיור, מספר משתתפים <span className="text-brand-gold">📝</span></p>
-                <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני</strong> - מייל עם פרטי נקודת המפגש והוראות הגעה <span className="text-brand-gold">📧</span></p>
-                <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני</strong> - תזכורת SMS/WhatsApp <span className="text-green-500">💬</span></p>
+                {inquiry
+                  ? <p className="text-gray-300 text-right" dir="rtl">המועד, נקודת המפגש והתשלום מתואמים אישית עם חיליק. האתר אינו שולח מיילים או תזכורות אוטומטיים <span className="text-brand-gold">💬</span></p>
+                  : <>
+                    <p className="text-gray-300 text-right" dir="rtl">לאחר ביצוע התשלום - תקבל/י <strong>מייל אישור מיידי</strong> <span className="text-brand-gold">✅</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl">המייל יכלול: מספר הזמנה, תאריך הסיור, מספר משתתפים <span className="text-brand-gold">📝</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני</strong> - מייל עם פרטי נקודת המפגש והוראות הגעה <span className="text-brand-gold">📧</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני</strong> - תזכורת SMS/WhatsApp <span className="text-green-500">💬</span></p>
+                  </>}
               </div>
             </div>
 
