@@ -68,7 +68,7 @@ describe('provided tour videos and empty-group behavior', () => {
   it('accepts an empty #videos hash without changing the public manual-enquiry flow', async () => {
     await i18n.changeLanguage('en'); window.history.replaceState({}, '', '/#videos');
     const { container } = render(<InquiryApp />);
-    expect(container.querySelector('#videos, video, a[href="/#videos"]')).toBeNull();
+    expect(container.querySelector('#videos, video:not(.target-hero__ambient), a[href="/#videos"]')).toBeNull();
     expect(screen.getByRole('heading', { name: i18n.t('inquiry.title'), exact: true })).toBeTruthy();
     expect(fetch).not.toHaveBeenCalled();
   });

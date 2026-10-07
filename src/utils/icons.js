@@ -41,5 +41,7 @@ export {
   Settings,
   Edit2,
   RotateCcw,
-  MapPin
+  MapPin,
+  Pause,
+  Play
 } from 'lucide-react';

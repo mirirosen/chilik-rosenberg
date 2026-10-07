@@ -546,3 +546,21 @@ html[lang="en"] .target-hero h1 { white-space:normal; }
 .target-hero [data-motion="hero-cta"]::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .45) 50%, transparent 70%); transform:translateX(var(--sheen-x)); }
 html[dir="rtl"] .target-hero [data-motion="hero-cta"]::after { transform:translateX(calc(var(--sheen-x) * -1)); }
 @media print { [data-motion] { opacity:1!important; transform:none!important; } .target-hero [data-motion="hero-cta"]::after { display:none; } }
+/* S7 (plan §18): silent Bnei Brak loop over the poster. The <img> poster stays the LCP element; the video shares
+   its box (.target-hero__food) and only becomes visible once it is actually playing. The square footage is centered. */
+.target-hero .target-hero__food { object-position:center; }
+.target-hero .target-hero__ambient { opacity:0; transition:opacity .4s ease; pointer-events:none; }
+.target-hero .target-hero__ambient.is-playing { opacity:1; }
+/* Attenuate the media once (plan §18.1): while the video plays, the poster under it fades out, so on phones the
+   footage sits at .5 like the old photo instead of compounding to .75. */
+.target-hero__visual.is-ambient-playing img.target-hero__food { opacity:0; transition:opacity .4s ease; }
+@media(max-width:767px) {
+ .target-hero .target-hero__ambient.is-playing { opacity:.5; }
+ /* Text scrim over moving footage: with media at .5 over #555457 and this .62 scrim, even a pure-white frame
+    composites to about rgb(82,81,82) under the text, so white text stays >= 4.5:1 and #ddd >= 4.5:1. */
+ .target-hero .target-hero__copy { background:rgb(28 27 29 / .62); }
+}
+/* Pause/play control for the loop (WCAG 2.2.2): 44px, over the footage, where the AI-image note used to be. */
+.target-hero__ambient-toggle { position:absolute; left:12px; bottom:12px; z-index:4; display:grid; place-items:center; width:44px; height:44px; border-radius:999px; background:rgb(24 21 19 / .72); color:#fff; border:1px solid rgb(255 255 255 / .35); cursor:pointer; }
+.target-hero__ambient-toggle:hover { background:rgb(24 21 19 / .88); }
+@media print { .target-hero__ambient, .target-hero__ambient-toggle { display:none !important; } }
