@@ -274,12 +274,16 @@ describe('bounded GSAP homepage enhancements', () => {
     const { container } = render(<Fixture />);
     const [heading, subtitle] = container.querySelectorAll('[data-motion="hero-line"]');
     const button = container.querySelector('.target-button');
-    gsap.globalTimeline.time(0.3); // mid-entrance
+    // Times relative to the render: the tweens start at the global timeline's current time, which depends on how
+    // long earlier tests took (absolute times made this test flaky).
+    const t0 = gsap.getTweensOf(heading)[0].startTime();
+    gsap.globalTimeline.time(t0 + 0.3); // mid-entrance
+    expect(subtitle.style.transform).not.toBe(''); // really mid-entrance: the sibling is still moving
     settle(heading);
     expect(heading.style.transform).toBe('');
     expect(gsap.getTweensOf(subtitle).length).toBe(1);
     expect(gsap.getTweensOf(button).some(tween => tween.vars.opacity !== undefined)).toBe(true);
-    gsap.globalTimeline.time(3); // the rest finish naturally
+    gsap.globalTimeline.time(t0 + 3); // the rest finish naturally
     expect(subtitle.style.transform).toBe('');
     expect(button.style.opacity).toBe('');
     expect(interaction(button)).toHaveLength(2); // press and hover still alive
