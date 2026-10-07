@@ -97,14 +97,17 @@ function revealScene(root, context) {
     context.add(() => {
       const groups = new Map();
       reveal.forEach(target => groups.set(target.parentElement, [...(groups.get(target.parentElement) ?? []), target]));
-      groups.forEach(group => {
+      groups.forEach((group, parent) => {
         // S2/S4: a visible but quiet rise. Section headings settle slower; cards stagger per grid (cap .24s).
         // One tween per element (delay instead of a shared stagger), so settling one card never strands another.
+        // Document order, whatever order the observer reported; a group can ask for the base step (S3 channels).
+        group.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+        const step = parent?.dataset?.motionStagger === 'base' ? STAGGER.base : STAGGER.tight;
         group.forEach((target, index) => {
           const heading = target.classList.contains('target-section-heading');
           registerEntrance(target, gsap.from(target, {
             y: DIST.m, opacity: 0.85, duration: heading ? DUR.l : DUR.m,
-            delay: Math.min(0.24, index * STAGGER.tight),
+            delay: Math.min(0.24, index * step),
             ease: heading ? EASE.settle : EASE.out, clearProps: 'transform,opacity',
           }), 'transform,opacity');
         });
