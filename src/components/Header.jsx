@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { gsap } from 'gsap';
 import { Menu, X } from '../utils/icons';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useNavigation } from '../navigation/NavigationContext';
 import { settle } from '../animations/registry';
+import { DIST, EASE, STAGGER, fromInlineStart } from '../animations/tokens';
+import { mediaContext } from '../animations/mediaContext';
 
 const Header = ({ showVideos = false }) => {
   const { t } = useTranslation();
@@ -17,12 +20,22 @@ const Header = ({ showVideos = false }) => {
     const previousOverflow = document.body.style.overflow;
     dialog.showModal();
     document.body.style.overflow = 'hidden';
+    // S5: the menu slides in from the inline-start edge (right in Hebrew, left in English) right after
+    // showModal, in its own media context that this effect reverts. Nothing starts hidden (opacity from .6),
+    // and closing is never delayed: the dialog closes at once and revert() clears what is left.
+    const motion = mediaContext('(prefers-reduced-motion: no-preference)', () => {
+      const content = dialog.querySelector('.mobile-navigation__content');
+      if (!content) return;
+      gsap.from(content, { x: fromInlineStart(DIST.l), opacity: 0.6, duration: 0.32, ease: EASE.out, clearProps: 'transform,opacity' });
+      gsap.from(content.querySelectorAll(':scope > :not(.mobile-navigation__close)'), { y: DIST.s, duration: 0.32, ease: EASE.out, stagger: STAGGER.tight, clearProps: 'transform' });
+    });
     const desktop = window.matchMedia('(min-width: 1280px)');
     const closeOnDesktop = (event) => {
       if (event.matches) setMobileMenuOpen(false);
     };
     desktop.addEventListener('change', closeOnDesktop);
     return () => {
+      motion.revert();
       desktop.removeEventListener('change', closeOnDesktop);
       document.body.style.overflow = previousOverflow;
       // Native dialog restores focus to the opener and keeps background controls inert.

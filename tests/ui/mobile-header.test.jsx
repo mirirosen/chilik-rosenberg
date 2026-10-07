@@ -7,7 +7,7 @@ import Header from '../../src/components/Header';
 let breakpoint;
 beforeEach(() => {
   breakpoint = null;
-  vi.stubGlobal('matchMedia', vi.fn(query => ({ matches: query.includes('reduced-motion'), addEventListener: (_, fn) => { breakpoint = fn; }, removeEventListener: vi.fn() })));
+  vi.stubGlobal('matchMedia', vi.fn(query => ({ matches: query.includes('reduced-motion'), addEventListener: (_, fn) => { if (query.includes('min-width')) breakpoint = fn; }, removeEventListener: vi.fn() })));
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   document.body.style.overflow = '';
