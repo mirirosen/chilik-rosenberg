@@ -15,7 +15,7 @@ export default function InquirySection({ status = false, search = '' }) {
     <div className="inquiry-actions">
       <a className="target-button" href={`https://wa.me/972506724312?text=${encodeURIComponent(draft)}`} target="_blank" rel="noopener noreferrer">{t('inquiry.cta')}</a>
       <a className="inquiry-secondary" href="tel:0506724312">{t('inquiry.call')} <bdi dir="ltr">0506724312</bdi></a>
-      <a className="inquiry-secondary" href="mailto:hr20192022@gmail.com">{t('inquiry.email')}</a>
+      <a className="inquiry-secondary" href="mailto:hr20192022@gmail.com">{t('inquiry.email')} <bdi dir="ltr">hr20192022@gmail.com</bdi></a>
     </div>
     <p className="inquiry-draft-notice">{t('inquiry.draftNotice')}</p>
   </section>;

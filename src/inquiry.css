@@ -15,3 +15,6 @@
 .target-site #date-selection>.inquiry-heading,
 .target-site #date-selection>.inquiry-actions { background: none; border: 0; border-radius: 0; box-shadow: none; }
 .inquiry-heading { padding-top: .5rem; }
+/* N3: on wide screens the phone and email channels read as quiet links beside the one gold WhatsApp button;
+   on phones they stay full-width outlined targets (48px). */
+@media (min-width: 431px) { .inquiry-secondary { border-color: transparent; text-decoration: underline; text-underline-offset: .3em; } .inquiry-secondary:hover { text-decoration-thickness: 2px; } }
