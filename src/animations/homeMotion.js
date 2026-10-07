@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { DIST, DUR, EASE, STAGGER } from './tokens';
 import { isSettled, registerEntrance, resetRegistry, setMotionActive, settle, settleAll } from './registry';
+import { mediaContext } from './mediaContext';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
 const hoverQuery = `${motionQuery} and (hover: hover) and (pointer: fine)`;
@@ -123,8 +124,7 @@ export function requestArrival(element) { if (element && arrivalRing) arrivalRin
 // and no scroll interception or booking UI selectors.
 export function setupHomeMotion(root) {
   if (!root || typeof window.matchMedia !== 'function') return () => {};
-  const media = gsap.matchMedia();
-  media.add(motionQuery, (context) => {
+  const motion = mediaContext(motionQuery, (context) => {
     const controller = new AbortController();
     setMotionActive(true);
     const cleanups = [setupPressMotion(root), heroScene(root), revealScene(root, context)];
@@ -146,7 +146,7 @@ export function setupHomeMotion(root) {
     };
   }, root);
 
-  media.add(hoverQuery, () => {
+  const hover = mediaContext(hoverQuery, () => {
     const cleanups = [];
     root.querySelectorAll(actionSelector).forEach(button => {
       // One reusable tween per button, including keyboard focus. Never accumulate
@@ -166,6 +166,6 @@ export function setupHomeMotion(root) {
     return () => cleanups.forEach(cleanup => cleanup());
   }, root);
 
-  // matchMedia owns both contexts, including observer-created animations.
-  return () => media.revert();
+  // The two media contexts own everything, including observer-created animations.
+  return () => { motion.revert(); hover.revert(); }; // creation order, as gsap.matchMedia did
 }
