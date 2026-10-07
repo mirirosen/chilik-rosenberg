@@ -540,3 +540,9 @@ html[lang="en"] .target-hero h1 { white-space:normal; }
 @media(min-width:768px) {
  .target-hero__food { -webkit-mask-image:linear-gradient(to right,#000 68%,transparent); mask-image:linear-gradient(to right,#000 68%,transparent); }
 }
+/* G2 (S1): one slow sheen across the hero CTA after the entrance. The pseudo-element rests outside the button
+   (clipped) and is driven by --sheen-x from GSAP; it never runs under reduced motion (no tween is created). */
+.target-hero [data-motion="hero-cta"] { position:relative; overflow:hidden; isolation:isolate; --sheen-x:-120%; }
+.target-hero [data-motion="hero-cta"]::after { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(100deg, transparent 30%, rgb(255 255 255 / .45) 50%, transparent 70%); transform:translateX(var(--sheen-x)); }
+html[dir="rtl"] .target-hero [data-motion="hero-cta"]::after { transform:translateX(calc(var(--sheen-x) * -1)); }
+@media print { [data-motion] { opacity:1!important; transform:none!important; } .target-hero [data-motion="hero-cta"]::after { display:none; } }

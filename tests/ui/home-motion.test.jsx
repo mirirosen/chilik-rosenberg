@@ -5,6 +5,8 @@ import { gsap } from 'gsap';
 import { useHomeMotion } from '../../src/hooks/useHomeMotion';
 import { settle } from '../../src/animations/registry';
 
+const interaction = element => gsap.getTweensOf(element).filter(tween => tween.vars.scale !== undefined || tween.vars.y !== undefined);
+
 let reduced;
 let fine;
 let observers;
@@ -62,7 +64,8 @@ describe('bounded GSAP homepage enhancements', () => {
     const cards = [...container.querySelectorAll('li')];
     const booking = container.querySelector('#date-selection button');
     expect(gsap.getTweensOf(heading).length).toBe(1);
-    expect(Number(heading.style.opacity)).toBeGreaterThanOrEqual(0.9);
+    expect(heading.style.opacity).toBe('');
+    expect(heading.style.transform).toContain('translate');
     expect(cards.every(card => card.style.opacity === '')).toBe(true);
     observers[0].reveal(cards);
     expect(gsap.getTweensOf(cards[0]).length).toBe(1);
@@ -85,7 +88,7 @@ describe('bounded GSAP homepage enhancements', () => {
     reduced = false;
     fine = false;
     const coarseView = render(<Fixture />);
-    const coarseTweens = gsap.getTweensOf(coarseView.container.querySelector('.target-button'));
+    const coarseTweens = interaction(coarseView.container.querySelector('.target-button'));
     expect(coarseTweens).toHaveLength(1);
     expect(coarseTweens[0].vars.scale).toBe(0.985);
     expect(coarseTweens[0].paused()).toBe(true);
@@ -125,7 +128,7 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(tween.reversed()).toBe(false);
     fireEvent.pointerLeave(button);
     expect(tween.reversed()).toBe(true);
-    expect(gsap.getTweensOf(button)).toHaveLength(2);
+    expect(interaction(button)).toHaveLength(2);
     unmount();
     fireEvent.focus(button);
     expect(gsap.getTweensOf(button)).toHaveLength(0);
@@ -136,7 +139,7 @@ describe('bounded GSAP homepage enhancements', () => {
     fine = false;
     const { container, unmount } = render(<Fixture />);
     const button = container.querySelector('.target-button');
-    const press = gsap.getTweensOf(button)[0];
+    const press = interaction(button)[0];
     const click = vi.fn(); button.addEventListener('click', click);
     const secondary = new MouseEvent('pointerdown', { bubbles: true, button: 2 });
     fireEvent(button, secondary); expect(press.paused()).toBe(true);
@@ -146,7 +149,7 @@ describe('bounded GSAP homepage enhancements', () => {
       expect(press.paused()).toBe(false); press.progress(0.5);
       fireEvent(document.body, new MouseEvent(index % 2 ? 'pointercancel' : 'pointerup', { bubbles: true }));
       expect(press.reversed()).toBe(true);
-      expect(gsap.getTweensOf(button)).toHaveLength(1);
+      expect(interaction(button)).toHaveLength(1);
     }
     fireEvent.click(button); expect(click).toHaveBeenCalledOnce();
     unmount(); expect(gsap.getTweensOf(button)).toHaveLength(0);
@@ -158,7 +161,7 @@ describe('bounded GSAP homepage enhancements', () => {
     const { container } = render(<Fixture />);
     const button = container.querySelector('.target-button');
     const link = container.querySelector('.target-menu__cta');
-    const buttonTween = gsap.getTweensOf(button)[0], linkTween = gsap.getTweensOf(link)[0];
+    const buttonTween = interaction(button)[0], linkTween = interaction(link)[0];
     fireEvent.keyDown(button, { key: ' ' }); expect(buttonTween.paused()).toBe(false);
     fireEvent.keyUp(button, { key: ' ' }); expect(buttonTween.reversed()).toBe(true);
     const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
@@ -219,15 +222,33 @@ describe('bounded GSAP homepage enhancements', () => {
     const { container } = render(<Fixture />);
     const heading = container.querySelector('h1');
     const button = container.querySelector('.target-button');
-    const interaction = gsap.getTweensOf(button).length;
+    const interactionCount = interaction(button).length;
     expect(gsap.getTweensOf(heading)).toHaveLength(1);
     const pageshow = new Event('pageshow'); Object.defineProperty(pageshow, 'persisted', { value: true });
     window.dispatchEvent(pageshow);
     expect(gsap.getTweensOf(heading)).toHaveLength(0);
     expect(heading.style.opacity).toBe('');
     expect(heading.style.transform).toBe('');
-    expect(gsap.getTweensOf(button)).toHaveLength(interaction);
-    expect(interaction).toBeGreaterThan(0);
+    expect(interaction(button)).toHaveLength(interactionCount);
+    expect(interactionCount).toBeGreaterThan(0);
+    expect(button.style.opacity).toBe('');
+    expect(button.style.getPropertyValue('--sheen-x')).toBe('');
+  });
+
+  it('keeps one owner per property in the hero entrance (S1)', () => {
+    const { container } = render(<Fixture />);
+    const button = container.querySelector('.target-button');
+    const heading = container.querySelector('h1');
+    const entrance = gsap.getTweensOf(button).filter(tween => !interaction(button).includes(tween));
+    const owned = entrance.flatMap(tween => Object.keys(tween.vars).filter(key => ['opacity', '--sheen-x', 'x', 'y', 'scale', 'transform'].includes(key)));
+    expect(new Set(owned)).toEqual(new Set(['opacity', '--sheen-x']));
+    const headingVars = gsap.getTweensOf(heading).flatMap(tween => Object.keys(tween.vars));
+    expect(headingVars).toContain('y');
+    expect(headingVars).not.toContain('opacity');
+    gsap.globalTimeline.progress(1);
+    expect(button.style.opacity).toBe('');
+    expect(button.style.getPropertyValue('--sheen-x')).toBe('');
+    expect(heading.style.transform).toBe('');
   });
 
   it('fails open when optional browser APIs are absent', () => {

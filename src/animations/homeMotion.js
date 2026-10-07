@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { EASE, STAGGER } from './tokens';
+import { DIST, DUR, EASE, STAGGER } from './tokens';
 import { isSettled, registerEntrance, resetRegistry, setMotionActive, settleAll } from './registry';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
@@ -38,15 +38,34 @@ function setupPressMotion(root) {
   };
 }
 
-// S1 (hero). Text lines move with transform only, so whichever element is the LCP is never hidden.
+// S1 (hero). Content settles within 1.0s; the ambient layer (photo settle, CTA sheen) ends by 1.7s.
+// Text lines and the figure move with transform only, so whichever element is the LCP is never hidden;
+// the CTA fades in with opacity only, so its transform stays owned by press/hover (one owner per property).
 function heroScene(root) {
   const lines = [...root.querySelectorAll('[data-motion="hero-line"]')];
-  if (!lines.length) return () => {};
-  const tween = gsap.from(lines, {
-    y: 8, opacity: 0.92, duration: 0.48, stagger: 0.06,
-    ease: EASE.out, clearProps: 'transform,opacity',
+  const cta = root.querySelector('[data-motion="hero-cta"]');
+  const figure = root.querySelector('[data-motion="hero-figure"]');
+  const food = root.querySelector('[data-motion="hero-food"]');
+  if (!lines.length && !cta && !figure && !food) return () => {};
+  const phone = window.matchMedia('(max-width: 767px)').matches;
+  const timeline = gsap.timeline({ defaults: { ease: EASE.soft } });
+  if (food && window.matchMedia('(min-width: 1200px)').matches) {
+    registerEntrance(food, timeline.from(food, { scale: 1.04, duration: 1.6, ease: EASE.settle, clearProps: 'transform' }, 0), 'transform');
+  }
+  lines.forEach(line => {
+    const title = line.tagName === 'H1', eyebrow = line.classList.contains('target-eyebrow');
+    const y = title ? DIST.l : eyebrow ? DIST.s : DIST.m;
+    const at = title ? 0.12 : eyebrow ? 0.05 : 0.22;
+    registerEntrance(line, timeline.from(line, { y, duration: title ? DUR.l : 0.6, clearProps: 'transform' }, at), 'transform');
   });
-  lines.forEach(line => registerEntrance(line, tween, 'transform,opacity'));
+  if (figure) {
+    registerEntrance(figure, timeline.from(figure, { y: phone ? DIST.m : DIST.l, duration: 0.9, clearProps: 'transform' }, 0.1), 'transform');
+  }
+  if (cta) {
+    registerEntrance(cta, timeline.from(cta, { opacity: 0.6, duration: DUR.m, clearProps: 'opacity' }, 0.35), 'opacity');
+    // One slow sheen across the CTA (index.css: ::after driven by --sheen-x; resting outside the button).
+    registerEntrance(cta, timeline.fromTo(cta, { '--sheen-x': '-120%' }, { '--sheen-x': '120%', duration: 0.9, ease: 'power1.inOut', clearProps: '--sheen-x' }, 0.75), '--sheen-x');
+  }
   return () => {};
 }
 
