@@ -90,13 +90,20 @@ describe('approved public inquiry release', () => {
   });
 
   it('states one consistent price in the FAQ and on the inquiry terms page (M7/M8)', async () => {
+    // Every published price is extracted on its own; they must all be the same number.
+    const amount = text => { const match = String(text).match(/(\d[\d,.]*)/); expect(match, text).not.toBeNull(); return match[1]; };
+    const prices = {};
     for (const lang of ['he', 'en']) {
       await i18n.changeLanguage(lang);
-      expect(i18n.t('faqs.q7.answer')).toMatch(/250/);
       expect(i18n.t('faqs.q7.answer')).not.toMatch(/registration|הרשמה/i);
+      prices[`faq q7 ${lang}`] = amount(i18n.t('faqs.q7.answer'));
+      prices[`terms priceAmount ${lang}`] = amount(i18n.t('terms.section2.priceAmount'));
     }
     await i18n.changeLanguage('he'); window.history.replaceState({}, '', '/terms'); const { container } = render(<InquiryApp />);
-    expect(container.textContent).toMatch(/250/);
+    const inclusion = [...container.querySelectorAll('h3')].find(h => h.textContent.includes('מה כלול במחיר'));
+    expect(inclusion).toBeTruthy();
+    prices['terms inclusion heading'] = amount(inclusion.textContent);
+    expect(new Set(Object.values(prices)).size, JSON.stringify(prices)).toBe(1);
   });
 
   it('pins the hosting-only target and sends admin to preserved legacy HTML', () => {
