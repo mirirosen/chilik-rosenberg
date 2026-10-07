@@ -125,11 +125,63 @@ describe('atDestination geometry', () => {
     const enough = world({ innerHeight: 72 + 40 }); enough.state.y = enough.desired();
     expect(atDestination({}, enough.measure)).toBe(true);
   });
+  it('floor with a 30px line: 45px of room fails, 46px passes (line 88–118 ≤ 118)', () => {
+    const tight = world({ lineH: 30, innerHeight: 72 + 45 }); tight.state.y = tight.desired();
+    expect(atDestination({}, tight.measure)).toBe(false);
+    const enough = world({ lineH: 30, innerHeight: 72 + 46 }); enough.state.y = enough.desired();
+    expect(atDestination({}, enough.measure)).toBe(true);
+  });
+  it('(i) a heading taller than the viewport (900px in 600px) arrives by its first line', () => {
+    const w = world({ innerHeight: 600 });
+    // 30 lines of 30px; only the first one has to be in the unobscured area.
+    w.measure.lineRects = () => Array.from({ length: 30 }, (_, i) => ({ top: w.state.docTop - w.state.y + i * 30, bottom: w.state.docTop - w.state.y + i * 30 + 24, width: 300, height: 24 }));
+    w.state.y = w.desired();
+    expect(atDestination({}, w.measure)).toBe(true);
+  });
+  it('(j) a low viewport (390×200, 72px header) arrives: 128px of room ≥ 40', () => {
+    const w = world({ innerHeight: 200 }); w.state.y = w.desired();
+    expect(atDestination({}, w.measure)).toBe(true);
+  });
+  it('(k) a first line at 40px overlapping the 72px header is not arrived', () => {
+    const w = world(); w.state.y = w.state.docTop - 40;
+    expect(atDestination({}, w.measure)).toBe(false);
+  });
+  it('(l) pinch zoom (scale 2, offsetTop 300): arrival is judged on the layout viewport, focus lets the browser bring the heading in', () => {
+    Object.defineProperty(window, 'visualViewport', { configurable: true, value: { scale: 2, offsetTop: 300, height: 400 } });
+    const w = world(); w.state.y = w.desired();
+    expect(atDestination({}, w.measure)).toBe(true);
+    const heading = { focus: vi.fn() };
+    focusArrived(heading);
+    expect(heading.focus).toHaveBeenCalledWith();
+    Object.defineProperty(window, 'visualViewport', { configurable: true, value: { scale: 1, offsetTop: 0, height: 800 } });
+    focusArrived(heading);
+    expect(heading.focus).toHaveBeenLastCalledWith({ preventScroll: true });
+  });
   it('rejects a first line hidden under the fixed header and empty geometry', () => {
     const w = world(); w.state.y = w.desired() + 60; // line at 28px, under the 72px header
     expect(atDestination({}, w.measure)).toBe(false);
     const empty = world(); empty.measure.lineRects = () => [];
     expect(atDestination({}, empty.measure)).toBe(false);
+  });
+});
+
+// The geometry examples through the whole waitForArrival loop, at every refresh rate: already at the
+// destination → 'arrived' on the first frame, without an instant completion; above the viewport → completed
+// instantly, then 'arrived'. Every frame is released.
+describe.each([30, 60, 120])('geometry examples through waitForArrival at %iHz', hz => {
+  const tall = w => { w.measure.lineRects = () => Array.from({ length: 30 }, (_, i) => ({ top: w.state.docTop - w.state.y + i * 30, bottom: w.state.docTop - w.state.y + i * 30 + 24, width: 300, height: 24 })); return w; };
+  it.each([
+    ['(g) clamped at the bottom', () => world({ docTop: 5300, maxScroll: 5000, y: 5000 }), false],
+    ['(h) above the viewport', () => world({ docTop: 2000, y: 3000 }), true],
+    ['(i) taller than the viewport', () => { const w = tall(world({ innerHeight: 600 })); w.state.y = w.desired(); return w; }, false],
+    ['(j) low viewport', () => { const w = world({ innerHeight: 200 }); w.state.y = w.desired(); return w; }, false],
+  ])('%s', async (_, make, completes) => {
+    const w = make(); const c = clock(hz);
+    const scrollTo = vi.fn(top => { w.state.y = top; });
+    const result = await drive(waitForArrival({}, undefined, { measure: w.measure, raf: c.raf, caf: c.caf, now: c.now, scrollTo }), c);
+    expect(result).toBe('arrived');
+    expect(scrollTo).toHaveBeenCalledTimes(completes ? 1 : 0);
+    expect(c.pending()).toBe(0);
   });
 });
 
