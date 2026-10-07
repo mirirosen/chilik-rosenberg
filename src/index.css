@@ -611,13 +611,16 @@ html[dir="rtl"] .target-hero [data-motion="hero-cta"]::after { transform:transla
 .target-site .target-hero .target-hero__ambient-toggle { position:static; }
 /* The hero box is direction:ltr (layout); the chapters read in the page language: Hebrew right to left. */
 html[dir="rtl"] .target-site .target-hero .target-hero__loop { direction:rtl; }
-.target-hero__chapters { display:flex; gap:6px; margin:0; padding:0; list-style:none; }
-.target-hero__chapters li { min-width:64px; white-space:nowrap; display:flex; flex-direction:column; gap:6px; font:400 12px/1.2 var(--eti-body-font); color:rgb(255 255 255 / .78); }
-.target-hero__chapters li::after { content:""; height:2px; background:rgb(255 255 255 / .35); }
-.target-hero__chapters li.is-active { color:#fff; font-weight:700; }
-.target-hero__chapters li.is-active::after { background:var(--target-gold); }
+/* The chapter bars belong to the contact-only site (.target-site); the legacy shell (App.jsx) shares Hero.jsx but
+   not this layout, so there the list is not rendered at all and the controls box stays empty (Codex review, round 3). */
+.target-hero__chapters { display:none; }
+.target-site .target-hero__chapters { display:flex; gap:6px; margin:0; padding:0; list-style:none; }
+.target-site .target-hero__chapters li { min-width:64px; white-space:nowrap; display:flex; flex-direction:column; gap:6px; font:400 12px/1.2 var(--eti-body-font); color:rgb(255 255 255 / .78); }
+.target-site .target-hero__chapters li::after { content:""; height:2px; background:rgb(255 255 255 / .35); }
+.target-site .target-hero__chapters li.is-active { color:#fff; font-weight:700; }
+.target-site .target-hero__chapters li.is-active::after { background:var(--target-gold); }
 /* Always laid out, only shown while the loop is on: appearing never moves the pause control (no layout shift). */
-.target-hero__chapters.is-off { visibility:hidden; }
+.target-site .target-hero__chapters.is-off { visibility:hidden; }
 @media(max-width:767px) {
  .target-site .target-hero { --media-h:clamp(300px,108vw,460px); padding-top:calc(var(--media-h) - 72px); background:#2b2a2d; }
  /* Whole pixels: a fractional height (108vw) made the video's LCP size a few px² larger than the poster's, so the video
@@ -635,6 +638,6 @@ html[dir="rtl"] .target-site .target-hero .target-hero__loop { direction:rtl; }
  .target-site .target-hero .target-hero__person-frame { position:absolute; z-index:2; left:auto; right:4px; bottom:auto; margin:0; width:min(46vw,200px); top:calc(var(--media-h) - 72px - min(46vw,200px) * 381 / 376); }
  html[dir="ltr"] .target-site .target-hero .target-hero__person-frame { right:auto; left:4px; }
  .target-site .target-hero .target-hero__loop { left:16px; top:16px; bottom:auto; }
- .target-hero__chapters { display:none; }
+ .target-site .target-hero__chapters { display:none; }
 }
 @media print { .target-hero__loop, .target-hero__veil { display:none !important; } }
