@@ -28,7 +28,10 @@ export function canAutoplayAmbient() {
   return motionAllowed && !reducedData && !saveData;
 }
 
-export function useAmbientVideo({ webm, mp4 }) {
+// Phones get their own 4:5 encode (each shot cropped around its subject); the choice is made once, when loading.
+export const PHONE_QUERY = '(max-width: 767px)';
+
+export function useAmbientVideo({ webm, mp4, phoneWebm, phoneMp4 }) {
   const ref = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [on, setOn] = useState(false);
@@ -43,10 +46,12 @@ export function useAmbientVideo({ webm, mp4 }) {
     const video = ref.current;
     if (!video || loaded.current || disposed.current) return false;
     video.muted = true; // property, required for autoplay; React does not reliably reflect the attribute
-    video.src = video.canPlayType('video/webm; codecs="vp9"') ? webm : mp4;
+    const phone = Boolean(phoneWebm && phoneMp4 && window.matchMedia?.(PHONE_QUERY).matches);
+    const vp9 = video.canPlayType('video/webm; codecs="vp9"');
+    video.src = phone ? (vp9 ? phoneWebm : phoneMp4) : (vp9 ? webm : mp4);
     loaded.current = true;
     return true;
-  }, [webm, mp4]);
+  }, [webm, mp4, phoneWebm, phoneMp4]);
 
   const play = useCallback(() => {
     const video = ref.current;

@@ -26,8 +26,9 @@
     "upcomingTours": "Upcoming tours"
   },
   "hero": {
-    "ambientPause": "Pause the Bnei Brak video",
-    "ambientPlay": "Play the Bnei Brak video",
+    "ambientPause": "Pause the Bnei Brak videos",
+    "ambientPlay": "Play the Bnei Brak videos",
+    "chapters": { "food": "Food", "street": "Street", "store": "The grocery", "people": "People", "chilik": "Chilik" },
     "badge": "Chilik Rosenberg invites you",
     "title": "Experience the Haredi world\nas you never have before",
     "subtitle": "Culinary and cultural tours, and talks from me, a Haredi man from Bnei Brak, offering an authentic, thoughtful, light-hearted and humorous glimpse into my world.",

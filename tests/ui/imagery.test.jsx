@@ -34,7 +34,7 @@ describe('locally hosted illustrative imagery', () => {
     expect(screen.getAllByText(he.imagery.generated)).toHaveLength(1);
     expect(container.querySelector('.target-hero .target-hero__image-note')).toBeNull();
     expect(container.querySelector('.target-tour-pick').textContent).toContain(he.imagery.generated);
-    expect(container.querySelector('.target-hero__food').getAttribute('src')).toBe('/media/hero/bnei-brak-ambient-poster.webp');
+    expect(container.querySelector('.target-hero__food').getAttribute('src')).toBe('/media/hero/bnei-brak-sequence-poster.webp');
     expect(container.querySelector('.target-hero__food').getAttribute('fetchpriority')).toBe('high');
     expect(container.querySelector('.target-tour-pick--portrait img').getAttribute('src')).toContain('hilik-cutout-provided');
     expect(Object.keys(he.imagery)).toEqual(Object.keys(en.imagery));
