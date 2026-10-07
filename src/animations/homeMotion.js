@@ -4,6 +4,13 @@ import { isSettled, registerEntrance, resetRegistry, setMotionActive, settle, se
 import { mediaContext } from './mediaContext';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
+
+// Entrances end on time even when frames stall. GSAP's default lag smoothing (500ms, 33ms) treats a long gap
+// between frames as 33ms, so a busy main thread stretches every running entrance by the length of each stall
+// (observed: WebKit at 5–19 fps left the hero mid-entrance for over 6s). With it off, a tween after a stall
+// renders where wall-clock time says it is, so content is natural by its nominal end (Codex review, round 2).
+export const LAG_SMOOTHING = 0;
+gsap.ticker.lagSmoothing(LAG_SMOOTHING);
 const hoverQuery = `${motionQuery} and (hover: hover) and (pointer: fine)`;
 const actionSelector = '.target-hero .target-button, .target-menu__cta, .target-lectures .target-button';
 
