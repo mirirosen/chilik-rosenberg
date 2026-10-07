@@ -11,6 +11,12 @@ export function tourVideoSource(value) {
   } catch { return null; }
 }
 
+// Site-owned gallery posters live in public/media/posters (public/tour-videos keeps no media binaries).
+export function tourVideoPoster(value) {
+  if (typeof value === 'string' && /^\/media\/posters\/[a-z0-9-]+\.webp$/.test(value.trim())) return value.trim();
+  return tourVideoSource(value);
+}
+
 export function populatedTourVideoGroups(groups = []) {
   if (!Array.isArray(groups)) return [];
   return groups.filter(group => group?.id && Array.isArray(group.items)).map(group => ({
@@ -20,7 +26,7 @@ export function populatedTourVideoGroups(groups = []) {
       && typeof item.title?.en === 'string' && item.title.en.trim()).map(item => ({
         ...item,
         src: tourVideoSource(item.src),
-        poster: tourVideoSource(item.poster) || undefined,
+        poster: tourVideoPoster(item.poster) || undefined,
         aspectRatio: ['16/9', '9/16', '1/1'].includes(item.aspectRatio) ? item.aspectRatio : '16/9',
       })),
   })).filter(group => group.items.length > 0);

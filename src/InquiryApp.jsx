@@ -45,7 +45,7 @@ export default function InquiryApp() {
     <Header showVideos={populatedTourVideoGroups(tourVideos).length > 0} />
     <main ref={motion} id="main-content" tabIndex={-1}>
       {route === 'home' ? <>
-        <Hero /><RatingBar /><InquirySection /><TourInclusions /><Journey /><Menu /><Lectures /><Bio /><TourVideos /><MediaSection /><FAQ />
+        <Hero /><RatingBar /><TourVideos /><InquirySection /><TourInclusions /><Journey /><Menu /><Lectures /><Bio /><MediaSection /><FAQ />
       </> : <div className="inquiry-route"><InquirySection status={route === 'confirmation'} search={window.location.search} /><a className="inquiry-back" href="/">{t('terms.backToSite')}</a></div>}
     </main>
     <Footer />

@@ -12,7 +12,7 @@ import i18n from '../../src/inquiry-i18n';
 import TourVideos from '../../src/components/TourVideos';
 import Header from '../../src/components/Header';
 import InquiryApp from '../../src/InquiryApp';
-import { populatedTourVideoGroups, tourVideoSource } from '../../src/utils/tourVideos';
+import { populatedTourVideoGroups, tourVideoPoster, tourVideoSource } from '../../src/utils/tourVideos';
 import he from '../../src/locales/he.json';
 import en from '../../src/locales/en.json';
 
@@ -82,7 +82,7 @@ describe('provided tour videos and empty-group behavior', () => {
     for (const item of [localVideo, remoteVideo]) {
       const player = screen.getByLabelText(item.title[language]);
       expect(player.tagName).toBe('VIDEO'); expect(player.controls).toBe(true); expect(player.playsInline).toBe(true);
-      expect(player.getAttribute('preload')).toBe('metadata'); expect(player.hasAttribute('autoplay')).toBe(false);
+      expect(player.getAttribute('preload')).toBe('none'); expect(player.hasAttribute('autoplay')).toBe(false);
       expect(player.hasAttribute('muted')).toBe(false); expect(player.getAttribute('poster')).toBeNull();
       expect(document.getElementById(player.getAttribute('aria-labelledby')).getAttribute('dir')).toBe('auto');
     }
@@ -104,11 +104,11 @@ describe('provided tour videos and empty-group behavior', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
-  it.each(['he', 'en'])('places populated %s videos between Bio and MediaSection and resolves #videos', async language => {
+  it.each(['he', 'en'])('places populated %s videos right after the intro and before the inquiry section, and resolves #videos', async language => {
     await i18n.changeLanguage(language); populate(); window.history.replaceState({}, '', '/#videos');
     const { container } = render(<InquiryApp />);
     const section = container.querySelector('#videos');
-    expect(section.previousElementSibling.id).toBe('about'); expect(section.nextElementSibling.id).toBe('media');
+    expect(section.previousElementSibling.id).toBe('introduction'); expect(section.nextElementSibling.id).toBe('date-selection');
     expect(section.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto' });
     expect(document.documentElement.dir).toBe(language === 'he' ? 'rtl' : 'ltr');
     expect(container.querySelectorAll('a[href="/#videos"]')).toHaveLength(2);
@@ -121,6 +121,10 @@ describe('provided tour videos and empty-group behavior', () => {
     expect(tourVideoSource('/tour-videos/../private.mp4')).toBeNull();
     expect(tourVideoSource('https://user:password@example.invalid/final.mp4')).toBeNull();
     expect(tourVideoSource('http://example.invalid/final.mp4')).toBeNull();
+    expect(tourVideoPoster('/media/posters/part-49-hilik-invite-tour.webp')).toBe('/media/posters/part-49-hilik-invite-tour.webp');
+    expect(tourVideoPoster('/media/posters/../secret.webp')).toBeNull();
+    expect(tourVideoPoster('/media/other/x.webp')).toBeNull();
+    expect(tourVideoPoster('/media/posters/x.png')).toBeNull();
   });
 
   it('keeps complete HE/EN resources and opens only media sources in the public Hosting CSP', () => {
