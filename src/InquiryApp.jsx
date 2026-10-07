@@ -15,6 +15,7 @@ import Footer from './components/Footer';
 import Terms from './components/Terms';
 import InquirySection from './components/InquirySection';
 import { useHomeMotion } from './hooks/useHomeMotion';
+import { NavigationProvider } from './navigation/NavigationContext';
 import { applyRouteMetadata } from './utils/routeMetadata';
 import { inquiryRoute } from './utils/inquiryRoutes';
 import { tourVideos } from './data/content';
@@ -40,7 +41,7 @@ export default function InquiryApp() {
   }, [route, i18n.language, t]);
   if (route === 'terms') return <Terms inquiry />;
   if (route === 'not-found') return <main className="inquiry-section"><h1>{t('seo.notFound.title')}</h1><a href="/">{t('terms.backToSite')}</a></main>;
-  return <div className="target-site min-h-screen">
+  return <NavigationProvider><div className="target-site min-h-screen">
     <a href="#main-content" className="target-skip-link">{t('common.skipContent')}</a>
     <Header showVideos={populatedTourVideoGroups(tourVideos).length > 0} />
     <main ref={motion} id="main-content" tabIndex={-1}>
@@ -49,5 +50,5 @@ export default function InquiryApp() {
       </> : <div className="inquiry-route"><InquirySection status={route === 'confirmation'} search={window.location.search} /><a className="inquiry-back" href="/">{t('terms.backToSite')}</a></div>}
     </main>
     <Footer />
-  </div>;
+  </div></NavigationProvider>;
 }

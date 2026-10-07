@@ -112,6 +112,11 @@ function revealScene(root, context) {
   return () => { active = false; observer.disconnect(); };
 }
 
+// S3: one soft ring around the inquiry WhatsApp button after a deliberate arrival. Only exists while the
+// no-preference context is active; otherwise requestArrival() does nothing (focus still moves).
+let arrivalRing = null;
+export function requestArrival(element) { if (element && arrivalRing) arrivalRing(element); }
+
 // Progressive enhancement: nothing is hidden in CSS, entrances only use explicit data-motion targets,
 // and no scroll interception or booking UI selectors.
 export function setupHomeMotion(root) {
@@ -123,7 +128,15 @@ export function setupHomeMotion(root) {
     const cleanups = [setupPressMotion(root), heroScene(root), revealScene(root, context)];
     // Back/forward cache: restore entrances to their natural state; press/hover tweens stay alive.
     window.addEventListener('pageshow', event => { if (event.persisted) settleAll(); }, { signal: controller.signal });
+    arrivalRing = element => context.add(() => {
+      const ring = gsap.timeline()
+        .fromTo(element, { '--arrive': 0 }, { '--arrive': 1, duration: 0.3, ease: EASE.out })
+        .to(element, { '--arrive': 0, duration: 0.6, ease: EASE.out })
+        .set(element, { clearProps: '--arrive' });
+      registerEntrance(element, ring, '--arrive');
+    });
     return () => {
+      arrivalRing = null;
       controller.abort();
       cleanups.forEach(cleanup => cleanup());
       setMotionActive(false);

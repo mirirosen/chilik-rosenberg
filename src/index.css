@@ -580,3 +580,12 @@ html[dir="rtl"] .target-hero [data-motion="hero-cta"]::after { transform:transla
 .target-videos__card--featured .target-videos__title { font-size:1.2rem; }
 @media(max-width:1023px) { .target-videos__grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } .target-videos__card--featured { grid-row:auto; } }
 @media(max-width:767px) { .target-site .target-videos { padding:75px 18px; } .target-videos__grid { grid-template-columns:1fr; } .target-videos__card--featured { grid-column:auto; } }
+/* S3 (GSAP plan): arriving at the inquiry. The heading itself is the scroll target, 16px below the fixed header;
+   it receives focus (tabindex -1, not in the Tab order) only after a verified arrival. */
+#inquiry-title { scroll-margin-top:calc(var(--header-height) + 16px); }
+#inquiry-title:focus { outline:none; }
+#inquiry-title:focus-visible { outline:3px solid #1373e6; outline-offset:6px; border-radius:4px; }
+/* One soft ring around the WhatsApp button after a deliberate arrival; transparent and inert at rest. */
+.inquiry-actions [data-motion-arrive] { position:relative; --arrive:0; }
+.inquiry-actions [data-motion-arrive]::before { content:""; position:absolute; inset:-6px; border-radius:10px; border:2px solid rgb(238 188 38 / .6); pointer-events:none; opacity:var(--arrive); transform:scale(calc(.96 + .04 * var(--arrive))); }
+@media print { .inquiry-actions [data-motion-arrive]::before { display:none; } }

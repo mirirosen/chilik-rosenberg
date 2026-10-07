@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, X } from '../utils/icons';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useNavigation } from '../navigation/NavigationContext';
 
 const Header = ({ showVideos = false }) => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef(null);
+  const { goToInquiry } = useNavigation();
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -23,7 +25,7 @@ const Header = ({ showVideos = false }) => {
       desktop.removeEventListener('change', closeOnDesktop);
       document.body.style.overflow = previousOverflow;
       // Native dialog restores focus to the opener and keeps background controls inert.
-      dialog.close();
+      if (dialog.open) dialog.close();
     };
   }, [mobileMenuOpen]);
 
@@ -31,7 +33,11 @@ const Header = ({ showVideos = false }) => {
     // Keep real hrefs for keyboard, no-JS and modified-click navigation.
     if (event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)) return;
     if (event) event.preventDefault();
+    // Close the menu now (not in the effect cleanup), so focus can land on the destination afterwards.
+    const dialog = dialogRef.current;
+    if (dialog?.open) { dialog.close(); document.body.style.overflow = ''; }
     setMobileMenuOpen(false);
+    if (id === 'date-selection' && goToInquiry) { goToInquiry(); return; }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });

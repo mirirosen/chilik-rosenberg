@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import profileImage from '../assets/hilik-cutout-provided.png';
 import { Pause, Play } from '../utils/icons';
 import { useAmbientVideo } from '../hooks/useAmbientVideo';
+import { useNavigation } from '../navigation/NavigationContext';
 
 // Silent Bnei Brak loop built from Chilik's own footage (storefront, deli shelf, kugel, salad counter).
 const AMBIENT = {
@@ -13,7 +14,11 @@ const AMBIENT = {
 const Hero = () => {
   const { t } = useTranslation();
   const ambient = useAmbientVideo(AMBIENT);
-  const scrollToDateSelection = () => document.getElementById('date-selection')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const { goToInquiry } = useNavigation();
+  const scrollToDateSelection = () => {
+    if (goToInquiry) { goToInquiry(); return; }
+    document.getElementById('date-selection')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
   return (
     <header className="target-hero">
       <div className={`target-hero__visual${ambient.playing ? ' is-ambient-playing' : ''}`} aria-hidden="true">
