@@ -7,12 +7,14 @@ const motionQuery = '(prefers-reduced-motion: no-preference)';
 // The observer starts a reveal up to this far below the viewport (S2); a bfcache restore settles the same zone.
 const REVEAL_AHEAD = 160;
 
-// Entrances end on time even when frames stall. GSAP's default lag smoothing (500ms, 33ms) treats a long gap
-// between frames as 33ms, so a busy main thread stretches every running entrance by the length of each stall
-// (observed: WebKit at 5–19 fps left the hero mid-entrance for over 6s). With it off, a tween after a stall
-// renders where wall-clock time says it is, so content is natural by its nominal end (Codex review, round 2).
-export const LAG_SMOOTHING = 0;
-gsap.ticker.lagSmoothing(LAG_SMOOTHING);
+// GSAP's lag smoothing stays at its default (500 ms, 33 ms), stated explicitly. 7788d94 had turned it off so that
+// entrances would end on wall-clock time after a stall, but GSAP's ticker sleeps when idle and its first tick after
+// waking counts the whole idle gap; with smoothing off, every entrance created after an idle moment (the menu, a
+// reveal on scroll, press/hover feedback) jumped to its end (g8 "idle": the Hebrew menu at 0 of 16 px 21 ms after
+// it was created). With the default, a stall delays a running entrance by at most the stall itself (bounded:
+// natural by the nominal end plus the frozen time) and nothing is ever skipped.
+export const LAG_SMOOTHING = [500, 33];
+gsap.ticker.lagSmoothing(...LAG_SMOOTHING);
 const hoverQuery = `${motionQuery} and (hover: hover) and (pointer: fine)`;
 const actionSelector = '.target-hero .target-button, .target-menu__cta, .target-lectures .target-button';
 
