@@ -530,3 +530,5 @@ body.preprod a[aria-disabled="true"] { cursor: not-allowed; opacity: .65; }
  html[lang="en"] .header-brand__full { display:none; }
  html[lang="en"] .header-brand__short { display:inline; }
 }
+/* N4: balanced hero headline wrapping (EN at 390px broke as "... as you never have / before"). */
+.target-hero h1 { text-wrap:balance; }
