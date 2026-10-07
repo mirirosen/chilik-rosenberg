@@ -8,7 +8,7 @@ test('default and malformed runtime gates block every booking/payment/admin hand
  for(const enabled of [undefined,false,'false','true',1,{},null]) {
   const options=[];
   const api=createBookingApi({onRequest:(o,h)=>{options.push(o);return h;},onSchedule:forbidden,db:new Proxy({},{get:forbidden}),bookings:new Proxy({},{get:forbidden}),jobs:new Proxy({},{get:forbidden}),paymentFlow:new Proxy({},{get:forbidden}),paymentReconciler:{runDue:forbidden},verifyIdToken:forbidden,enabled,schedulesEnabled:true,logger:{error:forbidden}});
-  assert.deepEqual(Object.keys(api).sort(),['createBooking','createPayment','paymentStatus','retryIntegrationJob','tranzilaWebhook','updateBookingStatus'].sort());
+  assert.deepEqual(Object.keys(api).sort(),['adminBookingContactCard','createBooking','createPayment','paymentStatus','retryIntegrationJob','tranzilaWebhook','updateBookingStatus'].sort());
   for(const handler of Object.values(api))for(const method of ['POST','GET','OPTIONS']) {
    const reply=res();await handler({method,body:{bookingId:'untrusted',index:'untrusted'},get:forbidden},reply);
    assert.equal(reply.statusCode,503);assert.deepEqual(reply.body,{error:'booking-runtime-disabled'});

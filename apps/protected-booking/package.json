@@ -1,0 +1,40 @@
+{
+  "name": "chilik-protected-booking-review",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 18781 --strictPort",
+    "build": "vite build",
+    "build:demo": "vite build --mode preprod",
+    "preview": "vite preview --host 127.0.0.1 --port 18782 --strictPort",
+    "test:ui": "vitest run --cache=false",
+    "test:rules": "firebase emulators:exec --config ../../firebase.booking.review.json --only firestore --project demo-chilik-rules \"node --test tests/firestore.rules.test.mjs\""
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "firebase": "^11.1.0",
+    "gsap": "^3.15.0",
+    "i18next": "^25.8.0",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.5.3"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "firebase-tools": "^14.27.0",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": "22"
+  }
+}

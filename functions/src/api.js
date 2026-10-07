@@ -1,11 +1,13 @@
 'use strict';
 const { FUNCTION_REGION, BOOKING_RUNTIME, INTEGRATION_RUNTIME } = require('./deployment-config');
 const { authenticate, canReadStatus } = require('./access');
+const { createAdminBookingContactCard } = require('./booking-contact-card');
 
 // Firebase transport, verified identity and provider services are supplied by the
 // runtime. Tests use this same handler factory without credentials or network.
 function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs, paymentFlow, paymentReconciler, paymentSecrets = [], verifyIdToken, integrationSecrets = [], logger = console, enabled = false, schedulesEnabled = false }) {
   const api = {};
+  api.adminBookingContactCard = createAdminBookingContactCard({ onRequest, bookings, verifyIdToken, enabled });
   const region = FUNCTION_REGION;
   const origins = new Set(['https://livechilik-tours.com', 'https://www.chilik-tours.com', 'https://chilik-tours.com', 'https://hilik-site.web.app', 'https://hilik-site.firebaseapp.com', 'http://localhost:3000', 'http://localhost:5173']);
   function json(res, status, body) { return res.status(status).set('Cache-Control', 'no-store').json(body); }

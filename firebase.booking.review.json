@@ -1,0 +1,83 @@
+{
+  "hosting": {
+    "public": "apps/protected-booking/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/admin",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/booking",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/confirmation",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/terms",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/תנאים",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/admin",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, max-age=0"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
+        ]
+      },
+      {
+        "source": "/booking",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/confirmation",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      }
+    ],
+    "site": "hilik-site"
+  },
+  "firestore": {
+    "rules": "security/booking/firestore.rules",
+    "indexes": "security/booking/firestore.indexes.json"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 18783
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  }
+}
