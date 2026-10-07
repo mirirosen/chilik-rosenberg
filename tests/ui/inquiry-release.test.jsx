@@ -39,6 +39,11 @@ describe('approved public inquiry release', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it.each([['he', 'חיליק רוזנברג'], ['en', 'Chilik Rosenberg']])('renders the %s short brand in the inquiry build (N5)', async (lang, expected) => {
+    await i18n.changeLanguage(lang); const { container } = render(<InquiryApp />);
+    expect(container.querySelector('.header-brand__short').textContent).toBe(expected);
+  });
+
   it('links the hero terms as a real link, not a scripted button (M5)', async () => {
     await i18n.changeLanguage('he'); const { container } = render(<InquiryApp />);
     const terms = container.querySelector('.target-hero .target-terms');

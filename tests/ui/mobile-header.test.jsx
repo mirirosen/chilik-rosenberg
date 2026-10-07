@@ -19,6 +19,13 @@ it('keeps a real upcoming-tours link available without opening the mobile menu',
   expect(link.getAttribute('href')).toBe('/#date-selection');
   expect(container.querySelector('dialog').hasAttribute('open')).toBe(false);
 });
+it('renders a translated short brand for phones, never the raw key (N5)', () => {
+  const { container } = render(<Header />);
+  const short = container.querySelector('.header-brand__short');
+  expect(short.textContent).toBe(he.header.titleShort);
+  expect(short.textContent).not.toBe('header.titleShort');
+  expect(container.querySelector('.header-brand__full').textContent).toBe(he.header.title);
+});
 it('opens and cancels mobile navigation, restoring body scrolling', () => {
   render(<Header />); const trigger = screen.getByRole('button', { name: he.header.menuButton });
   fireEvent.click(trigger); expect(trigger.getAttribute('aria-expanded')).toBe('true');
