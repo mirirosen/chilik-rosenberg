@@ -165,7 +165,7 @@ html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left
 .target-hero h1 { color:#fff; font-size:clamp(3rem,5.3vw,6.4rem); line-height:.98; max-width:780px; margin:0 0 25px; font-weight:500; }
 .target-hero__subtitle { color:#fff!important;font:400 clamp(1.1rem,1.7vw,1.8rem)/1.55 'Frank Ruhl Libre',serif!important; max-width:640px;margin:0 0 32px!important; }
 .target-button { background:var(--target-gold); color:#403d3d;padding:14px 30px;border-radius:4px;font-weight:700;box-shadow:0 8px 24px rgb(0 0 0/.15); }
-.target-terms { color:#ddd;font-size:.75rem;margin-top:14px;text-decoration:underline; }
+.target-terms { display:inline-flex;align-items:center;min-height:44px;color:#ddd;font-size:.875rem;margin-top:6px;text-decoration:underline; }
 .target-intro { max-width:1150px;margin:auto;padding:100px 30px 80px;text-align:center; }
 .target-intro__lead { max-width:850px;margin:0 auto 45px;font:400 1.2rem/1.9 'Frank Ruhl Libre',serif;color:#6a6564; }
 .target-tour-picks { display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:730px;margin:auto; }

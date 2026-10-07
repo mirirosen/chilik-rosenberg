@@ -39,6 +39,14 @@ describe('approved public inquiry release', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('links the hero terms as a real link, not a scripted button (M5)', async () => {
+    await i18n.changeLanguage('he'); const { container } = render(<InquiryApp />);
+    const terms = container.querySelector('.target-hero .target-terms');
+    expect(terms.tagName).toBe('A');
+    expect(terms.getAttribute('href')).toBe('/terms');
+    expect(terms.textContent).toBe(i18n.t('header.terms'));
+  });
+
   it('ignores arbitrary query text and only quotes a correctly shaped reference as unverified', () => {
     expect(inquiryReference('?bookingId=BK-aaaaaaaaaaaaaaaaaaaa')).toBe('BK-aaaaaaaaaaaaaaaaaaaa');
     expect(inquiryReference('?id=<img src=x onerror=alert(1)>')).toBeNull();

@@ -13,7 +13,7 @@ const Hero = () => {
         <h1>{t('hero.title')}</h1>
         <p className="target-hero__subtitle">{t('hero.subtitle')}</p>
         <button onClick={scrollToDateSelection} className="target-button">{t('hero.cta')}</button>
-        <button className="target-terms" onClick={() => { window.location.href = '/terms'; }}>{t('header.terms')}</button>
+        <a className="target-terms" href="/terms">{t('header.terms')}</a>
       </div>
       <small className="target-hero__image-note">{t('imagery.generated')}</small>
       <div className="target-hero__person-frame" aria-hidden="true">
