@@ -517,10 +517,16 @@ body.preprod a[aria-disabled="true"] { cursor: not-allowed; opacity: .65; }
 @media(max-height:650px) {
  .mobile-navigation__content { gap:12px;padding-block:72px 20px; }
 }
-/* N5: a short brand until the full name fits on one line (measured: the full brand wraps to 2-3 lines up to
-   ~639px and fits from 640px), so the header never stacks the name beside the menu button and contact pill. */
-.header-brand__short { display:none; }
-@media(max-width:639px) {
+/* N5: a short brand wherever the full name would wrap beside the navigation (measured in HE and EN):
+   - below 768px the EN name wraps up to 767px (HE up to ~639px), so both languages switch at 767px;
+   - on desktop the EN name wraps to two lines from 1280px to ~1599px next to the nav links, the language switch
+     and the CTA (the Tour videos link made the row longer); HE fits on one line there. */
+.header-brand__short { display:none; white-space:nowrap; }
+@media(max-width:767px) {
  .header-brand__full { display:none; }
  .header-brand__short { display:inline; }
+}
+@media(min-width:1280px) and (max-width:1599px) {
+ html[lang="en"] .header-brand__full { display:none; }
+ html[lang="en"] .header-brand__short { display:inline; }
 }
