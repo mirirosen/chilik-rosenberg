@@ -5,6 +5,7 @@ import { Pause, Play } from '../utils/icons';
 import { useAmbientVideo } from '../hooks/useAmbientVideo';
 import { useNavigation } from '../navigation/NavigationContext';
 import { settle } from '../animations/registry';
+import { setupFigureLife } from '../animations/figureLife';
 
 // Hero v2 (board 7): one silent loop of five chapters from Chilik's own footage, full-bleed. The left two thirds stay
 // clear; a veil darkens the right third, where the copy sits; Chilik stands on the line between them.
@@ -34,6 +35,16 @@ const Hero = () => {
     video.addEventListener('timeupdate', onTime);
     return () => video.removeEventListener('timeupdate', onTime);
   }, [ambient.ref]);
+  // Chilik's figure: breathing while the scene plays, depth toward the pointer (src/animations/figureLife.js).
+  const heroRef = useRef(null);
+  const bodyRef = useRef(null);
+  const lifeRef = useRef(null);
+  useEffect(() => {
+    const life = setupFigureLife(bodyRef.current, heroRef.current);
+    lifeRef.current = life;
+    return () => { life.revert(); lifeRef.current = null; };
+  }, []);
+  useEffect(() => { lifeRef.current?.setPlaying(ambient.playing); }, [ambient.playing]);
   const scrollToDateSelection = () => {
     if (goToInquiry) { goToInquiry(); return; }
     const section = document.getElementById('date-selection');
@@ -41,7 +52,7 @@ const Hero = () => {
     section?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
   return (
-    <header className="target-hero">
+    <header className="target-hero" ref={heroRef}>
       <div className={`target-hero__visual${ambient.playing ? ' is-ambient-playing' : ''}`} aria-hidden="true">
         {/* The poster stays the LCP element; the video only fades in over it once it is playing. */}
         <picture>
@@ -68,7 +79,11 @@ const Hero = () => {
         </ol>
       </div>
       <div className="target-hero__person-frame" data-motion="hero-figure" aria-hidden="true">
-        <img className="target-hero__person" src={profileImage} width="376" height="513" alt="" />
+        {/* The light falls on him from the clear side: a gradient masked by the cutout itself (no outline). */}
+        <div className="target-hero__person-body" ref={bodyRef} style={{ '--person-mask': `url(${profileImage})` }}>
+          <img className="target-hero__person" src={profileImage} width="376" height="513" alt="" />
+          <span className="target-hero__person-light" />
+        </div>
       </div>
     </header>
   );

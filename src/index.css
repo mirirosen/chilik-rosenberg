@@ -641,3 +641,14 @@ html[dir="rtl"] .target-site .target-hero .target-hero__loop { direction:rtl; }
  .target-site .target-hero__chapters { display:none; }
 }
 @media print { .target-hero__loop, .target-hero__veil { display:none !important; } }
+
+/* Chilik's figure, lit by the scene (follow-up to board 7): light falls on him from the clear side (a warm gradient
+   masked by the cutout itself, soft-light, so there is no outline), a soft shadow falls toward the veil, a contact
+   shadow grounds him, and a slight grade matches him to the footage. Contact-only shell only. */
+.target-hero__person-light { display:none; }
+.target-site .target-hero__person-frame { isolation:isolate; perspective:900px; }
+.target-site .target-hero__person-frame::before { content:""; position:absolute; left:6%; right:6%; bottom:0; height:16%; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 50% 100%, rgb(0 0 0 / .45), transparent 70%); }
+.target-site .target-hero__person-body { position:relative; transform-origin:50% 100%; }
+.target-site .target-hero__person-frame .target-hero__person { filter:brightness(.97) saturate(.94) drop-shadow(18px 14px 24px rgb(0 0 0 / .38)); }
+.target-site .target-hero__person-light { display:block; position:absolute; left:0; top:0; width:100%; aspect-ratio:376 / 513; transform:translateY(-8.187135%); pointer-events:none; background:linear-gradient(100deg, rgb(255 222 170 / .55) 0%, rgb(255 222 170 / .18) 30%, transparent 55%); mix-blend-mode:soft-light; -webkit-mask:var(--person-mask) 0 0 / 100% 100% no-repeat; mask:var(--person-mask) 0 0 / 100% 100% no-repeat; }
+@media print { .target-hero__person-light { display:none !important; } .target-site .target-hero__person-frame .target-hero__person { filter:none; } }
