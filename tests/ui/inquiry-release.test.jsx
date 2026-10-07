@@ -85,6 +85,18 @@ describe('approved public inquiry release', () => {
     for (const promise of ['מייל אישור', 'תזכורת', 'לאחר ביצוע התשלום', 'יישלחו במייל']) expect(container.textContent).not.toContain(promise);
     expect(container.textContent).toContain('האתר אינו שולח מיילים או תזכורות אוטומטיים');
     expect(container.textContent).toContain('השעה המדויקת של תחילת הסיור מתואמת אישית עם חיליק');
+    expect(container.textContent).toContain('תאריך הסיור ושם המזמין (ומספר הזמנה, אם קיבלתם)');
+    expect(container.textContent).not.toContain('מספר ההזמנה, תאריך הסיור, שם המזמין');
+  });
+
+  it('states one consistent price in the FAQ and on the inquiry terms page (M7/M8)', async () => {
+    for (const lang of ['he', 'en']) {
+      await i18n.changeLanguage(lang);
+      expect(i18n.t('faqs.q7.answer')).toMatch(/250/);
+      expect(i18n.t('faqs.q7.answer')).not.toMatch(/registration|הרשמה/i);
+    }
+    await i18n.changeLanguage('he'); window.history.replaceState({}, '', '/terms'); const { container } = render(<InquiryApp />);
+    expect(container.textContent).toMatch(/250/);
   });
 
   it('pins the hosting-only target and sends admin to preserved legacy HTML', () => {

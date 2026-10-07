@@ -219,7 +219,7 @@ const Terms = ({ inquiry = false }) => {
                 <p className="text-gray-300 text-right" dir="rtl">דרכי יצירת קשר לביטול: <span className="text-brand-gold">📞</span></p>
                 <p className="text-brand-gold text-right pr-6" dir="rtl">WhatsApp: 0506724312 <span className="text-green-500">💬</span></p>
                 <p className="text-brand-gold text-right pr-6" dir="rtl">דוא"ל: hr20192022@gmail.com <span className="text-brand-gold">✉️</span></p>
-                <p className="text-gray-300 text-right" dir="rtl">יש לציין בבקשת הביטול: <strong>מספר ההזמנה, תאריך הסיור, שם המזמין</strong> <span className="text-brand-gold">📋</span></p>
+                <p className="text-gray-300 text-right" dir="rtl">יש לציין בבקשת הביטול: <strong>{inquiry ? 'תאריך הסיור ושם המזמין (ומספר הזמנה, אם קיבלתם)' : 'מספר ההזמנה, תאריך הסיור, שם המזמין'}</strong> <span className="text-brand-gold">📋</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">תקבל/י אישור על הביטול בתוך 24 שעות <span className="text-brand-gold">⏰</span></p>
               </div>
             </div>
