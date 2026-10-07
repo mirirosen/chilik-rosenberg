@@ -201,7 +201,7 @@ html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left
 .target-menu__rail p { color:#6c6663;font-size:.9rem;line-height:1.6; }
 /* Existing transactional and informational sections recolored to the target system. */
 .target-site #date-selection,.target-site #media,.target-site #faq { color:var(--target-ink);background:var(--target-paper); }
-.target-site #date-selection>div { background:#ebeae9;border-color:#ddd;border-radius:8px;box-shadow:none; }
+.target-site #date-selection>div:not(.inquiry-heading):not(.inquiry-actions) { background:#ebeae9;border-color:#ddd;border-radius:8px;box-shadow:none; }
 .target-site #date-selection h2,.target-site #media h2,.target-site #faq>h2 { color:var(--target-ink);font-style:normal; }
 .target-site #date-selection h3,.target-site #date-selection p { color:#635f5e; }
 .target-site #date-selection .bg-brand-dark,.target-site #date-selection .bg-brand-dark-lighter { background:#fff;color:var(--target-ink); }
