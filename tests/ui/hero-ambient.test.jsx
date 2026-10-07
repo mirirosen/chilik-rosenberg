@@ -107,19 +107,29 @@ describe('hero ambient loop', () => {
     expect(button('hero.ambientPlay')).toBeTruthy();
   });
 
-  it('keeps the poster and the Play control when autoplay is refused, and ignores stale results', async () => {
-    let rejectFirst;
-    playImpl = function play() { plays += 1; return new Promise((_, reject) => { rejectFirst = reject; }); };
+  it('keeps the poster and the Play control when autoplay is refused', async () => {
+    let reject;
+    playImpl = function play() { plays += 1; return new Promise((_, r) => { reject = r; }); };
     const { container } = render(<Hero />);
     await flushIdle();
-    await act(async () => { rejectFirst(new DOMException('blocked', 'NotAllowedError')); });
+    await act(async () => { reject(new DOMException('blocked', 'NotAllowedError')); });
     expect(video(container).className).not.toContain('is-playing');
     expect(button('hero.ambientPlay')).toBeTruthy();
-    // A newer explicit attempt succeeds; a late rejection of the older attempt must not undo it.
-    const stale = rejectFirst;
+  });
+
+  it('ignores a late rejection of an older attempt after a newer attempt succeeded', async () => {
+    let rejectA;
+    // Attempt A (autoplay) stays pending.
+    playImpl = function play() { plays += 1; return new Promise((_, r) => { rejectA = r; }); };
+    render(<Hero />);
+    await flushIdle();
+    expect(button('hero.ambientPlay')).toBeTruthy();
+    // Attempt B (explicit Play) succeeds while A is still pending.
     playImpl = function play() { plays += 1; this.dispatchEvent(new Event('playing')); return Promise.resolve(); };
     await act(async () => { fireEvent.click(button('hero.ambientPlay')); });
-    await act(async () => { stale(new DOMException('late', 'AbortError')); });
+    expect(button('hero.ambientPause')).toBeTruthy();
+    // Now A rejects: it is stale and must not flip the state back.
+    await act(async () => { rejectA(new DOMException('late', 'AbortError')); });
     expect(button('hero.ambientPause')).toBeTruthy();
   });
 
