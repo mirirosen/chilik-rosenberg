@@ -303,7 +303,10 @@ html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left
  .target-site footer { padding-bottom:48px; }
 }
 @media(prefers-reduced-motion:reduce){
- .target-site * { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
+ /* M6: global, so /terms (wrapped in .terms-page, not .target-site), the root's smooth scrolling (line 10)
+    and ::before/::after (e.g. the nav underline) are all covered; one iteration stops infinite loops. */
+ html, body { scroll-behavior:auto!important; }
+ *, *::before, *::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important; }
 }
 /* Figma correction: Chilik's portrait owns roughly half of the hero, rather than reading as a narrow overlay. */
 @media(min-width:1200px){
