@@ -212,12 +212,15 @@ describe('hero ambient loop', () => {
     expect(video(second.container).hasAttribute('poster')).toBe(false); // the <picture> is the only poster download
   });
 
-  it('chapter bars: hidden while the loop is off, five while on, the active one follows the video clock', async () => {
+  it('chapter bars: laid out but hidden while the loop is off, shown while on, the active one follows the video clock', async () => {
     reduced = true; // no autoplay: off
     const { container } = render(<Hero />);
     await flushIdle();
-    expect(container.querySelector('.target-hero__chapters')).toBeNull();
+    const list = container.querySelector('.target-hero__chapters');
+    expect(list.className).toContain('is-off'); // visibility:hidden, still in layout: no shift when it appears
     await act(async () => { fireEvent.click(button('hero.ambientPlay')); });
+    expect(container.querySelector('.target-hero__chapters')).toBe(list);
+    expect(list.className).not.toContain('is-off');
     const bars = container.querySelectorAll('.target-hero__chapters li');
     expect([...bars].map(li => li.textContent)).toEqual(CHAPTERS.map(([id]) => i18n.t(`hero.chapters.${id}`)));
     expect(container.querySelector('.target-hero__chapters').getAttribute('aria-hidden')).toBe('true');

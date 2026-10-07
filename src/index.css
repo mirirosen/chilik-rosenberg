@@ -595,7 +595,11 @@ html[dir="rtl"] .target-hero [data-motion="hero-cta"]::after { transform:transla
    white frame keeps white text above 4.5:1 (measured over the poster and five frames, g8 G6.5). */
 .target-site .target-hero { background:#2b2a2d; }
 .target-site .target-hero .target-hero__visual { position:absolute; inset:0; overflow:hidden; }
-.target-site .target-hero .target-hero__food { position:absolute; left:0; top:0; width:100%; height:100%; object-fit:cover; object-position:50% 45%; opacity:1; -webkit-mask-image:none; mask-image:none; }
+.target-site .target-hero .target-hero__food { position:absolute; left:0; top:0; width:100%; height:100%; object-fit:cover; object-position:50% 45%; -webkit-mask-image:none; mask-image:none; }
+/* The poster image is fully visible; the video (same box class) stays invisible until it is actually playing. */
+.target-site .target-hero img.target-hero__food { opacity:1; }
+.target-site .target-hero .target-hero__ambient { opacity:0; }
+.target-site .target-hero .target-hero__ambient.is-playing { opacity:1; }
 .target-site .target-hero .target-hero__veil { position:absolute; inset:0; z-index:1; pointer-events:none;
   background:linear-gradient(270deg, rgb(43 42 45 / .94) 0%, rgb(43 42 45 / .9) 27%, rgb(43 42 45 / .72) 33.34%, rgb(43 42 45 / .28) 42%, rgb(43 42 45 / 0) 52%),
              linear-gradient(0deg, rgb(43 42 45 / .5), rgb(43 42 45 / 0) 160px); }
@@ -612,6 +616,8 @@ html[dir="rtl"] .target-site .target-hero .target-hero__loop { direction:rtl; }
 .target-hero__chapters li::after { content:""; height:2px; background:rgb(255 255 255 / .35); }
 .target-hero__chapters li.is-active { color:#fff; font-weight:700; }
 .target-hero__chapters li.is-active::after { background:var(--target-gold); }
+/* Always laid out, only shown while the loop is on: appearing never moves the pause control (no layout shift). */
+.target-hero__chapters.is-off { visibility:hidden; }
 @media(max-width:767px) {
  .target-site .target-hero { --media-h:clamp(300px,108vw,460px); padding-top:calc(var(--media-h) - 72px); background:#2b2a2d; }
  .target-site .target-hero .target-hero__visual { inset:0 0 auto 0; height:var(--media-h); }

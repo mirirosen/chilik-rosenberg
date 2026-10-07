@@ -61,10 +61,10 @@ const Hero = () => {
         <button type="button" className="target-hero__ambient-toggle" onClick={ambient.toggle} aria-label={t(ambient.on ? 'hero.ambientPause' : 'hero.ambientPlay')}>
           {ambient.on ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
         </button>
-        {/* Where the loop is (decorative): shown only while it is on. */}
-        {ambient.on && <ol className="target-hero__chapters" aria-hidden="true">
+        {/* Where the loop is (decorative): always laid out, visible only while it is on, so it never shifts the control. */}
+        <ol className={`target-hero__chapters${ambient.on ? '' : ' is-off'}`} aria-hidden="true">
           {CHAPTERS.map(([id], i) => <li key={id} className={i === chapter ? 'is-active' : undefined}><span>{t(`hero.chapters.${id}`)}</span></li>)}
-        </ol>}
+        </ol>
       </div>
       <div className="target-hero__person-frame" data-motion="hero-figure" aria-hidden="true">
         <img className="target-hero__person" src={profileImage} width="376" height="513" alt="" />
