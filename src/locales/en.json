@@ -455,7 +455,7 @@
     },
     "q2": {
       "question": "When are upcoming tours and how can I check availability?",
-      "answer": "Tours open for registration take place on Thursday evenings. Check the date-selection section for the listed dates and availability for your party size."
+      "answer": "Tours usually take place on Thursday evenings. Contact Chilik on WhatsApp, by phone or by email for dates and availability; availability is confirmed personally."
     },
     "q3": {
       "question": "How long does the tour last?",
@@ -475,27 +475,27 @@
     },
     "q7": {
       "question": "How much does the tour cost?",
-      "answer": "The price displayed on the site is ILS 250 per participant. The total is shown during registration according to the number of participants."
+      "answer": "The price and arrangements are agreed personally with Chilik."
     },
     "q8": {
       "question": "Where do we meet and where can I park?",
-      "answer": "Exact meeting details are provided after registration closes. Contact Chilik before arrival to confirm the meeting point, parking and directions for your date."
+      "answer": "Exact meeting details are provided after the arrangement is confirmed personally. Contact Chilik before arrival to confirm the meeting point, parking and directions."
     },
     "q9": {
       "question": "What food will we taste?",
-      "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Chilik before registering for details of the tastings on your chosen tour."
+      "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Chilik before arranging the tour for details of the tastings."
     },
     "q10": {
       "question": "What is the kashrut standard, and are vegetarian or allergy adjustments available?",
-      "answer": "Before registering, contact Chilik to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
+      "answer": "Contact Chilik before arranging the tour to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
     },
     "q11": {
       "question": "Is the tour suitable for children, strollers or people with walking difficulties?",
-      "answer": "Contact Chilik before registering to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
+      "answer": "Contact Chilik before arranging the tour to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
     },
     "q12": {
-      "question": "What if I need to cancel or postpone my booking?",
-      "answer": "Cancellation and postponement conditions are listed in the registration terms. Before changing a booking, read the terms and contact Chilik with your booking reference."
+      "question": "What if I need to cancel or postpone?",
+      "answer": "Cancellation and postponement conditions are listed in the terms. To change anything, contact Chilik with your arrangement details."
     }
   },
   "helpHub": {
