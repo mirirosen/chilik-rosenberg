@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, X } from '../utils/icons';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useNavigation } from '../navigation/NavigationContext';
+import { settle } from '../animations/registry';
 
 const Header = ({ showVideos = false }) => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ const Header = ({ showVideos = false }) => {
     if (id === 'date-selection' && goToInquiry) { goToInquiry(); return; }
     const element = document.getElementById(id);
     if (element) {
+      settle(element); // the destination is in its natural state before the scroll starts
       element.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     } else {
       window.location.href = `/#${id}`;

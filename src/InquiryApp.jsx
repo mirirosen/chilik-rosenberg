@@ -16,6 +16,7 @@ import Terms from './components/Terms';
 import InquirySection from './components/InquirySection';
 import { useHomeMotion } from './hooks/useHomeMotion';
 import { NavigationProvider } from './navigation/NavigationContext';
+import { settle } from './animations/registry';
 import { applyRouteMetadata } from './utils/routeMetadata';
 import { inquiryRoute } from './utils/inquiryRoutes';
 import { tourVideos } from './data/content';
@@ -33,7 +34,9 @@ export default function InquiryApp() {
     const scrollHash = () => {
       const id = window.location.hash.slice(1);
       if (['date-selection', 'about', 'journey', 'menu', 'lectures', 'videos', 'faq', 'media'].includes(id)) {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'auto' });
+        const element = document.getElementById(id);
+        settle(element); // hash navigation: natural state before the jump
+        element?.scrollIntoView({ behavior: 'auto' });
       }
     };
     scrollHash(); window.addEventListener('hashchange', scrollHash);

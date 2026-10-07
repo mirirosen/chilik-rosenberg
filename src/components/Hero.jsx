@@ -3,6 +3,7 @@ import profileImage from '../assets/hilik-cutout-provided.png';
 import { Pause, Play } from '../utils/icons';
 import { useAmbientVideo } from '../hooks/useAmbientVideo';
 import { useNavigation } from '../navigation/NavigationContext';
+import { settle } from '../animations/registry';
 
 // Silent Bnei Brak loop built from Chilik's own footage (storefront, deli shelf, kugel, salad counter).
 const AMBIENT = {
@@ -17,7 +18,9 @@ const Hero = () => {
   const { goToInquiry } = useNavigation();
   const scrollToDateSelection = () => {
     if (goToInquiry) { goToInquiry(); return; }
-    document.getElementById('date-selection')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    const section = document.getElementById('date-selection');
+    settle(section);
+    section?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
   return (
     <header className="target-hero">
