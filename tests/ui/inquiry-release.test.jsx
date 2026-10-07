@@ -47,6 +47,15 @@ describe('approved public inquiry release', () => {
     expect(terms.textContent).toBe(i18n.t('header.terms'));
   });
 
+  it('uses decorative SVG icons and a readable copyright line in the footer (M4)', async () => {
+    await i18n.changeLanguage('he'); const { container } = render(<InquiryApp />);
+    const footer = container.querySelector('footer');
+    expect(footer.textContent).not.toMatch(/[📍📞💬✉]/u);
+    const icons = footer.querySelectorAll('svg[aria-hidden="true"]');
+    expect(icons.length).toBeGreaterThanOrEqual(4);
+    expect(footer.querySelector('.text-gray-500')).toBeNull();
+  });
+
   it('ignores arbitrary query text and only quotes a correctly shaped reference as unverified', () => {
     expect(inquiryReference('?bookingId=BK-aaaaaaaaaaaaaaaaaaaa')).toBe('BK-aaaaaaaaaaaaaaaaaaaa');
     expect(inquiryReference('?id=<img src=x onerror=alert(1)>')).toBeNull();

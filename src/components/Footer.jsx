@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { MapPin, Phone, MessageCircle, Mail } from '../utils/icons';
 
 const Footer = () => {
   const { t, i18n } = useTranslation();
@@ -17,7 +18,7 @@ const Footer = () => {
             <div className="space-y-2 text-gray-400">
               <p className="flex items-center gap-2 justify-start">
                 <span>{t('footer.address')}</span>
-                <span className="text-brand-gold">📍</span>
+                <MapPin size={18} className="text-brand-gold shrink-0" aria-hidden="true" />
               </p>
               <a
                 href="tel:0506724312"
@@ -25,7 +26,7 @@ const Footer = () => {
                 dir={dir}
               >
                 <span dir="ltr">0506724312</span>
-                <span className="text-brand-gold">📞</span>
+                <Phone size={18} className="text-brand-gold shrink-0" aria-hidden="true" />
               </a>
               <a
                 href="https://wa.me/972506724312"
@@ -34,14 +35,14 @@ const Footer = () => {
                 className="flex items-center gap-2 justify-start hover:text-brand-gold transition-colors"
               >
                 <span>WhatsApp</span>
-                <span className="text-green-500">💬</span>
+                <MessageCircle size={18} className="text-brand-gold shrink-0" aria-hidden="true" />
               </a>
               <a
                 href="mailto:hr20192022@gmail.com"
                 className="flex items-center gap-2 justify-start hover:text-brand-gold transition-colors"
               >
                 <span>hr20192022@gmail.com</span>
-                <span className="text-brand-gold">✉️</span>
+                <Mail size={18} className="text-brand-gold shrink-0" aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -95,7 +96,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row-reverse justify-between items-center gap-4 text-center md:text-start">
-            <div className="text-xs text-gray-500 tracking-wider" dir={dir}>
+            <div className="text-xs text-[#d1d5db] tracking-wider" dir={dir}>
               © 2026 {t('footer.copyright')}
             </div>
             <a

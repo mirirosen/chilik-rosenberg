@@ -40,5 +40,6 @@ export {
   Globe,
   Settings,
   Edit2,
-  RotateCcw
+  RotateCcw,
+  MapPin
 } from 'lucide-react';
