@@ -4,6 +4,8 @@ import { isSettled, registerEntrance, resetRegistry, setMotionActive, settle, se
 import { mediaContext } from './mediaContext';
 
 const motionQuery = '(prefers-reduced-motion: no-preference)';
+// The observer starts a reveal up to this far below the viewport (S2); a bfcache restore settles the same zone.
+const REVEAL_AHEAD = 160;
 
 // Entrances end on time even when frames stall. GSAP's default lag smoothing (500ms, 33ms) treats a long gap
 // between frames as 33ms, so a busy main thread stretches every running entrance by the length of each stall
@@ -120,7 +122,7 @@ function revealScene(root, context) {
         });
       });
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px 160px 0px' });
+  }, { threshold: 0.12, rootMargin: `0px 0px ${REVEAL_AHEAD}px 0px` });
   root.querySelectorAll('[data-motion="reveal"]').forEach(target => observer.observe(target));
   return () => { active = false; observer.disconnect(); };
 }
@@ -139,14 +141,14 @@ export function setupHomeMotion(root) {
     setMotionActive(true);
     const cleanups = [setupPressMotion(root), heroScene(root), revealScene(root, context)];
     // Back/forward cache: restore entrances to their natural state; press/hover tweens stay alive. Blocks in view at
-    // restore are recorded as settled too, so an observer notification queued before the page was frozen (delivered
+    // restore (or within the observer's look-ahead below it) are recorded as settled too, so an observer notification queued before the page was frozen (delivered
     // after pageshow) cannot start a new entrance on them (found by gate 8.12: the intro lead re-entered).
     window.addEventListener('pageshow', event => {
       if (!event.persisted) return;
       settleAll();
       root.querySelectorAll('[data-motion="reveal"]').forEach(block => {
         const rect = block.getBoundingClientRect();
-        if (rect.bottom > 0 && rect.top < window.innerHeight) settle(block);
+        if (rect.bottom > 0 && rect.top < window.innerHeight + REVEAL_AHEAD) settle(block);
       });
     }, { signal: controller.signal });
     arrivalRing = element => context.add(() => {

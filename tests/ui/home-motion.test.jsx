@@ -248,6 +248,18 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(block.getAttribute('style')).toBeNull();
   });
 
+  it('a block just below the fold, inside the observer look-ahead, is settled at restore too; one further down still enters later', () => {
+    const { container } = render(<Fixture />);
+    const [near, far] = container.querySelectorAll('.target-journey__grid li');
+    near.getBoundingClientRect = () => ({ top: window.innerHeight + 100, bottom: window.innerHeight + 200, left: 0, right: 100, width: 100, height: 100 });
+    far.getBoundingClientRect = () => ({ top: window.innerHeight + 900, bottom: window.innerHeight + 1000, left: 0, right: 100, width: 100, height: 100 });
+    const pageshow = new Event('pageshow'); Object.defineProperty(pageshow, 'persisted', { value: true });
+    window.dispatchEvent(pageshow);
+    observers.at(-1).notify([near, far].map(target => ({ target, isIntersecting: true, boundingClientRect: { top: window.innerHeight + 40 } })));
+    expect(gsap.getTweensOf(near)).toHaveLength(0);
+    expect(gsap.getTweensOf(far)).toHaveLength(1);
+  });
+
   it('keeps one owner per property in the hero entrance (S1)', () => {
     const { container } = render(<Fixture />);
     const button = container.querySelector('.target-button');
