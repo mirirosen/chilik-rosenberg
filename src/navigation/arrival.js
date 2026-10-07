@@ -61,7 +61,7 @@ export function forceInstant(desired, scrollTo = (top) => window.scrollTo({ top,
 
 // Resolves once with 'arrived' | 'aborted' | 'failed'. Signals (scrollend, rAF sampling) only trigger a
 // geometry check. A stall of >= stallMs away from the destination, or the capMs cap, completes the scroll
-// instantly and re-checks (synchronously, then on the next frame). Every timer, frame and listener is released.
+// instantly and verifies it on the next frame (re-applied at most once). Every timer, frame and listener is released.
 export function waitForArrival(target, signal, {
   measure = domMeasure, stallMs = 500, capMs = 3000,
   raf = cb => window.requestAnimationFrame(cb), caf = id => window.cancelAnimationFrame(id),
@@ -81,11 +81,26 @@ export function waitForArrival(target, signal, {
     };
     const onAbort = () => finish('aborted');
     const arrived = () => { if (atDestination(target, measure)) { finish('arrived'); return true; } return false; };
-    const onScrollEnd = () => { if (!done) arrived(); };
+    let completing = false;
+    const onScrollEnd = () => { if (!done && !completing) arrived(); };
+    // The instant completion is verified on the next frame, never only synchronously: Chromium applies one more
+    // frame of an interrupted smooth scroll after the instant one (observed: +47..58px, then still). If the
+    // destination moved, the completion is re-applied once and verified on the following frame.
     const complete = () => {
-      if (forceInstant(desiredScrollY(target, measure), scrollTo) === 'failed') { finish('failed'); return; }
-      if (arrived()) return;
-      frame = raf(() => { frame = 0; if (!done) finish(atDestination(target, measure) ? 'arrived' : 'failed'); });
+      completing = true;
+      let retried = false;
+      const apply = () => forceInstant(desiredScrollY(target, measure), scrollTo) !== 'failed';
+      const verify = () => {
+        frame = 0;
+        if (done) return;
+        if (atDestination(target, measure)) { finish('arrived'); return; }
+        if (retried) { finish('failed'); return; }
+        retried = true;
+        if (!apply()) { finish('failed'); return; }
+        frame = raf(verify);
+      };
+      if (!apply()) { finish('failed'); return; }
+      frame = raf(verify);
     };
     const tick = timestamp => {
       frame = 0;

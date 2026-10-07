@@ -74,14 +74,17 @@ describe.each([30, 60, 120])('waitForArrival at %iHz', hz => {
     expect(scrollTo).toHaveBeenCalledOnce();
     expect(scrollTo.mock.calls[0][0]).toBe(w.desired());
     expect(c.time()).toBeGreaterThanOrEqual(100 + 500);
-    expect(c.time()).toBeLessThan(100 + 500 + 2 * (1000 / hz) + 1);
+    // Stall detected within a frame of 500ms, completion verified on the next frame (never only synchronously).
+    expect(c.time()).toBeLessThan(100 + 500 + 3 * (1000 / hz) + 1);
   });
 
   it('(d) a scroll still moving after 3000ms is completed at the cap', async () => {
     const w = world({ docTop: 200000, maxScroll: 400000 }); const c = clock(hz); const target = {};
     const scrollTo = vi.fn(top => { w.state.y = top; });
     const p = waitForArrival(target, undefined, { measure: w.measure, raf: c.raf, caf: c.caf, now: c.now, scrollTo });
-    const result = await drive(p, c, { onFrame: () => { w.state.y += 5; } });
+    // The smooth scroll keeps moving until the instant completion cancels it (observed in all three engines;
+    // Chromium's one stale frame after it is covered by the test below).
+    const result = await drive(p, c, { onFrame: () => { if (!scrollTo.mock.calls.length) w.state.y += 5; } });
     expect(result).toBe('arrived');
     expect(scrollTo).toHaveBeenCalledOnce();
     expect(c.time()).toBeGreaterThanOrEqual(3000);
@@ -93,6 +96,29 @@ describe.each([30, 60, 120])('waitForArrival at %iHz', hz => {
     const p = waitForArrival(target, undefined, { measure: w.measure, raf: c.raf, caf: c.caf, now: c.now, scrollTo });
     const result = await drive(p, c);
     expect(result).toBe('failed');
+    expect(c.pending()).toBe(0);
+  });
+
+  it('a stale frame of the interrupted smooth scroll after the instant completion is re-applied, then arrives', async () => {
+    // Chromium (observed): one more frame of the smooth scroll lands after the instant scroll (+47..58px).
+    const w = world({ docTop: 200000, maxScroll: 400000 }); const c = clock(hz); const target = {};
+    let stale = 0;
+    const scrollTo = vi.fn(top => { w.state.y = top; if (scrollTo.mock.calls.length === 1) stale = 1; });
+    const p = waitForArrival(target, undefined, { measure: w.measure, raf: c.raf, caf: c.caf, now: c.now, scrollTo });
+    const result = await drive(p, c, { onFrame: () => { if (stale) { w.state.y += 50; stale = 0; } else if (!scrollTo.mock.calls.length) w.state.y += 5; } });
+    expect(result).toBe('arrived');
+    expect(scrollTo).toHaveBeenCalledTimes(2);
+    expect(Math.abs(w.state.y - w.desired())).toBeLessThanOrEqual(2);
+    expect(c.pending()).toBe(0);
+  });
+
+  it("an instant completion that is pushed away twice is 'failed', after one re-application only", async () => {
+    const w = world(); const c = clock(hz); const target = {};
+    const scrollTo = vi.fn(top => { w.state.y = top; });
+    const p = waitForArrival(target, undefined, { measure: w.measure, raf: c.raf, caf: c.caf, now: c.now, scrollTo });
+    const result = await drive(p, c, { onFrame: () => { if (scrollTo.mock.calls.length) w.state.y = w.desired() + 50; } });
+    expect(result).toBe('failed');
+    expect(scrollTo).toHaveBeenCalledTimes(2);
     expect(c.pending()).toBe(0);
   });
 
