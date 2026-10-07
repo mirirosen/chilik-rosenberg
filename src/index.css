@@ -530,8 +530,11 @@ body.preprod a[aria-disabled="true"] { cursor: not-allowed; opacity: .65; }
  html[lang="en"] .header-brand__full { display:none; }
  html[lang="en"] .header-brand__short { display:inline; }
 }
-/* N4: balanced hero headline wrapping (EN at 390px broke as "... as you never have / before"). */
+/* N4: balanced hero headline wrapping. EN broke as "as you never have / before" at 390px and 1440px: with the
+   forced break of white-space:pre-line, balance did not redistribute it (measured in Chromium). EN drops the forced
+   break so balance can work ("as you never / have before"); HE keeps its deliberate two-line break. */
 .target-hero h1 { text-wrap:balance; }
+html[lang="en"] .target-hero h1 { white-space:normal; }
 /* N1: the cholent photo ended in a hard vertical edge (~x=528 at 1440px) that the portrait crossed; a soft fade
    into the hero background makes photo, portrait and copy read as one stage. Desktop and tablet only. */
 @media(min-width:768px) {
