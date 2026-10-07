@@ -1,0 +1,580 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back",
+    "skipContent": "Skip to content",
+    "availabilityUnavailable": "Availability is temporarily unavailable"
+  },
+  "header": {
+    "title": "Chilik Rosenberg | Bnei Brak Tours",
+    "about": "Who am I?",
+    "journey": "What will we see?",
+    "menu": "What will we eat?",
+    "dates": "When is the tour?",
+    "terms": "Terms",
+    "register": "Register for Tour",
+    "toWebsite": "To Main Site",
+    "logout": "Logout",
+    "menuButton": "Menu",
+    "lectures": "Talks",
+    "upcomingTours": "Upcoming tours"
+  },
+  "hero": {
+    "badge": "Chilik Rosenberg invites you",
+    "title": "Experience the Haredi world\nas you never have before",
+    "subtitle": "Culinary and cultural tours, and talks from me, a Haredi man from Bnei Brak, offering an authentic, thoughtful, light-hearted and humorous glimpse into my world.",
+    "cta": "Book a tour",
+    "termsReminder": "Before registering, please read the terms and conditions"
+  },
+  "booking": {
+    "title": "Register for Tour",
+    "form": {
+      "fullName": "Full Name",
+      "phone": "Phone / WhatsApp",
+      "email": "Email",
+      "howDidYouHear": "How did you hear about us?",
+      "dateOfBirth": "Date of Birth",
+      "tourDate": "Tour Date",
+      "participants": "Number of Participants",
+      "paymentMethod": "Payment Method",
+      "notes": "Notes / Special Requests",
+      "agreeToTerms": "I agree to the terms and conditions (including cancellation policy)",
+      "required": "Required field",
+      "submit": "Submit Booking",
+      "submitting": "Submitting booking...",
+      "backToHome": "Cancel and return to homepage"
+    },
+    "paymentMethods": {
+      "bit": "Bit — arrange verified payment details first",
+      "credit": "Credit Card",
+      "bankTransfer": "Bank transfer — arrange details first"
+    },
+    "payment": {
+      "redirectingToSecure": "Redirecting to secure payment…",
+      "notConfigured": "Card payment is not set up yet. You can choose Bit or bank transfer, or contact us on WhatsApp.",
+      "createFailed": "We could not confirm this request. Retry with the same details to recover it safely, or contact us before starting another payment.",
+      "paidTitle": "Payment received and booking confirmed",
+      "paidDetail": "Booking number: {{bookingId}}",
+      "failedTitle": "Payment was not completed",
+      "failedDetail": "Payment has not been confirmed. Before trying again or choosing another payment method, contact us with your booking number.",
+      "pendingTitle": "Payment is still being verified",
+      "pendingDetail": "Payment has not yet been confirmed. Do not pay again. Use “Check payment status” to check for an update.",
+      "checkingTitle": "Verifying your payment",
+      "checkingDetail": "Please wait while we check the payment status. Do not pay again.",
+      "backHome": "Back to homepage",
+      "refreshStatus": "Check payment status",
+      "statusUnavailable": "We could not verify this booking in your current session. Keep the reference below, try refreshing, or contact us. Do not pay again until the status is checked.",
+      "reviewTitle": "Your payment needs review",
+      "reviewDetail": "We are checking this payment and your reservation. Do not pay again. Please contact us with your booking number.",
+      "statusUnavailableTitle": "Booking status unavailable",
+      "refundReviewTitle": "Booking cancelled; payment needs review",
+      "refundReviewDetail": "Your reservation was cancelled. Any payment or refund must be checked by the team; no automatic refund is confirmed.",
+      "bookingUnavailable": "Online booking is temporarily unavailable. Your details have not been submitted through this form. Please contact us for help.",
+      "closedRequest": "This request is closed or its details have changed. Keep your booking reference and contact us before starting another payment.",
+      "sessionRecovery": "The original booking session could not be verified. Return to the original browser session or contact us before creating another booking or payment.",
+      "confirmedTitle": "Booking confirmed",
+      "confirmedDetail": "The booking is confirmed; this status does not confirm payment capture.",
+      "cancelledTitle": "Booking cancelled",
+      "cancelledDetail": "The booking is closed. Any payment needs a separate review; no automatic refund is confirmed."
+    },
+    "howOptions": {
+      "friend": "Friend's recommendation",
+      "google": "Google search",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "other": "Other"
+    },
+    "validation": {
+      "nameRequired": "Full name is required",
+      "phoneRequired": "Phone / WhatsApp is required",
+      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Invalid email address",
+      "howRequired": "Please select how you heard about us",
+      "dobRequired": "Date of birth is required",
+      "ageRestriction": "Registration is only for ages 18+",
+      "dateRequired": "Please select a tour date",
+      "thursdayOnly": "Only Thursdays can be selected",
+      "dateUnavailable": "Selected date is not available (blocked or sold out)",
+      "participantsRange": "Number of participants must be between 1 and 20",
+      "paymentRequired": "Please select a payment method",
+      "termsRequired": "You must agree to the terms and conditions"
+    },
+    "price": {
+      "total": "Total Price",
+      "perPerson": "per person"
+    },
+    "contact": {
+      "title": "For questions and inquiries:",
+      "name": "Chilik Rosenberg",
+      "whatsapp": "Send WhatsApp Message"
+    },
+    "redirectTitle": "Choose your tour first",
+    "redirectDetail": "Taking you to date and participant selection…",
+    "selectedDetails": "Your selected booking details",
+    "selection": {
+      "locked": "Locked",
+      "change": "Change selection",
+      "remainingSpots": "Only {{count}} places remain",
+      "notesPlaceholder": "For example: allergies or dietary requirements...",
+      "backToDates": "Back to date selection",
+      "submissionNotice": "Your booking status will be shown after submission.",
+      "termsLead": "I confirm that I have read the"
+    }
+  },
+  "confirmation": {
+    "title": "Booking request received",
+    "thankYou": "Thank you very much",
+    "bookingReference": "Booking Reference",
+    "saveForReference": "Save this number for inquiries",
+    "bookingDetails": "Booking Details",
+    "tourDate": "Tour Date",
+    "participants": "Participants",
+    "participant": "Participant",
+    "participantsPlural": "Participants",
+    "email": "Email",
+    "phone": "Phone",
+    "totalPayment": "Total Payment",
+    "perPerson": "per person",
+    "notes": "Notes",
+    "nextSteps": {
+      "title": "What's Next?",
+      "emailSent": "Booking confirmation has been sent to your email",
+      "contactSoon": "A representative will contact you soon for final confirmation and payment",
+      "bookingNumber": "Your booking number",
+      "emailPending": "Your request is saved. Email delivery has not yet been confirmed."
+    },
+    "contact": {
+      "title": "Questions? Contact Us",
+      "whatsapp": "Send WhatsApp Message"
+    },
+    "backToHome": "Back to Homepage",
+    "pendingDetail": "Your request is received and awaiting approval. Payment has not been confirmed."
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "subtitle": "Please read carefully before booking",
+    "section1": {
+      "title": "General",
+      "tours": "Tours take place on Thursday evenings",
+      "duration": "Tour duration: 2.5 to 3 hours",
+      "includes": "The price includes all food, drinks, alcohol, and treats"
+    },
+    "section2": {
+      "title": "Payment",
+      "prepayment": "Payment is made in advance",
+      "price": "Price",
+      "priceAmount": "250 NIS",
+      "perPerson": "per person",
+      "selectMethod": "Select payment method:",
+      "bit": "Bit",
+      "credit": "Credit Card",
+      "bank": "Bank Transfer",
+      "clickForDetails": "Click for payment details"
+    },
+    "section3": {
+      "title": "Cancellation Policy",
+      "option1": {
+        "title": "Cancellation up to 7 days before the tour",
+        "desc": "No charge - full refund"
+      },
+      "option2": {
+        "title": "Cancellation between 7 days and 48 hours before the tour",
+        "desc": "50% refund of the payment amount"
+      },
+      "option3": {
+        "title": "Cancellation less than 48 hours before the tour",
+        "desc": "No refund"
+      },
+      "postpone": {
+        "title": "Postponement Option",
+        "desc": "In case of cancellation, you can postpone the tour to another date at no extra cost (subject to availability)"
+      }
+    },
+    "section4": {
+      "title": "Suitable for All Ages",
+      "allAges": "The tour is suitable for all ages!",
+      "babies": "Mothers are welcome to bring babies",
+      "families": "Families with children - welcome!"
+    },
+    "section5": {
+      "title": "Liability",
+      "responsibility": "Participants are responsible for themselves during the tour",
+      "valuables": "The tour organizer is not responsible for valuables or personal damages"
+    },
+    "section6": {
+      "title": "Privacy & Data Security",
+      "secure": "Personal information is stored securely and will not be transferred to third parties",
+      "purpose": "Information is used solely for managing the booking",
+      "storage": "Data is stored on secure Firebase servers"
+    },
+    "section7": {
+      "title": "Contact",
+      "questions": "For questions about terms of use:",
+      "name": "Chilik Rosenberg",
+      "whatsapp": "Send WhatsApp Message"
+    },
+    "lastUpdated": "Last updated: January 2026",
+    "backToBooking": "Back to Booking Form",
+    "backToTop": "Back to Top",
+    "paymentModal": {
+      "bit": {
+        "title": "Bit Payment",
+        "line1": "The Bit payment recipient has not been verified.",
+        "phone": "Do not send money to the contact number based on this website.",
+        "name": "Contact Chilik with your booking reference to verify payment details.",
+        "line4": "The request remains pending until payment and booking are confirmed."
+      },
+      "credit": {
+        "title": "Credit Card Payment",
+        "line1": "For credit card payment, please contact:",
+        "phone": "Phone: 0506724312",
+        "whatsapp": "WhatsApp: 0506724312",
+        "line4": "Card payment availability depends on completing the secure integration."
+      },
+      "bank": {
+        "title": "Bank Transfer",
+        "details": "Bank transfer details are not available on this website.",
+        "bankName": "",
+        "accountNumber": "",
+        "branchNumber": "",
+        "beneficiary": "",
+        "confirmation": "Before transferring money, ask Chilik for verified payment details and provide your booking reference."
+      },
+      "openWhatsapp": "Open WhatsApp Chat",
+      "close": "Close"
+    },
+    "ui": {
+      "addressLabel": "Address",
+      "phoneLabel": "Phone / WhatsApp",
+      "emailLabel": "Email",
+      "service": "Culinary tours in Bnei Brak",
+      "register": "Register for Tour",
+      "contactMessage": "Hello, I have a question about the terms and conditions.",
+      "paymentMessage": "Hello, I would like payment details for the tour.",
+      "languageNotice": "The full policy below is currently in Hebrew. Please contact Chilik if you need clarification before booking."
+    }
+  },
+  "admin": {
+    "title": "Tour Management",
+    "name": "Chilik Rosenberg",
+    "tabs": {
+      "tours": "Manage Dates",
+      "bookings": "Bookings"
+    },
+    "password": "Password",
+    "login": "Login",
+    "loginTitle": "Admin Login"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions"
+  },
+  "footer": {
+    "contact": "Contact",
+    "quickLinks": "Quick Links",
+    "about": "About the Tours",
+    "aboutText": "Culinary tours in Bnei Brak with Chilik Rosenberg. An authentic experience of flavors, aromas, and stories from the heart of Haredi Bnei Brak.",
+    "register": "Register for Tour",
+    "terms": "Terms and Conditions",
+    "faqs": "FAQs",
+    "aboutLink": "About",
+    "copyright": "All Rights Reserved - Chilik Rosenberg | Bnei Brak Tours",
+    "title": "Chilik Rosenberg - Culinary Tours",
+    "address": "11 Lehi Street, Bnei Brak"
+  },
+  "bio": {
+    "title": "I'm Chilik. Let's get acquainted",
+    "text": "I was born and have lived my entire life in my beloved city, Bnei Brak. From a deep-rooted Lithuanian family, I studied at Ponevezh Yeshiva. I love the Haredi world and enjoy hosting you in it – of course with all the heart-warming Jewish food.",
+    "cta": "Let's discover together",
+    "eyebrow": "The story behind the tour",
+    "paragraphs": [
+      "I’m Chilik, a Haredi Torah scholar from Bnei Brak. I was born here, grew up here and live this life every day. I studied at Ponevezh, and my family’s roots run deep in this world. My grandfather even founded the first Talmud Torah after the Holocaust. I love Haredi society and its culture, and above all, I love people.",
+      "When we meet, I invite you on a short, fascinating journey into Haredi life. Who are we? What is life like from the inside? What lies behind matchmaking, military service or becoming a parent at a young age? I answer honestly and openly, with a little humour along the way.",
+      "These encounters are moving for me too: seeing your curiosity and discovery of lives so close by, yet seemingly far away.",
+      "And between us? I love bringing in warm cholent, fresh Vizhnitz challah or good gefilte fish. An experience needs flavour.",
+      "If you are curious, I’m here to take you on a genuine, funny and especially delicious journey."
+    ]
+  },
+  "journey": {
+    "title": "What will we experience along the way?",
+    "subtitle": "Nine fascinating stations from the Haredi heart of Bnei Brak",
+    "stations": {
+      "streams": {
+        "title": "Haredi Streams",
+        "desc": "We'll learn about the differences between Hasidim and Lithuanians and the fascinating social structure."
+      },
+      "shidduch": {
+        "title": "World of Matchmaking",
+        "desc": "How do you build a Jewish home? From the meeting in the hotel lobby to the wedding."
+      },
+      "architecture": {
+        "title": "Creative Construction",
+        "desc": "The flying balconies and architectural solutions to Bnei Brak's density."
+      },
+      "books": {
+        "title": "Bookstores",
+        "desc": "Visiting the Jewish book institutions where the written word reigns supreme."
+      },
+      "charity": {
+        "title": "Gemachs and Charity",
+        "desc": "A glimpse into the amazing world of lending pacifiers to charity boxes."
+      },
+      "yeshiva": {
+        "title": "Yeshivas and Cheders",
+        "desc": "We'll experience up close what really happens all day in a yeshiva and how a Haredi child grows up."
+      },
+      "bakery": {
+        "title": "Vizhnitz Bakery",
+        "desc": "We'll enter the heart of the mythological bakery and see how challah is braided."
+      },
+      "volunteering": {
+        "title": "Volunteering and Charity",
+        "desc": "We'll meet the organizations that drive Haredi society - charity as a way of life."
+      },
+      "internet": {
+        "title": "Internet Rooms",
+        "desc": "How technology meets tradition and how people surf the web in Bnei Brak?"
+      }
+    },
+    "eyebrow": "Get to know it from the inside"
+  },
+  "menu": {
+    "title": "Taste, experience, discover",
+    "subtitle": "Taste authentic food from the Haredi world, in its original setting and atmosphere",
+    "items": {
+      "cholent": {
+        "title": "My Cholent",
+        "desc": "Rich slow-cooked stew with tender meat, kishke, and homey flavors."
+      },
+      "fish": {
+        "title": "Fish Feast & Ceviche",
+        "desc": "Premium fish platter: fresh salmon ceviche, red tuna ceviche, and exquisite herring."
+      },
+      "kugel": {
+        "title": "Jerusalem Kugel",
+        "desc": "The authentic Jerusalem kugel - brown, spicy, and seasoned with coarse black pepper."
+      },
+      "liver": {
+        "title": "Traditional Chopped Liver",
+        "desc": "Chopped liver in a velvety texture with caramelized onions and plenty of Jewish love."
+      },
+      "challenge": {
+        "title": "Bakery Showdown",
+        "desc": "Blind taste test between challah giants: HaZvi Bakery vs. Vizhnitz. Who will win?"
+      },
+      "blintzes": {
+        "title": "Legendary Blintzes",
+        "desc": "Warm and sweet rich cheese blintzes that perfectly round out the meal."
+      }
+    },
+    "eyebrow": "The flavors of Bnei Brak",
+    "nextTours": "Sounds wonderful. When is the next tour?"
+  },
+  "media": {
+    "title": "See me in the media",
+    "mako": "Mako",
+    "kan": "Kan 11",
+    "reshet": "Reshet 13",
+    "readArticle": "Read the article",
+    "watchEpisode": "Watch episode",
+    "watchSeries": "Watch series"
+  },
+  "bookingSection": {
+    "title": "When is the tour?",
+    "subtitle": "Tours take place every Thursday evening",
+    "selectDate": "Select a date",
+    "nextThursday": "Next Thursday",
+    "soldOut": "Sold Out",
+    "blocked": "Blocked",
+    "available": "Available",
+    "registerNow": "Click to register now",
+    "privateTour": "Interested in a private tour?",
+    "contactUs": "Contact us",
+    "thursdaysOnly": "Tours take place only on Thursdays",
+    "thursday": "Thursday",
+    "dateCardLabel": "Tour date: {{date}}",
+    "spotsLeft": "{{count}} spots",
+    "scrollRight": "Scroll right",
+    "scrollLeft": "Scroll left",
+    "step1Title": "Choose a tour date",
+    "step1Subtitle": "Tours run every Thursday evening",
+    "step2Title": "Number of participants",
+    "decreaseParticipants": "Decrease participants",
+    "increaseParticipants": "Increase participants",
+    "participants": "Participants",
+    "step3Title": "Continue to registration",
+    "continueCta": "Continue to registration",
+    "checkingAvailability": "Checking availability...",
+    "afterClickNote": "After clicking, you'll be taken to the registration form with your chosen details",
+    "totalToPay": "Total to pay",
+    "perPerson": "{{count}} × ₪{{price}} per person",
+    "dateUnavailable": "Choose an upcoming Thursday within the next 12 weeks. Registration closes at 20:00 on the tour date.",
+    "dateAvailable": "✓ Date available",
+    "spotsRemainingOf": "{{available}} of {{max}} spots remaining",
+    "dateSoldOut": "⚠️ This date is sold out",
+    "chooseAnotherDate": "Please choose another date",
+    "tooManyParticipants": "⚠️ Number of participants exceeds available spots",
+    "onlySpotsLeft": "Only {{count}} spots left",
+    "errorTitle": "No spots available",
+    "blockedDate": "This date is blocked for registration",
+    "soldOutDate": "This date is sold out",
+    "availabilityCheckError": "Error checking availability. Please try again.",
+    "notEnoughSpots": "Sorry, not enough spots available for {{date}}.\n\nRequested: {{requested}} spots\nAvailable: only {{available}} spots",
+    "noSpots": "Sorry, no spots available for {{date}}.",
+    "whatsappMessage": "Hi Chilik,\n\nI tried to register {{count}} people for the tour on {{date}} but there aren't enough spots available.\n\nOnly {{available}} spots left.\n\nCan you help?\n\nThanks!",
+    "tryAnyway": "💬 Want to try anyway?",
+    "sendWhatsappNote": "Message Chilik on WhatsApp and we'll see what we can do",
+    "sendWhatsapp": "Send WhatsApp message",
+    "pickAnotherDate": "Pick another date"
+  },
+  "ratings": {
+    "stars": "Rated 5.0/5 based on 28 verified reviews",
+    "reason1": {
+      "title": "An Insider's Perspective",
+      "desc": "My tour is based on deep familiarity with the alleys where I grew up. This is not an external guide, but a rare glimpse into my Haredi life."
+    },
+    "reason2": {
+      "title": "Exclusive Tastings",
+      "desc": "We'll only visit the best places for Jewish food, spots that are passed along by word of mouth in Bnei Brak. Shhh... keep the secret too."
+    },
+    "reason3": {
+      "title": "Bridge Between Worlds",
+      "desc": "A tour full of humor and open dialogue. Here, every question is welcomed with a smile."
+    },
+    "highlights": "Why our tour"
+  },
+  "faqs": {
+    "q1": {
+      "question": "Can a private tour be arranged?",
+      "answer": "Yes. Contact Chilik to arrange a private group tour, with the date and content agreed in advance."
+    },
+    "q2": {
+      "question": "When are upcoming tours and how can I check availability?",
+      "answer": "Tours open for registration take place on Thursday evenings. Check the date-selection section for the listed dates and availability for your party size."
+    },
+    "q3": {
+      "question": "How long does the tour last?",
+      "answer": "The tour usually lasts between two and a half and three hours."
+    },
+    "q4": {
+      "question": "What should I wear?",
+      "answer": "Please wear respectful, modest clothing. If you are unsure about a particular item, ask in advance about the places visited."
+    },
+    "q5": {
+      "question": "Can I buy prepared food for Shabbat during the tour?",
+      "answer": "During the tour, Chilik can recommend places to buy prepared food for Shabbat."
+    },
+    "q6": {
+      "question": "What does a culinary tour of Bnei Brak with Chilik include?",
+      "answer": "The tour combines tastes of Jewish cuisine with stories and an introduction to Haredi life and culture in Bnei Brak, guided by Chilik Rosenberg."
+    },
+    "q7": {
+      "question": "How much does the tour cost?",
+      "answer": "The price displayed on the site is ILS 250 per participant. The total is shown during registration according to the number of participants."
+    },
+    "q8": {
+      "question": "Where do we meet and where can I park?",
+      "answer": "Exact meeting details are provided after registration closes. Contact Chilik before arrival to confirm the meeting point, parking and directions for your date."
+    },
+    "q9": {
+      "question": "What food will we taste?",
+      "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Chilik before registering for details of the tastings on your chosen tour."
+    },
+    "q10": {
+      "question": "What is the kashrut standard, and are vegetarian or allergy adjustments available?",
+      "answer": "Before registering, contact Chilik to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
+    },
+    "q11": {
+      "question": "Is the tour suitable for children, strollers or people with walking difficulties?",
+      "answer": "Contact Chilik before registering to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
+    },
+    "q12": {
+      "question": "What if I need to cancel or postpone my booking?",
+      "answer": "Cancellation and postponement conditions are listed in the registration terms. Before changing a booking, read the terms and contact Chilik with your booking reference."
+    }
+  },
+  "helpHub": {
+    "questions": "Questions?",
+    "register": "Register"
+  },
+  "intro": {
+    "label": "Tours and talks with Chilik",
+    "paragraphs": [
+      "You may know about us, but now it is time to taste, discover and experience our world up close, authentically and directly.",
+      "This is what I love most: meeting you, opening a door into my world and the Haredi community, and sharing an unforgettable experience.",
+      "A personal, honest encounter that is thoughtful, funny and, above all, delicious."
+    ],
+    "tours": "Tours",
+    "lectures": "Talks"
+  },
+  "inclusions": {
+    "title": "An unforgettable cultural\nand culinary experience including:",
+    "items": [
+      "Visits to unique and fascinating places",
+      "Encounters with interesting Haredi people",
+      "An introduction to Haredi food and culinary culture",
+      "Stories, sources and inspiration"
+    ]
+  },
+  "lectures": {
+    "title": "Bringing a team or friends together?\nLooking for a fascinating experience?",
+    "paragraphs": [
+      "I come to your company, living room or high school, ready for your questions. The curiosity is palpable.",
+      "Then we talk about Haredi life. Who are we, and how do our communities differ? How do matchmaking and attitudes to military service really work? What appears on a screen is not the whole story.",
+      "How does an 18-year-old Haredi young man feel ready to become a father? These lives can seem so different.",
+      "I love these encounters: listening to your questions, sometimes unspoken, and answering honestly and directly, with a little humour that opens the door to something deeper."
+    ],
+    "cta": "Ask about talks and availability"
+  },
+  "imagery": {
+    "generated": "AI-generated illustration",
+    "menuDisclosure": "Food images are AI-generated illustrations. Dishes served may vary."
+  },
+  "demo": {
+    "title": "Booking demo · Simulated payment",
+    "notice": "Use fictional sample details only. No charge, real booking or message is sent.",
+    "fill": "Use sample details",
+    "chooseOutcome": "Choose a scenario to review the screens. All outcomes here are simulated.",
+    "success": "Simulate success",
+    "decline": "Simulate decline",
+    "pending": "Pending approval",
+    "cancel": "Simulate cancellation",
+    "reset": "Reset demo and start a new booking",
+    "checkout": "Simulated checkout",
+    "noCard": "No credit card is needed. Do not enter card details in this demo.",
+    "summary": "View simulated booking summary",
+    "unavailable": "No demo booking is available in this tab. Reset the demo and start again.",
+    "noMessages": "This demo sends no emails, calendar events or WhatsApp messages."
+  },
+  "seo": {
+    "home": {
+      "title": "Chilik Rosenberg | Culinary Tours in Bnei Brak",
+      "description": "Explore culinary and cultural tours in Bnei Brak with Chilik Rosenberg. Tour information, frequently asked questions and upcoming dates."
+    },
+    "terms": {
+      "title": "Terms & Conditions | Chilik Rosenberg",
+      "description": "Booking terms, cancellation policy and contact information for Chilik Rosenberg tours in Bnei Brak."
+    },
+    "booking": {
+      "title": "Tour Booking | Chilik Rosenberg",
+      "description": "Tour booking form and booking status."
+    },
+    "confirmation": {
+      "title": "Booking Status | Chilik Rosenberg",
+      "description": "Check an existing booking status."
+    },
+    "admin": {
+      "title": "Admin Sign In | Chilik Rosenberg",
+      "description": "Sign in to the administration area."
+    },
+    "notFound": {
+      "title": "Page Unavailable | Chilik Rosenberg",
+      "description": "The requested address is unavailable."
+    }
+  }
+}

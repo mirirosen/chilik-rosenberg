@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && 'admin' in request.auth.token && request.auth.token.admin == true
+        && 'firebase' in request.auth.token && 'sign_in_provider' in request.auth.token.firebase
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    function validMax(n) { return n is int && n >= 1 && n <= 100; }
+    function validSettings(d) {
+      return (!('globalMaxParticipants' in d) || validMax(d.globalMaxParticipants))
+        && (!('blocked' in d) || (d.blocked is list && d.blocked.size() <= 1000))
+        && (!('soldOut' in d) || (d.soldOut is list && d.soldOut.size() <= 1000));
+    }
+    function validTour(d, date) {
+      return d.date == date && date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.useGlobalMax is bool
+        && (d.useGlobalMax ? d.customMax == null : validMax(d.customMax));
+    }
+    match /artifacts/hilik-rosenberg-v1/public/data/settings/global {
+      allow read: if true;
+      allow create: if isAdmin() && request.resource.data.keys().hasOnly(['globalMaxParticipants', 'blocked', 'soldOut'])
+        && validSettings(request.resource.data);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['globalMaxParticipants', 'blocked', 'soldOut'])
+        && validSettings(request.resource.data);
+    }
+    match /artifacts/hilik-rosenberg-v1/public/data/tourDates/{date} {
+      allow read: if true;
+      // Registration totals, reservation ownership and payment holds are server-owned.
+      allow create: if isAdmin() && request.resource.data.keys().hasOnly(['date', 'useGlobalMax', 'customMax'])
+        && validTour(request.resource.data, date);
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['date', 'useGlobalMax', 'customMax'])
+        && validTour(request.resource.data, date);
+    }
+    match /bookings/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /integrationJobs/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /bookingAudit/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

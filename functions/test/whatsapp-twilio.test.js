@@ -5,7 +5,8 @@ const {fakeDb,Timestamp}=require('./helpers/fake-db');
 const {createBookingService}=require('../src/booking-service');
 const {createJobRunner}=require('../src/integration-jobs');
 const {createTwilioWhatsAppAdapter,configurationValid,SENDER_SID,FROM,TO}=require('../src/whatsapp-twilio');
-const {SENDER,RECIPIENT,WABA,TEMPLATE_BODY}=require('../src/whatsapp-adapter');
+const {SENDER,RECIPIENT,WABA}=require('../src/whatsapp-adapter');
+const {CONTACT_TEMPLATE_BODY:TEMPLATE_BODY,CONTACT_BUTTON_TITLE,CONTACT_BUTTON_URL,contactSuffix}=require('../src/booking-contact-card');
 const {createWhatsAppRuntime,SECRET_NAMES}=require('../src/whatsapp-runtime');
 const {fixture,INPUT:HTTP_INPUT,NOW:HTTP_NOW}=require('./helpers/offline-system');
 const NOW=Date.parse('2026-10-06T05:00:00Z');
@@ -16,8 +17,8 @@ const SECRET='fixture-secret-not-real';
 const MSG='SM'+'d'.repeat(32);
 const reply=(status,data)=>({status,ok:status>=200&&status<300,json:async()=>data});
 const sender=()=>({sid:SENDER_SID,sender_id:FROM,status:'ONLINE',configuration:{waba_id:WABA}});
-const content=()=>({sid:CONFIG.contentSid,account_sid:CONFIG.accountSid,language:'he',types:{'twilio/text':{body:TEMPLATE_BODY}},variables:{'1':'Synthetic name','2':'08/10/2026','3':'2'}});
-const approval=()=>({sid:CONFIG.contentSid,account_sid:CONFIG.accountSid,whatsapp:{type:'whatsapp',name:CONFIG.templateName,status:'approved',content_type:'twilio/text'}});
+const content=()=>({sid:CONFIG.contentSid,account_sid:CONFIG.accountSid,language:'he',types:{'twilio/call-to-action':{body:TEMPLATE_BODY,actions:[{type:'URL',title:CONTACT_BUTTON_TITLE,url:CONTACT_BUTTON_URL}]}},variables:{'1':'Synthetic name','2':'08/10/2026','3':'2','4':contactSuffix('BK-000000000000000000000001')}});
+const approval=()=>({sid:CONFIG.contentSid,account_sid:CONFIG.accountSid,whatsapp:{type:'whatsapp',name:CONFIG.templateName,status:'approved',content_type:'twilio/call-to-action'}});
 const accepted=(patch={})=>reply(201,{sid:MSG,account_sid:CONFIG.accountSid,from:FROM,to:TO,direction:'outbound-api',status:'queued',...patch});
 const envFor=(c=CONFIG)=>({GCLOUD_PROJECT:c.projectId,CHILIK_WHATSAPP_ENABLED:'true',CHILIK_WHATSAPP_PROVIDER:c.provider,CHILIK_WHATSAPP_CONFIGURATION_VERIFIED:'true',CHILIK_WHATSAPP_RECIPIENT_OPT_IN_VERIFIED:'true',CHILIK_TWILIO_ACCOUNT_SID:c.accountSid,CHILIK_TWILIO_SENDER_SID:c.senderSid,CHILIK_TWILIO_AUTH_MODE:c.authMode,CHILIK_TWILIO_API_KEY_SID:c.apiKeySid,CHILIK_TWILIO_CONTENT_SID:c.contentSid,CHILIK_TWILIO_TEMPLATE_NAME:c.templateName,CHILIK_WHATSAPP_TEMPLATE_LANGUAGE:'he'});
 async function setup({config=CONFIG,send=accepted,senderData,contentData,approvalData,secret=SECRET,readFailure}={}){
@@ -43,7 +44,7 @@ test('Twilio Messages.json uses fixed From/To and ContentSid/JSON variables in f
  const f=await setup();await f.jobs.run(f.ref,NOW);assert.equal(f.posts().length,1);const post=f.posts()[0];
  assert.equal(post.contentType,'application/x-www-form-urlencoded');assert.deepEqual(Object.keys(post.fields).sort(),['ContentSid','ContentVariables','From','To']);
  assert.equal(post.fields.From,FROM);assert.equal(post.fields.To,TO);assert.equal(post.fields.ContentSid,CONFIG.contentSid);
- assert.deepEqual(JSON.parse(post.fields.ContentVariables),{'1':INPUT.name,'2':'08/10/2026','3':'2'});
+ assert.deepEqual(JSON.parse(post.fields.ContentVariables),{'1':INPUT.name,'2':'08/10/2026','3':'2','4':contactSuffix(f.b.bookingId)});
  assert.equal(f.receipt().provider,'twilio');assert.equal(f.receipt().providerId,MSG);assert.equal(f.receipt().providerStatus,'queued');assert.equal(f.job().status,'sent');
  for(const privateValue of [INPUT.phone,INPUT.email,INPUT.dateOfBirth,INPUT.notes,SECRET,Buffer.from(CONFIG.apiKeySid+':'+SECRET).toString('base64'),'4209'])assert.ok(!JSON.stringify([f.requests,f.job(),f.receipt()]).includes(privateValue));
  assert.ok(!JSON.stringify([...f.db.data]).includes(SECRET));
@@ -64,10 +65,17 @@ test('Twilio sender GET must bind exact XE SID, 3703, Online state and shared WA
   const f=await setup({senderData:{...sender(),...patch}});await f.jobs.run(f.ref,NOW);assert.equal(f.posts().length,0);assert.equal(f.job().lastError,'whatsapp-sender-unverified');assert.equal(f.receipt(),undefined);
  }
 });
-test('Content SID must match sender account, Hebrew, exact three-variable text and approved WhatsApp contract',async()=>{
+test('Content SID must match sender account, Hebrew, exact CTA body/button and approved four-variable contract',async()=>{
  for(const options of [{contentData:{...content(),account_sid:'AC'+'e'.repeat(32)}},{contentData:{...content(),sid:'HX'+'e'.repeat(32)}},{contentData:{...content(),language:'en'}},{contentData:{...content(),types:{'twilio/text':{body:'Changed {{1}}'}}}},{contentData:{...content(),variables:{'1':'Name'}}},{approvalData:{...approval(),whatsapp:{...approval().whatsapp,status:'pending'}}},{approvalData:{...approval(),account_sid:'AC'+'e'.repeat(32)}},{approvalData:{...approval(),whatsapp:{...approval().whatsapp,name:'b_notes'}}}]){
   const f=await setup(options);await f.jobs.run(f.ref,NOW);assert.equal(f.posts().length,0);assert.equal(f.job().lastError,'whatsapp-template-unverified');assert.equal(f.receipt(),undefined);
  }
+});
+test('wrong button origin/title/suffix, extra actions and old text templates are blocked before a message POST',async()=>{
+ const good=content(),cta=good.types['twilio/call-to-action'];
+ for(const actions of [[{...cta.actions[0],url:'https://evil.example.test/{{4}}'}],[{...cta.actions[0],url:'https://www.chilik-tours.com/admin?id={{4}}'}],[{...cta.actions[0],title:'Changed'}],[...cta.actions,cta.actions[0]],[{...cta.actions[0],type:'PHONE'}]]){
+  const f=await setup({contentData:{...good,types:{'twilio/call-to-action':{...cta,actions}}}});await f.jobs.run(f.ref,NOW);assert.equal(f.posts().length,0);assert.equal(f.job().lastError,'whatsapp-template-unverified');
+ }
+ const old=await setup({contentData:{...good,types:{'twilio/text':{body:TEMPLATE_BODY}},variables:{'1':'name','2':'date','3':'2'}}});await old.jobs.run(old.ref,NOW);assert.equal(old.posts().length,0);assert.equal(old.job().lastError,'whatsapp-template-unverified');
 });
 test('Basic auth supports explicit approved API-key and account-token modes without fallback',async()=>{
  for(const authMode of ['api-key','auth-token']){const f=await setup({config:{...CONFIG,authMode}});await f.jobs.run(f.ref,NOW);assert.equal(f.posts().length,1);assert.equal(f.job().providerId,MSG);}
@@ -91,7 +99,7 @@ test('actual Firebase export discovery binds Twilio secret only to existing inte
  };const exports={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/index.js'),'utf8'),{exports,require:id=>{assert.ok(modules[id],id);return modules[id];},process:{env:{...envFor(),CHILIK_BOOKING_RUNTIME_ENABLED:'true',CHILIK_BOOKING_SCHEDULERS_ENABLED:'true'}},console:{error(){}}});
  assert.ok(defined.includes('CHILIK_TWILIO_API_KEY_SECRET'));assert.ok(!defined.includes('CHILIK_WHATSAPP_ACCESS_TOKEN'));
  assert.deepEqual(Array.from(exports.processIntegrationJobs.options.secrets,s=>s.name),['CHILIK_TWILIO_API_KEY_SECRET']);
- for(const name of ['createBooking','createPayment','paymentStatus','updateBookingStatus','retryIntegrationJob','tranzilaWebhook','expirePaymentHolds','reconcilePayments'])assert.ok(!(exports[name].options.secrets||[]).some(s=>s.name.startsWith('CHILIK_TWILIO')));
+ for(const name of ['adminBookingContactCard','createBooking','createPayment','paymentStatus','updateBookingStatus','retryIntegrationJob','tranzilaWebhook','expirePaymentHolds','reconcilePayments'])assert.ok(!(exports[name].options.secrets||[]).some(s=>s.name.startsWith('CHILIK_TWILIO')));
 });
 test('concurrent Twilio workers claim one notification and POST once',async()=>{
  const f=await setup();await Promise.all([f.jobs.run(f.ref,NOW),f.jobs.run(f.ref,NOW)]);assert.equal(f.posts().length,1);assert.equal(f.job().status,'sent');
@@ -159,7 +167,7 @@ test('verified HTTP credit capture flows through actual Twilio runtime/worker on
  const f=fixture(),r=await f.call('createPayment',{body:HTTP_INPUT}),id=r.body.bookingId;f.record(id);await f.call('tranzilaWebhook',{query:{id},body:{index:42}});
  const j=[...f.db.data.values()].find(v=>v.kind==='whatsapp'),ref=f.db.doc(`integrationJobs/${id}-${j.revision}-whatsapp`);let posts=0;
  const runtime=createWhatsAppRuntime({db:f.db,Timestamp,env:envFor(),secretFactory:name=>{assert.equal(name,'CHILIK_TWILIO_API_KEY_SECRET');return {value:()=>SECRET};},fetchImpl:async(url,o)=>{
-  if(o.method==='POST'){posts++;const fields=Object.fromEntries(new URLSearchParams(o.body));assert.deepEqual(JSON.parse(fields.ContentVariables),{'1':HTTP_INPUT.name,'2':'08/10/2026','3':'2'});return accepted();}
+  if(o.method==='POST'){posts++;const fields=Object.fromEntries(new URLSearchParams(o.body));assert.deepEqual(JSON.parse(fields.ContentVariables),{'1':HTTP_INPUT.name,'2':'08/10/2026','3':'2','4':contactSuffix(id)});return accepted();}
   return reply(200,url.includes('messaging.twilio.com')?sender():url.endsWith('/ApprovalRequests')?approval():content());
  },now:()=>HTTP_NOW});
  const jobs=createJobRunner(f.db,Timestamp,{whatsapp:runtime.adapter});await jobs.run(ref,HTTP_NOW);await jobs.run(ref,HTTP_NOW+3600001);assert.equal(posts,1);assert.equal(f.booking(id).status,'confirmed');assert.equal(f.booking(id).paymentStatus,'paid');assert.equal(f.seats(),2);

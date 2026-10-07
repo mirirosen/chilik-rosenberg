@@ -1,7 +1,8 @@
 'use strict';
 const crypto = require('node:crypto');
 // Shared immutable contract; the historical direct-Meta factory is never called.
-const { snapshot, SENDER, RECIPIENT, WABA, TEMPLATE_BODY, MAX_ATTEMPTS } = require('./whatsapp-adapter');
+const { snapshot, SENDER, RECIPIENT, WABA, MAX_ATTEMPTS } = require('./whatsapp-adapter');
+const { contactSuffix, CONTACT_TEMPLATE_BODY: TEMPLATE_BODY, CONTACT_BUTTON_TITLE, CONTACT_BUTTON_URL } = require('./booking-contact-card');
 const SENDER_SID = 'XEf2b30f702857e60e8dab2bc74b3a53d4';
 const META_PHONE_ID = '1377867008742755'; // Lineage only, never a send URL.
 const FROM = `whatsapp:+${SENDER}`, TO = `whatsapp:+${RECIPIENT}`;
@@ -15,7 +16,7 @@ function render(job,c) {
   if (job?.kind !== 'whatsapp' || job.event !== 'confirmed' || !/^BK-[a-f0-9]{24}$/.test(job.bookingId || '') || !Number.isInteger(job.revision) || job.revision < 2 || job.idempotencyKey !== `${job.bookingId}-${job.revision}-whatsapp` || job.recipient !== RECIPIENT || job.sender !== SENDER) throw fail('whatsapp-job-invalid');
   const s = snapshot(job.whatsappSnapshot);
   if (s.tourDate !== job.tourDate) throw fail('whatsapp-snapshot-invalid');
-  return { From: FROM, To: TO, ContentSid: c.contentSid, ContentVariables: JSON.stringify({ '1': s.name, '2': `${s.tourDate.slice(8,10)}/${s.tourDate.slice(5,7)}/${s.tourDate.slice(0,4)}`, '3': String(s.participants) }) };
+  return { From: FROM, To: TO, ContentSid: c.contentSid, ContentVariables: JSON.stringify({ '1': s.name, '2': `${s.tourDate.slice(8,10)}/${s.tourDate.slice(5,7)}/${s.tourDate.slice(0,4)}`, '3': String(s.participants), '4': contactSuffix(job.bookingId) }) };
 }
 /** Raw REST avoids hidden SDK POST retries. Basic auth is explicit API-key or
  * account-token mode. No key creation/fallback. The receipt key is IDENTICAL
@@ -37,7 +38,8 @@ function createTwilioWhatsAppAdapter({ db, Timestamp, config = {}, readSecret, f
     const [sender,content,approval] = await Promise.all([read(senderUrl,authorization),read(contentUrl,authorization),read(approvalUrl,authorization)]);
     if (sender.sid !== SENDER_SID || sender.sender_id !== FROM || sender.status !== 'ONLINE' || sender.configuration?.waba_id !== WABA) throw fail('whatsapp-sender-unverified');
     const types = content.types && Object.keys(content.types), variables = content.variables && Object.keys(content.variables).sort();
-    if (content.sid !== c.contentSid || content.account_sid !== c.accountSid || content.language !== 'he' || types?.length !== 1 || types[0] !== 'twilio/text' || content.types['twilio/text']?.body !== TEMPLATE_BODY || JSON.stringify(variables) !== JSON.stringify(['1','2','3']) || approval.sid !== c.contentSid || approval.account_sid !== c.accountSid || approval.whatsapp?.status !== 'approved' || approval.whatsapp?.type !== 'whatsapp' || approval.whatsapp?.content_type !== 'twilio/text' || approval.whatsapp?.name !== c.templateName) throw fail('whatsapp-template-unverified');
+    const cta = content.types?.['twilio/call-to-action'], action = cta?.actions?.[0];
+    if (content.sid !== c.contentSid || content.account_sid !== c.accountSid || content.language !== 'he' || types?.length !== 1 || types[0] !== 'twilio/call-to-action' || cta.body !== TEMPLATE_BODY || cta.actions?.length !== 1 || action?.type !== 'URL' || action.title !== CONTACT_BUTTON_TITLE || action.url !== CONTACT_BUTTON_URL || JSON.stringify(variables) !== JSON.stringify(['1','2','3','4']) || approval.sid !== c.contentSid || approval.account_sid !== c.accountSid || approval.whatsapp?.status !== 'approved' || approval.whatsapp?.type !== 'whatsapp' || approval.whatsapp?.content_type !== 'twilio/call-to-action' || approval.whatsapp?.name !== c.templateName) throw fail('whatsapp-template-unverified');
   }
   return async function whatsapp(job) {
     if (!configurationValid(c)) throw fail('whatsapp-not-configured');
