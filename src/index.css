@@ -621,8 +621,9 @@ html[dir="rtl"] .target-site .target-hero .target-hero__loop { direction:rtl; }
 @media(max-width:767px) {
  .target-site .target-hero { --media-h:clamp(300px,108vw,460px); padding-top:calc(var(--media-h) - 72px); background:#2b2a2d; }
  /* Whole pixels: a fractional height (108vw) made the video's LCP size a few px² larger than the poster's, so the video
-    became the LCP when it started. Browsers without round() keep the line above. */
- .target-site .target-hero { --media-h:round(down,clamp(300px,108vw,460px),1px); }
+    became the LCP when it started. Only where round() is supported: a custom property would accept the value anyway
+    and its users would become invalid, so the plain clamp() above stays in effect elsewhere (Codex review, round 3). */
+ @supports (width: round(down, 1.5px, 1px)) { .target-site .target-hero { --media-h:round(down,clamp(300px,108vw,460px),1px); } }
  .target-site .target-hero .target-hero__visual { inset:0 0 auto 0; height:var(--media-h); }
  .target-site .target-hero .target-hero__food { object-position:50% 40%; }
  .target-site .target-hero .target-hero__ambient.is-playing { opacity:1; }
