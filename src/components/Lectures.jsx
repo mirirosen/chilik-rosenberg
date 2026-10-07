@@ -7,7 +7,7 @@ export default function Lectures() {
     <div className="target-lectures__content">
       <h2 id="lectures-title">{t('lectures.title')}</h2>
       {[0, 1, 2, 3].map(index => <p key={index}>{t(`lectures.paragraphs.${index}`)}</p>)}
-      <a className="target-button" href={`https://wa.me/${whatsappNumber}`}>{t('lectures.cta')}</a>
+      <a className="target-button" href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">{t('lectures.cta')}</a>
     </div>
   </section>;
 }
