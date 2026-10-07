@@ -97,10 +97,12 @@ function revealScene(root, context) {
       const groups = new Map();
       reveal.forEach(target => groups.set(target.parentElement, [...(groups.get(target.parentElement) ?? []), target]));
       groups.forEach(group => {
+        // S2/S4: a visible but quiet rise. Section headings settle slower; cards stagger per grid (cap .24s).
+        const heading = group.every(target => target.classList.contains('target-section-heading'));
         const tween = gsap.from(group, {
-          y: 8, opacity: 0.94, duration: 0.42,
-          stagger: { each: STAGGER.tight, amount: Math.min(0.16, (group.length - 1) * STAGGER.tight) },
-          ease: EASE.out, clearProps: 'transform,opacity',
+          y: DIST.m, opacity: 0.85, duration: heading ? DUR.l : DUR.m,
+          stagger: { each: STAGGER.tight, amount: Math.min(0.24, (group.length - 1) * STAGGER.tight) },
+          ease: heading ? EASE.settle : EASE.out, clearProps: 'transform,opacity',
         });
         group.forEach(target => registerEntrance(target, tween, 'transform,opacity'));
       });

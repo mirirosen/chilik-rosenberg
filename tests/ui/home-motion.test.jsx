@@ -19,6 +19,7 @@ function Fixture({ route = 'home' }) {
     <a className="target-menu__cta" href="#date-selection">Upcoming tours</a>
     <div className="target-journey__grid"><li data-motion="reveal">First stop</li><li data-motion="reveal">Next stop</li></div>
     <article className="target-menu__dish" data-motion="reveal">Cholent</article>
+    <div className="target-section-heading" data-motion="reveal"><h2>Section</h2></div>
     <section id="date-selection"><button>Book now</button></section>
   </main>;
 }
@@ -249,6 +250,22 @@ describe('bounded GSAP homepage enhancements', () => {
     expect(button.style.opacity).toBe('');
     expect(button.style.getPropertyValue('--sheen-x')).toBe('');
     expect(heading.style.transform).toBe('');
+  });
+
+  it('reveals blocks with a quiet 10px rise from .85 and settles section headings slower (S2/S4)', () => {
+    const { container } = render(<Fixture />);
+    const cards = [...container.querySelectorAll('li')];
+    const heading = container.querySelector('.target-section-heading');
+    const below = window.innerHeight + 40;
+    observers[0].notify([...cards, heading].map(target => ({ target, isIntersecting: true, boundingClientRect: { top: below } })));
+    const card = gsap.getTweensOf(cards[0])[0];
+    expect(card.vars.y).toBe(10);
+    expect(card.vars.opacity).toBe(0.85);
+    expect(card.vars.duration).toBe(0.42);
+    expect(card.vars.stagger.amount).toBeLessThanOrEqual(0.24);
+    const head = gsap.getTweensOf(heading)[0];
+    expect(head.vars.duration).toBe(0.7);
+    expect(head.vars.ease).toBe('expo.out');
   });
 
   it('fails open when optional browser APIs are absent', () => {
