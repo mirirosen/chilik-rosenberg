@@ -11,6 +11,8 @@ import { mediaContext } from './mediaContext';
 // motion; no depth on touch screens.
 // Both motions live in ONE context: they share the element's transform, and two contexts would each snapshot the
 // other's in-flight values and restore them in the wrong order (a stale scale left behind after a runtime flip).
+// Even inside one context GSAP reverts tweens by start time, which the visitor's Pause/Play reorders, so on exit the
+// figure's own transform is restored explicitly (GSAP's cached transform cleared, the original inline value back).
 const motionQuery = '(prefers-reduced-motion: no-preference)';
 const fineQuery = '(hover: hover) and (pointer: fine)';
 
@@ -23,6 +25,7 @@ export function setupFigureLife(body, hero) {
   if (!body || !hero || !hero.closest('.target-site')) return noop;
   let breath = null;
   let playing = false;
+  const original = { transform: body.style.transform, transformOrigin: body.style.transformOrigin };
   const motion = mediaContext(motionQuery, context => {
     breath = gsap.to(body, { scaleY: BREATH.scaleY, scaleX: BREATH.scaleX, transformOrigin: '50% 100%', duration: BREATH.duration, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: !playing });
     let depth = null; // { toX, toTurn }, created on the first fine-pointer match, inside this context
@@ -63,6 +66,8 @@ export function setupFigureLife(body, hero) {
       hero.removeEventListener('pointermove', move);
       hero.removeEventListener('pointerleave', leave);
       breath = null;
+      gsap.set(body, { clearProps: 'transform,transformOrigin' }); // runs after GSAP's own reverts
+      Object.assign(body.style, original);
     };
   });
   return {

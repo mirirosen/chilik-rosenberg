@@ -142,6 +142,33 @@ describe("Chilik's figure", () => {
     expect(el.style.transform).toBe('');
   });
 
+  it('pause and resume before reduced motion still restore the figure exactly (revert order independent of timing)', async () => {
+    const { container, unmount } = renderSite();
+    const el = body(container);
+    const hero = container.querySelector('.target-hero');
+    wide(hero);
+    const wait = ms => act(() => new Promise(resolve => { setTimeout(resolve, ms); }));
+    await playing(container, true);
+    await wait(250);
+    pointer(hero, 1000);
+    await wait(150);
+    await playing(container, false); // the visitor's Pause
+    await wait(400);
+    await playing(container, true); // ... and Play: the breathing tween's start time moves forward
+    // A long enough Pause puts the breathing's start after the depth tweens' (GSAP reverts a context's tweens by start
+    // time); make that ordering certain instead of depending on how long this environment's frames took.
+    const depthStart = Math.max(...gsap.getTweensOf(el).filter(t => t.vars.scaleY === undefined).map(t => t.startTime()));
+    const breath = breathOf(el);
+    if (breath.startTime() <= depthStart) breath.startTime(depthStart + 0.5);
+    await wait(150);
+    expect(el.style.transform).not.toBe('');
+    reduced = true; flip();
+    expect(gsap.getTweensOf(el)).toHaveLength(0);
+    expect(el.style.transform).toBe('');
+    unmount();
+    expect(el.style.transform).toBe('');
+  });
+
   it('the legacy shell (no .target-site) gets no figure motion and no pointer listeners', async () => {
     // Spy where the method lives: spying on a subclass prototype leaves an own property behind for later files.
     const added = vi.spyOn(EventTarget.prototype, 'addEventListener');
