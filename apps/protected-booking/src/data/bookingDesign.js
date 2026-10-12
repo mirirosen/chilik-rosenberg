@@ -1,0 +1,26 @@
+export const bookingDesign = {
+  he: {
+    eyebrow: 'סיור קולינרי עם חיליק בבני ברק', title: 'בואו רעבים.', titleAccent: 'תחזרו עם סיפורים.',
+    description: 'ביום חמישי, בני ברק מתכוננת לשבת. בואו לטעום, לפגוש ולשמוע את הסיפורים שמאחורי הרחובות — איתי, מבפנים.',
+    hostNote: 'מחכה לפגוש אתכם, חיליק', food: 'טעימות מהמטבח היהודי', time: 'כ־2.5–3 שעות של גילויים', group: 'חמישי ב־20:00, בני ברק · עד 30 משתתפים',
+    priceLabel: 'ערב אחד. הרבה מה לגלות.', perGuest: 'למשתתף', priceIncludes: 'כולל הסיור והטעימות',
+    personal: 'מתכננים סיור פרטי או מגיעים כקבוצה?', contact: 'דברו איתי',
+    steps: 'שלבי ההזמנה', select: 'בוחרים סיור', details: 'פרטים אישיים', payment: 'תשלום', dateTitle: 'איזה חמישי מתאים לכם?', dateHint: 'בחרו תאריך ומספר משתתפים. אני אדאג לסיפורים.',
+    upcoming: 'התאריכים הקרובים', previousDates: 'תאריכים מוקדמים יותר', nextDates: 'תאריכים מאוחרים יותר',
+    otherDate: 'מחפשים תאריך אחר?', peopleTitle: 'כמה מצטרפים?', peopleHint: 'עם מי אתם באים?', chooseDate: 'בחרו תאריך כדי להמשיך', continue: 'ממשיכים לפרטים האישיים', noCharge: 'בשלב הזה עדיין לא משלמים',
+    secureNote: 'התשלום בהמשך מאובטח באמצעות טרנזילה',
+    schedule: 'תחילת הסיור ב־20:00 · משך הסיור כ־2.5–3 שעות',
+  },
+  en: {
+    eyebrow: 'A culinary tour of Bnei Brak with Chilik', title: 'Come hungry.', titleAccent: 'Leave with stories.',
+    description: 'On Thursdays, Bnei Brak gets ready for Shabbat. Come taste the food, meet the people and discover the stories behind the streets — with me, from the inside.',
+    hostNote: 'Looking forward to meeting you', food: 'Traditional Jewish food tastings', time: 'Around 2½–3 hours to explore', group: 'Thursday at 20:00, Bnei Brak · up to 30 guests',
+    priceLabel: 'One evening. So much to discover.', perGuest: 'per guest', priceIncludes: 'Tour and food tastings included',
+    personal: 'Planning a private tour or bringing a group?', contact: 'Let’s talk',
+    steps: 'Booking steps', select: 'Your tour', details: 'Your details', payment: 'Payment', dateTitle: 'Which Thursday is yours?', dateHint: 'Pick a date and your party size. I’ll bring the stories.',
+    upcoming: 'Upcoming dates', previousDates: 'Earlier dates', nextDates: 'Later dates',
+    otherDate: 'Looking for another date?', peopleTitle: 'Guests', peopleHint: 'Your party size', chooseDate: 'Choose a date to continue', continue: 'Continue to your details', noCharge: 'There’s no payment at this step',
+    secureNote: 'Secure payment through Tranzila at the next stage',
+    schedule: 'Starts at 20:00 · Duration: around 2½–3 hours',
+  },
+};

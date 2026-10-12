@@ -44,6 +44,26 @@ async function start(container) {
 const arrive = () => act(async () => { pending?.('arrived'); await Promise.resolve(); });
 
 describe('cancelling a pending arrival at the inquiry', () => {
+  it('an early CTA shows the loading destination and then focuses the real heading', async () => {
+    const { container } = render(<InquiryApp bookingSection={<div id="date-selection"><p role="status">Loading tour dates</p></div>} />);
+    const placeholder = container.querySelector('#date-selection');
+    await act(async () => { fireEvent.click(container.querySelector('[data-motion="hero-cta"]')); });
+    expect(placeholder.scrollIntoView).toHaveBeenCalled();
+    expect(waitForArrival).not.toHaveBeenCalled();
+    await act(async () => { placeholder.innerHTML = '<h2 id="inquiry-title" tabindex="-1">Choose a tour</h2>'; await Promise.resolve(); });
+    expect(waitForArrival).toHaveBeenCalledOnce();
+    await arrive();
+    expect(focusArrived).toHaveBeenCalledOnce();
+  });
+
+  it('visitor cancellation while the calendar loads prevents later focus', async () => {
+    const { container } = render(<InquiryApp bookingSection={<div id="date-selection"><p role="status">Loading tour dates</p></div>} />);
+    await act(async () => { fireEvent.click(container.querySelector('[data-motion="hero-cta"]')); });
+    await act(async () => { fireEvent.wheel(window); });
+    await act(async () => { container.querySelector('#date-selection').innerHTML = '<h2 id="inquiry-title" tabindex="-1">Choose a tour</h2>'; await Promise.resolve(); });
+    expect(waitForArrival).not.toHaveBeenCalled();
+    expect(focusArrived).not.toHaveBeenCalled();
+  });
   it('Enter on another control cancels; no focus is moved', async () => {
     const { container } = render(<InquiryApp />);
     await start(container);

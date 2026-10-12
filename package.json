@@ -9,8 +9,14 @@
     "preview": "vite preview",
     "test:inquiry": "vitest run --cache=false",
     "prepare:inquiry-legacy": "node scripts/prepare-inquiry-legacy.mjs",
-    "build:inquiry": "node scripts/prepare-inquiry-legacy.mjs && vite build --mode inquiry && node scripts/package-inquiry-release.mjs",
-    "verify:inquiry": "node scripts/verify-inquiry-publication.mjs"
+    "build:inquiry": "node scripts/prepare-inquiry-legacy.mjs && vite build --mode inquiry --manifest && node scripts/prerender-public-home.mjs inquiry && node scripts/inline-public-styles.mjs inquiry && node scripts/build-organic-pages.mjs inquiry && node scripts/package-inquiry-release.mjs && node scripts/verify-organic-release.mjs inquiry",
+    "verify:inquiry": "node scripts/verify-inquiry-publication.mjs",
+    "build:booking": "node scripts/prepare-inquiry-legacy.mjs && vite build --mode booking --manifest && node scripts/prerender-public-home.mjs booking && node scripts/inline-public-styles.mjs booking && node scripts/build-organic-pages.mjs booking && node scripts/package-booking-release.mjs && node scripts/verify-organic-release.mjs booking",
+    "verify:organic:boundaries": "node scripts/verify-public-build-boundaries.mjs",
+    "verify:organic:browser": "node scripts/verify-home-hydration.cjs && node scripts/verify-home-navigation.cjs && node scripts/verify-home-critical-css.cjs",
+    "build:booking-demo": "vite build --mode booking-demo && node scripts/package-booking-release.mjs --demo",
+    "verify:organic:demo": "node scripts/verify-booking-demo.cjs",
+    "verify:organic:booking-intent": "node scripts/verify-booking-intent.cjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -31,6 +37,7 @@
     "vite": "^5.4.11",
     "@testing-library/react": "^16.3.0",
     "jsdom": "^25.0.1",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "playwright-core": "1.63.0"
   }
 }

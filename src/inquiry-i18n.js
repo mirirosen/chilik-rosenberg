@@ -44,14 +44,19 @@ function resource(base, lang) {
   };
 }
 
-let initial = /^he\b/i.test(navigator.language || '') ? 'he' : 'en';
+// The canonical homepage has a stable Hebrew default, independent of crawler
+// locale. A visitor's explicit language choice still overrides it.
+let initial = 'he';
 try { const saved = localStorage.getItem('language'); if (['he', 'en'].includes(saved)) initial = saved; } catch {}
 i18n.use(initReactI18next).init({ resources: { he: { translation: resource(he, 'he') }, en: { translation: resource(en, 'en') } }, lng: initial, fallbackLng: 'he', interpolation: { escapeValue: false }, react: { useSuspense: false } });
 function applyLanguage(language) {
+  if (typeof document === 'undefined') return;
   document.documentElement.lang = language;
   document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
   try { localStorage.setItem('language', language); } catch {}
 }
 i18n.on('languageChanged', applyLanguage);
-applyLanguage(initial);
+// Keep an already painted prerender in its own direction until React replaces
+// it. mountPublicSite commits the saved language and new DOM in one task.
+if (typeof document === 'undefined' || !document.getElementById('root')?.dataset.prerender || document.getElementById('root').dataset.prerender === initial) applyLanguage(initial);
 export default i18n;

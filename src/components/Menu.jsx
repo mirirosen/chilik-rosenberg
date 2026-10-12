@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-const dishKeys = ['cholent', 'fish', 'kugel', 'liver', 'challenge', 'blintzes'];
+const dishKeys = ['blintzes', 'cholent', 'fish', 'kugel', 'liver', 'challenge'];
 
 const Menu = () => {
   const { t } = useTranslation();
@@ -15,7 +15,7 @@ const Menu = () => {
       <div className="target-menu__rail" role="region" aria-label={t('menu.title')}>
         {dishKeys.map((key) => (
           <article key={key} className="target-menu__dish" data-motion="reveal">
-            <img src={`/images/food/${key}-960.webp`} srcSet={`/images/food/${key}-480.webp 480w, /images/food/${key}-960.webp 960w`} sizes="(max-width: 767px) 45vw, (max-width: 1280px) 30vw, 400px" width="960" height={key === 'cholent' ? '540' : '640'} loading="lazy" decoding="async" alt={`${t(`menu.items.${key}.title`)} — ${t('imagery.generated')}`} />
+            <img src={`/images/food/${key}-960.webp`} srcSet={`/images/food/${key}-480.webp 480w, /images/food/${key}-960.webp 960w`} sizes="(max-width: 767px) 90vw, (max-width: 1280px) 30vw, 400px" width="960" height={key === 'cholent' ? '540' : '640'} loading="lazy" decoding="async" alt={`${t(`menu.items.${key}.title`)} — ${t('imagery.generated')}`} />
             <div>
               <h3>{t(`menu.items.${key}.title`)}</h3>
               <p>{t(`menu.items.${key}.desc`)}</p>

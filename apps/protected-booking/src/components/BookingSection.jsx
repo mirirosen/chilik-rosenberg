@@ -192,7 +192,7 @@ const BookingSection = ({ onContinue, initialSelection } = {}) => {
       <div className="bg-brand-dark-lighter p-8 md:p-16 rounded-5xl md:rounded-7xl border border-white/5 shadow-2xl relative overflow-hidden">
 
         {/* Title */}
-        <h2 className="text-4xl md:text-6xl font-bold text-brand-gold font-serif mb-4 text-center">
+        <h2 id="inquiry-title" tabIndex={-1} className="text-4xl md:text-6xl font-bold text-brand-gold font-serif mb-4 text-center">
           {t('bookingSection.title')}
         </h2>
         <p className="text-lg text-gray-300 mb-12 text-center font-light">

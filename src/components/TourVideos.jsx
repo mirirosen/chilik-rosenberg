@@ -1,13 +1,14 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tourVideos } from '../data/content';
 import { populatedTourVideoGroups, tourVideoSource } from '../utils/tourVideos';
 
 // Plan §18 (S8): the tour videos sit right after the intro, in the site's light design. Native players with a
 // poster each and preload="none", so no video bytes are requested before a visitor presses play.
-export default function TourVideos({ groups = tourVideos }) {
+export default function TourVideos({ groups = tourVideos, compact = false }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
+  const [expanded, setExpanded] = useState(false);
   const populated = populatedTourVideoGroups(groups);
   if (!populated.length) return null;
   const language = (i18n.resolvedLanguage || i18n.language || 'he').startsWith('en') ? 'en' : 'he';
@@ -18,20 +19,22 @@ export default function TourVideos({ groups = tourVideos }) {
     </div>
     {populated.map(group => <div key={group.id} className="target-videos__group">
       <h3 className="target-videos__group-title">{t(`tourVideos.groups.${group.id}`)}</h3>
-      <div className="target-videos__grid">
-        {group.items.map((video, index) => {
+      <div id={`${headingId}-${group.id}-grid`} className="target-videos__grid">
+        {(compact && !expanded ? group.items.slice(0, 3) : group.items).map((video, index) => {
           const titleId = `${headingId}-${group.id}-${index}`;
           return <article key={video.id} className={`target-videos__card${index === 0 ? ' target-videos__card--featured' : ''}`} data-motion="reveal">
             <div className="target-videos__frame" style={{ aspectRatio: video.aspectRatio }}>
-              <video src={video.src} poster={video.poster} controls playsInline preload="none" aria-labelledby={titleId} className="target-videos__player">
+              <video src={video.src} poster={video.poster} controls playsInline preload="none" loading="lazy" aria-labelledby={titleId} className="target-videos__player">
                 {(video.captions || []).filter(track => tourVideoSource(track.src) && track.srcLang).map(track => <track key={track.srcLang} kind="captions" src={tourVideoSource(track.src)} srcLang={track.srcLang} label={track.label?.[language] || track.srcLang} default={track.srcLang === language} />)}
                 {t('tourVideos.unsupported')} <a href={video.src}>{t('tourVideos.openVideo')}</a>
               </video>
             </div>
             <h4 id={titleId} dir="auto" className="target-videos__title">{video.title[language]}</h4>
+            {video.durationSec && <p className="target-videos__duration"><span dir="ltr">{Math.floor(video.durationSec / 60)}:{String(video.durationSec % 60).padStart(2, '0')}</span> {language === 'he' ? 'דקות' : 'min'}</p>}
           </article>;
         })}
       </div>
+      {compact && group.items.length > 3 && <button type="button" className="target-videos__more" aria-expanded={expanded} aria-controls={`${headingId}-${group.id}-grid`} onClick={() => setExpanded(value => !value)}>{language === 'he' ? expanded ? 'הצגת פחות סרטונים' : `לכל ${group.items.length} הסרטונים` : expanded ? 'Show fewer videos' : `View all ${group.items.length} videos`}</button>}
     </div>)}
   </section>;
 }

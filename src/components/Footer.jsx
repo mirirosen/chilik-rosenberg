@@ -90,6 +90,7 @@ const Footer = () => {
             <p className="text-gray-400 text-sm leading-relaxed">
               {t('footer.aboutText')}
             </p>
+            <a href="/privacy.html" className="text-sm text-gray-400 underline mt-4">{i18n.language?.startsWith('en') ? 'Privacy policy' : 'מדיניות פרטיות'}</a>
           </div>
         </div>
 

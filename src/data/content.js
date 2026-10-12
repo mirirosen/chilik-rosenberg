@@ -31,7 +31,7 @@ export const stations = [
   },
   { 
     icon: "croissant", 
-    title: "מאפיית ויז'ניץ", 
+    title: "חלות ויזניץ חמות",
     desc: "ניכנס ללב המאפייה המיתולוגית ונראה איך קולעים חלות." 
   },
   { 
@@ -75,7 +75,7 @@ export const foods = [
   { 
     icon: "cookie", 
     title: "בלינצ'ס אגדיים", 
-    desc: "קינוח חם ומתוק של בלינצ'ס גבינה עשירים שסוגרים את הפינה." 
+    desc: "בלינצ'ס גבינה חמים ומתוקים, שאוכלים לפני המנות הבשריות."
   }
 ];
 
@@ -197,6 +197,17 @@ export const tourVideos = [
     },
   ] },
   { id: 'donkey-bnei-brak', items: [] },
+  { id: 'tour-moments', items: [
+    { id: 'CUYEMWo96u8', src: '/media/tour/vizhnitz-bakery.mp4', poster: '/media/posters/vizhnitz-bakery.webp', aspectRatio: '9/16', durationSec: 13, title: { he: 'חלות ויזניץ חמות', en: 'Warm Vizhnitz challah' } },
+    { id: '-ftkZJ8OYSY', src: '/media/tour/cholent-story.mp4', poster: '/media/posters/cholent-story.webp', aspectRatio: '9/16', durationSec: 26, title: { he: 'איך הכול התחיל — החמין של ליל שישי', en: 'How it started — Thursday-night cholent' } },
+    { id: '6i1rv_znrbk', src: '/media/tour/around-the-table.mp4', poster: '/media/posters/around-the-table.webp', aspectRatio: '9/16', durationSec: 12, title: { he: 'סביב השולחן עם חיליק', en: 'Around the table with Hilik' } },
+    { id: 'qlArGhOIY3U', src: '/media/tour/tour-traditions.mp4', poster: '/media/posters/tour-traditions.webp', aspectRatio: '9/16', durationSec: 8, title: { he: "טעימות בליל שישי", en: "Thursday-night tastings" } },
+    { id: 'd4ia2ZgNtH4', src: '/media/tour/neighborhood-games.mp4', poster: '/media/posters/neighborhood-games.webp', aspectRatio: '9/16', durationSec: 10, title: { he: "במה משחקים בבני ברק?", en: "Games in Bnei Brak" } },
+    { id: 'tbDuvz-AtIY', src: '/media/tour/tour-conversations.mp4', poster: '/media/posters/tour-conversations.webp', aspectRatio: '9/16', durationSec: 10, title: { he: "המפגשים שבדרך", en: "Conversations along the way" } },
+    { id: 'n2_Adti18zg', src: '/media/tour/bnei-brak-stories.mp4', poster: '/media/posters/bnei-brak-stories.webp', aspectRatio: '9/16', durationSec: 7, title: { he: "הסיפורים של בני ברק", en: "Stories of Bnei Brak" } },
+    { id: 'WFiJ766ZrYY', src: '/media/tour/yapchik.mp4', poster: '/media/posters/yapchik.webp', aspectRatio: '9/16', durationSec: 18, title: { he: "מה זה יאפצ׳ק?", en: "What is yapchik?" } },
+    { id: '1LGo3GvDEjg', src: '/media/tour/vegetarian-tastings.mp4', poster: '/media/posters/vegetarian-tastings.webp', aspectRatio: '9/16', durationSec: 14, title: { he: "טעימות גם לצמחונים", en: "Tastings for vegetarians" } },
+  ] },
 ];
 
 export const siteMetadata = {

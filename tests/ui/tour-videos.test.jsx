@@ -43,12 +43,24 @@ afterEach(() => { cleanup(); groups.forEach(group => { group.items.length = 0; }
 describe('provided tour videos and empty-group behavior', () => {
   it('ships all nine provided clips with preserved Hebrew IDs, an empty donkey group and no public media fixtures', async () => {
     const actual = await vi.importActual('../../src/data/content');
-    expect(actual.tourVideos.map(group => group.id)).toEqual(['hilik-bnei-brak', 'donkey-bnei-brak']);
+    expect(actual.tourVideos.map(group => group.id)).toEqual(['hilik-bnei-brak', 'donkey-bnei-brak', 'tour-moments']);
     expect(actual.tourVideos[0].items.map(item => item.id)).toEqual(['MxVd7LEjkJyq1eXMAuuT', 'ZUh34zcXVyiUPmbWPWAR', 'XEN797qZSr8SCo5xshoP', 'חלק-49', 'חלק-50', 'חלק-51', 'חלק-58', 'חלק-59', 'חלק-60']);
     expect(actual.tourVideos[0].items.map(item => item.durationSec)).toEqual([90, 150, 120, 44, 46, 44, 46, 44, 46]);
     expect(actual.tourVideos[1].items).toEqual([]);
     for (const item of actual.tourVideos[0].items) expect(new URL(item.src).pathname).toMatch(/^\/hilik-site-tour-videos\/hilik-bnei-brak\//);
-    for (const group of actual.tourVideos) expect(fs.readdirSync(`public/tour-videos/${group.id}`)).toEqual(['README.md']);
+    for (const group of actual.tourVideos.slice(0, 2)) expect(fs.readdirSync(`public/tour-videos/${group.id}`)).toEqual(['README.md']);
+  });
+
+  it('includes all nine selected Drive clips with local compressed videos and posters', async () => {
+    const actual = await vi.importActual('../../src/data/content');
+    const moments = actual.tourVideos.find(group => group.id === 'tour-moments');
+    expect(moments.items.map(item => item.id)).toEqual(['CUYEMWo96u8', '-ftkZJ8OYSY', '6i1rv_znrbk', 'qlArGhOIY3U', 'd4ia2ZgNtH4', 'tbDuvz-AtIY', 'n2_Adti18zg', 'WFiJ766ZrYY', '1LGo3GvDEjg']);
+    for (const item of moments.items) {
+      expect(tourVideoSource(item.src)).toBe(item.src);
+      expect(fs.existsSync(`public${item.src}`)).toBe(true);
+      expect(fs.statSync(`public${item.src}`).size).toBeLessThan(2_000_000);
+      expect(fs.existsSync(`public${item.poster}`)).toBe(true);
+    }
   });
 
   it.each([[], [{ id: 'hilik-bnei-brak', items: [] }], [{ id: 'donkey-bnei-brak' }]])('renders no section, heading or gap for empty content %j', data => {
@@ -104,11 +116,12 @@ describe('provided tour videos and empty-group behavior', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
-  it.each(['he', 'en'])('places populated %s videos right after the intro and before the inquiry section, and resolves #videos', async language => {
+  it.each(['he', 'en'])('places populated %s videos after the menu, keeps inquiry earlier, and resolves #videos', async language => {
     await i18n.changeLanguage(language); populate(); window.history.replaceState({}, '', '/#videos');
     const { container } = render(<InquiryApp />);
     const section = container.querySelector('#videos');
-    expect(section.previousElementSibling.id).toBe('introduction'); expect(section.nextElementSibling.id).toBe('date-selection');
+    expect(section.previousElementSibling.id).toBe('menu'); expect(section.nextElementSibling.id).toBe('lectures');
+    expect(container.querySelector('#date-selection').compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(section.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto' });
     expect(document.documentElement.dir).toBe(language === 'he' ? 'rtl' : 'ltr');
     expect(container.querySelectorAll('a[href="/#videos"]')).toHaveLength(2);

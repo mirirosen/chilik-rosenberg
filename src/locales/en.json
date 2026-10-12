@@ -28,7 +28,13 @@
   "hero": {
     "ambientPause": "Pause the Bnei Brak videos",
     "ambientPlay": "Play the Bnei Brak videos",
-    "chapters": { "food": "Food", "street": "Street", "store": "The grocery", "people": "People", "chilik": "Chilik" },
+    "chapters": {
+      "food": "Food",
+      "street": "Street",
+      "store": "The grocery",
+      "people": "People",
+      "chilik": "Chilik"
+    },
     "badge": "Chilik Rosenberg invites you",
     "title": "Experience the Haredi world\nas you never have before",
     "subtitle": "Culinary and cultural tours, and talks from me, a Haredi man from Bnei Brak, offering an authentic, thoughtful, light-hearted and humorous glimpse into my world.",
@@ -333,7 +339,7 @@
         "desc": "We'll experience up close what really happens all day in a yeshiva and how a Haredi child grows up."
       },
       "bakery": {
-        "title": "Vizhnitz Bakery",
+        "title": "Warm Vizhnitz challah",
         "desc": "We'll enter the heart of the mythological bakery and see how challah is braided."
       },
       "volunteering": {
@@ -368,12 +374,12 @@
         "desc": "Chopped liver in a velvety texture with caramelized onions and plenty of Jewish love."
       },
       "challenge": {
-        "title": "Bakery Showdown",
-        "desc": "Blind taste test between challah giants: HaZvi Bakery vs. Vizhnitz. Who will win?"
+        "title": "Warm Vizhnitz challah",
+        "desc": "Warm Vizhnitz challah — a taste of Bnei Brak’s culinary traditions."
       },
       "blintzes": {
         "title": "Legendary Blintzes",
-        "desc": "Warm and sweet rich cheese blintzes that perfectly round out the meal."
+        "desc": "Warm, sweet cheese blintzes, served before the meat dishes."
       }
     },
     "eyebrow": "The flavors of Bnei Brak",
@@ -381,6 +387,24 @@
   },
   "media": {
     "title": "See me in the media",
+    "eyebrow": "Articles, conversations and stories",
+    "subtitle": "Tours, interviews and appearances — in the media and online",
+    "filterLabel": "Filter references by type",
+    "categories": {
+      "all": "All",
+      "articles": "Articles",
+      "programs": "TV and podcasts",
+      "online": "Social media and websites"
+    },
+    "actions": {
+      "read": "Read at the source",
+      "watch": "Watch at the source",
+      "listen": "Listen at the source",
+      "visit": "Visit the original page"
+    },
+    "results": "Showing {{shown}} of {{total}} references",
+    "showAll": "View all {{count}} references",
+    "showLess": "Show fewer references",
     "mako": "Mako",
     "kan": "Kan 11",
     "reshet": "Reshet 13",
@@ -586,7 +610,8 @@
     "nav": "Tour videos",
     "groups": {
       "hilik-bnei-brak": "Chilik in Bnei Brak",
-      "donkey-bnei-brak": "Donkey in Bnei Brak"
+      "donkey-bnei-brak": "Donkey in Bnei Brak",
+      "tour-moments": "Moments from the tour"
     },
     "unsupported": "Your browser does not support video playback.",
     "openVideo": "Open the video"

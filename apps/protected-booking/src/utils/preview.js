@@ -1,5 +1,5 @@
 // Build-time only: a preprod build cannot be enabled or disabled by a URL.
-export const IS_PREPROD = import.meta.env.MODE === 'preprod';
+export const IS_PREPROD = import.meta.env.MODE === 'preprod' || import.meta.env.MODE === 'booking-demo';
 export const PREVIEW_NOTICE = 'תצוגת דמו • תשלום מדומה • ללא הזמנות אמיתיות או הודעות | Design preview • Simulated payments • No real bookings or messages';
 export const previewAvailability = Object.freeze({
   availabilityStatus: 'ready', blocked: [], soldOut: [], globalMaxParticipants: 30, tourDates: {},

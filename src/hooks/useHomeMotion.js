@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useBrowserLayoutEffect } from './useBrowserLayoutEffect';
 import { setupHomeMotion } from '../animations/homeMotion';
 
 export function useHomeMotion(route) {
   const root = useRef(null);
-  useLayoutEffect(() => {
+  useBrowserLayoutEffect(() => {
     if (route !== 'home') return;
     return setupHomeMotion(root.current);
   }, [route]);

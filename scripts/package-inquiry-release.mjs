@@ -2,11 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { assertPublicInquiryHtml } from './public-inquiry-gate.mjs';
 
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const release = path.join(source, '.inquiry-cache'), output = path.join(source, 'dist-inquiry');
 const entry = path.join(output, 'inquiry-index.html');
 if (fs.existsSync(entry)) fs.renameSync(entry, path.join(output, 'index.html'));
+if (fs.existsSync(path.join(output, '.vite/manifest.json'))) {
+  fs.unlinkSync(path.join(output, '.vite/manifest.json'));
+  fs.rmdirSync(path.join(output, '.vite'));
+}
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const original = JSON.parse(fs.readFileSync(path.join(source, 'docs', 'inquiry-legacy-manifest.json'), 'utf8'));
 const walk = folder => fs.readdirSync(folder, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(path.join(folder, entry.name)) : [path.join(folder, entry.name)]);
@@ -15,7 +20,7 @@ const newFiles = walk(output).map(file => ({ path: path.relative(output, file).r
 if (!fs.existsSync(path.join(output, 'index.html')) || fs.existsSync(path.join(output, 'inquiry-index.html'))) throw Error('Inquiry entry was not normalized to index.html');
 if (newFiles.some(file => /\.map$/.test(file.path))) throw Error('New source maps must not be published');
 const html = fs.readFileSync(path.join(output, 'index.html'), 'utf8');
-if (/preprod-banner|connect-src 'none'|noindex, nofollow/.test(html)) throw Error('Preprod HTML was used instead of public inquiry HTML');
+assertPublicInquiryHtml(html);
 const newJs = newFiles.filter(file => /\.js$/.test(file.path)).map(file => fs.readFileSync(path.join(output, file.path), 'utf8')).join('\n');
 for (const marker of ['cloudfunctions.net', 'getDemoAvailability', 'demoCheckout', 'signInAnonymously', 'identitytoolkit.googleapis.com', 'firestore.googleapis.com', 'ipapi.co']) if (newJs.includes(marker)) throw Error('Forbidden runtime dependency in public inquiry: '+marker);
 if (!newJs.includes('972506724312')) throw Error('Approved contact missing');

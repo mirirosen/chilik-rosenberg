@@ -1,7 +1,9 @@
-import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
+import { useBrowserLayoutEffect } from '../hooks/useBrowserLayoutEffect';
 import { settle } from '../animations/registry';
 import { requestArrival } from '../animations/homeMotion';
 import { focusArrived, waitForArrival } from './arrival';
+import { waitForInquiryHeading } from './bookingIntent';
 
 // Without a provider (tests, or anything rendered outside the site shell) goToInquiry is null and components
 // keep their original behaviour.
@@ -15,15 +17,13 @@ export function NavigationProvider({ children }) {
   const lifetime = useRef(null);
   const current = useRef(null);
 
-  useLayoutEffect(() => {
+  useBrowserLayoutEffect(() => {
     lifetime.current = new AbortController();
     return () => { current.current?.abort(); lifetime.current.abort(); lifetime.current = null; };
   }, []);
 
   const goToInquiry = useCallback(async () => {
-    const heading = document.getElementById('inquiry-title');
-    const section = document.getElementById('date-selection');
-    if (!heading || !section || !lifetime.current) { window.location.href = '/#date-selection'; return 'failed'; }
+    if (!document.getElementById('date-selection') || !lifetime.current) { window.location.href = '/#date-selection'; return 'failed'; }
     current.current?.abort(); // a newer navigation replaces the older one
     const controller = new AbortController();
     current.current = controller;
@@ -40,6 +40,21 @@ export function NavigationProvider({ children }) {
       if (!ownActivation) cancel();
     }, { signal });
 
+    // Show the loading destination immediately on an intentional early click.
+    // This also brings the lazy picker into view if its intent listener has not
+    // mounted yet. Visitor cancellation still prevents a later forced focus.
+    if (!document.getElementById('inquiry-title')) {
+      const pendingSection = document.getElementById('date-selection');
+      settle(pendingSection);
+      pendingSection.scrollIntoView({ behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }
+    const heading = await waitForInquiryHeading(signal);
+    if (signal.aborted) return 'aborted';
+    const section = document.getElementById('date-selection');
+    if (!heading || !section) {
+      if (current.current === controller) current.current = null;
+      controller.abort(); window.location.href = '/#date-selection'; return 'failed';
+    }
     settle(section);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     heading.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });

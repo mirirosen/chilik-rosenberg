@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import profileImage from '../assets/hilik-cutout-provided.png';
+import profileImage from '../assets/hilik-cutout-provided.webp';
 import { Pause, Play } from '../utils/icons';
 import { useAmbientVideo } from '../hooks/useAmbientVideo';
 import { useNavigation } from '../navigation/NavigationContext';

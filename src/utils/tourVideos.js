@@ -2,6 +2,7 @@
 export function tourVideoSource(value) {
   if (typeof value !== 'string' || !value.trim()) return null;
   const source = value.trim().replace(/^\/?public\/tour-videos\//, '/tour-videos/').replace(/^tour-videos\//, '/tour-videos/');
+  if (/^\/media\/tour\/[a-z0-9-]+\.mp4$/.test(source)) return source;
   try {
     const url = new URL(source, 'https://local.invalid');
     if (source.startsWith('/tour-videos/')) {

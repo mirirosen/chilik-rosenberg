@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import profileImage from '../assets/hilik-cutout-provided.png';
+import profileImage from '../assets/hilik-cutout-provided.webp';
 
 export default function Bio() {
   const { t } = useTranslation();

@@ -1,0 +1,692 @@
+{
+  "generatedAt": "2026-10-12T05:05:26.526412+00:00",
+  "baseCommit": "8e42b709053e6697b274fd76c8cc3af3936dd2a3",
+  "limits": "Binds staged code/media/config and freshly built local artifacts only. Documentation and this manifest are outside its own file list to avoid circular identity. Working and Git-normalized SHA256 are distinguished. Not a production certification. Raw QA/account evidence is excluded from Git.",
+  "scope": {
+    "publishedFrontendSupport": [
+      "src/BookingSiteApp.jsx",
+      "src/booking-main.jsx",
+      "src/booking-i18n.js",
+      "booking-index.html",
+      "firebase.hosting.booking.json",
+      "tailwind.booking.config.js",
+      "scripts/package-booking-release.mjs",
+      "apps/protected-booking/src/data/bookingDesign.js",
+      "src/site-design.css",
+      "src/data/mediaReferences.js",
+      "src/utils/paymentReturn.js",
+      "src/utils/paymentReturnBootstrap.js",
+      "tests/ui/media-references.test.jsx",
+      "tests/ui/payment-return.test.js",
+      "public/favicon.svg",
+      "public/privacy.html"
+    ],
+    "publicMediaSupport": [
+      "public/media/posters/around-the-table.webp",
+      "public/media/posters/bnei-brak-stories.webp",
+      "public/media/posters/cholent-story.webp",
+      "public/media/posters/neighborhood-games.webp",
+      "public/media/posters/tour-conversations.webp",
+      "public/media/posters/tour-traditions.webp",
+      "public/media/posters/vegetarian-tastings.webp",
+      "public/media/posters/vizhnitz-bakery.webp",
+      "public/media/posters/yapchik.webp",
+      "public/media/tour/README.md",
+      "public/media/tour/around-the-table.mp4",
+      "public/media/tour/bnei-brak-stories.mp4",
+      "public/media/tour/cholent-story.mp4",
+      "public/media/tour/neighborhood-games.mp4",
+      "public/media/tour/tour-conversations.mp4",
+      "public/media/tour/tour-traditions.mp4",
+      "public/media/tour/vegetarian-tastings.mp4",
+      "public/media/tour/vizhnitz-bakery.mp4",
+      "public/media/tour/yapchik.mp4"
+    ],
+    "excluded": "Dirty protected booking redesign/locales/tests, backend/functions, payment service rollout, unrelated deployment helpers/configs and raw account evidence remain unchanged/unimported. Main preview mode predicate and picker heading receive minimal compatibility corrections.",
+    "publicFrontendWithOrganicChanges": [
+      "src/InquiryApp.jsx",
+      "src/components/Bio.jsx",
+      "src/components/Footer.jsx",
+      "src/components/Hero.jsx",
+      "src/components/MediaSection.jsx",
+      "src/components/Menu.jsx",
+      "src/components/RatingBar.jsx",
+      "src/components/TourVideos.jsx",
+      "src/data/content.js",
+      "src/hooks/useHomeMotion.js",
+      "src/inquiry-i18n.js",
+      "src/inquiry-main.jsx",
+      "src/locales/en.json",
+      "src/locales/he.json",
+      "src/navigation/NavigationContext.jsx",
+      "src/utils/routeMetadata.js",
+      "src/utils/tourVideos.js",
+      "tests/ui/navigation-cancel.test.jsx",
+      "tests/ui/tour-videos.test.jsx",
+      "scripts/package-inquiry-release.mjs",
+      "firebase.hosting.inquiry.json",
+      "vite.config.js",
+      "postcss.config.js"
+    ],
+    "newCompatibilityFixes": [
+      "apps/protected-booking/src/utils/preview.js",
+      "apps/protected-booking/src/components/BookingSection.jsx",
+      "tests/ui/public-booking-selection.test.jsx",
+      "scripts/verify-booking-demo.cjs"
+    ]
+  },
+  "files": [
+    {
+      "path": ".gitignore",
+      "indexSha256": "0dfcde900572a482a651658f234991cae027441232bb81032f84ed62ae04613a",
+      "workingSha256": "ead849cba84115e21e7a8000618e6edbf685cd6b88f2ba647a93f08c100b336d",
+      "gitBlob": "df82bc6d1c173ac4e689d6b0dba2ec3e3db5bc30"
+    },
+    {
+      "path": "apps/protected-booking/src/components/BookingSection.jsx",
+      "indexSha256": "0459bf9b9f5bc95167c5614b9811261ed39788ae96dd62575eaac2219c2f7fec",
+      "workingSha256": "81f1141d5936b9d137088da2c75859056c9e0a1004c9b84deb1c7205e04337ea",
+      "gitBlob": "7e2cb24543620a714e3c2703a5e83249f03058de"
+    },
+    {
+      "path": "apps/protected-booking/src/data/bookingDesign.js",
+      "indexSha256": "79736b109698c62424a2bd85635a0e5d6b09507160f00b2e0711bf0096e40dde",
+      "workingSha256": "024cc314f9cf0b81976f09edcef95c27685b41d99d8a26df13da947eb1c8a431",
+      "gitBlob": "279f8a473074750f383b328cc4882b47dc7b81bb"
+    },
+    {
+      "path": "apps/protected-booking/src/utils/preview.js",
+      "indexSha256": "c236147199d2b2ba9389722126cfd5b19bd1c7218009fa74214315474f5cb639",
+      "workingSha256": "b693bfd9d15d296b2ab3bc1b5a939a7c023d58ebac863de2bf2775035b587355",
+      "gitBlob": "3efad62784200856e8c5642f0351f1bb47090948"
+    },
+    {
+      "path": "booking-index.html",
+      "indexSha256": "8ba18c64b2d5053bcf281dd53e9cf8bec2e0a2c94637cae0012066203b9b872f",
+      "workingSha256": "8ba18c64b2d5053bcf281dd53e9cf8bec2e0a2c94637cae0012066203b9b872f",
+      "gitBlob": "e0e5f9bef2a34ac0c8403d374b701fd30bcc2464"
+    },
+    {
+      "path": "firebase.hosting.booking.json",
+      "indexSha256": "873c3eb64e9ba15c5d8361736844cfc386ef9211c6d49f0fccea700678d8fbc5",
+      "workingSha256": "873c3eb64e9ba15c5d8361736844cfc386ef9211c6d49f0fccea700678d8fbc5",
+      "gitBlob": "02c79c245b469f67d9114e07d6422d95f0307587"
+    },
+    {
+      "path": "firebase.hosting.inquiry.json",
+      "indexSha256": "6c401129a9e1db8b55dcfb573a980a8f185f7067ad6bcc8bcb188f910834e4b0",
+      "workingSha256": "6c401129a9e1db8b55dcfb573a980a8f185f7067ad6bcc8bcb188f910834e4b0",
+      "gitBlob": "0559d6b75a2a6bbd785056d190ceb9a66474a312"
+    },
+    {
+      "path": "package-lock.json",
+      "indexSha256": "5fa62bb6fafb482d6d48bb7492a70411a2ebf906b8f556d5ef77e83b43321c78",
+      "workingSha256": "79108fc5ed7ef3e77839a9c3e16b866f0035b4613544304b142abbb0a7c6d5c7",
+      "gitBlob": "1d5b7bf71d12915588abc4687a9a2dba782d052e"
+    },
+    {
+      "path": "package.json",
+      "indexSha256": "c97ba316732bf5c31e993a7ee85e2ba127b0a983f134ee8c050b589293328392",
+      "workingSha256": "2a71f9341af4982a4b7507ac3fa384837d0818c5a0a2a44cb4de402536e391dc",
+      "gitBlob": "0a9f6d4d2ab5712f6cce25e459a4b7657a4f5586"
+    },
+    {
+      "path": "postcss.config.js",
+      "indexSha256": "9cb2d356328f256f463cddfa2ca6f3260fb1005caa1c7f47419471eeb69c181a",
+      "workingSha256": "87f6fdc1326810203777e1d7bad90c0165eba3fd330da060db3f5b088d1efcf3",
+      "gitBlob": "832848b24b9d299c728183e249e118b76db799d8"
+    },
+    {
+      "path": "public/favicon.svg",
+      "indexSha256": "8db7d649bcc322bd44b989f795a59e28537d67fbb78b6061ceacc53f2d928081",
+      "workingSha256": "8db7d649bcc322bd44b989f795a59e28537d67fbb78b6061ceacc53f2d928081",
+      "gitBlob": "b617fa3ce9cbe2f7c8e5ea9b9476e1743b344a32"
+    },
+    {
+      "path": "public/google5a2dfa5975623177.html",
+      "indexSha256": "c1d944b21e4e2ae82d8e72ceb96af659d49e52d7ccf2d1ff387d4507b17c6562",
+      "workingSha256": "c1d944b21e4e2ae82d8e72ceb96af659d49e52d7ccf2d1ff387d4507b17c6562",
+      "gitBlob": "dc97b66d9776ead101351ab04d81288f87de2371"
+    },
+    {
+      "path": "public/media/posters/around-the-table.webp",
+      "indexSha256": "e13b258d890a3aa6f3871316a8fa377bd562386d6ba556d5fd5a5fb5612911b8",
+      "workingSha256": "e13b258d890a3aa6f3871316a8fa377bd562386d6ba556d5fd5a5fb5612911b8",
+      "gitBlob": "cc86f27edbdb7d1bf9f9bc56e9538aca649cef40"
+    },
+    {
+      "path": "public/media/posters/bnei-brak-stories.webp",
+      "indexSha256": "d3f8a1cd884a5c15f590b931f253bcb30410652684a5c8c5424961500a7e3f65",
+      "workingSha256": "d3f8a1cd884a5c15f590b931f253bcb30410652684a5c8c5424961500a7e3f65",
+      "gitBlob": "6c0cfacb4fd2b4e7097e61f9e54ac31634cd7085"
+    },
+    {
+      "path": "public/media/posters/cholent-story.webp",
+      "indexSha256": "bc96b0df4d592222c7ccfd2a5f471a3bfe2e893f9146441d16471f9d1cd06751",
+      "workingSha256": "bc96b0df4d592222c7ccfd2a5f471a3bfe2e893f9146441d16471f9d1cd06751",
+      "gitBlob": "88403076130ed0206782e5d64d204d262bb749b6"
+    },
+    {
+      "path": "public/media/posters/neighborhood-games.webp",
+      "indexSha256": "2ab4659a5c44716e5660eb3ccedbc9693514cf608e706e51386bf01e52a45676",
+      "workingSha256": "2ab4659a5c44716e5660eb3ccedbc9693514cf608e706e51386bf01e52a45676",
+      "gitBlob": "7ffedbbade9e4af8feb92362d50689788efed343"
+    },
+    {
+      "path": "public/media/posters/tour-conversations.webp",
+      "indexSha256": "df6d4e48b89aa1dbff00e7ec1aa622eba199eea01b54b2373a289e8ed9827fe9",
+      "workingSha256": "df6d4e48b89aa1dbff00e7ec1aa622eba199eea01b54b2373a289e8ed9827fe9",
+      "gitBlob": "d80b556d4c97128f75375fe4c6f09588f30e62e5"
+    },
+    {
+      "path": "public/media/posters/tour-traditions.webp",
+      "indexSha256": "b62d6d6dd5fd69ad8fb9c1c99cc95264d77d257873688884a3b03f00dfebd2a0",
+      "workingSha256": "b62d6d6dd5fd69ad8fb9c1c99cc95264d77d257873688884a3b03f00dfebd2a0",
+      "gitBlob": "e475188744f16514f391642742a6eb023283e101"
+    },
+    {
+      "path": "public/media/posters/vegetarian-tastings.webp",
+      "indexSha256": "0af4c8dd18365c35d6d33234c9b186f0584898228dcd7bbb4fbc6704730ce52a",
+      "workingSha256": "0af4c8dd18365c35d6d33234c9b186f0584898228dcd7bbb4fbc6704730ce52a",
+      "gitBlob": "a5e317d496e9d90839c9c13e1bbd248f5431e829"
+    },
+    {
+      "path": "public/media/posters/vizhnitz-bakery.webp",
+      "indexSha256": "f77746c6c61b2cf3d3bec6464c7e37b1a2254119524294d73ca1d4fb0635badb",
+      "workingSha256": "f77746c6c61b2cf3d3bec6464c7e37b1a2254119524294d73ca1d4fb0635badb",
+      "gitBlob": "65f2e750b1ae26b485ec8ed3a5c6f9cd4609c778"
+    },
+    {
+      "path": "public/media/posters/yapchik.webp",
+      "indexSha256": "3e57fa6fce6d4a509c53e2f10ff9ff17f41eec9123c8df74c88dfedbf30517a5",
+      "workingSha256": "3e57fa6fce6d4a509c53e2f10ff9ff17f41eec9123c8df74c88dfedbf30517a5",
+      "gitBlob": "05a58b67c0703b5320b62f7eea2750ca45d4599f"
+    },
+    {
+      "path": "public/media/tour/README.md",
+      "indexSha256": "1b8aef6f568842281b4a6f523209126fa4c9ebaacad67c00e9cdfd0c955e95b6",
+      "workingSha256": "1b8aef6f568842281b4a6f523209126fa4c9ebaacad67c00e9cdfd0c955e95b6",
+      "gitBlob": "894697b6b13d9379228fdf923a020ab6060ab9c2"
+    },
+    {
+      "path": "public/media/tour/around-the-table.mp4",
+      "indexSha256": "8880bb4cc030c07b393586a340b53439b105d46141d3f9943059dda14d600a1f",
+      "workingSha256": "8880bb4cc030c07b393586a340b53439b105d46141d3f9943059dda14d600a1f",
+      "gitBlob": "7bdc184dd57aa1d503d0662a8e554d2854aa7263"
+    },
+    {
+      "path": "public/media/tour/bnei-brak-stories.mp4",
+      "indexSha256": "45082586321d95bb7ca5b127c7a5c486a3481008d41077c352ddc0c3182b9170",
+      "workingSha256": "45082586321d95bb7ca5b127c7a5c486a3481008d41077c352ddc0c3182b9170",
+      "gitBlob": "920cd5f1823cbe2d94ab8f12ac2686cfb7beaada"
+    },
+    {
+      "path": "public/media/tour/cholent-story.mp4",
+      "indexSha256": "ce804299f0a548c2fbf3c2d1969938a4cab0ad7b7e42c05bab3946b4d8588bad",
+      "workingSha256": "ce804299f0a548c2fbf3c2d1969938a4cab0ad7b7e42c05bab3946b4d8588bad",
+      "gitBlob": "5ce9678092c814b51de1ee3cb2927a664c661f12"
+    },
+    {
+      "path": "public/media/tour/neighborhood-games.mp4",
+      "indexSha256": "598512ddfff1084eea71fb63600c60d7dcb5a3301fc5aeb559153037d493951a",
+      "workingSha256": "598512ddfff1084eea71fb63600c60d7dcb5a3301fc5aeb559153037d493951a",
+      "gitBlob": "904cc76e216b242ddbeca35ae88925bc8314cd7f"
+    },
+    {
+      "path": "public/media/tour/tour-conversations.mp4",
+      "indexSha256": "1c8a06e80a14d906692655edd3dd70f68fafa8da9c3662ec811a9f36b41071d1",
+      "workingSha256": "1c8a06e80a14d906692655edd3dd70f68fafa8da9c3662ec811a9f36b41071d1",
+      "gitBlob": "8d01f2816ba284ca2512bf85694eca5c50e398d8"
+    },
+    {
+      "path": "public/media/tour/tour-traditions.mp4",
+      "indexSha256": "c49111751e60883b1184a99b380a7fd75c9f59817d72b56d9070eb9e1629731d",
+      "workingSha256": "c49111751e60883b1184a99b380a7fd75c9f59817d72b56d9070eb9e1629731d",
+      "gitBlob": "9bf144f03bc55036222df19974e8b5f1e8edb406"
+    },
+    {
+      "path": "public/media/tour/vegetarian-tastings.mp4",
+      "indexSha256": "329cf855618314d386c172ee1db8a634a31140cf59cd50f5249e54ad9b65c2e0",
+      "workingSha256": "329cf855618314d386c172ee1db8a634a31140cf59cd50f5249e54ad9b65c2e0",
+      "gitBlob": "22558def7c380133b85649fe5c4f00f6e97ec939"
+    },
+    {
+      "path": "public/media/tour/vizhnitz-bakery.mp4",
+      "indexSha256": "62634ba5367b9a6668b5beaa600eed49e21496784d3fbb10fd98680be6791a81",
+      "workingSha256": "62634ba5367b9a6668b5beaa600eed49e21496784d3fbb10fd98680be6791a81",
+      "gitBlob": "27d6fce5efb4cd4550eab125194fbac2d23ed388"
+    },
+    {
+      "path": "public/media/tour/yapchik.mp4",
+      "indexSha256": "cece3b314ed50a52449b6b55d880e3dcb8a621c5798b7d18b3657825ab710171",
+      "workingSha256": "cece3b314ed50a52449b6b55d880e3dcb8a621c5798b7d18b3657825ab710171",
+      "gitBlob": "4e59a8d46f80b6299e717e859ffc43b2f04a4d44"
+    },
+    {
+      "path": "public/privacy.html",
+      "indexSha256": "3c3a9dc75e74f782f232cefdc7f17a08f3bb74e54135d4543be2575376e9225a",
+      "workingSha256": "3c3a9dc75e74f782f232cefdc7f17a08f3bb74e54135d4543be2575376e9225a",
+      "gitBlob": "45f40337c0ba0f0e2eed79382b2b66c98a19c9bf"
+    },
+    {
+      "path": "scripts/browser-organic-audit.cjs",
+      "indexSha256": "ff04da904ba4af3e42da551de861be4b4a7c20080c7e268b0bf09c0880e7269b",
+      "workingSha256": "4e22ce24f6763f4ae8be26655d0ee8c8779d12e3bb468e61d7747a35436ca49a",
+      "gitBlob": "6bbe5a755199564752d1314a05f9e2fdd8e2e53d"
+    },
+    {
+      "path": "scripts/build-organic-pages.mjs",
+      "indexSha256": "d266a2727a1457d469b476c117c0085967012d54142c3d295a6fd92e64785bce",
+      "workingSha256": "d266a2727a1457d469b476c117c0085967012d54142c3d295a6fd92e64785bce",
+      "gitBlob": "21989893a6d7cb524d21897bcd245fd2e97905e1"
+    },
+    {
+      "path": "scripts/inline-public-styles.mjs",
+      "indexSha256": "257654c5348872c0a9d30aeedce21d99efab5fa09470a828d0e23121edc1862c",
+      "workingSha256": "257654c5348872c0a9d30aeedce21d99efab5fa09470a828d0e23121edc1862c",
+      "gitBlob": "126614c495db4b7c3d2a65450f76c621b4a167bb"
+    },
+    {
+      "path": "scripts/organic-html.mjs",
+      "indexSha256": "8e9e504b33dda1e249d7068408122fcd55004c1554afd0dbcefb5aa49674ff29",
+      "workingSha256": "8e9e504b33dda1e249d7068408122fcd55004c1554afd0dbcefb5aa49674ff29",
+      "gitBlob": "50014df73ddace0be5e66bad6da2577f7113773c"
+    },
+    {
+      "path": "scripts/package-booking-release.mjs",
+      "indexSha256": "f8147d3e5ce43f951ef9a9386cbb9684bdf70225963f304e85b3f71bba9b8e5a",
+      "workingSha256": "f8147d3e5ce43f951ef9a9386cbb9684bdf70225963f304e85b3f71bba9b8e5a",
+      "gitBlob": "0c5a77639ac92f38025b366617bd2981ffe5ef11"
+    },
+    {
+      "path": "scripts/package-inquiry-release.mjs",
+      "indexSha256": "2e367e7928d607af18be96e55e504ed2ed0e0364dcba5c5294ccf8ef12067937",
+      "workingSha256": "3a322f8979ef425a8a3fdb516a23b5f95439c7ddeb48f8d411529a23663741f1",
+      "gitBlob": "d05066f0c65271ce428990e7eb90339cee7f1d51"
+    },
+    {
+      "path": "scripts/prerender-public-home.mjs",
+      "indexSha256": "f45972c033398183a2395c1fefd4dc1010fd3bd90a556db9119909fd88d7ad1e",
+      "workingSha256": "f45972c033398183a2395c1fefd4dc1010fd3bd90a556db9119909fd88d7ad1e",
+      "gitBlob": "727657603af39298aa5c0e06103df042946734ed"
+    },
+    {
+      "path": "scripts/public-inquiry-gate.mjs",
+      "indexSha256": "79cc81e62c9a5f24e2a0487c1e9690c67b44a6b33a88bdd010c16def89e704a5",
+      "workingSha256": "79cc81e62c9a5f24e2a0487c1e9690c67b44a6b33a88bdd010c16def89e704a5",
+      "gitBlob": "2f7146366ab833548281ac0b82e3c88486f55bb4"
+    },
+    {
+      "path": "scripts/render-public-home.jsx",
+      "indexSha256": "f006f1bdadb8236db48e6ea041625b8522f125a7e73af8c692f2ca429f7071e1",
+      "workingSha256": "f006f1bdadb8236db48e6ea041625b8522f125a7e73af8c692f2ca429f7071e1",
+      "gitBlob": "c5c80b473f95431eb73e9bce9e888dd7eff3bc9f"
+    },
+    {
+      "path": "scripts/serve-organic-audit.mjs",
+      "indexSha256": "0aa69574f64518d4b41da2a56967dce815823a87c8bb2626105cbaca13777b8f",
+      "workingSha256": "0aa69574f64518d4b41da2a56967dce815823a87c8bb2626105cbaca13777b8f",
+      "gitBlob": "26200c61ccd1f35bfb9c4ff048e3f10442ec88f3"
+    },
+    {
+      "path": "scripts/verify-booking-demo.cjs",
+      "indexSha256": "7c32b982550006486e00c6d710df9419a921bcc2f199c6daa003ca68914b6230",
+      "workingSha256": "7c32b982550006486e00c6d710df9419a921bcc2f199c6daa003ca68914b6230",
+      "gitBlob": "cc8dfe37267022a6caef15719cd5a6c7682ab141"
+    },
+    {
+      "path": "scripts/verify-booking-intent.cjs",
+      "indexSha256": "81cb316b3a84f33f618b3617ccd3f734b4caf8acf67fd57eb9b878e57b7a57ee",
+      "workingSha256": "81cb316b3a84f33f618b3617ccd3f734b4caf8acf67fd57eb9b878e57b7a57ee",
+      "gitBlob": "70571bffe2412087c37da5da7efb767d97c86f58"
+    },
+    {
+      "path": "scripts/verify-home-critical-css.cjs",
+      "indexSha256": "74dff6e631344cd34272c4bd0e76190ae6ec200c171112ca52da88c3f11e7cae",
+      "workingSha256": "48b0a63df520874ea45a9589b812295d3cb419667fd368a452e78bf8e6f3878c",
+      "gitBlob": "96cae994fe21b15fdb305915a76f6bf93b1588cc"
+    },
+    {
+      "path": "scripts/verify-home-hydration.cjs",
+      "indexSha256": "26e71430142fc7b64e2f7a4a62d2132e8ae1253c498c9488d7fae3fbcbb20134",
+      "workingSha256": "b4ed63e91caeb3a5cb64c84b4afa75bfab1a458f2a53ea808527e521b66861a6",
+      "gitBlob": "3081f27f83e7b73634bb718bdffb7c79f1ffcb3b"
+    },
+    {
+      "path": "scripts/verify-home-navigation.cjs",
+      "indexSha256": "5de2c76a20bc0d15f68f2397cc3deaada37a53ab3312be26c6f140de992d4acc",
+      "workingSha256": "42c137b855d624ee1447f46b71a25e79817cf263e7f8caccd8a26ed7bbcbebdf",
+      "gitBlob": "3e8e1e09ac469a837d376925b15cda63d8b1b19a"
+    },
+    {
+      "path": "scripts/verify-organic-release.mjs",
+      "indexSha256": "470a432cb4c066a2ed2a733ede20a0dcc6205b8b2ca50d58b29698a0a0425ed8",
+      "workingSha256": "1c25624dcc8486f44e4f7918c304771daffdd00f173ef7d533a43e257387d6fc",
+      "gitBlob": "fccf9674f3df2a4641e980fc2d8f6e4b38f881ea"
+    },
+    {
+      "path": "scripts/verify-public-build-boundaries.mjs",
+      "indexSha256": "a5576fcacdbd03185daec50975c5b579659af1bd0c04167a94d9069886e60d74",
+      "workingSha256": "b17c9755ac336958dcd192f71b4b3bc96aada95dbce3a0c3572041e8f83b670d",
+      "gitBlob": "95aea8212455b8f57c733b39bc7b71549f2f5c86"
+    },
+    {
+      "path": "src/BookingSiteApp.jsx",
+      "indexSha256": "a2c6098c6527344e0e22e9aea9581f55137e7d304bfc4a205d1d4ca3c598670f",
+      "workingSha256": "873f3369a64689df1c61d278826e958f2f86ad0acf18a31965b5485dea21598d",
+      "gitBlob": "7e155b1abc4beee93ab851220e14bd3268762a38"
+    },
+    {
+      "path": "src/InquiryApp.jsx",
+      "indexSha256": "c95ff46c3d16b9eb04815e7f7049b8432de9dc6cdd6cf6bc8b973c0e0de99480",
+      "workingSha256": "4ae87d394864aa21a3a1f9fc86f5b5be3643268fe9ddb210f9711abbcda26f1f",
+      "gitBlob": "d5e5d04503cc3074c8e13b8ff75ee569b1dcba60"
+    },
+    {
+      "path": "src/assets/hilik-cutout-provided.webp",
+      "indexSha256": "a1df1270013c3b2e9e357f8240df4e20be7c960cdb72897c56843362893eea59",
+      "workingSha256": "a1df1270013c3b2e9e357f8240df4e20be7c960cdb72897c56843362893eea59",
+      "gitBlob": "d62010fb04c4bfd8a5a19bbb86aec1bcc3b9b6d1"
+    },
+    {
+      "path": "src/booking-i18n.js",
+      "indexSha256": "ec216090018a3c7c4489bd2e05745543dcef2fc626091a581546b39988afe08c",
+      "workingSha256": "ec216090018a3c7c4489bd2e05745543dcef2fc626091a581546b39988afe08c",
+      "gitBlob": "b2fcfda35396443b914558843fb4f0e2c2fb65c9"
+    },
+    {
+      "path": "src/booking-main.jsx",
+      "indexSha256": "f1170dd3c82ef68f401b7e22fd7a8bf6cdb6f1882673167cd495eb565016599b",
+      "workingSha256": "f1170dd3c82ef68f401b7e22fd7a8bf6cdb6f1882673167cd495eb565016599b",
+      "gitBlob": "6e598693a95a39c28b42da45679dea6ce9b2d05b"
+    },
+    {
+      "path": "src/components/Bio.jsx",
+      "indexSha256": "b38db3cf0e43bc755d1008820801b141bfb821a88fb360bd654bf7f0776abd49",
+      "workingSha256": "a16f25bf75a46f12bd5e88d50709f8c1854ec81324bfc5abedaa1a010ed4bf0d",
+      "gitBlob": "d4bdd09ba523a46e3c76fb2b15e93c7c6379fd87"
+    },
+    {
+      "path": "src/components/Footer.jsx",
+      "indexSha256": "d036754fe183e7a4cb7f1568f2d3283291a24d9449086af1c2e8332edf90e8cf",
+      "workingSha256": "f686201072684f2595707700b813fc8301dd451a2c991fb51df5a9e8ce14624a",
+      "gitBlob": "3d1f6c8307ad7fbfee20e1f7b5344ce77acae3f7"
+    },
+    {
+      "path": "src/components/Hero.jsx",
+      "indexSha256": "536945346fce1a24fd0731f69ac114fe20140276b6f7641680a21dcb3aeba846",
+      "workingSha256": "536945346fce1a24fd0731f69ac114fe20140276b6f7641680a21dcb3aeba846",
+      "gitBlob": "548aa18fd517a5efd16bf11c6e119e256a258503"
+    },
+    {
+      "path": "src/components/MediaSection.jsx",
+      "indexSha256": "85bf8259d48cb969cc3c18f002e46f5186d945bf3cdf36ed6f5291d7c90095c9",
+      "workingSha256": "e69b635faee85374ddcab84fced72b4a73c2f6834218a9964a3f5b6167c1e06d",
+      "gitBlob": "93686e47845f1c8d8a402875ebeeb0f3341d5afb"
+    },
+    {
+      "path": "src/components/Menu.jsx",
+      "indexSha256": "983f5a9a4aeb0e2f73c49bec34dcd942461eb0a1d5f68d74f0380ffbecdcc1da",
+      "workingSha256": "84aef94f4f172d72cecdb08a7d134e5d7a58267ccada14e8b8a5528f305d0dfb",
+      "gitBlob": "94ce86d03d5cf1d24a157fad10a87accb62a1833"
+    },
+    {
+      "path": "src/components/RatingBar.jsx",
+      "indexSha256": "b14056fa70623b7a99ea16f129aa4893bb4e65f376f8bd4fc0260e87e64c71a9",
+      "workingSha256": "c53249f824ba7f02636b28d60e11b2c77d4a959090a1e4f9325f1229a9e74db3",
+      "gitBlob": "64bed1f2cf62ca3571a07c96d6190ba8e603204b"
+    },
+    {
+      "path": "src/components/TourOverview.jsx",
+      "indexSha256": "0bbbee68edc02238d268e71f63b69bbc99646e66702eef724b100461fed66502",
+      "workingSha256": "0bbbee68edc02238d268e71f63b69bbc99646e66702eef724b100461fed66502",
+      "gitBlob": "7ddd6389c828df1abf5e0649aaf8f84431828be7"
+    },
+    {
+      "path": "src/components/TourVideos.jsx",
+      "indexSha256": "0ef6099947010264e5b5ca4cc420cc3a70d47725f9539f4bd21167987f1a6199",
+      "workingSha256": "0ef6099947010264e5b5ca4cc420cc3a70d47725f9539f4bd21167987f1a6199",
+      "gitBlob": "a39c3a13dfed058dc1d2ae889558484d067f3766"
+    },
+    {
+      "path": "src/data/bookingFaqCopy.js",
+      "indexSha256": "be5c4e580497d08ab68a26736464b452af3f099f92d2bcf95d061b207fba8d21",
+      "workingSha256": "be5c4e580497d08ab68a26736464b452af3f099f92d2bcf95d061b207fba8d21",
+      "gitBlob": "048ea7081131785100158e25cb4c6cbdfc4dfc60"
+    },
+    {
+      "path": "src/data/content.js",
+      "indexSha256": "8a26a9e4289e49f6e55088a8b3586ccea2b67c569dccda4863bb3827251783d1",
+      "workingSha256": "bab7b67d4f12ba7fd349aa968090215a8b4c0a626e16c28e47a52e3c6ee63088",
+      "gitBlob": "45236526570b8caadb67f5c4ce401287d26f1769"
+    },
+    {
+      "path": "src/data/mediaReferences.js",
+      "indexSha256": "7c48ddb20a02f63b091ffc3c9ba49165fb87898151fba051095e712ef8740c9d",
+      "workingSha256": "7c48ddb20a02f63b091ffc3c9ba49165fb87898151fba051095e712ef8740c9d",
+      "gitBlob": "145eb45ee1793f011aedb0565df6bc7f24764e1c"
+    },
+    {
+      "path": "src/data/organicContent.js",
+      "indexSha256": "77a1b58d6d8784a7c98f1dee48263b6e86dcb9c982ca577e7f580f5fd04404ac",
+      "workingSha256": "77a1b58d6d8784a7c98f1dee48263b6e86dcb9c982ca577e7f580f5fd04404ac",
+      "gitBlob": "4dcd40b013e83cdf5168d3011438b3d4610a81f1"
+    },
+    {
+      "path": "src/hooks/useBrowserLayoutEffect.js",
+      "indexSha256": "587e9c4159da6d30a314387bba422b158af331ec3e87c93ea35808933364261c",
+      "workingSha256": "587e9c4159da6d30a314387bba422b158af331ec3e87c93ea35808933364261c",
+      "gitBlob": "58a784808fb21f3b5b6f24eb3066de75f87c4f38"
+    },
+    {
+      "path": "src/hooks/useHomeMotion.js",
+      "indexSha256": "bab22ef3baa9b20d8f6ef009ed04995e3b6a493b91cfaef72ff0fa3900686cca",
+      "workingSha256": "70a0311115c6cee1247636ccee0502744de0e6a3c7a6651c1796deadd44badbf",
+      "gitBlob": "f759bf7bd0d2c8ab702946abcaa6b712435f3730"
+    },
+    {
+      "path": "src/inquiry-i18n.js",
+      "indexSha256": "e24364477852cef2bab03ce4e8e814661b0bd8afadf1b2430f0ae58895ead66d",
+      "workingSha256": "7accf63db0ef524ceeaa69a9e92eca6b0ffbb72cfbd4e91849ccb659817c298c",
+      "gitBlob": "eacca864509aaf68976fc166339e59a52f1f3954"
+    },
+    {
+      "path": "src/inquiry-main.jsx",
+      "indexSha256": "207d65276c078d18ca4437f1134778b7991d09d14024e25aa4b2893532d2bc49",
+      "workingSha256": "49f7a6a47cec52d2b690ce3b13a124acc0905c100f5e5d69b2971dc84c944f5a",
+      "gitBlob": "585f3e3daa0a22b69f293d5939074519f578f822"
+    },
+    {
+      "path": "src/locales/en.json",
+      "indexSha256": "2ca3205c50ad77c05e8145484689b591807abd8084b3f539cb42c9f7bc91304e",
+      "workingSha256": "7d953a34bec61d8800f3fd7930d013095d9544609670038e0f4cb4e6ede67bff",
+      "gitBlob": "b92bfe3d598434d378b7ad8a2fa9f4bb2058d39e"
+    },
+    {
+      "path": "src/locales/he.json",
+      "indexSha256": "a2bf3c86aca8112c74178435797525f9ea0499276fd790cc830309b0934643fb",
+      "workingSha256": "e87c0f3fc7b253fe7919897b5aaecaf10258f4f40267fbc750978a4e9ca7c7d1",
+      "gitBlob": "dcf36488c169daf523c27553a4d7ff777d1a5c0a"
+    },
+    {
+      "path": "src/navigation/NavigationContext.jsx",
+      "indexSha256": "adbd3c628f1de0c2ce33d91f519d38b1d887d688eec2d825b68f10c9352fd72f",
+      "workingSha256": "adbd3c628f1de0c2ce33d91f519d38b1d887d688eec2d825b68f10c9352fd72f",
+      "gitBlob": "4eee93b02f4f603b3230ad9d48b6ddff9cbaadf3"
+    },
+    {
+      "path": "src/navigation/bookingIntent.js",
+      "indexSha256": "b3741bb8999773aa7a4b98544581e1be8f64822bfcbfa20da671a32624a9274b",
+      "workingSha256": "b3741bb8999773aa7a4b98544581e1be8f64822bfcbfa20da671a32624a9274b",
+      "gitBlob": "b374fd1ffa0b65abf6081be3447bab4f80e11ef7"
+    },
+    {
+      "path": "src/organic-seo.css",
+      "indexSha256": "7e87cc8d56174379da3fb6ab478a8e7963da13d994ac348c8b85707068e4c14e",
+      "workingSha256": "7e87cc8d56174379da3fb6ab478a8e7963da13d994ac348c8b85707068e4c14e",
+      "gitBlob": "25431d5c7fd97a51cd89e879574795f5ffb16e1a"
+    },
+    {
+      "path": "src/site-design.css",
+      "indexSha256": "16ccc517698f46df6b13dfabb4d9ddcd809ebc3aacb8f4859e0b6463e0309727",
+      "workingSha256": "16ccc517698f46df6b13dfabb4d9ddcd809ebc3aacb8f4859e0b6463e0309727",
+      "gitBlob": "9bb9aa7feb600345f79b20fcefd432414369d737"
+    },
+    {
+      "path": "src/utils/mountPublicSite.jsx",
+      "indexSha256": "6197dab4c01c4e754085d565aec8a09c6b42b74dc0645ae246a314ebd7b3afd6",
+      "workingSha256": "6197dab4c01c4e754085d565aec8a09c6b42b74dc0645ae246a314ebd7b3afd6",
+      "gitBlob": "a7c70214e97789865a8853d64c47123ff3d08b71"
+    },
+    {
+      "path": "src/utils/paymentReturn.js",
+      "indexSha256": "3ce0d7f72ee563e6c803bbe896f52870716039805689a992f2997e3e25bfa024",
+      "workingSha256": "3ce0d7f72ee563e6c803bbe896f52870716039805689a992f2997e3e25bfa024",
+      "gitBlob": "48cb0b2977fb9cf39faad6afc0450b6561873235"
+    },
+    {
+      "path": "src/utils/paymentReturnBootstrap.js",
+      "indexSha256": "6d1924f1ce8eb59e49adf4a501c564e4bf05a58256f235e89c52422bd94b79b8",
+      "workingSha256": "6d1924f1ce8eb59e49adf4a501c564e4bf05a58256f235e89c52422bd94b79b8",
+      "gitBlob": "f523dcd26ff9e30e5780b4a9aa693a24f361560c"
+    },
+    {
+      "path": "src/utils/routeMetadata.js",
+      "indexSha256": "6c06b1d22563f0b5c905357d7357fa25adfc826eb1faa515bce1895cb2c6ebc4",
+      "workingSha256": "f5e870e4ee588b4ce4aff26843ead45b5b84d979ce7e04af6ff8f3e2cdc60b0d",
+      "gitBlob": "2b2562deb606771115188ca4bf2ee50088a9a854"
+    },
+    {
+      "path": "src/utils/tourVideos.js",
+      "indexSha256": "dfcf3368f32a03eb84749ede77c161ce6cb38522c93352a021205f3216779931",
+      "workingSha256": "9f4d61bd132ae68690d1352d468a3897f3230f973ca297be4bb2201b42fa6272",
+      "gitBlob": "c92df2886cd3f63e488072376bedd14511ebbf6b"
+    },
+    {
+      "path": "tailwind.booking.config.js",
+      "indexSha256": "70abf642eac18f5707d6340bbe024bfa7fc6b1553ebc887fa567550c2fc87760",
+      "workingSha256": "70abf642eac18f5707d6340bbe024bfa7fc6b1553ebc887fa567550c2fc87760",
+      "gitBlob": "be385ad4e3083c84dccc287bfaa074071374da90"
+    },
+    {
+      "path": "tests/ui/booking-intent.test.js",
+      "indexSha256": "2d90cd4359bd926c20e70a35d41adbc5020a02a43f7ab183485245133ea97d32",
+      "workingSha256": "2d90cd4359bd926c20e70a35d41adbc5020a02a43f7ab183485245133ea97d32",
+      "gitBlob": "69d733221a7197cffdd92ebaaa23666090ed6a59"
+    },
+    {
+      "path": "tests/ui/media-references.test.jsx",
+      "indexSha256": "e038ceb6e7d4f0205c037625f80a6ede8f22e61469e3d1488e04b890e2bbbee9",
+      "workingSha256": "e038ceb6e7d4f0205c037625f80a6ede8f22e61469e3d1488e04b890e2bbbee9",
+      "gitBlob": "65a2baa6edaf61be56454ff858f7014bf0f6e7f4"
+    },
+    {
+      "path": "tests/ui/navigation-cancel.test.jsx",
+      "indexSha256": "b77259f59baae403d68298c29466f44f427b2fb149a98e2f61c34a14e96993d1",
+      "workingSha256": "b77259f59baae403d68298c29466f44f427b2fb149a98e2f61c34a14e96993d1",
+      "gitBlob": "c7a3db484d464f19e692a993784f78eeffd5012e"
+    },
+    {
+      "path": "tests/ui/organic-seo.test.js",
+      "indexSha256": "2652995554bd89448d71c6ecb6bd91173f2b091b432e000b1be6904dd889d686",
+      "workingSha256": "2652995554bd89448d71c6ecb6bd91173f2b091b432e000b1be6904dd889d686",
+      "gitBlob": "dfc9b0dee6d40cf026903e19e7035603c3a0e881"
+    },
+    {
+      "path": "tests/ui/payment-return.test.js",
+      "indexSha256": "014f6e09015ed22e0fbd447985299d83c4c78c81a7fbc9a9702a7f7823833730",
+      "workingSha256": "014f6e09015ed22e0fbd447985299d83c4c78c81a7fbc9a9702a7f7823833730",
+      "gitBlob": "71657b35e9f53e42d0fc8a17fd822c8d28e71f25"
+    },
+    {
+      "path": "tests/ui/public-booking-selection.test.jsx",
+      "indexSha256": "60531853adc908cbd5628b82c6bba4d5ace7b8bdd8fded6912b101d22a4af47b",
+      "workingSha256": "60531853adc908cbd5628b82c6bba4d5ace7b8bdd8fded6912b101d22a4af47b",
+      "gitBlob": "1f7cc706875a90ae9293ce5e465913f1de97e46c"
+    },
+    {
+      "path": "tests/ui/public-language-mount.test.jsx",
+      "indexSha256": "22ad48c5301047c3eab07523e577efe6a58aa6f54528bf5b937fd0389f4c98fd",
+      "workingSha256": "22ad48c5301047c3eab07523e577efe6a58aa6f54528bf5b937fd0389f4c98fd",
+      "gitBlob": "7e78a61d6b5453c83ee419f58ca2f2b6d9f8597f"
+    },
+    {
+      "path": "tests/ui/tour-videos.test.jsx",
+      "indexSha256": "f11fd3f78b2e0df974a0c7833c90476900a392b5de37620e52a10200426cdbff",
+      "workingSha256": "f8e7f2d2541415750ea1a1c84cc81ebe7c8cdf16fad0da1fc1f73d8e4e3fcf9c",
+      "gitBlob": "f04e3edfb80cd213b3149ebffda112c2912c1abe"
+    },
+    {
+      "path": "vite.config.js",
+      "indexSha256": "ff6988f2a15954c74e10dfa61150e1ab296450cb043009bcddc37959a0566838",
+      "workingSha256": "fa0034db809c3c8faec74ffbf83f54de5c5d237f8d3d7a53dd55d4915ebe7bee",
+      "gitBlob": "aad92fda8d4630055e094479ba9b7716ee90fbed"
+    }
+  ],
+  "builds": [
+    {
+      "mode": "booking",
+      "fileCount": 92,
+      "sha256OfSortedPathHashPairs": "551ec90948101dfce2d2bcd8de0fd5511ed1d493f82195c6e75239ab8ecf407f",
+      "indexSha256": "8c9fd3b42390caf24921d01bfc977fbe04e9962bb04e86c5f6dc8bd49ef37ab8"
+    },
+    {
+      "mode": "inquiry",
+      "fileCount": 82,
+      "sha256OfSortedPathHashPairs": "e2ef802a2e726d67312a19211aa9c95e5cc17fce5b23a8f8de80c6beea04aaa4",
+      "indexSha256": "1a9f885a112e76ec25f120119981d19e2e8aa77ceb419c401252bdd33c8797a5"
+    },
+    {
+      "mode": "booking-demo",
+      "fileCount": 73,
+      "sha256OfSortedPathHashPairs": "6c29faa9253f7eb0b2d519aad6a9bc807584ff2412fca0be77900434b510a48f",
+      "indexSha256": "3ac6ff478c099d3ac8e89ebbdf0bf7f5e3b1557d1ed908b8b8f0488d2cbd7387"
+    }
+  ],
+  "postBuildFormattingOnly": [
+    "src/data/content.js: removed whitespace only from two added lines",
+    "apps/protected-booking/src/data/bookingDesign.js: removed one EOF blank line"
+  ],
+  "localEvidenceBindings": [
+    {
+      "path": "docs/seo/runtime/candidate-browser.json",
+      "sha256": "2d26402a90b143fb114a93fc2f615e86ff774233389b3cfbb76c960f54d6b25c",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/booking-demo.json",
+      "sha256": "ec66f3cf6e4f0dd366c36d1a06f336f7270c49844eea5bab7843f5dc9f3e9e93",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/booking-navigation.json",
+      "sha256": "15e3635f7dababa70b63bbf0a6a0d3a13bc3716db19d0b66b4f0cfcfe51fb4d5",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/booking-hydration.json",
+      "sha256": "5b943fc034e252579e86bc1f6002322136883d49addcf30d934e298e946c87f4",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/inquiry-hydration.json",
+      "sha256": "63af9871f6aa9efa6f38e31e7b9a4063c426367b8277952c9ee9d00c9eceaa1d",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/booking-full-styles.json",
+      "sha256": "1f01b4941b1435b55dc538087897acf063cc79b550f06f281d4457fbd49767ff",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/build-boundaries.json",
+      "sha256": "f55cc47bb63cec8f43c62d5c529ec67c1195ad83d456a1b7147fc056a219c909",
+      "status": "passed"
+    },
+    {
+      "path": "docs/seo/runtime/performance/booking-intent.json",
+      "sha256": "2a3d9adf609b3ad064794066c9139c319787e42acc413241c16a09b7800b93d9",
+      "status": "passed"
+    }
+  ]
+}

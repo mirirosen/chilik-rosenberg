@@ -1,0 +1,10 @@
+.organic-overview{max-width:72rem;margin:4rem auto;padding:2rem 1.5rem;color:#d1d5db;line-height:1.85;text-align:start}
+.organic-overview h1,.organic-overview h2,.organic-overview h3{color:#dfc47c;font-family:Georgia,serif;line-height:1.4;margin:0 0 1.25rem}
+.organic-overview h1,.organic-overview h2{font-size:clamp(1.6rem,3vw,2.3rem)}
+.organic-overview h3{font-size:1.3rem;margin-top:2rem}
+.organic-overview p{margin:1rem 0}.organic-overview dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:2rem 0}
+.organic-overview dl>div{padding:1rem;border:1px solid #dfc47c33;border-radius:1rem}.organic-overview dt{font-weight:700;color:#dfc47c}.organic-overview dd{margin:0}
+.organic-overview a{color:#dfc47c;text-decoration:underline;text-underline-offset:.2rem}.organic-overview a:focus-visible{outline:2px solid #dfc47c;outline-offset:4px}
+.organic-overview li{margin:.5rem 0}.organic-overview ul{padding-inline-start:1.5rem}
+.target-site .organic-overview{color:#3c342c}.target-site .organic-overview h2,.target-site .organic-overview h3,.target-site .organic-overview dt,.target-site .organic-overview a{color:#6a4b12}.target-site .organic-overview dl>div{border-color:#6a4b1233}
+@media(max-width:600px){.organic-overview dl{grid-template-columns:1fr}.organic-overview{margin:2rem auto}}

@@ -1,0 +1,13 @@
+id,language,query,intent,status
+HE01,he,"מה כולל סיור קולינרי בבני ברק עם חיליק רוזנברג?",brand_service,not_measured
+HE02,he,"כמה עולה סיור אוכל בבני ברק עם חיליק?",price,not_measured
+HE03,he,"כמה זמן נמשך סיור קולינרי בבני ברק ומתי הוא מתקיים?",duration_dates,not_measured
+HE04,he,"איך מתלבשים לסיור אוכל בבני ברק ומה כדאי לברר על כשרות ואלרגיות?",preparation,not_measured
+HE05,he,"איך מתאמים סיור פרטי בבני ברק לקבוצה?",private_group,not_measured
+HE06,he,"האם הסיורים של חיליק בבני ברק מתקיימים באנגלית?",language,not_measured
+EN01,en,"What does a Bnei Brak food tour with Chilik Rosenberg include?",brand_service,not_measured
+EN02,en,"How much does Chilik's Bnei Brak food tour cost?",price,not_measured
+EN03,en,"How long is a Bnei Brak food tour and when are tours offered?",duration_dates,not_measured
+EN04,en,"What should visitors wear and ask about kosher food and allergies on a Bnei Brak food tour?",preparation,not_measured
+EN05,en,"How can a group arrange a private food tour in Bnei Brak?",private_group,not_measured
+EN06,en,"Does Chilik Rosenberg offer Bnei Brak food tours in English?",language,not_measured

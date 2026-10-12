@@ -32,3 +32,13 @@ dist-preprod/
 .env.*
 *.zip
 coverage/
+
+dist-booking/
+
+dist-booking-demo/
+
+dist-management/
+
+.firebase/hosting.*.cache
+
+docs/seo/runtime/
