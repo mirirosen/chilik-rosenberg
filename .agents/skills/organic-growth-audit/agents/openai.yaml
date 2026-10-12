@@ -1,0 +1,4 @@
+interface:
+  display_name: "SEO and AEO Organic Growth"
+  short_description: "Improve SEO and AEO with verified before/after evidence"
+  default_prompt: "Use $organic-growth-audit to audit SEO and AEO, implement authorized improvements, verify before/after evidence and create a measurable organic-growth plan."
