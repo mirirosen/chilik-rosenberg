@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "source": "functions",
+    "codebase": "booking",
+    "runtime": "nodejs22",
+    "ignore": ["node_modules", ".git", ".env*", "*.log", "test/**"]
+  }
+}
