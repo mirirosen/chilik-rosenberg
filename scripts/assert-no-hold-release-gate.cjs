@@ -4,8 +4,8 @@
 // The no-hold-before-payment backend creates bank/bit bookings with capacityReserved:false.
 // The admin UI currently live on hilik-site shows "אשר הזמנה" only for capacityReserved===true,
 // so deploying these functions without the matching admin hosting leaves new bookings unconfirmable.
-// Hosting from this repo cannot ship yet either: live hosting has features missing from the repo
-// (18+/terms checkbox, admin password setup/reset). Functions and hosting must go out together.
+// The live-only hosting features (18+/terms checkbox, admin password setup/reset, booking-screen design)
+// are recovered in this branch, so its hosting build can ship; functions and hosting must go out together.
 const ACK_VAR = 'CHILIK_NO_HOLD_RELEASE_ACK';
 const ACK_VALUE = 'functions-and-admin-hosting-together';
 
