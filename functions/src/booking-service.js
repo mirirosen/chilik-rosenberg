@@ -11,6 +11,7 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
   const calendarWeekRef = key => db.doc(`calendarAvailability/${key}`);
   function jobs(tx, booking, revision, now, kinds = ['email', 'calendar']) {
     for (const kind of kinds) {
+      if (kind === 'email' && !booking.email) continue;
       const id = `${booking.bookingId}-${revision}-${kind}`;
       const emailSnapshot = kind === 'email' ? { bookingId: booking.bookingId, revision, status: booking.status, email: booking.email, tourDate: booking.tourDate, participants: booking.participants, totalPrice: booking.totalPrice } : null;
       tx.create(db.doc(`integrationJobs/${id}`), { ...(emailSnapshot ? { emailSnapshot } : {}), kind, bookingId: booking.bookingId, tourDate: booking.tourDate, revision, event: booking.status, language: booking.language || 'he', status: 'pending', attempts: 0, nextAttemptAt: now, createdAt: now, updatedAt: now });

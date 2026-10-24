@@ -2,7 +2,7 @@
 const { authenticate } = require('./access');
 const { FUNCTION_REGION, BOOKING_RUNTIME } = require('./deployment-config');
 const realDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(`${value}T12:00:00Z`)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
-const CONTACT_ADMIN_URL = 'https://www.chilik-tours.com/admin';
+const CONTACT_ADMIN_URL = 'https://www.chilik-tours.com/manage-bookings';
 const CONTACT_TEMPLATE_BODY = 'עדכון על הזמנה חדשה לסיור שהתקבלה באתר.\nשם המזמין: {{1}}\nתאריך הסיור שנבחר: {{2}}\nמספר המשתתפים בהזמנה: {{3}}\nלפתיחת כרטיס איש הקשר של המזמין, היכנס לקישור המאובטח.\nהצפייה בפרטי הקשר והורדת הכרטיס זמינות לאחר כניסה לחשבון מנהל מורשה.';
 const CONTACT_BUTTON_TITLE = 'פתיחת איש קשר';
 const CONTACT_BUTTON_URL = 'https://www.chilik-tours.com/{{4}}';
@@ -43,7 +43,7 @@ function renderContactCard(booking) {
 }
 function createAdminBookingContactCard({ onRequest, bookings, verifyIdToken, enabled = false }) {
   const origins = new Set(['https://www.chilik-tours.com', 'https://chilik-tours.com', 'https://livechilik-tours.com', 'https://hilik-site.web.app', 'https://hilik-site.firebaseapp.com', 'http://localhost:3000', 'http://localhost:5173']);
-  return onRequest({ region: FUNCTION_REGION, serviceAccount: BOOKING_RUNTIME, invoker: 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60 }, async (req, res) => {
+  return onRequest({ region: FUNCTION_REGION, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60 }, async (req, res) => {
     // Apply on every response, including authentication, validation and CORS errors.
     res.set('Cache-Control', 'private, no-store, max-age=0').set('Pragma', 'no-cache').set('Expires', '0')
       .set('Referrer-Policy', 'no-referrer').set('X-Robots-Tag', 'noindex, nofollow, noarchive')

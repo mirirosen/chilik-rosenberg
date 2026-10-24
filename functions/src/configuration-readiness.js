@@ -6,7 +6,9 @@ function paymentConfigurationIssues(config = {}) {
   const issues = [];
   if (config.enabled !== true) issues.push('payment-runtime-disabled');
   if (config.merchantConfigurationVerified !== true) issues.push('merchant-configuration-unverified');
-  if (config.reportContractVerified !== true) issues.push('report-capture-and-cancellation-contract-unverified');
+  // Capture can be enabled from its verified receipt contract independently of
+  // financial cancellation, whose executor remains unsupported.
+  if (config.captureContractVerified !== true && config.reportContractVerified !== true) issues.push('report-capture-and-cancellation-contract-unverified');
   if (!/^[a-zA-Z0-9_-]+$/.test(config.terminal || '')) issues.push('terminal-missing-or-invalid');
   for (const key of ['appKey', 'secret']) if (typeof config[key] !== 'string' || !config[key] || /[\r\n]/.test(config[key])) issues.push(`${key}-missing-or-invalid`);
   let url; try { url = new URL(config.checkoutUrl); } catch { /* reported below */ }

@@ -37,16 +37,18 @@ function createReturnUrls(config) {
 function lookupConfigurationIssues(config = {}) {
   const issues = [];
   if (config.orderLookupVerified !== true) issues.push('order-lookup-contract-unverified');
-  if (!/^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(config.orderFilterParameter || '')) issues.push('order-filter-parameter-missing');
+  const mode = config.orderLookupMode || 'exact-filter';
+  if (!['exact-filter', 'bounded-date-scan'].includes(mode)) issues.push('order-lookup-mode-invalid');
+  if (mode === 'exact-filter' && !/^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(config.orderFilterParameter || '')) issues.push('order-filter-parameter-missing');
   return issues;
 }
 function loadPaymentConfiguration({ env = {}, readSecret = () => '' } = {}) {
   const config = {
     enabled: flag(env.TRANZILA_ENABLED), merchantConfigurationVerified: flag(env.TRANZILA_MERCHANT_CONFIGURATION_VERIFIED),
-    reportContractVerified: flag(env.TRANZILA_REPORT_CONTRACT_VERIFIED), terminal: env.TRANZILA_TERMINAL || '',
+    reportContractVerified: flag(env.TRANZILA_REPORT_CONTRACT_VERIFIED), captureContractVerified: flag(env.TRANZILA_CAPTURE_CONTRACT_VERIFIED), terminal: env.TRANZILA_TERMINAL || '',
     checkoutUrl: env.TRANZILA_CHECKOUT_URL || '', orderParameter: env.TRANZILA_ORDER_PARAMETER || '',
     orderReportField: env.TRANZILA_ORDER_REPORT_FIELD || '', checkoutTranmode: env.TRANZILA_CHECKOUT_TRANMODE || '',
-    orderLookupVerified: flag(env.TRANZILA_ORDER_LOOKUP_VERIFIED), orderFilterParameter: env.TRANZILA_ORDER_FILTER_PARAMETER || '',
+    orderLookupVerified: flag(env.TRANZILA_ORDER_LOOKUP_VERIFIED), orderLookupMode: env.TRANZILA_ORDER_LOOKUP_MODE || 'exact-filter', orderFilterParameter: env.TRANZILA_ORDER_FILTER_PARAMETER || '',
     capturePairs: [], appKey: '', secret: '',
   };
   const issues = [];

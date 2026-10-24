@@ -5,7 +5,7 @@
     "node": "22"
   },
   "type": "commonjs",
-  "main": "src/index.js",
+  "main": "booking-entry.cjs",
   "scripts": {
     "test": "node --test test/*.test.js",
     "lint": "node --check src/index.js && node --check src/api.js && node --check src/calendar-api.js && node --check src/providers/tranzila.js && node --check src/providers/tranzila-contract.js && node --check src/cancellation-preparation.js && node --check src/providers/tranzila-cancellation-draft.js",

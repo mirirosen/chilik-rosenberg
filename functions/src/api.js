@@ -5,7 +5,7 @@ const { createAdminBookingContactCard } = require('./booking-contact-card');
 
 // Firebase transport, verified identity and provider services are supplied by the
 // runtime. Tests use this same handler factory without credentials or network.
-function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs, paymentFlow, paymentReconciler, paymentSecrets = [], verifyIdToken, integrationSecrets = [], logger = console, enabled = false, schedulesEnabled = false }) {
+function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs, paymentFlow, paymentReconciler, paymentSecrets = [], verifyIdToken, integrationSecrets = [], logger = console, enabled = false, schedulesEnabled = false, integrationSchedulesEnabled = true }) {
   const api = {};
   api.adminBookingContactCard = createAdminBookingContactCard({ onRequest, bookings, verifyIdToken, enabled });
   const region = FUNCTION_REGION;
@@ -21,7 +21,7 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
   }
   const identity = (req, needsAdmin) => authenticate(req, verifyIdToken, needsAdmin);
   function endpoint(method, action, needsAdmin = false, needsPaymentSecrets = false) {
-    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
       if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
       if (!cors(req, res)) return;
       if (req.method !== method) return json(res, 405, { error: 'method-not-allowed' });
@@ -71,24 +71,24 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     await jobs.retry(db.doc(`integrationJobs/${jobId}`));
     return json(res, 200, { queued: true });
   }, true);
-  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
     if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
-    if (req.method !== 'POST') return json(res, 405, { error: 'method-not-allowed' });
+    if (!['POST', 'GET'].includes(req.method)) return json(res, 405, { error: 'method-not-allowed' });
     try {
-      const data = typeof req.body === 'object' && req.body ? req.body : {};
+      const data = req.method === 'GET' ? req.query : typeof req.body === 'object' && req.body ? req.body : {};
       const result = await paymentFlow.notify({ bookingId: String(req.query.id || data.bookingId || ''), transactionIndex: data.index });
       return json(res, 200, { received: true, paymentStatus: result.paymentStatus });
     } catch (error) {
       return json(res, error.status || 503, { error: error.code || 'provider-verification-pending' });
     }
   });
-  if (enabled === true && schedulesEnabled === true && paymentReconciler) api.reconcilePayments = onSchedule({ schedule: 'every 5 minutes', region, serviceAccount: BOOKING_RUNTIME, maxInstances: 1, timeoutSeconds: 540, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, () => paymentReconciler.runDue());
-  if (enabled === true && schedulesEnabled === true) api.expirePaymentHolds = onSchedule({ schedule: 'every 5 minutes', region, serviceAccount: BOOKING_RUNTIME }, async () => {
+  if (enabled === true && schedulesEnabled === true && paymentReconciler) api.reconcilePayments = onSchedule({ schedule: 'every 1 minutes', region, serviceAccount: BOOKING_RUNTIME, minInstances: 0, maxInstances: 1, concurrency: 1, timeoutSeconds: 540, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, () => paymentReconciler.runDue());
+  if (enabled === true && schedulesEnabled === true) api.expirePaymentHolds = onSchedule({ schedule: 'every 5 minutes', region, serviceAccount: BOOKING_RUNTIME, minInstances: 0, maxInstances: 1, concurrency: 1, timeoutSeconds: 300 }, async () => {
     const due = await db.collection('bookings').where('schemaVersion', '==', 2).where('paymentStatus', 'in', ['creating', 'awaiting_payment']).where('holdExpiresAt', '<=', Timestamp.now()).limit(100).get();
     const results = await Promise.allSettled(due.docs.map(d => bookings.change(d.id, 'expire', 'system:expiry')));
     if (results.some(r => r.status === 'rejected')) throw new Error('hold-expiry-requires-review');
   });
-  if (enabled === true && schedulesEnabled === true) api.processIntegrationJobs = onSchedule({ schedule: 'every 1 minutes', region, serviceAccount: INTEGRATION_RUNTIME, maxInstances: 1, timeoutSeconds: 300, ...(integrationSecrets.length ? { secrets: integrationSecrets } : {}) }, async () => {
+  if (enabled === true && schedulesEnabled === true && integrationSchedulesEnabled === true) api.processIntegrationJobs = onSchedule({ schedule: 'every 1 minutes', region, serviceAccount: INTEGRATION_RUNTIME, maxInstances: 1, timeoutSeconds: 300, ...(integrationSecrets.length ? { secrets: integrationSecrets } : {}) }, async () => {
     const due = await db.collection('integrationJobs').where('status', 'in', ['pending', 'retry', 'processing']).where('nextAttemptAt', '<=', Timestamp.now()).limit(100).get();
     const results = await Promise.allSettled(due.docs.map(d => jobs.run(d.ref)));
     if (results.some(r => r.status === 'rejected')) throw new Error('integration-job-processing-failed');
