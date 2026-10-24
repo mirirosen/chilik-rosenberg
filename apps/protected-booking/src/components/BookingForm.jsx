@@ -391,7 +391,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {/* Phone Field */}
         <div>
           <label htmlFor="phone" className="block text-sm font-bold mb-2 text-right">
-            <Phone size={16} className="inline mr-2" />
+            <Phone size={16} className="inline me-2" />
             {t('booking.form.phone')} <span className="text-red-400">*</span>
           </label>
           <input
@@ -411,7 +411,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {/* Email Field */}
         <div>
           <label htmlFor="email" className="block text-sm font-bold mb-2 text-right">
-            <Mail size={16} className="inline mr-2" />
+            <Mail size={16} className="inline me-2" />
             {t('booking.form.email')} <span className="text-gray-400">{t('booking.form.optional')}</span>
           </label>
           <input
@@ -457,7 +457,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {!isDateLocked ? (
           <div>
             <label htmlFor="tourDate" className="block text-sm font-bold mb-2 text-right">
-              <Calendar size={16} className="inline mr-2" />
+              <Calendar size={16} className="inline me-2" />
               {t('booking.form.tourDate')} <span className="text-red-400">*</span>
             </label>
             <input
@@ -501,9 +501,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {!isParticipantsLocked ? (
           <div>
             <label htmlFor="participants" className="block text-sm font-bold mb-2 text-right">
-              <Users size={16} className="inline mr-2" />
+              <Users size={16} className="inline me-2" />
               {t('booking.form.participants')} <span className="text-red-400">*</span>
-              <span className="text-xs text-gray-400 font-normal ml-2">
+              <span className="text-xs text-gray-400 font-normal ms-2">
                 (1-{selectedDateCapacity ? Math.min(20, selectedDateCapacity.available) : 20})
               </span>
             </label>
@@ -647,7 +647,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {/* Notes Field */}
         <div>
           <label htmlFor="notes" className="block text-sm font-bold mb-2 text-right">
-            <MessageSquare size={16} className="inline mr-2" />
+            <MessageSquare size={16} className="inline me-2" />
             {t('booking.form.notes')}
           </label>
           <textarea

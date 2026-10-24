@@ -47,7 +47,7 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
             {t(unpaidTransfer ? 'confirmation.unpaidTitle' : titleKey)}
           </h1>
           <p className="text-xl text-gray-300">
-            {t('confirmation.thankYou')}, {bookingData.name}!
+            {t('confirmation.thankYou')}, <bdi>{bookingData.name}</bdi>!
           </p>
         </div>
         <DemoBookingNotice />
