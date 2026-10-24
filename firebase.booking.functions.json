@@ -3,6 +3,9 @@
     "source": "functions",
     "codebase": "booking",
     "runtime": "nodejs22",
-    "ignore": ["node_modules", ".git", ".env*", "*.log", "test/**"]
+    "ignore": ["node_modules", ".git", ".env*", "*.log", "test/**"],
+    "predeploy": [
+      "node scripts/assert-no-hold-release-gate.cjs"
+    ]
   }
 }
