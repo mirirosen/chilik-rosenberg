@@ -125,7 +125,8 @@
       "backToDates": "Back to date selection",
       "submissionNotice": "Your booking status will be shown after submission.",
       "termsLead": "I confirm that I have read the"
-    }
+    },
+    "noHoldNotice": "Please note: registering does not reserve a place. Your place is reserved only after the payment is completed."
   },
   "confirmation": {
     "title": "Booking request received",
@@ -147,14 +148,18 @@
       "emailSent": "Booking confirmation has been sent to your email",
       "contactSoon": "A representative will contact you soon for final confirmation and payment",
       "bookingNumber": "Your booking number",
-      "emailPending": "Your request is saved. Email delivery has not yet been confirmed."
+      "emailPending": "Your request was received. Email delivery has not yet been confirmed.",
+      "completePayment": "Complete the payment to reserve your place. Until the payment is confirmed, your place is not reserved."
     },
     "contact": {
       "title": "Questions? Contact Us",
       "whatsapp": "Send WhatsApp Message"
     },
     "backToHome": "Back to Homepage",
-    "pendingDetail": "Your request is received and awaiting approval. Payment has not been confirmed."
+    "pendingDetail": "Your request is received and awaiting approval. Payment has not been confirmed.",
+    "noHoldNotice": "Please note: registering does not reserve a place. Your place is reserved only after the payment is completed.",
+    "unpaidTitle": "Registration received – your place is not reserved yet",
+    "unpaidDetail": "Your registration was received, but no place on the tour has been reserved for you yet. Please complete the payment (Bit or bank transfer) – your place is reserved only once the payment is received and confirmed."
   },
   "terms": {
     "title": "Terms & Conditions",

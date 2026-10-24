@@ -13,6 +13,7 @@ it('validates mutation acknowledgements instead of treating malformed success as
   await expect(adminRequest('updateBookingStatus', { bookingId: 'booking', status: 'cancelled' })).resolves.toHaveProperty('status', 'cancelled');
 });
 it('maps authentication-required to sign-in guidance', () => { expect(adminErrorMessage(new Error('authentication-required'))).toContain('להתחבר מחדש'); });
+it('explains a full tour at confirmation without claiming the seat was saved', () => { const m = adminErrorMessage(new Error('capacity-full-at-confirmation')); expect(m).toContain('אין מספיק מקום'); expect(m).toContain('המקום לא נשמר'); });
 it('rejects an identity change before sending', async () => {
   state.auth.currentUser.getIdToken.mockImplementation(async () => { state.auth.currentUser = { uid: 'different' }; return 'test-token'; });
   await expect(adminRequest('retryIntegrationJob', {})).rejects.toThrow('admin-session-changed'); expect(fetch).not.toHaveBeenCalled();

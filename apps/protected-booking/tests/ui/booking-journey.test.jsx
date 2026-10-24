@@ -13,6 +13,7 @@ vi.mock('../../src/hooks/useFirebaseData', () => ({ useFirebaseData: () => ({ av
 vi.mock('../../src/utils/dateUtils', async importOriginal => ({ ...await importOriginal(), getUpcomingThursdays: () => [{ dateStr: '2026-10-08', day: 8, month: 'Oct' }], formatDateHebrew: date => date, getNearestThursday: date => date }));
 import BookingForm from '../../src/components/BookingForm';
 import BookingSection from '../../src/components/BookingSection';
+import BookingConfirmation from '../../src/components/BookingConfirmation';
 const ID = 'BK-' + 'a'.repeat(24);
 function fillForm(container, method = 'bit') {
   for (const [id, value] of Object.entries({ name: 'Test Customer', phone: '0501234567', email: 'test@example.com', howDidYouHear: 'friend', dateOfBirth: '1990-01-01' })) fireEvent.change(container.querySelector(`#${id}`), { target: { value } });
@@ -122,20 +123,47 @@ describe('offline booking components', () => {
     fireEvent.submit(checkout.container.querySelector('form'));
     await waitFor(() => expect(redirect).toHaveBeenCalledTimes(1));
     const url = new URL(redirect.mock.calls[0][0]), id = url.searchParams.get('order_id');
-    expect(system.booking(id).paymentStatus).toBe('awaiting_payment'); expect(system.seats()).toBe(2);
+    // An open card checkout holds no seat; the verified capture reserves it.
+    expect(system.booking(id).paymentStatus).toBe('awaiting_payment'); expect(system.seats()).toBe(0); expect(system.jobsCount()).toBe(0);
     system.record(id);
     const notify = await system.call('tranzilaWebhook', { query: { id }, body: { index: 42, Response: 'malicious-ignored' } });
-    expect(notify.statusCode).toBe(200); expect(system.booking(id).paymentStatus).toBe('paid');
-    expect(system.jobsCount()).toBe(4); // hold Calendar + confirmed Calendar/email/WhatsApp
+    expect(notify.statusCode).toBe(200); expect(system.booking(id).paymentStatus).toBe('paid'); expect(system.seats()).toBe(2);
+    expect(system.jobsCount()).toBe(3); // confirmed Calendar/email/WhatsApp
     expect([...system.db.data.values()].filter(job => job.kind === 'whatsapp')).toHaveLength(1);
     checkout.unmount(); window.history.replaceState({}, '', `/booking?payment=success&id=${id}`);
     render(<BookingForm />); await screen.findByText('booking.payment.paidTitle');
     await system.call('updateBookingStatus', { token: 'admin', body: { bookingId: id, status: 'cancelled' } });
     fireEvent.click(screen.getByText('booking.payment.refreshStatus')); await screen.findByText('booking.payment.refundReviewTitle');
-    expect(system.seats()).toBe(0); expect(system.jobsCount()).toBe(6); expect(global.fetch).not.toHaveBeenCalled(); // cancellation adds Calendar/email, no second WhatsApp
+    expect(system.seats()).toBe(0); expect(system.jobsCount()).toBe(5); expect(global.fetch).not.toHaveBeenCalled(); // cancellation adds Calendar/email, no second WhatsApp
     expect([...system.db.data.values()].filter(job => job.kind === 'whatsapp')).toHaveLength(1);
   });
 
+  it('shows the no-hold notice next to the payment methods and on an unpaid card return', async () => {
+    const { container } = render(<BookingForm />);
+    const notice = screen.getByTestId('no-hold-notice');
+    expect(notice.textContent).toBe('booking.noHoldNotice');
+    expect(container.querySelector('[role="radiogroup"]').parentElement.contains(notice)).toBe(true);
+    cleanup();
+    mocks.getPaymentStatus.mockResolvedValue({ paymentStatus: 'awaiting_payment', status: 'payment_pending' });
+    window.history.replaceState({}, '', `/booking?payment=success&id=${ID}`);
+    render(<BookingForm />); await screen.findByText('booking.payment.checkingTitle');
+    expect(screen.getByTestId('no-hold-notice').textContent).toBe('booking.noHoldNotice');
+  });
+  it('unpaid bank/bit confirmation never says the seat is reserved and asks to complete payment', () => {
+    render(<BookingConfirmation bookingData={{ bookingId: ID, name: 'Test', status: 'pending', paymentStatus: 'pending', paymentMethod: 'bank_transfer', tourDate: '2026-10-08', participants: 2, totalPrice: 500, pricePerPerson: 250 }} onBackToHome={() => {}} />);
+    expect(screen.getByText('confirmation.unpaidTitle')).toBeTruthy();
+    expect(screen.getByText('confirmation.unpaidDetail')).toBeTruthy();
+    expect(screen.getByTestId('no-hold-notice').textContent).toBe('confirmation.noHoldNotice');
+    expect(screen.getByText('confirmation.nextSteps.completePayment')).toBeTruthy();
+    expect(screen.queryByText('booking.payment.confirmedTitle')).toBeNull();
+    expect(screen.queryByText('booking.payment.paidTitle')).toBeNull();
+  });
+  it('paid confirmation shows the confirmed state without the unpaid notice', () => {
+    render(<BookingConfirmation bookingData={{ bookingId: ID, name: 'Test', status: 'confirmed', paymentStatus: 'paid', paymentMethod: 'credit', tourDate: '2026-10-08', participants: 2, totalPrice: 500, pricePerPerson: 250 }} onBackToHome={() => {}} />);
+    expect(screen.getByText('booking.payment.paidTitle')).toBeTruthy();
+    expect(screen.queryByTestId('no-hold-notice')).toBeNull();
+    expect(screen.queryByText('confirmation.nextSteps.completePayment')).toBeNull();
+  });
   it('rapid repeated submit starts one request while the first remains in flight', async () => {
     let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
     const { container } = render(<BookingForm />); fillForm(container);

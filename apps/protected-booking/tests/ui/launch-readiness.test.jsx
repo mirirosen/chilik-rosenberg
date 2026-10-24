@@ -83,7 +83,8 @@ it('keeps approved contact destinations in Terms and Footer with English address
 });
 
 it('keeps the original Hebrew policy provisions unchanged after trailing-whitespace cleanup except language attributes', () => {
-  const source = readFileSync('src/components/Terms.jsx','utf8');
+  // Normalize Windows (autocrlf) checkouts so the hash covers the copy, not line endings.
+  const source = readFileSync('src/components/Terms.jsx','utf8').replace(/\r\n/g, '\n');
   // Hashes of the unchanged integrated-source policy blocks after trailing-whitespace cleanup. This fixture
   // protects copy without depending on the author's Windows source path.
   for (const [from,to,hash] of [

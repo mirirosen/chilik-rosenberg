@@ -37,6 +37,8 @@ service cloud.firestore {
     match /bookings/{id} { allow read: if isAdmin(); allow write: if false; }
     match /integrationJobs/{id} { allow read: if isAdmin(); allow write: if false; }
     match /bookingAudit/{id} { allow read: if isAdmin(); allow write: if false; }
+    // Server-only owner alerts (e.g. a verified payment that arrived when the tour was full).
+    match /adminNotices/{id} { allow read: if isAdmin(); allow write: if false; }
     match /{document=**} { allow read, write: if false; }
   }
 }

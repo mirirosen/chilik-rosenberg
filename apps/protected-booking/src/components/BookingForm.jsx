@@ -292,7 +292,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           : { icon: '…', title: t('booking.payment.checkingTitle'), detail: t('booking.payment.checkingDetail') };
     return <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir={i18n.dir()}>
       <div className="text-6xl mb-6">{copy.icon}</div><h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
-      <p className="text-gray-300 mb-6">{copy.detail}</p>{validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
+      <p className="text-gray-300 mb-6">{copy.detail}</p>{['pending', 'checking'].includes(paymentReturnState) && <p className="booking-no-hold-notice text-amber-300 font-bold mb-6" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>}{validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
       <DemoBookingNotice />
       {IS_PREPROD && validBookingReference(paymentBookingId) && <DemoBookingControls bookingId={paymentBookingId} onChange={() => setStatusRefresh(v => v + 1)} />}
       <div className="flex flex-wrap gap-4 justify-center"><button type="button" className="target-button" disabled={paymentReturnState === 'checking'} onClick={() => setStatusRefresh(v => v + 1)}>{t('booking.payment.refreshStatus')}</button>{IS_PREPROD && ['paid', 'confirmed', 'pending'].includes(paymentReturnState) && <button type="button" className="target-button" onClick={() => { try { onSuccess?.(getDemoBooking(paymentBookingId)); } catch { setPaymentReturnState('unavailable'); } }}>{t('demo.summary')}</button>}<a className="target-button inline-flex" href="/">{t('booking.payment.backHome')}</a></div>
@@ -679,6 +679,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             </label>
           </div>
           {errors.paymentMethod && <p id="paymentMethod-error" className="text-red-400 text-sm mt-1 text-right">{errors.paymentMethod}</p>}
+          <p id="no-hold-notice" className="booking-no-hold-notice mt-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm font-bold text-amber-200 text-right" role="note" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>
         </div>
 
         {/* Notes Field */}

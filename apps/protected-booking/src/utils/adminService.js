@@ -8,6 +8,10 @@ export function adminErrorMessage(error) {
   if (['unauthenticated', 'authentication-required', 'admin-required', 'admin-session-changed'].includes(error.message)) return 'יש להתחבר מחדש עם חשבון מנהל מורשה.';
   if (error.message === 'admin-service-unavailable') return 'שירות הניהול אינו מוגדר. יש לפנות למנהל המערכת.';
   if (error.message === 'job-not-retryable') return 'מצב הפעולה השתנה. רענן את הנתונים לפני ניסיון נוסף.';
+  // Seats are reserved only at confirmation; the server re-checks capacity in the same transaction.
+  if (error.message === 'capacity-full-at-confirmation') return 'אין מספיק מקום פנוי בסיור כדי לאשר את ההזמנה. המקום לא נשמר וההזמנה נשארה ממתינה. יש לפנות מקום או לתאם מועד אחר עם הלקוח.';
+  if (error.message === 'calendar-unavailable') return 'לא ניתן לאמת כרגע את התפוסה השבועית מול היומן. נסו שוב בעוד כמה דקות.';
+  if (error.message === 'capacity-requires-reconciliation') return 'מוני התפוסה דורשים בדיקה ידנית לפני שינוי ההזמנה.';
   return 'לא התקבל אישור לעדכון. ייתכן שהשינוי נשמר; רענן את הנתונים ובדוק את המצב לפני ניסיון נוסף.';
 }
 export async function adminRequest(endpoint, body) {

@@ -60,7 +60,7 @@ const AdminBookings = () => {
     if (actionLock.current || bookingsError) return;
     const notice = status === 'cancelled'
       ? `לבטל את ההזמנה ${bookingId}? המקומות ישוחררו. פעולה זו אינה מבצעת החזר כספי. תשלום שכבר התקבל או שיתקבל מאוחר יותר מחייב בדיקה ידנית.`
-      : `לאשר את ההזמנה ${bookingId}? יש לוודא את פרטי ההזמנה והתשלום לפני האישור. האישור אינו מחייב כרטיס אשראי.`;
+      : `לאשר את ההזמנה ${bookingId}? יש לוודא שהתשלום התקבל לפני האישור. האישור שומר את המקום בסיור (אם עדיין יש מקום פנוי) ואינו מחייב כרטיס אשראי.`;
     if (!window.confirm(notice)) return;
     actionLock.current = true;
     setUpdating(bookingId);
@@ -322,6 +322,8 @@ const AdminBookings = () => {
 
                     <div className="text-sm text-gray-300" dir="rtl">תשלום: {{ pending: 'ממתין לאישור', creating: 'פותח תשלום', awaiting_payment: 'ממתין לתשלום', paid: 'שולם', failed: 'נכשל', cancelled: 'בוטל', expired: 'פג תוקף', pending_review: 'נדרשת בדיקה' }[booking.paymentStatus] || 'לא ידוע'} · {booking.paymentMethod}</div>
                     {(booking.paymentStatus === 'pending_review' || booking.additionalPaymentReview || booking.refundStatus === 'manual_review_required') && <p className="text-amber-300 text-sm" dir="rtl">נדרשת בדיקת תשלום/החזר ידנית. לא בוצע החזר אוטומטי.</p>}
+                    {booking.paymentReviewReason === 'overbooked-at-payment' && booking.status === 'payment_review' && <p className="text-amber-300 text-sm font-bold" dir="rtl">התשלום התקבל אך הסיור היה מלא – לא נשמר מקום. יש לאשר אם התפנה מקום, לתאם מועד אחר או לבצע החזר ידני.</p>}
+                    {booking.schemaVersion === 2 && booking.status === 'pending' && booking.capacityReserved !== true && <p className="text-gray-400 text-sm" dir="rtl">לא נשמר מקום. המקום יישמר רק באישור התשלום.</p>}
                     {booking.schemaVersion !== 2 && <p className="text-amber-300 text-sm" dir="rtl">הזמנה ישנה: נדרשת התאמת נתונים לפני שינוי מצב</p>}
                     {/* Notes */}
                     {booking.notes && (
@@ -347,7 +349,7 @@ const AdminBookings = () => {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-2">
-                      {booking.schemaVersion === 2 && booking.status === 'pending' && booking.capacityReserved === true && booking.paymentMethod !== 'credit' && (
+                      {booking.schemaVersion === 2 && ((booking.status === 'pending' && booking.paymentMethod !== 'credit') || (booking.status === 'payment_review' && booking.paymentStatus === 'paid' && booking.paymentReviewReason === 'overbooked-at-payment')) && (
                         <button
                           onClick={() => updateBookingStatus(booking.id, 'confirmed')}
                           disabled={!!updating || !!retrying || !!bookingsError}
