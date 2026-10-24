@@ -2,6 +2,9 @@
   "hosting": {
     "site": "hilik-site",
     "public": "dist-booking",
+    "predeploy": [
+      "node scripts/assert-booking-hosting-build.cjs"
+    ],
     "ignore": [
       "**/.*",
       "**/node_modules/**"

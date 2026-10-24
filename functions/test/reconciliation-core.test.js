@@ -17,9 +17,23 @@ test('mixed booked, held, released and payment review totals use reservation own
     booking('review', { status: 'payment_review', paymentStatus: 'pending_review', paymentMethod: 'credit', capacityReserved: false })
   ], 5));
   assert.equal(p.status, 'consistent');
-  assert.deepEqual(p.tours[0].totals, { booked: 3, held: 2, released: 4, paymentReview: 2, reviewReserved: 0, unresolvedBookings: 0, reserved: 5 });
+  assert.deepEqual(p.tours[0].totals, { booked: 3, held: 2, unreserved: 0, released: 4, paymentReview: 2, reviewReserved: 0, unresolvedBookings: 0, reserved: 5 });
   assert.equal(p.tours[0].countProposal, null);
   assert.ok(has(p, 'payment-review-required-no-financial-action'));
+});
+test('unpaid requests without a hold and paid-but-overbooked reviews reserve no seats', () => {
+  const p = buildReconciliationPlan(input([
+    booking('booked', { status: 'confirmed', participants: 3 }),
+    booking('bit-request', { capacityReserved: false }),
+    booking('card-checkout', { status: 'payment_pending', paymentStatus: 'awaiting_payment', paymentMethod: 'credit', capacityReserved: false, holdExpiresAtMs: nowMs - 1 }),
+    booking('overbooked', { status: 'payment_review', paymentStatus: 'paid', paymentMethod: 'credit', capacityReserved: false, participants: 4 })
+  ], 3));
+  assert.equal(p.status, 'consistent');
+  assert.deepEqual(p.tours[0].totals, { booked: 3, held: 0, unreserved: 4, released: 0, paymentReview: 4, reviewReserved: 0, unresolvedBookings: 0, reserved: 3 });
+  assert.ok(!has(p, 'expired-hold-still-reserved-use-lifecycle-release'));
+  assert.ok(has(p, 'payment-review-required-no-financial-action'));
+  const contradictory = buildReconciliationPlan(input([booking('reserved-review', { status: 'payment_review', paymentStatus: 'paid', paymentMethod: 'credit', capacityReserved: true })], 2));
+  assert.ok(has(contradictory, 'contradictory-v2-lifecycle'));
 });
 test('legacy pending and confirmed are ambiguous until explicitly dispositioned', () => {
   const pending = booking('legacy-pending', { schemaVersion: undefined, capacityReserved: undefined });

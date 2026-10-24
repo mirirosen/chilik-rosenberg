@@ -25,14 +25,14 @@ import BookingSiteApp from '../../src/BookingSiteApp';
 beforeEach(() => { vi.spyOn(window, 'scrollTo').mockImplementation(() => {}); });
 afterEach(() => { cleanup(); window.history.replaceState({}, '', '/'); vi.restoreAllMocks(); });
 
-it('preserves the existing main form draft including birth date across a date-selection round trip without restoring consent', async () => {
+it('preserves the main form draft across a date-selection round trip without restoring consent or a birth date', async () => {
   window.history.replaceState({}, '', '/booking?date=2026-10-15&participants=2');
   render(<BookingSiteApp />);
   fireEvent.click(await screen.findByText('Change selection'));
   expect(JSON.parse((await screen.findByTestId('selection')).textContent)).toEqual({ date: '2026-10-15', participants: 2 });
   fireEvent.click(screen.getByText('Choose new date'));
   const draft = JSON.parse((await screen.findByTestId('draft')).textContent);
-  expect(draft).toEqual({ name: 'Guest', phone: '0501234567', email: 'guest@example.test', notes: 'Keep this', howDidYouHear: 'search', dateOfBirth: '1990-01-02', paymentMethod: 'credit' });
+  expect(draft).toEqual({ name: 'Guest', phone: '0501234567', email: 'guest@example.test', notes: 'Keep this', howDidYouHear: 'search', paymentMethod: 'credit' });
   expect(draft).not.toHaveProperty('agreeToTerms');
   expect(window.location.pathname).toBe('/booking');
   expect(new URLSearchParams(window.location.search).get('date')).toBe('2026-10-22');

@@ -44,6 +44,22 @@ describe('admin booking safeguards', () => {
     fireEvent.click(screen.getByRole('button', { name: 'הוסף לתור שוב blocked-job' }));
     await waitFor(() => expect(mocks.request).toHaveBeenCalledWith('retryIntegrationJob', { jobId: 'blocked-job' }));
   });
+  it('offers confirmation for unreserved bank/bit requests and paid overbooked reviews, explaining the seat state', async () => {
+    window.confirm.mockReturnValue(true);
+    render(<AdminBookings />);
+    const rows = [
+      { id: 'BK-pending', data: () => ({ schemaVersion: 2, bookingId: 'BK-pending', name: 'Pending', status: 'pending', paymentStatus: 'pending', paymentMethod: 'bit', capacityReserved: false, phone: '', tourDate: '2026-10-08', participants: 2, totalPrice: 500 }) },
+      { id: 'BK-review', data: () => ({ schemaVersion: 2, bookingId: 'BK-review', name: 'Review', status: 'payment_review', paymentStatus: 'paid', paymentMethod: 'credit', paymentReviewReason: 'overbooked-at-payment', capacityReserved: false, phone: '', tourDate: '2026-10-08', participants: 2, totalPrice: 500 }) },
+      { id: 'BK-card', data: () => ({ schemaVersion: 2, bookingId: 'BK-card', name: 'Card', status: 'payment_pending', paymentStatus: 'awaiting_payment', paymentMethod: 'credit', capacityReserved: false, phone: '', tourDate: '2026-10-08', participants: 2, totalPrice: 500 }) },
+    ];
+    act(() => mocks.listeners.bookings.success({ forEach: fn => rows.forEach(fn) }));
+    expect(screen.getAllByRole('button', { name: 'אשר הזמנה' })).toHaveLength(2);
+    expect(screen.getByText('לא נשמר מקום. המקום יישמר רק באישור התשלום.')).toBeTruthy();
+    expect(screen.getByText(/התשלום התקבל אך הסיור היה מלא/)).toBeTruthy();
+    fireEvent.click(screen.getAllByRole('button', { name: 'אשר הזמנה' })[0]);
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('שומר את המקום'));
+    await waitFor(() => expect(mocks.request).toHaveBeenCalledWith('updateBookingStatus', { bookingId: 'BK-pending', status: 'confirmed' }));
+  });
   it('surfaces uncertain mutation failures without claiming success', async () => {
     window.confirm.mockReturnValue(true); mocks.request.mockRejectedValue(new Error('timeout'));
     render(<AdminBookings />);

@@ -34,7 +34,6 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     email: '',
     notes: '',
     howDidYouHear: '',
-    dateOfBirth: '',
     paymentMethod: '',
     ...(!paymentResult && !demoCheckoutId ? initialDraft : null),
     participants: prefilledParticipants ? Number(prefilledParticipants) : 1,
@@ -136,18 +135,6 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     return emailRegex.test(email);
   };
 
-  const validateAge = (dateOfBirth) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1;
-    }
-    return age;
-  };
-
   const validateThursdayDate = (dateStr) => {
     // Availability is authoritative on the server. A retry must reach its
     // original idempotency key even if its own reservation filled the date.
@@ -167,23 +154,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       newErrors.phone = t('booking.validation.phoneInvalid');
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = t('booking.validation.emailRequired');
-    } else if (!validateEmail(formData.email)) {
+    // Email and "how did you hear" are optional; an email that is given must be valid.
+    if (formData.email.trim() && !validateEmail(formData.email.trim())) {
       newErrors.email = t('booking.validation.emailInvalid');
-    }
-
-    if (!formData.howDidYouHear) {
-      newErrors.howDidYouHear = t('booking.validation.howRequired');
-    }
-
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = t('booking.validation.dobRequired');
-    } else {
-      const age = validateAge(formData.dateOfBirth);
-      if (age < 18) {
-        newErrors.dateOfBirth = t('booking.validation.ageRestriction');
-      }
     }
 
     if (!formData.tourDate) {
@@ -204,6 +177,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       newErrors.paymentMethod = t('booking.validation.paymentRequired');
     }
 
+    // One checkbox confirms both age 18+ and the terms.
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = t('booking.validation.termsRequired');
     }
@@ -232,7 +206,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     setIsSubmitting(true);
 
     try {
-      const booking = { ...formData, name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
+      // A draft saved before the date-of-birth field was removed may still carry one; never send it.
+      const { dateOfBirth: _dateOfBirth, ...details } = formData;
+      const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
       const key = await bookingApi.makeIdempotencyKey(booking);
       // Preserve the key on network timeouts: the server may already have committed.
       if (booking.paymentMethod === 'credit') {
@@ -290,23 +266,23 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         : paymentReturnState === 'pending'
           ? { icon: '…', title: t('booking.payment.pendingTitle'), detail: t('booking.payment.pendingDetail') }
           : { icon: '…', title: t('booking.payment.checkingTitle'), detail: t('booking.payment.checkingDetail') };
-    return <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir={i18n.dir()}>
-      <div className="text-6xl mb-6">{copy.icon}</div><h2 className="text-2xl font-bold text-white mb-4">{copy.title}</h2>
-      <p className="text-gray-300 mb-6">{copy.detail}</p>{validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
+    return <div className="booking-status-card bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir={i18n.dir()}>
+      <div className="text-6xl mb-6">{copy.icon}</div><h1 className="text-2xl font-bold text-white mb-4">{copy.title}</h1>
+      <p className="text-gray-300 mb-6">{copy.detail}</p>{['pending', 'checking'].includes(paymentReturnState) && <p className="booking-no-hold-notice text-amber-300 font-bold mb-6" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>}{validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
       <DemoBookingNotice />
       {IS_PREPROD && validBookingReference(paymentBookingId) && <DemoBookingControls bookingId={paymentBookingId} onChange={() => setStatusRefresh(v => v + 1)} />}
-      <div className="flex flex-wrap gap-4 justify-center"><button type="button" className="target-button" disabled={paymentReturnState === 'checking'} onClick={() => setStatusRefresh(v => v + 1)}>{t('booking.payment.refreshStatus')}</button>{IS_PREPROD && ['paid', 'confirmed', 'pending'].includes(paymentReturnState) && <button type="button" className="target-button" onClick={() => { try { onSuccess?.(getDemoBooking(paymentBookingId)); } catch { setPaymentReturnState('unavailable'); } }}>{t('demo.summary')}</button>}<a className="target-button inline-flex" href="/">{t('booking.payment.backHome')}</a></div>
+      <div className="flex flex-wrap gap-4 justify-center"><button type="button" className="target-button" disabled={paymentReturnState === 'checking'} onClick={() => setStatusRefresh(v => v + 1)}>{t('booking.payment.refreshStatus')}</button>{IS_PREPROD && ['paid', 'confirmed', 'pending'].includes(paymentReturnState) && <button type="button" className="target-button" onClick={() => { try { onSuccess?.(getDemoBooking(paymentBookingId)); } catch { setPaymentReturnState('unavailable'); } }}>{t('demo.summary')}</button>}<a className="target-button booking-secondary inline-flex" href="/">{t('booking.payment.backHome')}</a></div>
     </div>;
   }
 
   // Show redirect message if no pre-filled data
   if (redirecting) {
     return (
-      <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center">
+      <div className="booking-status-card bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center">
         <div className="text-6xl mb-6">🔄</div>
-        <h2 className="text-2xl font-bold text-white mb-4" dir={i18n.dir()}>
+        <h1 className="text-2xl font-bold text-white mb-4" dir={i18n.dir()}>
           {t('booking.redirectTitle')}
-        </h2>
+        </h1>
         <p className="text-gray-400 mb-6" dir={i18n.dir()}>
           {t('booking.redirectDetail')}
         </p>
@@ -316,10 +292,15 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
   }
 
   return (
-    <div className="bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl">
-      <h2 className="text-3xl md:text-5xl font-serif text-brand-gold text-center mb-8 font-bold">
+    <div className="booking-form-card bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl" dir={i18n.dir()}>
+      <ol className="booking-flow-steps" aria-label={t('bookingDesign.steps')}>
+        <li><span>1</span>{t('bookingDesign.select')}</li>
+        <li aria-current="step"><span>2</span>{t('bookingDesign.details')}</li>
+        <li><span>3</span>{t('bookingDesign.payment')}</li>
+      </ol>
+      <h1 className="text-3xl md:text-5xl font-serif text-brand-gold text-center mb-8 font-bold">
         {t('booking.title')}
-      </h2>
+      </h1>
       <DemoBookingNotice onFill={sample => setFormData(previous => ({ ...previous, ...sample }))} />
 
       {/* Pre-filled Summary Card */}
@@ -363,6 +344,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
               </div>
             )}
           </div>
+
+          <p className="mt-4 text-center text-sm text-gray-300">{t('bookingDesign.schedule')}</p>
 
           {/* Total Price Preview */}
           <div className="mt-4 pt-4 border-t border-white/10 text-center">
@@ -429,7 +412,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         <div>
           <label htmlFor="email" className="block text-sm font-bold mb-2 text-right">
             <Mail size={16} className="inline mr-2" />
-            {t('booking.form.email')} <span className="text-red-400">*</span>
+            {t('booking.form.email')} <span className="text-gray-400">{t('booking.form.optional')}</span>
           </label>
           <input
             type="email"
@@ -449,7 +432,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         {/* How Did You Hear About Us */}
         <div>
           <label htmlFor="howDidYouHear" className="block text-sm font-bold mb-2 text-right">
-            {t('booking.form.howDidYouHear')} <span className="text-red-400">*</span>
+            {t('booking.form.howDidYouHear')} <span className="text-gray-400">{t('booking.form.optional')}</span>
           </label>
           <select
             id="howDidYouHear"
@@ -468,27 +451,6 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             <option value="other">{t('booking.howOptions.other')}</option>
           </select>
           {errors.howDidYouHear && <p id="howDidYouHear-error" className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}
-        </div>
-
-        {/* Date of Birth */}
-        <div>
-          <label htmlFor="dateOfBirth" className="block text-sm font-bold mb-2 text-right">
-            {t('booking.form.dateOfBirth')} <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="date"
-            id="dateOfBirth"
-            aria-invalid={!!errors.dateOfBirth}
-            aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
-            value={formData.dateOfBirth}
-            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-            max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-            className={`w-full bg-brand-dark border ${errors.dateOfBirth ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center`}
-            style={{ colorScheme: 'dark' }}
-            disabled={isSubmitting}
-          />
-          {errors.dateOfBirth && <p id="dateOfBirth-error" className="text-red-400 text-sm mt-1 text-right">{errors.dateOfBirth}</p>}
-          <p className="text-xs text-gray-400 mt-1 text-right">{t('booking.validation.ageRestriction')}</p>
         </div>
 
         {/* Tour Date - Locked if pre-filled */}
@@ -640,7 +602,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           <div id="payment-method-label" className="block text-sm font-bold mb-3 text-right">
             {t('booking.form.paymentMethod')} <span className="text-red-400">*</span>
           </div>
-          <div role="radiogroup" aria-labelledby="payment-method-label" aria-invalid={!!errors.paymentMethod} aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined} className="space-y-3">
+          <div role="radiogroup" aria-labelledby="payment-method-label" aria-invalid={!!errors.paymentMethod} aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined} className="booking-payment-options space-y-3">
             <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
               <span className="text-white">{t('booking.paymentMethods.bit')}</span>
               <input
@@ -679,6 +641,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             </label>
           </div>
           {errors.paymentMethod && <p id="paymentMethod-error" className="text-red-400 text-sm mt-1 text-right">{errors.paymentMethod}</p>}
+          <p id="no-hold-notice" className="booking-no-hold-notice mt-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm font-bold text-amber-200 text-right" role="note" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>
         </div>
 
         {/* Notes Field */}

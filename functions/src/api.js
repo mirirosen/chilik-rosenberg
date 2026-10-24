@@ -2,6 +2,12 @@
 const { FUNCTION_REGION, BOOKING_RUNTIME, INTEGRATION_RUNTIME } = require('./deployment-config');
 const { authenticate, canReadStatus } = require('./access');
 const { createAdminBookingContactCard } = require('./booking-contact-card');
+// Human-readable explanations (admin UI) for errors raised when payment is confirmed.
+const ERROR_MESSAGES = Object.freeze({
+  'capacity-full-at-confirmation': 'אין מספיק מקום פנוי בסיור כדי לאשר את ההזמנה. המקום לא נשמר וההזמנה נשארה ממתינה. יש לפנות מקום או לתאם מועד אחר עם הלקוח.',
+  'calendar-unavailable': 'לא ניתן לאמת כרגע את התפוסה השבועית מול היומן. נסו שוב בעוד כמה דקות.',
+  'capacity-requires-reconciliation': 'מוני התפוסה דורשים בדיקה ידנית לפני שינוי ההזמנה.',
+});
 
 // Firebase transport, verified identity and provider services are supplied by the
 // runtime. Tests use this same handler factory without credentials or network.
@@ -27,10 +33,11 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
       if (req.method !== method) return json(res, 405, { error: 'method-not-allowed' });
       try { return await action(req, res, await identity(req, needsAdmin)); }
       catch (error) {
-        const safe = /^(invalid-|terms-required|adult-required|idempotency-conflict|booking-closed|tour-unavailable|capacity-|legacy-booking-|not-found|job-not-retryable)/.test(error.message);
+        const safe = /^(invalid-|terms-required|adult-required|idempotency-conflict|booking-closed|tour-unavailable|capacity-|calendar-unavailable|legacy-booking-|not-found|job-not-retryable)/.test(error.message);
         const status = error.status || (error.message === 'not-found' ? 404 : safe ? 409 : 500);
         logger.error('booking-api', { code: safe ? error.message : 'request-failed' });
-        return json(res, status, { error: error.status || safe ? error.message : 'request-failed' });
+        const message = safe ? ERROR_MESSAGES[error.message] : null;
+        return json(res, status, { error: error.status || safe ? error.message : 'request-failed', ...(message ? { message } : {}) });
       }
     });
   }

@@ -31,9 +31,12 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
   const titleKey = { paid: 'booking.payment.paidTitle', confirmed: 'booking.payment.confirmedTitle', cancelled: 'booking.payment.cancelledTitle', failed: 'booking.payment.failedTitle', review: 'booking.payment.reviewTitle', refundReview: 'booking.payment.refundReviewTitle' }[view] || 'confirmation.title';
   const detailKey = { paid: 'booking.payment.paidDetail', confirmed: 'booking.payment.confirmedDetail', cancelled: 'booking.payment.cancelledDetail', failed: 'booking.payment.failedDetail', review: 'booking.payment.reviewDetail', refundReview: 'booking.payment.refundReviewDetail' }[view] || 'confirmation.pendingDetail';
   const confirmed = ['paid', 'confirmed'].includes(view);
+  // Bank transfer / bit requests reserve nothing until the payment is confirmed.
+  const unpaid = view === 'pending';
+  const unpaidTransfer = unpaid && verified?.paymentMethod !== 'credit' && bookingData.paymentMethod !== 'credit';
 
   return (
-    <div className="target-site target-booking-flow min-h-screen bg-brand-dark flex items-center justify-center px-4 md:px-6 py-12" dir={i18n.dir()}>
+    <div className="booking-confirmation target-site target-booking-flow min-h-screen bg-brand-dark flex items-center justify-center px-4 md:px-6 py-12" dir={i18n.dir()}>
       <div className="max-w-2xl w-full">
         {/* Success Icon */}
         <div className="text-center mb-8 animate-in zoom-in duration-500">
@@ -41,14 +44,15 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
             {confirmed ? <CheckCircle size={48} className="text-green-500" /> : <span className="text-5xl text-brand-gold">{view === 'pending' ? '…' : '!'}</span>}
           </div>
           <h1 className="text-4xl md:text-5xl font-serif text-brand-gold font-bold mb-3">
-            {t(titleKey)}
+            {t(unpaidTransfer ? 'confirmation.unpaidTitle' : titleKey)}
           </h1>
           <p className="text-xl text-gray-300">
             {t('confirmation.thankYou')}, {bookingData.name}!
           </p>
         </div>
         <DemoBookingNotice />
-        <p className="text-center mb-6" role="status">{t(detailKey, { bookingId: bookingData.bookingId })}</p>
+        <p className="text-center mb-6" role="status">{t(unpaidTransfer ? 'confirmation.unpaidDetail' : detailKey, { bookingId: bookingData.bookingId })}</p>
+        {unpaid && <p className="booking-no-hold-notice text-center mb-6 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 font-bold text-amber-200" role="note" data-testid="no-hold-notice">{t('confirmation.noHoldNotice')}</p>}
         {statusError && <p className="text-center mb-6" role="alert">{statusError}</p>}
         <button type="button" className="target-button w-full mb-6" onClick={refreshStatus} disabled={checking}>{t('booking.payment.refreshStatus')}</button>
         <DemoBookingControls bookingId={bookingData.bookingId} />
@@ -80,6 +84,7 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
                 {i18n.language?.startsWith('en') ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeZone: 'Asia/Jerusalem' }).format(new Date(`${bookingData.tourDate}T12:00:00Z`)) : formatDateHebrew(bookingData.tourDate)}
               </div>
             </div>
+            <p className="text-sm text-gray-300">{t('bookingDesign.schedule')}</p>
 
             {/* Participants */}
             <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
@@ -92,16 +97,18 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
               </div>
             </div>
 
-            {/* Email */}
-            <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2 text-gray-400">
-                <Mail size={20} />
-                <span className="text-sm">{t('confirmation.email')}</span>
+            {/* Email (optional) */}
+            {bookingData.email && (
+              <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Mail size={20} />
+                  <span className="text-sm">{t('confirmation.email')}</span>
+                </div>
+                <div className="text-lg text-white" dir="ltr">
+                  {bookingData.email}
+                </div>
               </div>
-              <div className="text-lg text-white" dir="ltr">
-                {bookingData.email}
-              </div>
-            </div>
+            )}
 
             {/* Phone */}
             <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
@@ -144,10 +151,14 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-3xl p-6 mb-6 animate-in fade-in duration-1000">
           <h3 className="text-xl font-bold text-blue-400 text-right mb-4">{t('confirmation.nextSteps.title')}</h3>
           {IS_PREPROD ? <p>{t('demo.noMessages')}</p> : <ul className="space-y-3 text-right text-gray-300">
-            <li className="flex items-start gap-3 justify-end">
+            {unpaid && <li className="flex items-start gap-3 justify-end">
+              <span className="font-bold text-amber-200">{t('confirmation.nextSteps.completePayment')}</span>
+              <div className="text-amber-300 mt-1">!</div>
+            </li>}
+            {bookingData.email && <li className="flex items-start gap-3 justify-end">
               <span>{t('confirmation.nextSteps.emailPending')}</span>
               <div className="text-blue-400 mt-1">✓</div>
-            </li>
+            </li>}
             <li className="flex items-start gap-3 justify-end">
               <span>{t('confirmation.nextSteps.contactSoon')}</span>
               <div className="text-blue-400 mt-1">✓</div>

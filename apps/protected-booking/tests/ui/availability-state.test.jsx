@@ -40,12 +40,14 @@ it.each(['settings', 'tours'])('%s subscription failure does not invent capacity
 });
 it('date cards remain disabled during loading and outage, and recover with data', () => {
   render(<BookingSection />);
-  const card = screen.getByRole('button', { name: 'bookingSection.dateCardLabel' });
+  // The card's accessible name is "<date label>, <status>".
+  const card = screen.getByRole('button', { name: /^bookingSection\.dateCardLabel/ });
   expect(card.disabled).toBe(true);
-  expect(screen.getByText('common.loading')).toBeTruthy();
+  expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, common.loading');
   act(() => mocks.subscriptions.settings.error(new Error('permission-denied')));
   expect(card.disabled).toBe(true);
-  expect(screen.getByText('common.availabilityUnavailable')).toBeTruthy();
+  expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, common.availabilityUnavailable');
+  expect(screen.getByRole('status').textContent).toBe('common.availabilityUnavailable');
   expect(screen.queryByText('bookingSection.available')).toBeNull();
   act(() => { mocks.subscriptions.settings.next(settings); mocks.subscriptions.tours.next(tours); });
   expect(card.disabled).toBe(false);
@@ -59,10 +61,10 @@ it('participant plus cannot create an uneditable checkout above the server limit
     mocks.subscriptions.settings.next({ exists: () => true, data: () => ({ globalMaxParticipants: 30 }) });
     mocks.subscriptions.tours.next({ forEach: () => {} });
   });
-  fireEvent.click(screen.getByRole('button', { name: 'bookingSection.dateCardLabel' }));
+  fireEvent.click(screen.getByRole('button', { name: /^bookingSection\.dateCardLabel/ }));
   const count = screen.getByRole('spinbutton');
   fireEvent.change(count, { target: { value: '19' } });
-  const plus = count.parentElement.nextElementSibling;
+  const plus = screen.getByRole('button', { name: 'bookingSection.increaseParticipants' });
   fireEvent.click(plus);
   expect(count.value).toBe('20');
   expect(plus.disabled).toBe(true);
@@ -70,5 +72,5 @@ it('participant plus cannot create an uneditable checkout above the server limit
   expect(count.value).toBe('20');
   act(() => mocks.subscriptions.tours.error(new Error('offline')));
   expect(screen.queryByText('bookingSection.dateSoldOut')).toBeNull();
-  expect(screen.queryByText('bookingSection.continueCta')).toBeNull();
+  expect(screen.queryByRole('button', { name: /bookingDesign\.continue/ })).toBeNull();
 });

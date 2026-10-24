@@ -3,6 +3,16 @@ const { validateBooking, fingerprint, identifiers, transition, fault } = require
 const { APPROVED_WEEK_POLICY, validatePolicy, weekStartDate, assertWeeklyCounter, assertWeeklyAvailability } = require('./weekly-availability');
 const { enqueueConfirmedBookingWhatsApp } = require('./whatsapp-outbox');
 const APP_ID = 'hilik-rosenberg-v1';
+const FULL_CODES = ['capacity-exceeded', 'tour-unavailable'];
+// Daily tour cap. Throws tour-unavailable/capacity-exceeded when there is no room.
+function assertTourRoom(td, sd, date, participants) {
+  td = td || {}; sd = sd || {};
+  if ((sd.blocked || []).includes(date) || (sd.soldOut || []).includes(date)) throw fault('tour-unavailable');
+  const max = td.useGlobalMax === false ? td.customMax : sd.globalMaxParticipants ?? 30;
+  const current = td.currentRegistrations ?? 0;
+  if (!Number.isInteger(max) || max < 1 || !Number.isInteger(current) || current < 0) throw fault('capacity-requires-reconciliation');
+  if (current + participants > max) throw fault('capacity-exceeded');
+}
 function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLICY } = {}) {
   const tourRef = date => db.doc(`artifacts/${APP_ID}/public/data/tourDates/${date}`);
   const bookingRef = id => db.doc(`bookings/${id}`);
@@ -17,6 +27,9 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
       tx.create(db.doc(`integrationJobs/${id}`), { ...(emailSnapshot ? { emailSnapshot } : {}), kind, bookingId: booking.bookingId, tourDate: booking.tourDate, revision, event: booking.status, language: booking.language || 'he', status: 'pending', attempts: 0, nextAttemptAt: now, createdAt: now, updatedAt: now });
     }
   }
+  // Creating a booking never reserves capacity (bank transfer, bit or card).
+  // Availability is still checked so an already full tour is rejected early,
+  // but tour/week counters change only when payment is confirmed (see change()).
   async function create(uid, key, input, nowMs = Date.now()) {
     const data = validateBooking(input, new Date(nowMs)), id = identifiers(uid, key), ref = bookingRef(id), digest = fingerprint(data);
     return db.runTransaction(async tx => {
@@ -27,31 +40,21 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         if (b.status === 'cancelled' || ['expired', 'failed'].includes(b.paymentStatus)) throw fault('booking-closed');
         return { ...b, reused: true };
       }
-      let weekly = null;
+      let weekKey = null;
       if (weeklyPolicy?.enabled === true) {
-        // Not activated by this patch/runtime. A future approved configuration
-        // requires an explicitly chosen week policy and a fresh complete sync.
         validatePolicy(weeklyPolicy, true);
-        const key = weekStartDate(data.tourDate, weeklyPolicy);
-        const [calendar, counter] = await Promise.all([tx.get(calendarWeekRef(key)), tx.get(weekRef(key))]);
-        const max = settings.data()?.globalMaxParticipants ?? 30;
-        const current = assertWeeklyAvailability(calendar.data(), counter.data(), { policy: weeklyPolicy, weekStart: key, maxParticipants: max, participants: data.participants, nowMs });
-        weekly = { key, current, held: counter.data().heldParticipants, confirmed: counter.data().confirmedParticipants };
+        weekKey = weekStartDate(data.tourDate, weeklyPolicy);
+        const [calendar, counter] = await Promise.all([tx.get(calendarWeekRef(weekKey)), tx.get(weekRef(weekKey))]);
+        assertWeeklyAvailability(calendar.data(), counter.data(), { policy: weeklyPolicy, weekStart: weekKey, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: data.participants, nowMs });
       }
-      const td = tour.data() || {}, sd = settings.data() || {};
-      if ((sd.blocked || []).includes(data.tourDate) || (sd.soldOut || []).includes(data.tourDate)) throw fault('tour-unavailable');
-      const max = td.useGlobalMax === false ? td.customMax : sd.globalMaxParticipants ?? 30;
-      const current = td.currentRegistrations ?? 0;
-      if (!Number.isInteger(max) || max < 1 || !Number.isInteger(current) || current < 0) throw fault('capacity-requires-reconciliation');
-      if (current + data.participants > max) throw fault('capacity-exceeded');
+      assertTourRoom(tour.data(), settings.data(), data.tourDate, data.participants);
       const now = Timestamp.fromMillis(nowMs), credit = data.paymentMethod === 'credit';
-      const booking = { ...data, ...(weekly ? { weekStart: weekly.key } : {}), bookingId: id, ownerUid: uid, requestFingerprint: digest, schemaVersion: 2, capacityReserved: true, revision: 1, status: credit ? 'payment_pending' : 'pending', paymentStatus: credit ? 'creating' : 'pending', holdExpiresAt: credit ? Timestamp.fromMillis(nowMs + 15 * 60000) : null, createdAt: now, updatedAt: now };
+      // holdExpiresAt is only the card checkout window (abandoned checkouts are
+      // closed by expirePaymentHolds); no seat is held during it.
+      const booking = { ...data, ...(weekKey ? { weekStart: weekKey } : {}), bookingId: id, ownerUid: uid, requestFingerprint: digest, schemaVersion: 2, capacityReserved: false, revision: 1, status: credit ? 'payment_pending' : 'pending', paymentStatus: credit ? 'creating' : 'pending', holdExpiresAt: credit ? Timestamp.fromMillis(nowMs + 15 * 60000) : null, createdAt: now, updatedAt: now };
       tx.create(ref, booking);
-      tx.set(tourRef(data.tourDate), { date: data.tourDate, currentRegistrations: current + data.participants, updatedAt: now }, { merge: true });
-      if (weekly) tx.set(weekRef(weekly.key), { currentRegistrations: weekly.current + data.participants, heldParticipants: weekly.held + data.participants, confirmedParticipants: weekly.confirmed, updatedAt: now }, { merge: true });
-      // A credit hold changes availability immediately, before payment capture.
-      // It needs a calendar job even when no customer email is due yet.
-      jobs(tx, booking, 1, now, credit ? ['calendar'] : ['email', 'calendar']);
+      // Availability is unchanged, so no calendar job is due at creation.
+      jobs(tx, booking, 1, now, credit ? [] : ['email']);
       return booking;
     });
   }
@@ -66,9 +69,15 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         if (!guards.initiationLease) throw fault('invalid-initiation-lease');
         if (b.initiationLease !== guards.initiationLease || b.paymentStatus !== 'creating') return b;
       }
+      // Payment confirmation of an unreserved booking may reserve its seats now.
+      const mayReserve = ['confirm', 'paid'].includes(event) && b.capacityReserved === false && b.status !== 'cancelled';
+      const weeklyEnabled = mayReserve && weeklyPolicy?.enabled === true;
+      const weekKey = b.weekStart || (weeklyEnabled ? weekStartDate(b.tourDate, weeklyPolicy) : null);
       const tr = tourRef(b.tourDate), tour = await tx.get(tr);
-      const weeklyRef = b.weekStart ? weekRef(b.weekStart) : null;
+      const weeklyRef = weekKey ? weekRef(weekKey) : null;
       const weekly = weeklyRef ? await tx.get(weeklyRef) : null;
+      const settings = mayReserve ? await tx.get(settingsRef()) : null;
+      const calendar = weeklyEnabled ? await tx.get(calendarWeekRef(weekKey)) : null;
       const deliveryRef = receipt ? db.doc(`paymentWebhookDeliveries/${fingerprint(receipt.transactionKey)}`) : null;
       const delivery = deliveryRef ? await tx.get(deliveryRef) : null;
       if (['paid', 'decline'].includes(event) && (!receipt || receipt.verified !== true || receipt.bookingId !== id || receipt.amount !== b.totalPrice || receipt.currency !== 'ILS' || !receipt.transactionKey)) throw fault('unverified-provider-event');
@@ -88,21 +97,49 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         // A decline and a later verified capture can share one transaction ID.
         if (delivery.data().event === event || delivery.data().event === 'paid') return b;
       }
-      const patch = event === 'paid' && ['paid', 'pending_review'].includes(b.paymentStatus)
-        ? { additionalPaymentReview: true, paymentReviewReason: 'multiple-approved-transactions' }
-        : transition(b, event, nowMs);
+      // Room check for the reservation, inside this transaction: the daily tour
+      // cap plus the weekly quota (incl. calendar external participants) when enabled.
+      let room = { available: false, code: null };
+      if (mayReserve) {
+        try {
+          if (weeklyEnabled) {
+            validatePolicy(weeklyPolicy, true);
+            assertWeeklyAvailability(calendar.data(), weekly?.data(), { policy: weeklyPolicy, weekStart: weekKey, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: b.participants, nowMs });
+          }
+          assertTourRoom(tour.data(), settings.data(), b.tourDate, b.participants);
+          room = { available: true, code: null };
+        } catch (error) {
+          if (!error.code) throw error;
+          room = { available: false, code: error.code };
+        }
+      }
+      let patch;
+      try {
+        patch = event === 'paid' && ['paid', 'pending_review'].includes(b.paymentStatus)
+          ? { additionalPaymentReview: true, paymentReviewReason: 'multiple-approved-transactions' }
+          : transition(b, event, nowMs, { capacityAvailable: room.available });
+      } catch (error) {
+        // A stale calendar or an unreconciled counter is not "full": report the real cause.
+        if (error.code === 'capacity-full-at-confirmation' && room.code && !FULL_CODES.includes(room.code)) throw fault(room.code);
+        throw error;
+      }
       if (!patch) return b;
+      if (patch.paymentReviewReason === 'overbooked-at-payment' && room.code) patch.capacityCheckCode = room.code;
       const current = tour.data()?.currentRegistrations || 0;
       const release = b.capacityReserved && patch.capacityReserved === false ? b.participants : 0;
+      const reserve = !b.capacityReserved && patch.capacityReserved === true ? b.participants : 0;
+      if (reserve && weekKey && !b.weekStart) patch.weekStart = weekKey;
       if (release && current < release) throw fault('capacity-requires-reconciliation');
       if (release && weeklyRef && (weekly?.data()?.reconciled !== true || !Number.isInteger(weekly.data().currentRegistrations) || weekly.data().currentRegistrations < release)) throw fault('capacity-requires-reconciliation');
       const now = Timestamp.fromMillis(nowMs), revision = b.revision + 1, updated = { ...b, ...patch, revision, updatedAt: now };
+      const held = booking => booking.capacityReserved && booking.status !== 'confirmed' ? booking.participants : 0;
+      const confirmed = booking => booking.capacityReserved && booking.status === 'confirmed' ? booking.participants : 0;
+      const heldDelta = held(updated) - held(b), confirmedDelta = confirmed(updated) - confirmed(b);
       let weeklyPatch;
-      if (weeklyRef) {
+      // Unreserved bookings never touch the weekly counter (cancel, expire, review).
+      if (weeklyRef && (release || reserve || heldDelta || confirmedDelta)) {
         const counter = assertWeeklyCounter(weekly?.data());
-        const held = booking => booking.capacityReserved && booking.status !== 'confirmed' ? booking.participants : 0;
-        const confirmed = booking => booking.capacityReserved && booking.status === 'confirmed' ? booking.participants : 0;
-        weeklyPatch = { currentRegistrations: counter.currentRegistrations - release, heldParticipants: counter.heldParticipants + held(updated) - held(b), confirmedParticipants: counter.confirmedParticipants + confirmed(updated) - confirmed(b), updatedAt: now };
+        weeklyPatch = { currentRegistrations: counter.currentRegistrations - release + reserve, heldParticipants: counter.heldParticipants + heldDelta, confirmedParticipants: counter.confirmedParticipants + confirmedDelta, updatedAt: now };
         assertWeeklyCounter({ ...counter, ...weeklyPatch });
       }
       // All reads above; no Firestore reads after the first write.
@@ -111,11 +148,13 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         if (delivery?.exists) tx.update(deliveryRef, record);
         else tx.create(deliveryRef, { ...record, createdAt: now });
       }
-      if (release) tx.set(tr, { currentRegistrations: current - release, updatedAt: now }, { merge: true });
-      if (weeklyRef) tx.set(weeklyRef, weeklyPatch, { merge: true });
+      if (release || reserve) tx.set(tr, { date: b.tourDate, currentRegistrations: current - release + reserve, updatedAt: now }, { merge: true });
+      if (weeklyPatch) tx.set(weeklyRef, weeklyPatch, { merge: true });
       tx.update(ref, { ...patch, revision, updatedAt: now });
       tx.create(db.doc(`bookingAudit/${id}-${revision}`), { bookingId: id, event, actor, fromStatus: b.status, toStatus: updated.status, createdAt: now });
-      // First real confirmation only. Pending holds, browser return parameters,
+      // Verified money for a full tour: keep the payment record and alert the owner.
+      if (patch.paymentReviewReason === 'overbooked-at-payment') tx.create(db.doc(`adminNotices/${id}-${revision}`), { type: 'overbooked-at-payment', bookingId: id, tourDate: b.tourDate, participants: b.participants, totalPrice: b.totalPrice, paymentMethod: b.paymentMethod, capacityCheckCode: room.code, status: 'open', createdAt: now, updatedAt: now });
+      // First real confirmation only. Pending requests, browser return parameters,
       // late captures under review, repeated callbacks and cancellation never send.
       if (b.status !== 'confirmed' && updated.status === 'confirmed') enqueueConfirmedBookingWhatsApp(tx, db, updated, now);
       if (patch.status || patch.paymentStatus) jobs(tx, updated, revision, now);
@@ -124,4 +163,4 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
   }
   return { create, change, bookingRef, tourRef };
 }
-module.exports = { createBookingService };
+module.exports = { createBookingService, assertTourRoom };

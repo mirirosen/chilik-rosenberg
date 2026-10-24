@@ -48,9 +48,10 @@ test('CRLF/property injection, controls, bidi overrides, malformed phone/date/co
   assert.ok(renderContactCard({ ...BOOKING, phone: '+972500000001' }).equals(renderContactCard(BOOKING)));
 });
 test('alert locator contains no PII/token, and CTA suffix resolves to the same exact fragment route', () => {
-  assert.equal(contactLink(ID), 'https://www.chilik-tours.com/admin#contact=BK-000000000000000000000001');
+  // Live admin route (deployed 2026-10-09) is /manage-bookings.
+  assert.equal(contactLink(ID), 'https://www.chilik-tours.com/manage-bookings#contact=BK-000000000000000000000001');
   assert.equal(CONTACT_BUTTON_URL.replace('{{4}}', contactSuffix(ID)), contactLink(ID));
-  const url = new URL(contactLink(ID)); assert.equal(url.pathname, '/admin'); assert.equal(url.search, '');
+  const url = new URL(contactLink(ID)); assert.equal(url.pathname, '/manage-bookings'); assert.equal(url.search, '');
   for (const id of ['../secret', ID+'\r\n', ['BK-other'], 'BK-'+'f'.repeat(20), ID+'?name=x']) assert.throws(() => contactLink(id));
 });
 test('actual API export authenticates revoked-token-checking admin before reading and generates attachment on request', async () => {

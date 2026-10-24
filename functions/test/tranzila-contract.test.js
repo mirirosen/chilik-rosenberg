@@ -9,7 +9,7 @@ const urls={success:'https://example.com/success',failure:'https://example.com/f
 test('verified field mapping and Handshake facts cannot satisfy remaining financial release gates',()=>{
  assert.ok(Object.isFrozen(VERIFIED_TERMINAL_METADATA));
  assert.equal(VERIFIED_TERMINAL_METADATA.reportField,'user_defined_10');
- const issues=paymentConfigurationIssues({...VERIFIED_TERMINAL_METADATA,enabled:false,merchantConfigurationVerified:false,reportContractVerified:false});
+ const issues=paymentConfigurationIssues({...VERIFIED_TERMINAL_METADATA,enabled:false,merchantConfigurationVerified:false,reportContractVerified:false,captureContractVerified:false});
  assert.ok(issues.includes('payment-runtime-disabled'));assert.ok(issues.includes('merchant-configuration-unverified'));assert.ok(issues.includes('report-capture-and-cancellation-contract-unverified'));
 });
 test('Handshake response contract returns only a boolean for valid bounded token shapes',()=>{

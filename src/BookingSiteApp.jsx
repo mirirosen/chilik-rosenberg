@@ -88,8 +88,8 @@ export default function BookingSiteApp() {
     navigate(`/confirmation?id=${encodeURIComponent(result.bookingId)}`);
   };
   const changeSelection = form => {
-    const { name, phone, email, notes, howDidYouHear, dateOfBirth, paymentMethod } = form;
-    setDraft({ name, phone, email, notes, howDidYouHear, dateOfBirth, paymentMethod });
+    const { name, phone, email, notes, howDidYouHear, paymentMethod } = form;
+    setDraft({ name, phone, email, notes, howDidYouHear, paymentMethod });
     setSelection({ date: form.tourDate, participants: form.participants }); navigate('/booking');
   };
   const loading = <div className="site-route-loading" role="status">{t('common.loading')}</div>;

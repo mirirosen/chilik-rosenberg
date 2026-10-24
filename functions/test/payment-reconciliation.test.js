@@ -17,7 +17,7 @@ async function setup() {
   }});
   const runner=createPaymentReconciler({db:f.db,bookings:f.bookings,Timestamp,provider,isEnabled:()=>true,clock:()=>now});
   const record=(index=42,patch={})=>{
-    const row={index,authorization_number:147934,amount:500,currency:'1',processor_response_code:'000',child_terminal:CONFIG.terminal,user_defined_3:id,txn_type:'FIXTURE_CAPTURE',tranmode:'FIXTURE_MODE',transtatus:1,txn_payment_method:'CC',cancelfdid:null,cancelfdnumber:null,credit_card_token:'private-card-token',...patch};
+    const row={index,authorization_number:147934,amount:50000,currency:'1',processor_response_code:'000',child_terminal:CONFIG.terminal,user_defined_3:id,txn_type:'FIXTURE_CAPTURE',tranmode:'FIXTURE_MODE',transtatus:1,txn_payment_method:'CC',cancelfdid:null,cancelfdnumber:null,credit_card_token:'private-card-token',...patch};
     reports.set(index,row); f.record(id,index,patch);
   };
   return {...f,id,ref,runner,provider,calls,record,job:()=>f.db.data.get(ref.path),now:()=>now,advance:ms=>{now+=ms;f.advance(ms);},outage:value=>{outage=value;}};
@@ -33,12 +33,12 @@ test('disabled default and runtime worker perform no DB, secret or provider acce
 });
 test('lost callback is recovered only by discovery plus independently verified capture; repeat preserves seats/jobs/revision',async()=>{
   const f=await setup(); f.record();
-  assert.equal(f.booking(f.id).paymentStatus,'awaiting_payment');
+  assert.equal(f.booking(f.id).paymentStatus,'awaiting_payment'); assert.equal(f.seats(),0);
   await f.runner.runDue();
-  assert.equal(f.booking(f.id).paymentStatus,'paid'); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),4);
+  assert.equal(f.booking(f.id).paymentStatus,'paid'); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),3);
   assert.deepEqual(f.calls,['lookup',42]); assert.equal(f.job().status,'retry');
   const revision=f.booking(f.id).revision; f.advance(3*60000); await f.runner.run(f.ref);
-  assert.equal(f.booking(f.id).revision,revision); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),4);
+  assert.equal(f.booking(f.id).revision,revision); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),3);
   const stored=JSON.stringify(f.job());
   for(const privateValue of ['private-card-token',INPUT.email,INPUT.phone,CONFIG.appKey,CONFIG.secret]) assert.ok(!stored.includes(privateValue));
 });
@@ -47,7 +47,7 @@ test('empty report and wrong capture cannot confirm from browser success or disc
   assert.equal(f.booking(f.id).paymentStatus,'awaiting_payment');
   assert.equal((await f.call('paymentStatus',{method:'GET',query:{id:f.id,payment:'success'}})).body.paymentStatus,'awaiting_payment');
   f.advance(3*60000); f.record(42,{amount:1}); await f.runner.run(f.ref);
-  assert.equal(f.booking(f.id).paymentStatus,'awaiting_payment'); assert.equal(f.seats(),2); assert.equal(f.job().lastErrorCode,'provider-verification-pending');
+  assert.equal(f.booking(f.id).paymentStatus,'awaiting_payment'); assert.equal(f.seats(),0); assert.equal(f.job().lastErrorCode,'provider-verification-pending');
 });
 test('transient report outage retries without exposing upstream details or modifying payment',async()=>{
   const f=await setup(); f.outage(true); await f.runner.run(f.ref);
@@ -58,7 +58,7 @@ test('transient report outage retries without exposing upstream details or modif
 test('concurrent worker leases allow one discovery and one atomic capture transition',async()=>{
   const f=await setup(); f.record();
   await Promise.all([f.runner.run(f.ref),f.runner.run(f.ref)]);
-  assert.deepEqual(f.calls,['lookup',42]); assert.equal(f.booking(f.id).revision,2); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),4);
+  assert.deepEqual(f.calls,['lookup',42]); assert.equal(f.booking(f.id).revision,2); assert.equal(f.seats(),2); assert.equal(f.jobsCount(),3);
   assert.equal([...f.db.data.keys()].filter(path=>path.startsWith('paymentReconciliation/')).length,1);
 });
 test('a replaced worker lease cannot apply its delayed result or overwrite its successor',async()=>{

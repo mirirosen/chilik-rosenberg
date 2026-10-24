@@ -18,7 +18,7 @@ async function customerSession(createSession) {
   if (!auth.currentUser) throw new Error('booking-session-unavailable');
   return auth.currentUser;
 }
-export function bookingFingerprint(b) { return JSON.stringify([b.email?.trim().toLowerCase(), b.phone?.replace(/\D/g, ''), b.tourDate, Number(b.participants), b.paymentMethod, b.name?.trim(), b.notes?.trim(), b.howDidYouHear, b.dateOfBirth, b.agreeToTerms, b.language]); }
+export function bookingFingerprint(b) { return JSON.stringify([b.email?.trim().toLowerCase(), b.phone?.replace(/\D/g, ''), b.tourDate, Number(b.participants), b.paymentMethod, b.name?.trim(), b.notes?.trim(), b.howDidYouHear, b.dateOfBirth, b.agreeToTerms, b.language, ...(b.adultConfirmed === undefined ? [] : [b.adultConfirmed])]); }
 async function digest(value) {
   const bytes = new TextEncoder().encode(value);
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(v => v.toString(16).padStart(2, '0')).join('');
