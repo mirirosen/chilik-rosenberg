@@ -36,7 +36,7 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
   const unpaidTransfer = unpaid && verified?.paymentMethod !== 'credit' && bookingData.paymentMethod !== 'credit';
 
   return (
-    <div className="target-site target-booking-flow min-h-screen bg-brand-dark flex items-center justify-center px-4 md:px-6 py-12" dir={i18n.dir()}>
+    <div className="booking-confirmation target-site target-booking-flow min-h-screen bg-brand-dark flex items-center justify-center px-4 md:px-6 py-12" dir={i18n.dir()}>
       <div className="max-w-2xl w-full">
         {/* Success Icon */}
         <div className="text-center mb-8 animate-in zoom-in duration-500">
@@ -84,6 +84,7 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
                 {i18n.language?.startsWith('en') ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeZone: 'Asia/Jerusalem' }).format(new Date(`${bookingData.tourDate}T12:00:00Z`)) : formatDateHebrew(bookingData.tourDate)}
               </div>
             </div>
+            <p className="text-sm text-gray-300">{t('bookingDesign.schedule')}</p>
 
             {/* Participants */}
             <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
@@ -96,16 +97,18 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
               </div>
             </div>
 
-            {/* Email */}
-            <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2 text-gray-400">
-                <Mail size={20} />
-                <span className="text-sm">{t('confirmation.email')}</span>
+            {/* Email (optional) */}
+            {bookingData.email && (
+              <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Mail size={20} />
+                  <span className="text-sm">{t('confirmation.email')}</span>
+                </div>
+                <div className="text-lg text-white" dir="ltr">
+                  {bookingData.email}
+                </div>
               </div>
-              <div className="text-lg text-white" dir="ltr">
-                {bookingData.email}
-              </div>
-            </div>
+            )}
 
             {/* Phone */}
             <div className="booking-detail-row flex flex-row-reverse items-center justify-between border-b border-white/10 pb-4">
@@ -152,10 +155,10 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
               <span className="font-bold text-amber-200">{t('confirmation.nextSteps.completePayment')}</span>
               <div className="text-amber-300 mt-1">!</div>
             </li>}
-            <li className="flex items-start gap-3 justify-end">
+            {bookingData.email && <li className="flex items-start gap-3 justify-end">
               <span>{t('confirmation.nextSteps.emailPending')}</span>
               <div className="text-blue-400 mt-1">✓</div>
-            </li>
+            </li>}
             <li className="flex items-start gap-3 justify-end">
               <span>{t('confirmation.nextSteps.contactSoon')}</span>
               <div className="text-blue-400 mt-1">✓</div>

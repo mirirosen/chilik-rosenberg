@@ -43,11 +43,12 @@
       "participants": "Number of Participants",
       "paymentMethod": "Payment Method",
       "notes": "Notes / Special Requests",
-      "agreeToTerms": "I agree to the terms and conditions (including cancellation policy)",
+      "agreeToTerms": "I confirm that I am 18 or older and agree to the terms and conditions (including the cancellation policy)",
       "required": "Required field",
       "submit": "Submit Booking",
       "submitting": "Submitting booking...",
-      "backToHome": "Cancel and return to homepage"
+      "backToHome": "Cancel and return to homepage",
+      "optional": "(optional)"
     },
     "paymentMethods": {
       "bit": "Bit — arrange verified payment details first",
@@ -103,7 +104,7 @@
       "dateUnavailable": "Selected date is not available (blocked or sold out)",
       "participantsRange": "Number of participants must be between 1 and 20",
       "paymentRequired": "Please select a payment method",
-      "termsRequired": "You must agree to the terms and conditions"
+      "termsRequired": "Confirm that you are 18 or older and accept the terms and conditions"
     },
     "price": {
       "total": "Total Price",
@@ -334,7 +335,7 @@
         "desc": "We'll experience up close what really happens all day in a yeshiva and how a Haredi child grows up."
       },
       "bakery": {
-        "title": "Vizhnitz Bakery",
+        "title": "Warm Vizhnitz challah",
         "desc": "We'll enter the heart of the mythological bakery and see how challah is braided."
       },
       "volunteering": {
@@ -369,12 +370,12 @@
         "desc": "Chopped liver in a velvety texture with caramelized onions and plenty of Jewish love."
       },
       "challenge": {
-        "title": "Bakery Showdown",
-        "desc": "Blind taste test between challah giants: HaZvi Bakery vs. Vizhnitz. Who will win?"
+        "title": "Warm Vizhnitz challah",
+        "desc": "Warm Vizhnitz challah — a taste of Bnei Brak’s culinary traditions."
       },
       "blintzes": {
         "title": "Legendary Blintzes",
-        "desc": "Warm and sweet rich cheese blintzes that perfectly round out the meal."
+        "desc": "Warm, sweet cheese blintzes, served before the meat dishes."
       }
     },
     "eyebrow": "The flavors of Bnei Brak",

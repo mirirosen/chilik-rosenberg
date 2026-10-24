@@ -102,6 +102,13 @@ const Terms = () => {
 
         {i18n.language !== 'he' && <p className="terms-language-notice mb-8 p-4 border border-brand-gold/40 rounded-2xl">{t('terms.ui.languageNotice')}</p>}
 
+        {/* Contents: sections 3-5 are Hebrew-only legal text, so their links stay RTL */}
+        <nav className="legal-contents" aria-label={dir === 'rtl' ? 'נושאי התקנון' : 'Terms contents'}>
+          {[t('terms.section1.title'), t('terms.section2.title'), 'מדיניות ביטול רכישה', 'מדיניות אספקת השירות', 'אחריות ושיפוי', t('terms.section6.title'), t('terms.section7.title')].map((title, index) => (
+            <a key={index} href={`#terms-section-${index + 1}`} dir={index >= 2 && index <= 4 ? 'rtl' : dir}>{index + 1}. {title}</a>
+          ))}
+        </nav>
+
         {/* Content Sections */}
         <div className="space-y-8">
           {/* AGE RESTRICTION - PROMINENT WARNING */}
@@ -123,7 +130,7 @@ const Terms = () => {
           </section>
 
           {/* Section 1: כללי */}
-          <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section id="terms-section-1" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
               1. {t('terms.section1.title')}
             </h2>
@@ -135,7 +142,7 @@ const Terms = () => {
           </section>
 
           {/* Section 2: תשלום */}
-          <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section id="terms-section-2" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
               2. {t('terms.section2.title')}
             </h2>
@@ -178,7 +185,7 @@ const Terms = () => {
           </section>
 
           {/* Section 3: מדיניות ביטול רכישה */}
-          <section lang="he" dir="rtl" className="bg-red-500/5 border-2 border-red-500/30 rounded-3xl p-8">
+          <section id="terms-section-3" lang="he" dir="rtl" className="bg-red-500/5 border-2 border-red-500/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚠️ מדיניות ביטול רכישה .3
             </h2>
@@ -246,7 +253,7 @@ const Terms = () => {
           </section>
 
           {/* Section 4: מדיניות אספקת השירות */}
-          <section lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section id="terms-section-4" lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               📋 מדיניות אספקת השירות .4
             </h2>
@@ -316,7 +323,7 @@ const Terms = () => {
           </section>
 
           {/* Section 5: אחריות ושיפוי */}
-          <section lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section id="terms-section-5" lang="he" dir="rtl" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-right" dir="rtl">
               ⚖️ אחריות ושיפוי .5
             </h2>
@@ -402,7 +409,7 @@ const Terms = () => {
           </section>
 
           {/* Section 6: פרטיות */}
-          <section className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
+          <section id="terms-section-6" className="bg-brand-dark-lighter border border-white/10 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-start" dir={dir}>
               6. {t('terms.section6.title')}
             </h2>
@@ -414,7 +421,7 @@ const Terms = () => {
           </section>
 
           {/* Section 7: יצירת קשר */}
-          <section className="bg-brand-gold/10 border-2 border-brand-gold/30 rounded-3xl p-8">
+          <section id="terms-section-7" className="bg-brand-gold/10 border-2 border-brand-gold/30 rounded-3xl p-8">
             <h2 className="text-2xl font-serif text-brand-gold font-bold mb-6 text-center">
               7. {t('terms.section7.title')}
             </h2>

@@ -86,8 +86,8 @@ it('continue rechecks sanitized server availability and a newly blocked date nev
   const { default: BookingSection } = await import('../../src/components/BookingSection');
   const onContinue = vi.fn(); render(<BookingSection onContinue={onContinue} />);
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
-  const card = screen.getAllByRole('button', { name: 'bookingSection.dateCardLabel' })[0];
-  fireEvent.click(card); fireEvent.click(screen.getByText('bookingSection.continueCta'));
+  const card = screen.getAllByRole('button', { name: /^bookingSection\.dateCardLabel/ }).find(button => !button.disabled);
+  fireEvent.click(card); fireEvent.click(screen.getByRole('button', { name: /bookingDesign\.continue/ }));
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   expect(fetch).toHaveBeenCalledTimes(2); expect(onContinue).not.toHaveBeenCalled(); expect(mocks.getDoc).not.toHaveBeenCalled();
 });

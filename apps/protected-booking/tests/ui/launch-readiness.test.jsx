@@ -82,7 +82,7 @@ it('keeps approved contact destinations in Terms and Footer with English address
   expect(container.textContent).not.toContain('0505804367');
 });
 
-it('keeps the original Hebrew policy provisions unchanged after trailing-whitespace cleanup except language attributes', () => {
+it('keeps the original Hebrew policy provisions unchanged after trailing-whitespace cleanup except language attributes and contents anchors', () => {
   // Normalize Windows (autocrlf) checkouts so the hash covers the copy, not line endings.
   const source = readFileSync('src/components/Terms.jsx','utf8').replace(/\r\n/g, '\n');
   // Hashes of the unchanged integrated-source policy blocks after trailing-whitespace cleanup. This fixture
@@ -91,7 +91,7 @@ it('keeps the original Hebrew policy provisions unchanged after trailing-whitesp
     ['AGE RESTRICTION - PROMINENT WARNING','Section 1: כללי','5ae90d5cff9a1a7e528eb17efe9aa87163187193a83bf71e5b3687a4fdf47cdb'],
     ['Section 3: מדיניות ביטול רכישה','Section 6: פרטיות','2c93cab6fff60848fbde18ca0a9683c4ce6672a826bd5d9443c83627400ca077']
   ]) {
-    const block = text => text.slice(text.indexOf('{/* '+from),text.indexOf('{/* '+to)).replaceAll('<section lang="he" dir="rtl" ', '<section ');
+    const block = text => text.slice(text.indexOf('{/* '+from),text.indexOf('{/* '+to)).replace(/<section id="terms-section-\d"/g, '<section').replaceAll('<section lang="he" dir="rtl" ', '<section ');
     expect(createHash('sha256').update(block(source)).digest('hex')).toBe(hash);
   }
 });

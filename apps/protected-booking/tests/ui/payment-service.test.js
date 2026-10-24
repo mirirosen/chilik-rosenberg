@@ -83,3 +83,9 @@ it('concurrent key creation for the same request converges before any POST', asy
   const s = await service(); const keys = await Promise.all([s.makeIdempotencyKey(booking), s.makeIdempotencyKey(booking)]);
   expect(keys[0]).toBe(keys[1]); expect(sessionStorage.length).toBe(2);
 });
+it('the 18+ consent is part of the request fingerprint only when present (as on live hosting)', async () => {
+  const s = await service();
+  expect(JSON.parse(s.bookingFingerprint(booking))).toHaveLength(11);
+  expect(JSON.parse(s.bookingFingerprint({ ...booking, adultConfirmed: true })).at(-1)).toBe(true);
+  expect(s.bookingFingerprint({ ...booking, adultConfirmed: true })).not.toBe(s.bookingFingerprint({ ...booking, adultConfirmed: false }));
+});

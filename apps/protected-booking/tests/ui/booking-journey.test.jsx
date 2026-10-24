@@ -16,7 +16,7 @@ import BookingSection from '../../src/components/BookingSection';
 import BookingConfirmation from '../../src/components/BookingConfirmation';
 const ID = 'BK-' + 'a'.repeat(24);
 function fillForm(container, method = 'bit') {
-  for (const [id, value] of Object.entries({ name: 'Test Customer', phone: '0501234567', email: 'test@example.com', howDidYouHear: 'friend', dateOfBirth: '1990-01-01' })) fireEvent.change(container.querySelector(`#${id}`), { target: { value } });
+  for (const [id, value] of Object.entries({ name: 'Test Customer', phone: '0501234567', email: 'test@example.com', howDidYouHear: 'friend' })) fireEvent.change(container.querySelector(`#${id}`), { target: { value } });
   fireEvent.click(container.querySelector(`input[value="${method}"]`)); fireEvent.click(container.querySelector('input[type="checkbox"]'));
 }
 beforeEach(() => {
@@ -34,12 +34,15 @@ describe('offline booking components', () => {
     const { container } = render(<BookingForm />);
     fireEvent.submit(container.querySelector('form'));
     await waitFor(() => expect(document.activeElement.id).toBe('name'));
-    for (const id of ['name', 'phone', 'email', 'howDidYouHear', 'dateOfBirth', 'agreeToTerms']) {
+    for (const id of ['name', 'phone', 'agreeToTerms']) {
       const field = container.querySelector(`#${id}`);
       expect(field.getAttribute('aria-invalid')).toBe('true');
       expect(field.getAttribute('aria-describedby')).toBe(`${id}-error`);
       expect(container.querySelector(`#${id}-error`).textContent).toBeTruthy();
     }
+    // Email and "how did you hear" are optional; there is no date-of-birth field.
+    for (const id of ['email', 'howDidYouHear']) expect(container.querySelector(`#${id}`).getAttribute('aria-invalid')).toBe('false');
+    expect(container.querySelector('#dateOfBirth')).toBeNull();
     expect(screen.getByRole('radiogroup').getAttribute('aria-labelledby')).toBe('payment-method-label');
     expect(mocks.createBooking).not.toHaveBeenCalled();
   });
@@ -56,12 +59,13 @@ describe('offline booking components', () => {
     const success = vi.fn(); mocks.createBooking.mockResolvedValue({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 250, pricePerPerson: 250 });
     function Journey() { const [form, setForm] = useState(false); return form ? <BookingForm onSuccess={success} /> : <BookingSection onContinue={(date, participants) => { window.history.replaceState({}, '', `/booking?date=${date}&participants=${participants}`); setForm(true); }} />; }
     const { container } = render(<Journey />);
-    fireEvent.click(screen.getByRole('button', { name: 'bookingSection.dateCardLabel' }));
-    fireEvent.click(screen.getByText('bookingSection.continueCta'));
+    fireEvent.click(screen.getByRole('button', { name: /^bookingSection\.dateCardLabel/ }));
+    fireEvent.click(screen.getByRole('button', { name: /bookingDesign\.continue/ }));
     await waitFor(() => expect(container.querySelector('#name')).not.toBeNull());
     fillForm(container); fireEvent.submit(container.querySelector('form'));
     await waitFor(() => expect(success).toHaveBeenCalled());
-    expect(mocks.createBooking.mock.calls[0][0]).toMatchObject({ tourDate: '2026-10-08', participants: 1, paymentMethod: 'bit', agreeToTerms: true });
+    expect(mocks.createBooking.mock.calls[0][0]).toMatchObject({ tourDate: '2026-10-08', participants: 1, paymentMethod: 'bit', agreeToTerms: true, adultConfirmed: true });
+    expect(mocks.createBooking.mock.calls[0][0]).not.toHaveProperty('dateOfBirth');
     expect(global.fetch).not.toHaveBeenCalled();
   });
   it('ambiguous last-seat submission can retry same key despite own reservation filling date', async () => {

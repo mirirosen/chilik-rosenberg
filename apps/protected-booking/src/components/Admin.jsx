@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { doc, setDoc, runTransaction } from 'firebase/firestore';
-import { onIdTokenChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onIdTokenChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth, db, APP_ID } from '../utils/firebase';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots, usesGlobalMax } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew, isThursday } from '../utils/dateUtils';
@@ -77,6 +77,23 @@ const Admin = () => {
     setIsAuthenticated(false);
     setPassword('');
     try { await signOut(auth); } catch { setError('היציאה נכשלה. נסה שוב.'); }
+  };
+
+  // First login and forgotten password share one flow: Firebase emails a set-password link.
+  // The message is the same whether or not the account exists, so it does not reveal admins.
+  const handlePasswordSetup = async () => {
+    if (!auth || !email.trim() || loggingIn) return;
+    setLoggingIn(true);
+    setError('');
+    setSuccessMessage('');
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setSuccessMessage('אם לחשבון יש גישה לניהול, יישלח אליו קישור להגדרת סיסמה. בדקו גם את תיקיית הספאם.');
+    } catch {
+      setError('לא ניתן לשלוח קישור כרגע. נסו שוב בעוד מעט.');
+    } finally {
+      setLoggingIn(false);
+    }
   };
 
   // ============================================
@@ -267,7 +284,7 @@ const Admin = () => {
   // Login Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-brand-dark flex items-center justify-center px-6">
+      <div className="site-admin-login min-h-screen bg-brand-dark flex items-center justify-center px-6" dir="rtl">
         <div className="max-w-md w-full bg-brand-dark-lighter p-12 rounded-5xl border border-white/10 shadow-2xl">
           <div className="flex justify-center mb-8">
             <Lock size={64} className="text-brand-gold" />
@@ -275,6 +292,9 @@ const Admin = () => {
           <h1 className="text-4xl font-serif text-brand-gold text-center mb-8 font-bold">
             כניסת מנהל
           </h1>
+          <p className="text-center text-gray-300 mb-6" dir="rtl">
+            ניהול ההזמנות החדשות. בכניסה הראשונה הזינו את האימייל ובחרו ״הגדרת סיסמה״.
+          </p>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
@@ -302,10 +322,11 @@ const Admin = () => {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-2xl p-4 text-red-400 text-center">
+              <div role="alert" className="bg-red-500/10 border border-red-500/50 rounded-2xl p-4 text-red-400 text-center">
                 {error}
               </div>
             )}
+            {successMessage && <p role="status" className="text-center text-brand-gold" dir="rtl">{successMessage}</p>}
 
             <button
               type="submit"
@@ -313,6 +334,14 @@ const Admin = () => {
               className="w-full bg-brand-gold text-brand-dark py-4 rounded-full font-black text-xl hover:scale-105 transition-all"
             >
               התחבר
+            </button>
+            <button
+              type="button"
+              onClick={handlePasswordSetup}
+              disabled={loggingIn || !auth || !email.trim()}
+              className="w-full border border-brand-gold/40 text-brand-gold py-3 rounded-full font-bold"
+            >
+              הגדרת סיסמה / שכחתי סיסמה
             </button>
           </form>
 
