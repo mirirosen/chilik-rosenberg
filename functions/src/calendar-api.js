@@ -36,7 +36,7 @@ function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now,
   const region = FUNCTION_REGION;
   const api = {};
   const origins = new Set(['https://livechilik-tours.com', 'https://www.chilik-tours.com', 'https://chilik-tours.com', 'https://hilik-site.web.app', 'https://hilik-site.firebaseapp.com', 'http://localhost:3000', 'http://localhost:5173']);
-  api.calendarAvailability = onRequest({ region, serviceAccount: INTEGRATION_RUNTIME, invoker: 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60 }, async (req, res) => {
+  api.calendarAvailability = onRequest({ region, serviceAccount: INTEGRATION_RUNTIME, invoker: runtime.publicEnabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60 }, async (req, res) => {
     res.set('Cache-Control', 'no-store');
     const origin = req.get('origin');
     if (origin && !origins.has(origin)) return res.status(403).json({ error: 'origin-not-allowed' });
@@ -50,7 +50,7 @@ function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now,
   });
   // No schedule export/registration at all while the feature is off.
   if (runtime.readsEnabled) {
-    api.refreshCalendarAvailability = onSchedule({ region, serviceAccount: INTEGRATION_RUNTIME, schedule: 'every 2 minutes', timeZone: 'Asia/Jerusalem', retryCount: 3, minBackoffSeconds: 30, maxBackoffSeconds: 120, maxRetrySeconds: 240, ...(runtime.secretBindings.length ? { secrets: runtime.secretBindings } : {}) }, async () => {
+    api.refreshCalendarAvailability = onSchedule({ region, serviceAccount: INTEGRATION_RUNTIME, schedule: 'every 2 minutes', timeZone: 'Asia/Jerusalem', retryCount: 3, minBackoffSeconds: 30, maxBackoffSeconds: 120, maxRetrySeconds: 240, minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 180, ...(runtime.secretBindings.length ? { secrets: runtime.secretBindings } : {}) }, async () => {
       try { return await runtime.importUpcoming(); }
       catch { logger.error('calendar-import', { code: 'calendar-import-failed' }); throw new Error('calendar-import-failed'); }
     });

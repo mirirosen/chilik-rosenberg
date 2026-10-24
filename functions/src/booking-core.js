@@ -8,7 +8,7 @@ function validateBooking(input, now = new Date()) {
   const text = (value, max) => typeof value === 'string' && value.trim().length > 0 && value.trim().length <= max;
   if (!text(input?.name, 120)) throw fault('invalid-name');
   if (typeof input.phone !== 'string' || !/^05\d-?\d{7}$/.test(String(input.phone || '').replace(/\s/g, ''))) throw fault('invalid-phone');
-  if (!text(input.email, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) throw fault('invalid-email');
+  if (input.email != null && input.email !== '' && (!text(input.email, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email))) throw fault('invalid-email');
   if (!realDate(input.tourDate) || new Date(input.tourDate + 'T12:00:00Z').getUTCDay() !== 4 || (input.tourDate < localDate(now) || (input.tourDate === localDate(now) && Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(now)) >= 20)) || new Date(input.tourDate + 'T12:00:00Z') - now > 84 * 86400000) throw fault('invalid-date');
   if (!['number', 'string'].includes(typeof input.participants) || (typeof input.participants === 'string' && !/^\d+$/.test(input.participants))) throw fault('invalid-participants');
   const participants = Number(input.participants);
@@ -16,10 +16,14 @@ function validateBooking(input, now = new Date()) {
   if (!Number.isInteger(participants) || participants < 1 || participants > 20) throw fault('invalid-participants');
   if (!['credit', 'bit', 'bank_transfer'].includes(input.paymentMethod)) throw fault('invalid-payment-method');
   if (input.agreeToTerms !== true) throw fault('terms-required');
-  if (!realDate(input.dateOfBirth)) throw fault('invalid-birth-date');
-  const today = localDate(now), adultCutoff = `${Number(today.slice(0, 4)) - 18}${today.slice(4)}`;
-  if (input.dateOfBirth > adultCutoff || input.dateOfBirth < '1900-01-01') throw fault('adult-required');
-  return { name: input.name.trim(), phone: input.phone.replace(/\D/g, ''), email: input.email.trim().toLowerCase(), participants, tourDate: input.tourDate, paymentMethod: input.paymentMethod, notes: String(input.notes || '').trim().slice(0, 1000), howDidYouHear: String(input.howDidYouHear || '').slice(0, 80), adultConfirmed: true, termsVersion: '2026-10', totalPrice: participants * PRICE_PER_PERSON, pricePerPerson: PRICE_PER_PERSON, language: input.language === 'en' ? 'en' : 'he' };
+  // Existing cached clients can still provide DOB. New clients explicitly
+  // attest adulthood without collecting the actual birth date.
+  if (input.dateOfBirth != null && input.dateOfBirth !== '') {
+    if (!realDate(input.dateOfBirth)) throw fault('invalid-birth-date');
+    const today = localDate(now), adultCutoff = `${Number(today.slice(0, 4)) - 18}${today.slice(4)}`;
+    if (input.dateOfBirth > adultCutoff || input.dateOfBirth < '1900-01-01') throw fault('adult-required');
+  } else if (input.adultConfirmed !== true) throw fault('adult-required');
+  return { name: input.name.trim(), phone: input.phone.replace(/\D/g, ''), email: (input.email || '').trim().toLowerCase(), participants, tourDate: input.tourDate, paymentMethod: input.paymentMethod, notes: String(input.notes || '').trim().slice(0, 1000), howDidYouHear: String(input.howDidYouHear || '').slice(0, 80), adultConfirmed: true, termsVersion: '2026-10', totalPrice: participants * PRICE_PER_PERSON, pricePerPerson: PRICE_PER_PERSON, language: input.language === 'en' ? 'en' : 'he' };
 }
 function fingerprint(data) { return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex'); }
 function identifiers(uid, key) {

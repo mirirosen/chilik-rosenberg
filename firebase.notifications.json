@@ -1,0 +1,10 @@
+{
+  "functions": [
+    {
+      "source": "functions-notifications",
+      "codebase": "notifications",
+      "runtime": "nodejs22",
+      "ignore": ["node_modules", ".git", ".env*", "*.log", "test/**"]
+    }
+  ]
+}

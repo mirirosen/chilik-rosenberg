@@ -14,6 +14,14 @@ function money(value) {
   if (!Number.isSafeInteger(result) || result <= 0) throw fail('provider-invalid-amount');
   return result;
 }
+function reportMinorUnits(value) {
+  // The controlled ₪1 DirectNG capture returned Reports amount=100.
+  // Reports uses integer minor units; booking/Handshake amounts use shekels.
+  if (!['number', 'string'].includes(typeof value) || !/^[1-9]\d*$/.test(String(value))) throw fail('provider-verification-pending');
+  const result = Number(value);
+  if (!Number.isSafeInteger(result) || result <= 0) throw fail('provider-verification-pending');
+  return result;
+}
 function authorizationNumber(value) {
   // Local safety bounds, not a claim about cancellation API parameter syntax.
   // Preserve leading zeroes in string reports; reject lossy numeric values.
@@ -55,13 +63,15 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
   }
   function assertLookupReady() {
     assertReady();
-    if (config.orderLookupVerified !== true || !/^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(config.orderFilterParameter || '')) throw fail('payment-order-lookup-not-configured');
+    const mode = config.orderLookupMode || 'exact-filter';
+    if (config.orderLookupVerified !== true || !['exact-filter', 'bounded-date-scan'].includes(mode) || (mode === 'exact-filter' && !/^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(config.orderFilterParameter || ''))) throw fail('payment-order-lookup-not-configured');
   }
   async function findTransactionIndexes({ booking, nowMs = clock() }) {
     assertLookupReady();
     if (!/^BK-[a-f0-9]{24}$/.test(booking.bookingId || '') || booking.paymentTerminal !== config.terminal) throw fail('invalid-booking-reference');
     const createdMs = booking.createdAt?.toMillis();
     if (!Number.isFinite(createdMs) || !Number.isFinite(nowMs) || createdMs > nowMs || nowMs - createdMs > 48 * 3600000) throw fail('provider-lookup-window-invalid');
+    if (config.orderLookupMode === 'bounded-date-scan') return boundedDateScan(booking, createdMs, nowMs);
     // Inclusive date ranges, padded by one day at both ends, avoid assuming the
     // merchant's report timezone. Only the exact configured order filter is used.
     const date = ms => new Date(ms).toISOString().slice(0, 10);
@@ -82,6 +92,38 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     }
     throw fail('provider-lookup-incomplete');
   }
+  async function boundedDateScan(booking, createdMs, nowMs) {
+    // Explicit alternative for terminals whose documented ufields filter fails.
+    // No silent fallback. Two complete, identical scans cap the date window,
+    // pagination and volume. Only exact own order bindings become candidates;
+    // single-index verification still authenticates every possible capture.
+    const date = ms => new Date(ms).toISOString().slice(0, 10);
+    const base = { terminal_name: config.terminal, transaction_start_date: date(createdMs - 86400000), transaction_end_date: date(nowMs + 86400000), detailed: 'N', page_results: 10, order_direction: 'asc' };
+    async function scan() {
+      const entries = new Map(); let total = null;
+      for (let page = 1; page <= 10; page++) {
+        const report = await post('https://report.tranzila.com/v1/transaction', { ...base, page });
+        if (!report || !Array.isArray(report.transactions) || report.transactions.length > 10 || !/^(0|[1-9]\d*)$/.test(String(report.total)) || !Number.isSafeInteger(Number(report.total)) || Number(report.total) > 100 || Number(report.rows) !== report.transactions.length || (Object.hasOwn(report, 'error_code') && report.error_code !== 0)) throw fail('provider-lookup-incomplete');
+        if (total === null) total = Number(report.total);
+        if (Number(report.total) !== total) throw fail('provider-lookup-incomplete');
+        for (const row of report.transactions) {
+          const index = Number(row?.index);
+          if (!/^\d{1,12}$/.test(String(row?.index)) || !Number.isSafeInteger(index) || index < 1 || row.child_terminal !== config.terminal || entries.has(index)) throw fail('provider-lookup-incomplete');
+          const order = Object.hasOwn(row, config.orderReportField) ? row[config.orderReportField] : null;
+          if (order !== null && typeof order !== 'string') throw fail('provider-lookup-incomplete');
+          entries.set(index, order);
+        }
+        if (entries.size === total) return [...entries].sort((a, b) => a[0] - b[0]);
+        if (!report.transactions.length || entries.size > total) throw fail('provider-lookup-incomplete');
+      }
+      throw fail('provider-lookup-incomplete');
+    }
+    const first = await scan(), second = await scan();
+    if (JSON.stringify(first) !== JSON.stringify(second)) throw fail('provider-lookup-incomplete');
+    const indexes = first.filter(([, order]) => order === booking.bookingId).map(([index]) => index);
+    if (indexes.length > 20) throw fail('provider-lookup-incomplete');
+    return { complete: true, transactionIndexes: indexes };
+  }
   async function verifyTransaction({ booking, transactionIndex }) {
     assertReady();
     // A terminal change must never reinterpret an older checkout under the new
@@ -93,7 +135,7 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     if (!report || !Array.isArray(report.transactions) || report.transactions.length !== 1 || (Object.hasOwn(report, 'error_code') && report.error_code !== 0)) throw fail('provider-verification-pending');
     const row = report.transactions[0];
     if (!row || typeof row !== 'object') throw fail('provider-verification-pending');
-    if (Number(row.index) !== index || row.child_terminal !== config.terminal || !orderMatches(row, config, booking.bookingId) || money(row.amount) !== money(booking.totalPrice) || String(row.currency) !== '1' || row.txn_payment_method !== 'CC' || !config.capturePairs.some(p => p.txnType === row.txn_type && p.tranmode === row.tranmode && p.transtatus === row.transtatus) || !Object.hasOwn(row, 'cancelfdid') || !Object.hasOwn(row, 'cancelfdnumber') || row.cancelfdid != null || row.cancelfdnumber != null || row.processor_response_code !== '000' || !Object.hasOwn(row, 'authorization_number')) throw fail('provider-verification-pending');
+    if (Number(row.index) !== index || row.child_terminal !== config.terminal || !orderMatches(row, config, booking.bookingId) || reportMinorUnits(row.amount) !== money(booking.totalPrice) || String(row.currency) !== '1' || row.txn_payment_method !== 'CC' || !config.capturePairs.some(p => p.txnType === row.txn_type && p.tranmode === row.tranmode && p.transtatus === row.transtatus) || !Object.hasOwn(row, 'cancelfdid') || !Object.hasOwn(row, 'cancelfdnumber') || row.cancelfdid != null || row.cancelfdnumber != null || row.processor_response_code !== '000' || !Object.hasOwn(row, 'authorization_number')) throw fail('provider-verification-pending');
     // Unknown/declined reports are NOT accepted as authenticated declines. They
     // remain pending until expiry or manual review; callback fields are ignored.
     return { verified: true, bookingId: booking.bookingId, transactionKey: `${config.terminal}:${index}`, amount: booking.totalPrice, currency: 'ILS', event: 'paid', providerTransaction: { provider: 'tranzila', terminal: config.terminal, transactionIndex: String(index), authorizationNumber: authorizationNumber(row.authorization_number) } };

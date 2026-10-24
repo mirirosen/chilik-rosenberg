@@ -10,12 +10,12 @@ const { createBookingApi } = require('./api');
 const { SECRET_NAMES, loadPaymentConfiguration, createRuntimePaymentFlow } = require('./payment-runtime');
 const { createRuntimeReconciler } = require('./payment-reconciliation');
 const { createIntegrationAdapters } = require('./integration-adapters');
-const { createCalendarRuntime } = require('./calendar-runtime');
+const { createCalendarRuntime, loadCalendarConfiguration } = require('./calendar-runtime');
 const { createCalendarApi } = require('./calendar-api');
 const { createWhatsAppRuntime } = require('./whatsapp-runtime');
 admin.initializeApp({ projectId: FIREBASE_PROJECT });
 const db = admin.firestore(), Timestamp = admin.firestore.Timestamp;
-const calendarRuntime = createCalendarRuntime({ db, secretFactory: name => defineSecret(name) });
+const calendarRuntime = createCalendarRuntime({ db, ...loadCalendarConfiguration(process.env), secretFactory: name => defineSecret(name) });
 const bookings = createBookingService(db, Timestamp, { weeklyPolicy: calendarRuntime.policy });
 // Declarations only. Values are accessed inside a configured invocation, never
 // during deployment discovery. No secret is created/set by loading this file.
@@ -34,5 +34,6 @@ Object.assign(exports, createBookingApi({
   logger: console,
   enabled: process.env.CHILIK_BOOKING_RUNTIME_ENABLED === 'true',
   schedulesEnabled: process.env.CHILIK_BOOKING_SCHEDULERS_ENABLED === 'true',
+  integrationSchedulesEnabled: process.env.CHILIK_INTEGRATION_SCHEDULER_ENABLED === 'true',
 }));
 Object.assign(exports, createCalendarApi({ db, onRequest, onSchedule, runtime: calendarRuntime }));
