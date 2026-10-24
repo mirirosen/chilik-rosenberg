@@ -30,29 +30,47 @@ function identifiers(uid, key) {
   if (!/^[a-zA-Z0-9_-]{16,80}$/.test(key || '')) throw fault('invalid-idempotency-key');
   return `BK-${fingerprint([uid, key]).slice(0, 24)}`;
 }
-function transition(booking, event, nowMs = Date.now()) {
+// Seats are reserved only when payment is confirmed: a verified card capture
+// ('paid') or an admin confirmation of a bank/bit transfer ('confirm').
+// options.capacityAvailable tells whether the tour/weekly quota has room for
+// this booking right now (computed by the caller inside the same transaction).
+// Bookings with capacityReserved=true from the earlier hold-at-create flow keep
+// their original semantics and are never reserved twice.
+function transition(booking, event, nowMs = Date.now(), { capacityAvailable = false } = {}) {
   if (booking.schemaVersion !== 2 || typeof booking.capacityReserved !== 'boolean') throw fault('legacy-booking-requires-reconciliation');
   const active = booking.capacityReserved;
   if (event === 'confirm') {
     if (booking.status === 'confirmed') return null;
-    if (booking.status !== 'pending' || !active || booking.paymentMethod === 'credit') throw fault('invalid-transition');
-    return { status: 'confirmed' };
+    // A verified card payment that arrived while the tour was full may be
+    // confirmed later by the admin once room exists.
+    const overbookedPaid = booking.paymentMethod === 'credit' && booking.status === 'payment_review' && booking.paymentStatus === 'paid' && booking.paymentReviewReason === 'overbooked-at-payment' && !active;
+    if (!overbookedPaid && (booking.status !== 'pending' || booking.paymentMethod === 'credit')) throw fault('invalid-transition');
+    if (active) return { status: 'confirmed' };
+    if (!capacityAvailable) throw fault('capacity-full-at-confirmation');
+    return { status: 'confirmed', capacityReserved: true, ...(overbookedPaid ? { paymentReviewReason: null, resolvedPaymentReviewReason: 'overbooked-at-payment' } : {}) };
   }
   if (event === 'cancel') {
     if (booking.status === 'cancelled') return null;
     return { status: 'cancelled', capacityReserved: false, ...(['paid', 'pending_review'].includes(booking.paymentStatus) ? { refundStatus: 'manual_review_required' } : { paymentStatus: 'cancelled' }) };
   }
   if (event === 'expire' || event === 'decline' || event === 'initiation_failed') {
-    if (!['creating', 'awaiting_payment'].includes(booking.paymentStatus) || !active) return null;
+    if (!['creating', 'awaiting_payment'].includes(booking.paymentStatus) || booking.status === 'cancelled') return null;
     if (event === 'expire' && booking.holdExpiresAt.toMillis() > nowMs) return null;
     return { status: 'cancelled', paymentStatus: event === 'expire' ? 'expired' : 'failed', capacityReserved: false };
   }
   if (event === 'paid') {
     if (booking.paymentMethod !== 'credit') throw fault('invalid-transition');
     if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'pending_review') return null;
-    // Late captured money must never confirm released/expired seats or revive cancellation.
-    if (!active || booking.status === 'cancelled' || booking.holdExpiresAt.toMillis() <= nowMs) return { status: 'payment_review', paymentStatus: 'pending_review', capacityReserved: false, paymentReviewReason: 'late-payment-after-hold' };
-    return { status: 'confirmed', paymentStatus: 'paid' };
+    // Late captured money must never revive a cancelled/expired booking.
+    if (booking.status === 'cancelled') return { status: 'payment_review', paymentStatus: 'pending_review', capacityReserved: false, paymentReviewReason: 'late-payment-after-hold' };
+    if (active) {
+      // Legacy hold created before this change: its own seats, its own expiry.
+      if (booking.holdExpiresAt.toMillis() <= nowMs) return { status: 'payment_review', paymentStatus: 'pending_review', capacityReserved: false, paymentReviewReason: 'late-payment-after-hold' };
+      return { status: 'confirmed', paymentStatus: 'paid' };
+    }
+    if (capacityAvailable) return { status: 'confirmed', paymentStatus: 'paid', capacityReserved: true };
+    // Never lose the money record: paid, not reserved, owner must decide.
+    return { status: 'payment_review', paymentStatus: 'paid', capacityReserved: false, paymentReviewReason: 'overbooked-at-payment' };
   }
   throw fault('invalid-transition');
 }

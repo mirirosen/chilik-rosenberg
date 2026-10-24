@@ -132,7 +132,9 @@ test('valid noncredit booking is authenticated, price-owned and HTTP-idempotent'
   assert.equal(second.statusCode, 200); assert.equal(second.body.reused, true);
   assert.equal(first.body.bookingId, second.body.bookingId);
   assert.equal(f.db.data.get(`bookings/${first.body.bookingId}`).ownerUid, 'customer');
-  assert.equal([...f.db.data.keys()].filter(k => k.startsWith('integrationJobs/')).length, 2);
+  // Only the request acknowledgement email; no seat changed, so no calendar job.
+  assert.equal([...f.db.data.keys()].filter(k => k.startsWith('integrationJobs/')).length, 1);
+  assert.equal(f.db.data.get(`bookings/${first.body.bookingId}`).capacityReserved, false);
   assert.equal((await f.call('createBooking', { body: { ...INPUT, name: 'Changed' } })).statusCode, 409);
 });
 test('credit creation and every untrusted callback fail closed with zero DB reads or writes', async () => {
@@ -145,7 +147,8 @@ test('credit creation and every untrusted callback fail closed with zero DB read
 test('method and CORS checks run before authentication or data access', async () => {
   const f = fixture();
   for (const [name, method] of endpoints) assert.equal((await f.call(name, { method: method === 'GET' ? 'POST' : 'GET', token: null })).statusCode, 405);
-  assert.equal((await f.call('tranzilaWebhook', { method: 'GET', token: null })).statusCode, 405);
+  // Live Tranzila notify may arrive as GET or POST; any other method is rejected.
+  assert.equal((await f.call('tranzilaWebhook', { method: 'PUT', token: null })).statusCode, 405);
   assert.equal((await f.call('createBooking', { headers: { origin: 'https://untrusted.example' } })).statusCode, 403);
   const preflight = await f.call('createBooking', { method: 'OPTIONS', token: null, headers: { origin: 'https://www.chilik-tours.com' } });
   assert.equal(preflight.statusCode, 204); assert.equal(preflight.headers['Access-Control-Allow-Origin'], 'https://www.chilik-tours.com');

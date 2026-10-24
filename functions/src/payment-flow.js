@@ -3,13 +3,13 @@ const crypto = require('crypto');
 const failure = code => Object.assign(new Error(code), { status: 409 });
 function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock = Date.now }) {
   async function create(uid, key, input) {
-    provider.assertReady(); // Configuration failure cannot consume any seats.
+    provider.assertReady(); // Configuration failure creates nothing. No seat is held until payment.
     urlsFor.assertReady?.();
     const booking = await bookings.create(uid, key, { ...input, paymentMethod: 'credit' }, clock());
     const ref = bookings.bookingRef(booking.bookingId), lease = crypto.randomUUID();
     const state = await db.runTransaction(async tx => {
       const snap = await tx.get(ref), b = snap.data();
-      if (!b.capacityReserved || b.holdExpiresAt.toMillis() <= clock() || !['creating', 'awaiting_payment'].includes(b.paymentStatus)) throw failure('booking-closed');
+      if (b.status !== 'payment_pending' || b.holdExpiresAt.toMillis() <= clock() || !['creating', 'awaiting_payment'].includes(b.paymentStatus)) throw failure('booking-closed');
       if (b.paymentStatus === 'awaiting_payment' && b.paymentUrl) return b;
       if (b.initiationLeaseUntil?.toMillis() > clock()) throw failure('payment-initiation-in-progress');
       tx.update(ref, { initiationLease: lease, initiationLeaseUntil: Timestamp.fromMillis(clock() + 120000) });
@@ -20,7 +20,7 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
       const checkout = await provider.createCheckout({ booking, urls: urlsFor(booking.bookingId) });
       await db.runTransaction(async tx => {
         const b = (await tx.get(ref)).data();
-        if (b.initiationLease !== lease || b.paymentStatus !== 'creating' || !b.capacityReserved || b.holdExpiresAt.toMillis() <= clock()) throw failure('booking-closed');
+        if (b.initiationLease !== lease || b.paymentStatus !== 'creating' || b.status !== 'payment_pending' || b.holdExpiresAt.toMillis() <= clock()) throw failure('booking-closed');
         const terminal = checkout.paymentTerminal;
         const jobRef = /^[a-zA-Z0-9_-]+$/.test(terminal || '') ? db.doc(`paymentReconciliation/${booking.bookingId}`) : null;
         const job = jobRef ? await tx.get(jobRef) : null;
@@ -32,7 +32,7 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
       return { bookingId: booking.bookingId, paymentUrl: checkout.paymentUrl };
     } catch (error) {
       // No URL was delivered; handshake alone is not a charge. A failed/uncertain
-      // initiation releases the hold, never generates a new idempotency key.
+      // initiation closes the booking (and releases a legacy hold), never generates a new idempotency key.
       await bookings.change(booking.bookingId, 'initiation_failed', 'system:initiation', null, clock(), { initiationLease: lease });
       throw error;
     }

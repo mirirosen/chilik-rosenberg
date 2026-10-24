@@ -34,9 +34,14 @@ function fixture(external = 10) {
   return { db, binding, calls, adapters, service: createBookingService(db, Timestamp, { weeklyPolicy: POLICY }), event: () => event, setEvent: patch => { event = { ...event, ...patch }; }, lose: () => { loseResponse = true; }, conflict: action => { conflict = action; } };
 }
 const input = method => ({ name: 'Fixture', phone: '0501234567', email: 'fixture@example.test', participants: 2, tourDate: DATE, paymentMethod: method, dateOfBirth: '1990-01-01', agreeToTerms: true });
+// Requests reserve nothing; a website seat exists only after payment is confirmed.
+async function confirmedBooking(f, key = 'a'.repeat(32)) {
+  const b = await f.service.create('owner', key, input('bit'), NOW);
+  return f.service.change(b.bookingId, 'confirm', 'fixture-admin', null, NOW);
+}
 test('existing all-day event reflects external baseline plus website seats once and retains unrelated fields', async () => {
   const f = fixture(27);
-  await f.service.create('owner', 'a'.repeat(32), input('bit'), NOW);
+  await confirmedBooking(f);
   await f.adapters.calendar(JOB);
   assert.equal(f.event().summary, '29 אנשים');
   assert.equal(f.event().description, 'PRIVATE DETAILS'); assert.equal(f.event().start.date, DATE);
@@ -50,17 +55,21 @@ test('existing all-day event reflects external baseline plus website seats once 
   await f.adapters.calendar({ ...JOB, revision: 2 });
   assert.equal(f.calls.filter(c => c.method === 'PATCH').length, 1);
 });
-test('credit hold queues calendar immediately; cancel/expiry retries update the same event and release once', async () => {
+test('card request queues no calendar job; verified capture, expiry and cancel update the same event once', async () => {
   const f = fixture();
   const b = await f.service.create('owner', 'a'.repeat(32), input('credit'), NOW);
-  assert.ok(f.db.data.has(`integrationJobs/${b.bookingId}-1-calendar`));
+  assert.ok(!f.db.data.has(`integrationJobs/${b.bookingId}-1-calendar`));
   assert.ok(!f.db.data.has(`integrationJobs/${b.bookingId}-1-email`));
-  await f.adapters.calendar(JOB); assert.equal(f.event().summary, '12 אנשים');
-  await f.service.change(b.bookingId, 'expire', 'fixture-expiry', null, NOW + 900001);
-  await f.service.change(b.bookingId, 'expire', 'fixture-expiry', null, NOW + 900002);
   await f.adapters.calendar(JOB); assert.equal(f.event().summary, '10 אנשים');
-  const receipt = { verified: true, bookingId: b.bookingId, amount: 500, currency: 'ILS', transactionKey: 'fixture:late' };
-  await f.service.change(b.bookingId, 'paid', 'fixture-provider', receipt, NOW + 900003);
+  await f.service.change(b.bookingId, 'paid', 'fixture-provider', { verified: true, bookingId: b.bookingId, amount: 500, currency: 'ILS', transactionKey: 'fixture:paid' }, NOW + 60000);
+  assert.ok(f.db.data.has(`integrationJobs/${b.bookingId}-2-calendar`));
+  await f.adapters.calendar(JOB); assert.equal(f.event().summary, '12 אנשים');
+  await f.service.change(b.bookingId, 'cancel', 'fixture-admin', null, NOW + 60001);
+  await f.adapters.calendar(JOB); assert.equal(f.event().summary, '10 אנשים');
+  const abandoned = await f.service.create('owner', 'c'.repeat(32), input('credit'), NOW);
+  await f.service.change(abandoned.bookingId, 'expire', 'fixture-expiry', null, NOW + 900001);
+  await f.service.change(abandoned.bookingId, 'expire', 'fixture-expiry', null, NOW + 900002);
+  await f.service.change(abandoned.bookingId, 'paid', 'fixture-provider', { verified: true, bookingId: abandoned.bookingId, amount: 500, currency: 'ILS', transactionKey: 'fixture:late' }, NOW + 900003);
   await f.adapters.calendar(JOB); assert.equal(f.event().summary, '10 אנשים');
   const pending = await f.service.create('owner', 'b'.repeat(32), input('bit'), NOW);
   await f.service.change(pending.bookingId, 'confirm', 'fixture-admin', null, NOW);
@@ -78,10 +87,10 @@ test('lost PATCH acknowledgement is recovered from persisted intent with no seco
   assert.ok(f.calls.every(c => ['GET', 'PATCH'].includes(c.method)));
 });
 test('ETag conflict rereads counter and retries with latest state; manual title edits require reconciliation', async () => {
-  const f = fixture(); const booking = await f.service.create('owner', 'a'.repeat(32), input('bit'), NOW);
+  const f = fixture(); const booking = await confirmedBooking(f);
   f.conflict(() => {
     f.db.data.set(`bookings/${booking.bookingId}`, { ...f.db.data.get(`bookings/${booking.bookingId}`), participants: 3 });
-    const c = f.db.data.get(`bookingWeeks/${WEEK}`); f.db.data.set(`bookingWeeks/${WEEK}`, { ...c, heldParticipants: 3, currentRegistrations: 13 });
+    const c = f.db.data.get(`bookingWeeks/${WEEK}`); f.db.data.set(`bookingWeeks/${WEEK}`, { ...c, confirmedParticipants: 13, currentRegistrations: 13 });
   });
   await f.adapters.calendar(JOB);
   assert.deepEqual(f.calls.filter(c => c.method === 'PATCH').map(c => c.payload.summary), ['12 אנשים', '13 אנשים']);
@@ -99,14 +108,18 @@ test('unmapped, moved, private-tour, attendee or counter conflicts cannot write 
   const g = fixture(); g.db.data.get(`bookingWeeks/${WEEK}`).currentRegistrations = 20;
   await assert.rejects(g.adapters.calendar(JOB), /calendar-count-requires-reconciliation/); assert.equal(g.calls.length, 1);
 });
-test('expired holds are omitted from mirror aggregates but mapped counter sync waits for atomic release', async () => {
-  const f = fixture(); const b = await f.service.create('owner', 'a'.repeat(32), input('credit'), NOW);
-  f.db.data.get(`bookings/${b.bookingId}`).holdExpiresAt = Timestamp.fromMillis(NOW - 1);
+test('expired legacy holds are omitted from mirror aggregates but mapped counter sync waits for atomic release', async () => {
+  const f = fixture(), id = `BK-${'b'.repeat(24)}`;
+  // Card hold reserved under the earlier hold-at-create flow, already counted.
+  f.db.data.set(`bookings/${id}`, { bookingId: id, schemaVersion: 2, capacityReserved: true, status: 'payment_pending', paymentStatus: 'awaiting_payment', paymentMethod: 'credit', participants: 2, tourDate: DATE, weekStart: WEEK, revision: 1, holdExpiresAt: Timestamp.fromMillis(NOW - 1) });
+  f.db.data.set(`bookingWeeks/${WEEK}`, { ...f.db.data.get(`bookingWeeks/${WEEK}`), heldParticipants: 2, currentRegistrations: 12 });
+  const unreserved = await f.service.create('owner', 'a'.repeat(32), input('credit'), NOW);
+  f.db.data.get(`bookings/${unreserved.bookingId}`).holdExpiresAt = Timestamp.fromMillis(NOW - 1);
   await assert.rejects(f.adapters.calendar(JOB), e => !e.blocked && e.message === 'calendar-hold-expiry-pending');
   assert.deepEqual(summarizeBookings([...f.db.data.values()].filter(v => v.schemaVersion), NOW), { confirmed: 0, held: 0, expiredHolds: 2 });
 });
 test('concurrent calendar workers deliver the same binding; persisted jobs retain sanitized failures', async () => {
-  const f = fixture(); await f.service.create('owner', 'a'.repeat(32), input('bit'), NOW);
+  const f = fixture(); await confirmedBooking(f);
   await Promise.all([f.adapters.calendar(JOB), f.adapters.calendar(JOB)]);
   assert.equal(f.event().summary, '12 אנשים'); assert.ok(f.calls.every(c => ['GET', 'PATCH'].includes(c.method)));
   f.setEvent({ summary: '30 אנשים' });

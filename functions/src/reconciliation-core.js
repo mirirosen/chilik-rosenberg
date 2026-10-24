@@ -66,18 +66,20 @@ function buildReconciliationPlan({ bookings, tours, dispositions = [], snapshot,
       if (!states.has(b.status) || !payments.has(b.paymentStatus) || !['credit', 'bit', 'bank_transfer'].includes(b.paymentMethod) || typeof b.capacityReserved !== 'boolean' || !Number.isSafeInteger(b.revision) || b.revision < 1) { add('invalid-v2-lifecycle', { id, date }); continue; }
       const reserved = b.capacityReserved, credit = b.paymentMethod === 'credit';
       let valid = false;
-      if (b.status === 'pending') { valid = reserved && !credit && b.paymentStatus === 'pending'; row.classification = 'held'; }
-      if (b.status === 'payment_pending') { valid = reserved && credit && ['creating', 'awaiting_payment'].includes(b.paymentStatus); row.classification = 'held'; }
+      // Since no-hold-before-payment, unpaid requests are unreserved; older ones may still hold seats.
+      if (b.status === 'pending') { valid = !credit && b.paymentStatus === 'pending'; row.classification = reserved ? 'held' : 'unreserved'; }
+      if (b.status === 'payment_pending') { valid = credit && ['creating', 'awaiting_payment'].includes(b.paymentStatus); row.classification = reserved ? 'held' : 'unreserved'; }
       if (b.status === 'confirmed') { valid = reserved && (credit ? b.paymentStatus === 'paid' : ['pending', 'paid'].includes(b.paymentStatus)); row.classification = 'booked'; }
       if (b.status === 'cancelled') { valid = !reserved && ['cancelled', 'expired', 'failed', 'paid', 'pending_review'].includes(b.paymentStatus); row.classification = 'released'; }
-      if (b.status === 'payment_review') { valid = !reserved && credit && b.paymentStatus === 'pending_review'; row.classification = 'payment_review'; }
+      // 'paid' + payment_review: verified capture that arrived when the tour was full (overbooked-at-payment).
+      if (b.status === 'payment_review') { valid = !reserved && credit && ['pending_review', 'paid'].includes(b.paymentStatus); row.classification = 'payment_review'; }
       if (!valid) { row.classification = 'unresolved'; add('contradictory-v2-lifecycle', { id, date }); continue; }
-      if (b.status === 'payment_pending') {
+      if (b.status === 'payment_pending' && reserved) {
         if (!integer(b.holdExpiresAtMs)) { row.classification = 'unresolved'; add('invalid-hold-expiry', { id, date }); continue; }
         if (b.holdExpiresAtMs <= nowMs) add('expired-hold-still-reserved-use-lifecycle-release', { id, date, severity: 'warning' });
       }
       row.reservedSeats = reserved ? b.participants : 0;
-      if (b.paymentStatus === 'pending_review' || b.additionalPaymentReview === true) add('payment-review-required-no-financial-action', { id, date, severity: 'warning' });
+      if (b.paymentStatus === 'pending_review' || b.status === 'payment_review' || b.additionalPaymentReview === true) add('payment-review-required-no-financial-action', { id, date, severity: 'warning' });
       if (b.status === 'cancelled' && ['paid', 'pending_review'].includes(b.paymentStatus)) add('cancelled-payment-needs-manual-review-no-refund-inferred', { id, date, severity: 'warning' });
     } else {
       if (b.schemaVersion != null && b.schemaVersion !== 1) { row.source = 'unknown'; add('unsupported-schema-version', { id, date }); continue; }
@@ -99,7 +101,7 @@ function buildReconciliationPlan({ bookings, tours, dispositions = [], snapshot,
   const tourPlans = dates.map(date => {
     const tour = tourMap.get(date), relevant = rows.filter(row => row.tourDate === date);
     if (!tour) add('missing-tour-snapshot', { date });
-    const totals = { booked: 0, held: 0, released: 0, paymentReview: 0, reviewReserved: 0, unresolvedBookings: 0, reserved: 0 };
+    const totals = { booked: 0, held: 0, unreserved: 0, released: 0, paymentReview: 0, reviewReserved: 0, unresolvedBookings: 0, reserved: 0 };
     for (const row of relevant) {
       if (row.classification === 'unresolved') { totals.unresolvedBookings++; continue; }
       const key = row.classification === 'payment_review' ? 'paymentReview' : row.classification;

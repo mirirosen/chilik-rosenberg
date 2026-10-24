@@ -18,10 +18,12 @@ test('concurrent initiation leases prevent multiple checkout URLs; retry reuses 
   const reused = await flow.create('u', 'a'.repeat(32), input); assert.equal(reused.reused, true);
   assert.equal([...db.data.keys()].filter(k => k.startsWith('bookings/')).length, 1);
 });
-test('handshake failure releases hold exactly once, closed key cannot reopen checkout', async () => {
+test('handshake failure closes the booking without touching seats, closed key cannot reopen checkout', async () => {
   const { db, bookings, flow } = setup({ assertReady() {}, async createCheckout() { throw new Error('provider-unavailable'); } });
   await assert.rejects(flow.create('u', 'a'.repeat(32), input), /provider-unavailable/);
-  assert.equal(db.data.get(bookings.tourRef(input.tourDate).path).currentRegistrations, 0);
+  assert.equal(db.data.get(bookings.tourRef(input.tourDate).path)?.currentRegistrations ?? 0, 0);
+  const closed = [...db.data.entries()].find(([k]) => k.startsWith('bookings/'))[1];
+  assert.equal(closed.status, 'cancelled'); assert.equal(closed.paymentStatus, 'failed'); assert.equal(closed.capacityReserved, false);
   await assert.rejects(flow.create('u', 'a'.repeat(32), input), /booking-closed/);
 });
 test('notification uses only independent provider receipt, not browser approved/amount fields', async () => {
@@ -48,6 +50,8 @@ test('stale initiator cannot cancel checkout issued under a newer lease', async 
   const active = await flow.create('u', 'a'.repeat(32), input);
   resumeFirst(); assert.match((await stale).message, /booking-closed/);
   const saved = db.data.get(bookings.bookingRef(active.bookingId).path);
-  assert.equal(saved.paymentStatus, 'awaiting_payment'); assert.equal(saved.capacityReserved, true);
-  assert.equal(db.data.get(bookings.tourRef(input.tourDate).path).currentRegistrations, 2);
+  assert.equal(saved.paymentStatus, 'awaiting_payment'); assert.equal(saved.status, 'payment_pending');
+  // An open checkout holds no seat; seats are reserved only by a verified capture.
+  assert.equal(saved.capacityReserved, false);
+  assert.equal(db.data.get(bookings.tourRef(input.tourDate).path)?.currentRegistrations ?? 0, 0);
 });

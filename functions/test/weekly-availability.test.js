@@ -75,28 +75,59 @@ test('server blocks a private-tour week without exposing event details', async (
   const {db,service,count}=fixture(); db.data.set(`calendarAvailability/${WEEK}`,snapshots([{summary:'סיור פרטי Secret',start:{date:DATE},end:{date:'2026-10-09'}}])[WEEK]);
   await assert.rejects(service.create('owner','a'.repeat(32),INPUT,NOW), /tour-unavailable/); assert.equal(count(),0); assert.equal([...db.data.keys()].filter(k=>k.startsWith('bookings/')).length,0);
 });
-test('concurrent quantities enforce 30/week separately from 20/order and retries count once', async () => {
+test('concurrent quantities enforce 30/week separately from 20/order at confirmation and retries count once', async () => {
   const {db,service,count}=fixture();
-  const result=await Promise.allSettled([service.create('owner','a'.repeat(32),{...INPUT,participants:20},NOW),service.create('owner','b'.repeat(32),{...INPUT,participants:10},NOW),service.create('owner','c'.repeat(32),{...INPUT,participants:1},NOW)]);
+  const created=await Promise.all([service.create('owner','a'.repeat(32),{...INPUT,participants:20},NOW),service.create('owner','b'.repeat(32),{...INPUT,participants:10},NOW),service.create('owner','c'.repeat(32),{...INPUT,participants:1},NOW)]);
+  assert.equal(count(),0); // requests alone reserve nothing
+  const result=await Promise.allSettled(created.map(b=>service.change(b.bookingId,'confirm','fixture-admin',null,NOW)));
   assert.equal(result.filter(r=>r.status==='fulfilled').length,2); assert.equal(count(),30);
-  assert.match(result[2].reason.message,/capacity-exceeded/);
+  assert.equal(result[2].reason.code,'capacity-full-at-confirmation');
+  assert.equal(db.data.get(`bookingWeeks/${WEEK}`).heldParticipants,0); assert.equal(db.data.get(`bookingWeeks/${WEEK}`).confirmedParticipants,30);
   const retry=await service.create('owner','a'.repeat(32),{...INPUT,participants:20},NOW+POLICY.maxAgeMs+1); assert.equal(retry.reused,true); assert.equal(count(),30);
   await assert.rejects(service.create('owner','d'.repeat(32),{...INPUT,participants:21},NOW), /invalid-participants/);
-  await service.change(result[0].value.bookingId,'cancel','fixture-admin',null,NOW); await service.change(result[0].value.bookingId,'cancel','fixture-admin',null,NOW); assert.equal(count(),10);
-  await service.change(result[1].value.bookingId,'confirm','fixture-admin',null,NOW); assert.equal(count(),10);
+  await service.change(created[0].bookingId,'cancel','fixture-admin',null,NOW); await service.change(created[0].bookingId,'cancel','fixture-admin',null,NOW); assert.equal(count(),10);
+  await service.change(created[2].bookingId,'cancel','fixture-admin',null,NOW); assert.equal(count(),10); // unreserved: no decrement
   assert.equal(db.data.get(`bookingWeeks/${WEEK}`).heldParticipants,0); assert.equal(db.data.get(`bookingWeeks/${WEEK}`).confirmedParticipants,10);
-  assert.equal([...db.data.keys()].filter(k=>k.startsWith('whatsappOutbox/')).length,0);
 });
-test('expiry releases date and week capacity once; late capture cannot reclaim seats', async () => {
+test('card checkout expiry touches neither date nor week counters; late capture cannot reclaim seats', async () => {
   const {db,service,count}=fixture(); const b=await service.create('owner','a'.repeat(32),{...INPUT,paymentMethod:'credit'},NOW);
-  assert.equal(count(),2); await service.change(b.bookingId,'expire','fixture-expiry',null,NOW+900001); await service.change(b.bookingId,'expire','fixture-expiry',null,NOW+900002); assert.equal(count(),0);
+  assert.equal(count(),0); assert.equal(b.weekStart,WEEK);
+  await service.change(b.bookingId,'expire','fixture-expiry',null,NOW+900001); await service.change(b.bookingId,'expire','fixture-expiry',null,NOW+900002); assert.equal(count(),0);
   const receipt={verified:true,bookingId:b.bookingId,amount:500,currency:'ILS',transactionKey:'fixture:42'};
   const late=await service.change(b.bookingId,'paid','fixture-provider',receipt,NOW+900003); assert.equal(late.paymentStatus,'pending_review'); assert.equal(count(),0);
-  assert.equal(db.data.get(service.tourRef(DATE).path).currentRegistrations,0);
+  assert.equal(db.data.get(service.tourRef(DATE).path)?.currentRegistrations ?? 0,0);
+  assert.deepEqual(db.data.get(`bookingWeeks/${WEEK}`),counter(0));
+});
+test('verified capture reserves date and week capacity as confirmed; held stays zero', async () => {
+  const {db,service,count}=fixture(); const b=await service.create('owner','a'.repeat(32),{...INPUT,paymentMethod:'credit'},NOW);
+  const paid=await service.change(b.bookingId,'paid','fixture-provider',{verified:true,bookingId:b.bookingId,amount:500,currency:'ILS',transactionKey:'fixture:1'},NOW+60000);
+  assert.equal(paid.status,'confirmed'); assert.equal(paid.capacityReserved,true); assert.equal(count(),2);
+  assert.equal(db.data.get(`bookingWeeks/${WEEK}`).heldParticipants,0); assert.equal(db.data.get(`bookingWeeks/${WEEK}`).confirmedParticipants,2);
+  assert.equal(db.data.get(service.tourRef(DATE).path).currentRegistrations,2);
+  await service.change(b.bookingId,'cancel','fixture-admin',null,NOW+120000); assert.equal(count(),0);
+  assert.equal(db.data.get(`bookingWeeks/${WEEK}`).confirmedParticipants,0);
+});
+test('verified capture for a full week is kept paid for review; stale calendar is never treated as room', async () => {
+  const {db,service,count}=fixture(); db.data.set('artifacts/hilik-rosenberg-v1/public/data/settings/global',{globalMaxParticipants:10});
+  const b=await service.create('owner','a'.repeat(32),{...INPUT,paymentMethod:'credit',participants:4},NOW);
+  db.data.set(`bookingWeeks/${WEEK}`,{reconciled:true,currentRegistrations:8,heldParticipants:0,confirmedParticipants:8});
+  const full=await service.change(b.bookingId,'paid','fixture-provider',{verified:true,bookingId:b.bookingId,amount:1000,currency:'ILS',transactionKey:'fixture:7'},NOW+60000);
+  assert.equal(full.status,'payment_review'); assert.equal(full.paymentStatus,'paid'); assert.equal(full.paymentReviewReason,'overbooked-at-payment');
+  assert.equal(count(),8); assert.equal([...db.data.keys()].filter(k=>k.startsWith('adminNotices/')).length,1);
+  // Admin confirmation of another booking with an outdated calendar snapshot reports the real cause.
+  const c=await service.create('owner','c'.repeat(32),{...INPUT,participants:1},NOW);
+  await assert.rejects(service.change(c.bookingId,'confirm','fixture-admin',null,NOW+POLICY.maxAgeMs+1),err=>err.code==='calendar-unavailable');
+  assert.equal(count(),8); assert.equal(db.data.get(service.bookingRef(c.bookingId).path).status,'pending');
+  // A capture during a calendar outage keeps the money record and asks for review.
+  const d=await service.create('owner','d'.repeat(32),{...INPUT,paymentMethod:'credit',participants:1},NOW);
+  const stale=await service.change(d.bookingId,'paid','fixture-provider',{verified:true,bookingId:d.bookingId,amount:250,currency:'ILS',transactionKey:'fixture:8'},NOW+POLICY.maxAgeMs+1);
+  assert.equal(stale.paymentStatus,'paid'); assert.equal(stale.status,'payment_review'); assert.equal(stale.capacityCheckCode,'calendar-unavailable'); assert.equal(count(),8);
 });
 test('editable global quota is enforced and unapproved runtime policy is not usable', async () => {
   const {db,service,count}=fixture(); db.data.set('artifacts/hilik-rosenberg-v1/public/data/settings/global',{globalMaxParticipants:15});
-  await service.create('owner','a'.repeat(32),{...INPUT,participants:10},NOW); await assert.rejects(service.create('owner','b'.repeat(32),{...INPUT,participants:8},NOW), /capacity-exceeded/); assert.equal(count(),10);
+  const a=await service.create('owner','a'.repeat(32),{...INPUT,participants:10},NOW); assert.equal(count(),0);
+  await service.change(a.bookingId,'confirm','fixture-admin',null,NOW); assert.equal(count(),10);
+  await assert.rejects(service.create('owner','b'.repeat(32),{...INPUT,participants:8},NOW), /capacity-exceeded/); assert.equal(count(),10);
   db.data.set('artifacts/hilik-rosenberg-v1/public/data/settings/global',{globalMaxParticipants:5});
   await assert.rejects(service.create('owner','c'.repeat(32),{...INPUT,participants:1},NOW), /capacity-exceeded/); assert.equal(count(),10); // no automatic cancellation
   const notApproved=fixture({...POLICY,approved:false}); await assert.rejects(notApproved.service.create('owner','a'.repeat(32),INPUT,NOW), /availability-policy-unconfirmed/); assert.equal(notApproved.count(),0);

@@ -4,7 +4,7 @@ const { authHeaders, createTranzilaAdapter } = require('../src/providers/tranzil
 const booking = { bookingId: 'BK-' + 'a'.repeat(24), totalPrice: 500, language: 'en', paymentTerminal: 'test-terminal' };
 // Fixture labels are deliberately NOT production Tranzila transaction-mode defaults.
 const config = { enabled: true, merchantConfigurationVerified: true, reportContractVerified: true, terminal: 'test-terminal', checkoutUrl: 'https://directng.tranzila.com/test-terminal/', appKey: 'test-key', secret: 'test-secret', orderParameter: 'order_id', orderReportField: 'user_defined_3', checkoutTranmode: 'FIXTURE_MODE', capturePairs: [{ txnType: 'FIXTURE_CAPTURE', tranmode: 'FIXTURE_MODE', transtatus: 1 }] };
-const row = { index: 42, authorization_number: 147934, amount: 500, currency: '1', processor_response_code: '000', child_terminal: config.terminal, user_defined_3: booking.bookingId, txn_type: 'FIXTURE_CAPTURE', tranmode: 'FIXTURE_MODE', transtatus: 1, txn_payment_method: 'CC', cancelfdid: null, cancelfdnumber: null };
+const row = { index: 42, authorization_number: 147934, amount: 50000, currency: '1', processor_response_code: '000', child_terminal: config.terminal, user_defined_3: booking.bookingId, txn_type: 'FIXTURE_CAPTURE', tranmode: 'FIXTURE_MODE', transtatus: 1, txn_payment_method: 'CC', cancelfdid: null, cancelfdnumber: null };
 const urls = { success: 'https://example.com/success', failure: 'https://example.com/failure', notify: 'https://example.com/notify' };
 const respond = body => async () => ({ ok: true, json: async () => body });
 test('documented PHP-compatible HMAC uses secret+seconds+80-hex nonce as key', () => {

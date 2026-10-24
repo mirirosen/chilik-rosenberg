@@ -10,7 +10,7 @@ const { Timestamp } = require('./helpers/fake-db');
 const ID = 'BK-' + 'a'.repeat(24);
 const NAMED = { ...CONFIG, orderParameter: 'chilik_order_id', orderReportField: 'chilik_order_id' };
 const booking = { bookingId: ID, totalPrice: 500, paymentTerminal: CONFIG.terminal, createdAt: Timestamp.fromMillis(NOW - 60000) };
-const row = (config = CONFIG, patch = {}) => ({ index: 42, authorization_number: '00147934', amount: 500, currency: '1', child_terminal: config.terminal, [config.orderReportField]: ID, txn_payment_method: 'CC', txn_type: 'FIXTURE_CAPTURE', tranmode: 'FIXTURE_MODE', transtatus: 1, processor_response_code: '000', cancelfdid: null, cancelfdnumber: null, ...patch });
+const row = (config = CONFIG, patch = {}) => ({ index: 42, authorization_number: '00147934', amount: 50000, currency: '1', child_terminal: config.terminal, [config.orderReportField]: ID, txn_payment_method: 'CC', txn_type: 'FIXTURE_CAPTURE', tranmode: 'FIXTURE_MODE', transtatus: 1, processor_response_code: '000', cancelfdid: null, cancelfdnumber: null, ...patch });
 const adapter = (config, report) => createTranzilaAdapter({ config, clock: () => NOW, fetchImpl: async () => ({ ok: true, json: async () => ({ transactions: [report] }) }) });
 const ledgerEntries = f => [...f.db.data.entries()].filter(([path]) => path.startsWith('paymentWebhookDeliveries/'));
 const references = (index = 42, auth = '00147934') => ({ provider: 'tranzila', terminal: CONFIG.terminal, transactionIndex: String(index), authorizationNumber: auth });
@@ -92,7 +92,7 @@ test('browser approval hint cannot fill a missing server-report approval number'
   f.record(id, 42, { authorization_number: undefined });
   const response = await f.call('tranzilaWebhook', { query: { id }, body: { index: 42, ConfirmationCode: '147934', authorization_number: '147934', Response: '000' } });
   assert.equal(response.statusCode, 503); assert.equal(f.booking(id).paymentStatus, 'awaiting_payment');
-  assert.equal(ledgerEntries(f).length, 0); assert.equal(f.jobsCount(), 1);
+  assert.equal(ledgerEntries(f).length, 0); assert.equal(f.jobsCount(), 0);
 });
 
 test('duplicate and distinct captures retain separate immutable original-charge references', async () => {
@@ -105,7 +105,7 @@ test('duplicate and distinct captures retain separate immutable original-charge 
   f.record(id, 43, { authorization_number: '00147935' });
   await f.call('tranzilaWebhook', { query: { id }, body: { index: 43 } });
   assert.deepEqual(ledgerEntries(f).map(([, record]) => record.providerTransaction), [references(), references(43, '00147935')]);
-  assert.equal(f.booking(id).additionalPaymentReview, true); assert.equal(f.seats(), 2); assert.equal(f.jobsCount(), 4);
+  assert.equal(f.booking(id).additionalPaymentReview, true); assert.equal(f.seats(), 2); assert.equal(f.jobsCount(), 3);
 });
 
 test('conflicting approval for a previously accepted index cannot overwrite references or resend notifications', async () => {
@@ -114,7 +114,7 @@ test('conflicting approval for a previously accepted index cannot overwrite refe
   const revision = f.booking(id).revision;
   f.record(id, 42, { authorization_number: '777777' });
   assert.equal((await f.call('tranzilaWebhook', { query: { id }, body: { index: 42 } })).statusCode, 503);
-  assert.deepEqual(ledgerEntries(f)[0][1].providerTransaction, references()); assert.equal(f.booking(id).revision, revision); assert.equal(f.jobsCount(), 4);
+  assert.deepEqual(ledgerEntries(f)[0][1].providerTransaction, references()); assert.equal(f.booking(id).revision, revision); assert.equal(f.jobsCount(), 3);
 });
 
 test('invalid receipt references cannot be persisted via internal transition path', async () => {
@@ -133,7 +133,7 @@ test('missing callback reconciliation saves the same private references without 
   await worker.runDue();
   assert.equal(f.booking(id).paymentStatus, 'paid'); assert.deepEqual(ledgerEntries(f)[0][1].providerTransaction, references());
   const revision = f.booking(id).revision; clock += 3 * 60000; f.advance(3 * 60000); await worker.runDue();
-  assert.equal(f.booking(id).revision, revision); assert.equal(ledgerEntries(f).length, 1); assert.equal(f.jobsCount(), 4);
+  assert.equal(f.booking(id).revision, revision); assert.equal(ledgerEntries(f).length, 1); assert.equal(f.jobsCount(), 3);
 });
 
 test('late captures retain cancellation references without restoring seats or creating WhatsApp work', async () => {
