@@ -6,7 +6,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 const mocks = vi.hoisted(() => ({ createBooking: vi.fn(), createCreditPayment: vi.fn(), getPaymentStatus: vi.fn(), makeIdempotencyKey: vi.fn(), cloud: { blocked: [], soldOut: [], globalMaxParticipants: 2, tourDates: {} } }));
 vi.mock('../../src/utils/paymentService', () => mocks);
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key, i18n: { language: 'en', dir: () => 'ltr' } }) }));
+// Interpolated params are appended so a reference rendered inside copy is still visible to the tests.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key, params) => params?.bookingId ? `${key} ${params.bookingId}` : key, i18n: { language: 'en', dir: () => 'ltr' } }) }));
 vi.mock('../../src/utils/firebase', () => ({ db: {}, APP_ID: 'demo-chilik-repair' }));
 vi.mock('firebase/firestore', () => ({ doc: (...parts) => parts.join('/'), getDoc: async ref => ({ exists: () => true, data: () => ref.endsWith('global') ? mocks.cloud : { useGlobalMax: true, currentRegistrations: mocks.cloud.tourDates['2026-10-08']?.currentRegistrations || 0 } }) }));
 vi.mock('../../src/hooks/useFirebaseData', () => ({ useFirebaseData: () => ({ availabilityStatus: 'ready', ...mocks.cloud }), getEffectiveMax: () => mocks.cloud.globalMaxParticipants, getCurrentRegistrations: (_, date) => mocks.cloud.tourDates[date]?.currentRegistrations || 0, getAvailableSpots: (_, date) => mocks.cloud.globalMaxParticipants - (mocks.cloud.tourDates[date]?.currentRegistrations || 0) }));
@@ -199,6 +200,17 @@ describe('offline booking components', () => {
     }
     render(<BookingConfirmation bookingData={{ bookingId: ID, name: 'Test', status: 'confirmed', paymentStatus: 'paid', paymentMethod: 'credit', tourDate: '2026-10-08', participants: 2, totalPrice: 500, pricePerPerson: 250 }} onBackToHome={() => {}} />);
     expect(screen.getByText('confirmation.paidDetail').getAttribute('role')).toBe('status');
+  });
+  it('paid /confirmation?id= status card (reload or card return) shows the booking reference only once', async () => {
+    for (const url of [`/confirmation?id=${ID}`, `/booking?payment=success&id=${ID}`]) {
+      window.history.replaceState({}, '', url);
+      mocks.getPaymentStatus.mockResolvedValue({ status: 'confirmed', paymentStatus: 'paid' });
+      const { container } = render(<BookingForm statusBookingId={url.startsWith('/confirmation') ? ID : undefined} />);
+      await screen.findByText('booking.payment.paidTitle');
+      expect(screen.getByText('confirmation.paidDetail')).toBeTruthy();
+      expect(container.textContent.split(ID)).toHaveLength(2);
+      cleanup();
+    }
   });
   it('rapid repeated submit starts one request while the first remains in flight', async () => {
     let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));

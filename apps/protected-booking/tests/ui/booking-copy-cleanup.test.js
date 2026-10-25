@@ -22,6 +22,11 @@ describe('booking copy cleanup', () => {
     expect(he.confirmation.nextSteps.bookingNumber).toBeUndefined();
     expect(he.confirmation.paidDetail).not.toMatch(/\{\{bookingId\}\}/);
     expect(en.confirmation.paidDetail).not.toMatch(/\{\{bookingId\}\}/);
+    // The /confirmation?id= reload and card-return status card reuses the reference-free paid detail.
+    expect(form).toContain("detail: t('confirmation.paidDetail')");
+    expect(form).not.toContain('booking.payment.paidDetail');
+    expect(he.booking.payment.paidDetail).toBeUndefined();
+    expect(en.booking.payment.paidDetail).toBeUndefined();
   });
   it('keeps the no-seat-without-payment notice and the 18+/terms checkbox untouched', () => {
     expect(form).toContain(`<p id="no-hold-notice" className="booking-no-hold-notice mt-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm font-bold text-amber-200 text-right" role="note" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>`);

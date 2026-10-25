@@ -60,7 +60,6 @@
       "notConfigured": "Card payment is not set up yet. You can choose Bit or bank transfer, or contact us on WhatsApp.",
       "createFailed": "We could not confirm this request. Retry with the same details to recover it safely, or contact us before starting another payment.",
       "paidTitle": "Payment received and booking confirmed",
-      "paidDetail": "Booking number: {{bookingId}}",
       "failedTitle": "Payment was not completed",
       "failedDetail": "Payment has not been confirmed. Before trying again or choosing another payment method, contact us with your booking number.",
       "pendingTitle": "Payment is still being verified",

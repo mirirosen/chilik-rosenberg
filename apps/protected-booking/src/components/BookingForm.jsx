@@ -260,7 +260,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       : paymentReturnState === 'cancelled'
       ? { icon: '!', title: t('booking.payment.cancelledTitle'), detail: t('booking.payment.cancelledDetail') }
       : paymentReturnState === 'paid'
-      ? { icon: '✓', title: t('booking.payment.paidTitle'), detail: t('booking.payment.paidDetail', { bookingId: paymentBookingId }) }
+      ? { icon: '✓', title: t('booking.payment.paidTitle'), detail: t('confirmation.paidDetail') }
       : paymentReturnState === 'failed'
         ? { icon: '!', title: t('booking.payment.failedTitle'), detail: t('booking.payment.failedDetail') }
         : paymentReturnState === 'pending'
