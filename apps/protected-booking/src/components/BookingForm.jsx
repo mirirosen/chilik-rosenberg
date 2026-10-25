@@ -347,10 +347,13 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
 
           <p className="mt-4 text-center text-sm text-gray-300">{t('bookingDesign.schedule')}</p>
 
-          {/* Total Price Preview */}
-          <div className="mt-4 pt-4 border-t border-white/10 text-center">
+          {/* Total Price: the only price on the form, with the per-guest breakdown */}
+          <div className="mt-4 pt-4 border-t border-white/10 text-center" data-testid="booking-total">
             <span className="text-gray-400 text-sm">{t('booking.price.total')}: </span>
             <span className="text-2xl font-black text-brand-gold">₪{totalPrice}</span>
+            <div className="text-xs text-gray-400 mt-1">
+              {formData.participants} × ₪{PRICE_PER_PERSON} {t('booking.price.perPerson')}
+            </div>
           </div>
 
           {/* Change Selection Button */}
@@ -585,17 +588,6 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           // Locked Participants - Hidden field for form submission
           <input type="hidden" name="participants" value={formData.participants} />
         )}
-
-        {/* Price Display */}
-        <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-4 text-center">
-          <div className="text-sm text-gray-300 mb-1">{t('booking.price.total')}</div>
-          <div className="text-3xl font-black text-brand-gold">
-            ₪{totalPrice}
-          </div>
-          <div className="text-xs text-gray-400 mt-1">
-            {formData.participants} × ₪{PRICE_PER_PERSON} {t('booking.price.perPerson')}
-          </div>
-        </div>
 
         {/* Payment Method */}
         <div>

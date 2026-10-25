@@ -45,7 +45,7 @@
       "notes": "Notes / Special Requests",
       "agreeToTerms": "I confirm that I am 18 or older and agree to the terms and conditions (including the cancellation policy)",
       "required": "Required field",
-      "submit": "Submit Booking",
+      "submit": "Continue to payment",
       "submitting": "Submitting booking...",
       "backToHome": "Cancel and return to homepage",
       "optional": "(optional)"
@@ -148,7 +148,6 @@
       "title": "What's Next?",
       "emailSent": "Booking confirmation has been sent to your email",
       "contactSoon": "A representative will contact you soon for final confirmation and payment",
-      "bookingNumber": "Your booking number",
       "emailPending": "Your request was received. Email delivery has not yet been confirmed.",
       "completePayment": "Complete the payment to reserve your place. Until the payment is confirmed, your place is not reserved."
     },
@@ -158,6 +157,7 @@
     },
     "backToHome": "Back to Homepage",
     "pendingDetail": "Your request is received and awaiting approval. Payment has not been confirmed.",
+    "paidDetail": "Your booking details and booking number are shown below.",
     "noHoldNotice": "Please note: registering does not reserve a place. Your place is reserved only after the payment is completed.",
     "unpaidTitle": "Registration received – your place is not reserved yet",
     "unpaidDetail": "Your registration was received, but no place on the tour has been reserved for you yet. Please complete the payment (Bit or bank transfer) – your place is reserved only once the payment is received and confirmed."

@@ -14,6 +14,12 @@ const VENDOR = /^(firebase-vendor|react-vendor|lucide-vendor)-/;
 const INTENTIONAL = new Map([
   ['? יש לוודא את פרטי ההזמנה והתשלום לפני האישור. האישור אינו מחייב כרטיס אשראי.',
     'no-hold-before-payment: the admin confirm dialog now says confirming reserves the seat if room is left'],
+  // booking-copy-cleanup (owner-approved): these strings still ship via the legacy src/locales copies,
+  // so the check does not flag them today; listed so a later removal of those copies is explained.
+  ['שלח הזמנה', 'booking-copy-cleanup: the booking form submit button now reads "המשך לתשלום"'],
+  ['Submit Booking', 'booking-copy-cleanup: the booking form submit button now reads "Continue to payment"'],
+  ['מספר ההזמנה שלך', 'booking-copy-cleanup: the confirmation "מה הלאה?" list no longer repeats the booking reference'],
+  ['Your booking number', 'booking-copy-cleanup: the confirmation "What\'s Next?" list no longer repeats the booking reference'],
 ]);
 const HEB = /[֐-׿]/;
 

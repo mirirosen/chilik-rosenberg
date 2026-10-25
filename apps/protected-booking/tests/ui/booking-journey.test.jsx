@@ -168,6 +168,38 @@ describe('offline booking components', () => {
     expect(screen.queryByTestId('no-hold-notice')).toBeNull();
     expect(screen.queryByText('confirmation.nextSteps.completePayment')).toBeNull();
   });
+  it('shows the total price once, in the locked summary with the per-guest breakdown', () => {
+    const { container } = render(<BookingForm />);
+    expect(container.textContent.split('₪500')).toHaveLength(2);
+    const total = screen.getByTestId('booking-total');
+    expect(total.textContent).toContain('₪500');
+    expect(total.textContent).toContain('2 × ₪250 booking.price.perPerson');
+    expect(container.querySelectorAll('[data-testid="booking-total"]')).toHaveLength(1);
+    // The single total sits in the locked summary, not next to the payment methods.
+    expect(container.querySelector('[role="radiogroup"]').parentElement.textContent).not.toContain('₪');
+  });
+  it('labels the submit button "continue to payment" and keeps the submitting state while in flight', async () => {
+    let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const { container } = render(<BookingForm onSuccess={() => {}} />);
+    const submit = container.querySelector('button[type="submit"]');
+    expect(submit.textContent).toBe('booking.form.submit');
+    fillForm(container); fireEvent.submit(container.querySelector('form'));
+    await waitFor(() => expect(submit.textContent).toBe('booking.form.submitting'));
+    expect(submit.disabled).toBe(true);
+    await act(async () => finish({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250 }));
+  });
+  it('paid and unpaid confirmations show the booking reference only once, in the reference card', () => {
+    for (const data of [{ status: 'confirmed', paymentStatus: 'paid', paymentMethod: 'credit' }, { status: 'pending', paymentStatus: 'pending', paymentMethod: 'bit' }]) {
+      const { container } = render(<BookingConfirmation bookingData={{ bookingId: ID, name: 'Test', email: 'test@example.com', tourDate: '2026-10-08', participants: 2, totalPrice: 500, pricePerPerson: 250, ...data }} onBackToHome={() => {}} />);
+      expect(container.textContent.split(ID)).toHaveLength(2);
+      expect(screen.getByText(ID).previousElementSibling.textContent).toBe('confirmation.bookingReference');
+      expect(screen.getByText('confirmation.nextSteps.title')).toBeTruthy();
+      expect(screen.queryByText(/confirmation.nextSteps.bookingNumber/)).toBeNull();
+      cleanup();
+    }
+    render(<BookingConfirmation bookingData={{ bookingId: ID, name: 'Test', status: 'confirmed', paymentStatus: 'paid', paymentMethod: 'credit', tourDate: '2026-10-08', participants: 2, totalPrice: 500, pricePerPerson: 250 }} onBackToHome={() => {}} />);
+    expect(screen.getByText('confirmation.paidDetail').getAttribute('role')).toBe('status');
+  });
   it('rapid repeated submit starts one request while the first remains in flight', async () => {
     let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
     const { container } = render(<BookingForm />); fillForm(container);
