@@ -29,7 +29,8 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
   if (!bookingData) return null;
   const view = paymentReturnView(verified);
   const titleKey = { paid: 'booking.payment.paidTitle', confirmed: 'booking.payment.confirmedTitle', cancelled: 'booking.payment.cancelledTitle', failed: 'booking.payment.failedTitle', review: 'booking.payment.reviewTitle', refundReview: 'booking.payment.refundReviewTitle' }[view] || 'confirmation.title';
-  const detailKey = { paid: 'booking.payment.paidDetail', confirmed: 'booking.payment.confirmedDetail', cancelled: 'booking.payment.cancelledDetail', failed: 'booking.payment.failedDetail', review: 'booking.payment.reviewDetail', refundReview: 'booking.payment.refundReviewDetail' }[view] || 'confirmation.pendingDetail';
+  // The booking reference is shown once, in the large card below, so the paid status line omits it.
+  const detailKey = { paid: 'confirmation.paidDetail', confirmed: 'booking.payment.confirmedDetail', cancelled: 'booking.payment.cancelledDetail', failed: 'booking.payment.failedDetail', review: 'booking.payment.reviewDetail', refundReview: 'booking.payment.refundReviewDetail' }[view] || 'confirmation.pendingDetail';
   const confirmed = ['paid', 'confirmed'].includes(view);
   // Bank transfer / bit requests reserve nothing until the payment is confirmed.
   const unpaid = view === 'pending';
@@ -51,7 +52,7 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
           </p>
         </div>
         <DemoBookingNotice />
-        <p className="text-center mb-6" role="status">{t(unpaidTransfer ? 'confirmation.unpaidDetail' : detailKey, { bookingId: bookingData.bookingId })}</p>
+        <p className="text-center mb-6" role="status">{t(unpaidTransfer ? 'confirmation.unpaidDetail' : detailKey)}</p>
         {unpaid && <p className="booking-no-hold-notice text-center mb-6 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 font-bold text-amber-200" role="note" data-testid="no-hold-notice">{t('confirmation.noHoldNotice')}</p>}
         {statusError && <p className="text-center mb-6" role="alert">{statusError}</p>}
         <button type="button" className="target-button w-full mb-6" onClick={refreshStatus} disabled={checking}>{t('booking.payment.refreshStatus')}</button>
@@ -161,10 +162,6 @@ const BookingConfirmation = ({ bookingData, onBackToHome }) => {
             </li>}
             <li className="flex items-start gap-3 justify-end">
               <span>{t('confirmation.nextSteps.contactSoon')}</span>
-              <div className="text-blue-400 mt-1">✓</div>
-            </li>
-            <li className="flex items-start gap-3 justify-end">
-              <span>{t('confirmation.nextSteps.bookingNumber')}: <strong className="text-brand-gold">{bookingData.bookingId}</strong></span>
               <div className="text-blue-400 mt-1">✓</div>
             </li>
           </ul>}
