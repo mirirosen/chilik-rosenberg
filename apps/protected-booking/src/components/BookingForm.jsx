@@ -450,6 +450,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             <option value="google">{t('booking.howOptions.google')}</option>
             <option value="facebook">{t('booking.howOptions.facebook')}</option>
             <option value="instagram">{t('booking.howOptions.instagram')}</option>
+            <option value="youtube">{t('booking.howOptions.youtube')}</option>
+            <option value="tiktok">{t('booking.howOptions.tiktok')}</option>
+            <option value="media">{t('booking.howOptions.media')}</option>
             <option value="other">{t('booking.howOptions.other')}</option>
           </select>
           {errors.howDidYouHear && <p id="howDidYouHear-error" className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}

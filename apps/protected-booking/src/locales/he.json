@@ -88,6 +88,9 @@
       "google": "חיפוש בגוגל",
       "facebook": "פייסבוק",
       "instagram": "אינסטגרם",
+      "youtube": "יוטיוב",
+      "tiktok": "טיקטוק",
+      "media": "טלוויזיה / כתבה",
       "other": "אחר"
     },
     "validation": {

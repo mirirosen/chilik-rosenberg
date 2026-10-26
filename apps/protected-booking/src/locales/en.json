@@ -88,6 +88,9 @@
       "google": "Google search",
       "facebook": "Facebook",
       "instagram": "Instagram",
+      "youtube": "YouTube",
+      "tiktok": "TikTok",
+      "media": "TV / article",
       "other": "Other"
     },
     "validation": {
