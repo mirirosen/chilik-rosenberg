@@ -5,6 +5,7 @@ import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailable
 import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey } from '../utils/paymentService';
+import { normalizeIsraeliMobile } from '../utils/phone';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
@@ -129,11 +130,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     };
   }, [formData.tourDate, cloudData]);
 
-  const validatePhone = (phone) => {
-    // Israeli phone format: 05X-XXXXXXX or 05XXXXXXXX
-    const phoneRegex = /^(05\d{1}-?\d{7}|05\d{8})$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
+  // Israeli mobile: 05X-XXXXXXX, +972 5X..., 972..., spaces/dashes/parentheses.
+  const validatePhone = (phone) => normalizeIsraeliMobile(phone) !== null;
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -213,7 +211,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     try {
       // A draft saved before the date-of-birth field was removed may still carry one; never send it.
       const { dateOfBirth: _dateOfBirth, ...details } = formData;
-      const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
+      const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: normalizeIsraeliMobile(formData.phone) || formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
       const key = await bookingApi.makeIdempotencyKey(booking);
       // Preserve the key on network timeouts: the server may already have committed.
       // Card (and Bit, when enabled) both continue to the secure Tranzila checkout.
@@ -405,7 +403,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             value={formData.phone}
             onChange={(e) => handleInputChange('phone', e.target.value)}
             className={`w-full bg-brand-dark border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-right`}
-            placeholder="05X-XXXXXXX"
+            placeholder={t('booking.form.phonePlaceholder')}
+            dir="ltr"
             disabled={isSubmitting}
           />
           {errors.phone && <p id="phone-error" className="text-red-400 text-sm mt-1 text-right">{errors.phone}</p>}

@@ -36,6 +36,7 @@
     "form": {
       "fullName": "שם מלא",
       "phone": "טלפון / WhatsApp",
+      "phonePlaceholder": "05X-XXXXXXX",
       "email": "אימייל",
       "howDidYouHear": "איך הגעת אלינו?",
       "dateOfBirth": "תאריך לידה",
@@ -92,7 +93,7 @@
     "validation": {
       "nameRequired": "שם מלא הוא שדה חובה",
       "phoneRequired": "טלפון / WhatsApp הוא שדה חובה",
-      "phoneInvalid": "מספר טלפון לא תקין (פורמט: 05X-XXXXXXX)",
+      "phoneInvalid": "יש להזין מספר נייד ישראלי, למשל 050-1234567 או ‎+972 50-123-4567",
       "emailRequired": "כתובת אימייל היא שדה חובה",
       "emailInvalid": "כתובת אימייל לא תקינה",
       "howRequired": "יש לבחור כיצד הגעת אלינו",

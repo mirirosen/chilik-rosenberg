@@ -36,6 +36,7 @@
     "form": {
       "fullName": "Full Name",
       "phone": "Phone / WhatsApp",
+      "phonePlaceholder": "+972 5X-XXX-XXXX",
       "email": "Email",
       "howDidYouHear": "How did you hear about us?",
       "dateOfBirth": "Date of Birth",
@@ -92,7 +93,7 @@
     "validation": {
       "nameRequired": "Full name is required",
       "phoneRequired": "Phone / WhatsApp is required",
-      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)",
+      "phoneInvalid": "Please enter an Israeli mobile number, e.g. +972 50-123-4567 or 050-1234567",
       "emailRequired": "Email address is required",
       "emailInvalid": "Invalid email address",
       "howRequired": "Please select how you heard about us",
