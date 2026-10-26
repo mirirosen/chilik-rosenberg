@@ -48,12 +48,15 @@ function amountValue(b) {
 }
 
 // Per-language labels and formatters for the shared section layout.
+// Wrap a user name in Unicode FSI/PDI isolates so a Hebrew name in the English
+// greeting (or a Latin name in the Hebrew one) does not drag the comma to the wrong side.
+const isolate = v => `\u2068${v}\u2069`;
 const LANG = {
   he: {
     lang: 'he', dir: 'rtl', align: 'right',
     labels: { id: 'מספר הזמנה', tour: 'סיור', date: 'תאריך', time: 'שעה', point: 'נקודת מפגש', people: 'משתתפים', amount: 'סכום', status: 'סטטוס תשלום' },
     date: formatDate, tour: tourName, amount: v => `${v} ₪`,
-    hello: name => `שלום${name ? ` ${name}` : ''},`,
+    hello: name => `שלום${name ? ` ${isolate(name)}` : ''},`,
     contactTitle: 'שאלות? חיליק זמין בשבילכם', phone: 'טלפון', email: 'אימייל', site: 'אתר',
     thanks: `תודה, ${BRAND}`,
   },
@@ -61,7 +64,7 @@ const LANG = {
     lang: 'en', dir: 'ltr', align: 'left',
     labels: { id: 'Booking number', tour: 'Tour', date: 'Date', time: 'Time', point: 'Meeting point', people: 'Participants', amount: 'Amount', status: 'Payment status' },
     date: formatDateEn, tour: b => customTour(b) || DEFAULT_TOUR_EN, amount: v => `₪${v} (ILS)`,
-    hello: name => `Hello${name ? ` ${name}` : ''},`,
+    hello: name => `Hello${name ? ` ${isolate(name)}` : ''},`,
     contactTitle: 'Questions? Hilik is happy to help', phone: 'Phone', email: 'Email', site: 'Website',
     thanks: `Thank you, ${BRAND_EN}`,
   },

@@ -320,7 +320,7 @@ test('bilingual: English part escapes user data too', () => {
   for (const m of [customerReceivedEmail(evil, { ...created, name: evil, meetingPoint: evil, tourName: evil }, NOW_R), customerConfirmedEmail(evil, { ...paid, name: evil, meetingPoint: evil, tourName: evil })]) {
     const en = enPart(m.html);
     assert.ok(!en.includes('<script>'));
-    assert.ok(en.includes('Hello &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;,'));
+    assert.ok(en.includes('Hello \u2068&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;\u2069,'));
     assert.ok(en.includes('>&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;<'));
   }
 });
