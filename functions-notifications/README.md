@@ -8,6 +8,34 @@ Separate Firebase Functions codebase. It never deploys or deletes the live `book
   cancelled/expired/failed and payment-review bookings are skipped. Hebrew text, plus English when `language === 'en'`.
 - Only bookings created after `NOTIFY_CUTOFF_ISO` (default `2026-10-24T17:30:00Z`) are eligible.
 
+## Customer emails (OFF by default)
+
+Hebrew RTL HTML (table layout, inline CSS, max 600px, no images) + plain-text alternative, rendered by `src/customer-render.js`.
+
+- `notifyCustomerOnBooking` (`bookings/{id}` created, `retry: true`) → "booking received" to the registrant. States that the
+  registration is NOT confirmed and no seat is held until payment is completed; payment button only while the hold is open
+  (same `liveLink()` rule as the unpaid notice). Claim flag `customerReceivedSentAt`, counter `customerReceivedAttempts`.
+- `notifyCustomerOnPaid` (`bookings/{id}` updated, `retry: true`) → "booking confirmed". Sent only on the write where the booking
+  becomes verified-paid: `paymentStatus === 'paid' && status === 'confirmed'` and `paymentMethod === 'credit'` (or `'bit'` with
+  `paymentProvider === 'tranzila'`), and it was not both before. The live booking service writes `paymentStatus: 'paid'` only from
+  `BookingService.change(id, 'paid', 'provider:tranzila', receipt)` with a verified Tranzila receipt (tranzilaWebhook / reconcilePayments).
+  Manual admin confirmations of bit/bank requests keep `paymentStatus: 'pending'` and never trigger it.
+  Claim flag `customerConfirmedSentAt`, counter `customerConfirmedAttempts`.
+- Each send claims its flag in a transaction; on SMTP failure the flag is released, `customer*Error` is recorded and the trigger retries,
+  at most 3 attempts. Message-IDs are stable: `<customer-received-<id>@notifications.chilik-tours.com>` / `<customer-confirmed-<id>@…>`.
+- The unpaid sweep skips bookings that already got the "booking received" email (`customerReceivedSentAt` set), so the customer is not
+  told the same thing twice. While the flag is off, the unpaid notice behaves exactly as before.
+- Meeting point / time rows appear only when the booking document has `meetingPoint` / `tourTime` (the live booking has neither today).
+
+Params (both required to send anything):
+
+| Param | Default | Meaning |
+| --- | --- | --- |
+| `NOTIFY_CUSTOMER_EMAILS` | `false` | Master switch for customer mail. |
+| `NOTIFY_CUSTOMER_CUTOFF_ISO` | empty | Only bookings created at/after this ISO time. Empty/invalid ⇒ nothing is sent. |
+
+Preview: `npm run preview -- <out-dir>` writes the two emails (with and without meeting point) as `.html` + `.txt`.
+
 Provider: Gmail SMTP (`smtp.gmail.com:465`, TLS) via nodemailer, user and sender `hr20192022@gmail.com`.
 Secret: `GMAIL_APP_PASSWORD` (a Google App Password of that account; requires 2-Step Verification).
 

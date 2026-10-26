@@ -45,4 +45,4 @@ function unpaidEmail(id, b, nowMs = Date.now()) {
     html: parts.map((p, i) => `<div dir="${i === 0 ? 'rtl' : 'ltr'}">${p.map(l => `<p>${esc(l)}</p>`).join('')}</div>`).join('<hr>'),
   };
 }
-module.exports = { ownerEmail, unpaidEmail, isPaid, isClosed };
+module.exports = { ownerEmail, unpaidEmail, isPaid, isClosed, liveLink };
