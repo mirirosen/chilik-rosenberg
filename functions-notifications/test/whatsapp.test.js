@@ -60,6 +60,19 @@ test('sender: health must be WORKING with the expected number', async () => {
   assert.throws(() => T.createWahaSender({ origin: 'http://x', apiKey: 'k' }), /not-configured/);
 });
 test('toIntl', () => { assert.equal(T.toIntl('0501234567'), '972501234567'); assert.equal(T.toIntl('abc'), ''); });
+test('toIntl: international E.164 bookings get a WhatsApp recipient; malformed or Israeli landlines do not', () => {
+  assert.equal(T.toIntl('+14155550100'), '14155550100');
+  assert.equal(T.toIntl('+442079460958'), '442079460958');
+  assert.equal(T.toIntl('+972501234567'), '972501234567');
+  for (const bad of ['+97231234567', '+0501234567', '14155550100', '+1', '+1234567890123456', '']) assert.equal(T.toIntl(bad), '', bad);
+});
+test('WAHA sender accepts international recipients and rejects malformed ones before any request', async () => {
+  const calls = []; const f = async url => { calls.push(url); return url.endsWith('/sendText') ? { ok: true, json: async () => ({ id: 'ok' }) } : { ok: true, json: async () => ({ status: 'WORKING', me: { id: '972553094372@c.us' } }) }; };
+  const s = T.createWahaSender({ origin: 'https://waha.example', apiKey: 'k', fetchImpl: f });
+  assert.equal(await s('14155550100', 'hi'), 'ok');
+  for (const bad of ['97231234567', '0501234567', '+14155550100', 'x', 14155550100]) await assert.rejects(s(bad, 'hi'), /waha-invalid-recipient/);
+  assert.equal(calls.length, 2);
+});
 test('overbooked paid (payment_review): owner warned, customer not told confirmed', async () => {
   const db = fakeDb({ 'BK-1': { ...b, paymentStatus: 'paid', status: 'payment_review' } }); const { n, sent } = mk(db, { customerEnabled: true });
   await n.onUpdated({ data: () => b }, db.snap('BK-1'));

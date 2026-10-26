@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "hilik-rosenberg-ddb9b"
+    "default": "hilik-site",
+    "legacy": "hilik-rosenberg-ddb9b"
   }
 }

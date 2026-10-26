@@ -6,6 +6,7 @@ import { formatDateHebrew } from '../utils/dateUtils';
 import { Calendar, Users, Phone, Mail, MessageSquare, CheckCircle, XCircle, Clock } from '../utils/icons';
 
 import { adminRequest, adminErrorMessage } from '../utils/adminService';
+import { phoneToE164Digits } from '../utils/phone';
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -372,7 +373,7 @@ const AdminBookings = () => {
                       )}
 
                       <a
-                        href={`https://wa.me/972${String(booking.phone || '').replace(/^0/, '').replace(/-/g, '')}?text=שלום ${booking.name}, לגבי ההזמנה ${booking.bookingId || booking.id}`}
+                        href={`https://wa.me/${phoneToE164Digits(booking.phone) || `972${String(booking.phone || '').replace(/^0/, '').replace(/-/g, '')}`}?text=שלום ${booking.name}, לגבי ההזמנה ${booking.bookingId || booking.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-full text-sm font-bold hover:bg-green-700 transition-all"

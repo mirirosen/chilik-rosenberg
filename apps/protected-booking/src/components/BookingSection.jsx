@@ -1,5 +1,5 @@
 import { IS_PREPROD } from '../utils/preview';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../utils/firebase';
@@ -7,6 +7,7 @@ import { Utensils, Clock, Users, Calendar, ChevronRight, ChevronLeft, CheckCircl
 import { useFirebaseData, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
 import { serverAvailabilityEnabled, getServerAvailability, freshAvailabilityRow } from '../utils/calendarAvailability';
+import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
 import './BookingSection.css';
 
@@ -23,6 +24,8 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const [isChecking, setIsChecking] = useState(false);
   const [checkError, setCheckError] = useState('');
   const checking = useRef(false);
+  // The picker mounts only on booking intent (scroll-near or CTA on the home page).
+  useEffect(() => { warmPaymentFunctions(); }, []);
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12, i18n.language), [i18n.language]);

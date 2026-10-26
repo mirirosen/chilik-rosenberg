@@ -5,7 +5,7 @@ const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const { FIREBASE_PROJECT } = require('./deployment-config');
 const { createBookingService } = require('./booking-service');
-const { createJobRunner } = require('./integration-jobs');
+const { createJobRunner, loadIntegrationGates } = require('./integration-jobs');
 const { createBookingApi } = require('./api');
 const { SECRET_NAMES, loadPaymentConfiguration, createRuntimePaymentFlow } = require('./payment-runtime');
 const { createRuntimeReconciler } = require('./payment-reconciliation');
@@ -25,7 +25,7 @@ const readConfiguration = () => loadPaymentConfiguration({ env: process.env, rea
 const paymentFlow = createRuntimePaymentFlow({ db, bookings, Timestamp, readConfiguration });
 const paymentReconciler = createRuntimeReconciler({ db, bookings, Timestamp, readSecret, envFor: () => process.env });
 const whatsappRuntime = createWhatsAppRuntime({ db, Timestamp, env: process.env, secretFactory: name => defineSecret(name) });
-const jobs = createJobRunner(db, Timestamp, { ...createIntegrationAdapters({ db, config: { calendar: calendarRuntime.adapterConfig }, getAccessToken: calendarRuntime.getAccessToken }), whatsapp: whatsappRuntime.adapter });
+const jobs = createJobRunner(db, Timestamp, { ...createIntegrationAdapters({ db, config: { calendar: calendarRuntime.adapterConfig }, getAccessToken: calendarRuntime.getAccessToken }), whatsapp: whatsappRuntime.adapter }, loadIntegrationGates(process.env));
 
 Object.assign(exports, createBookingApi({
   onRequest, onSchedule, db, Timestamp, bookings, jobs, paymentFlow, paymentReconciler, paymentSecrets,

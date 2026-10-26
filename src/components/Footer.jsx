@@ -1,5 +1,17 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Phone, MessageCircle, Mail } from '../utils/icons';
+import { consentState, withdrawConsent } from '../../apps/protected-booking/src/utils/analytics';
+
+// Shown after mount, only to a visitor who accepted analytics: withdrawing is one click.
+function WithdrawAnalyticsConsent({ english }) {
+  const [granted, setGranted] = useState(false);
+  useEffect(() => { setGranted(consentState() === 'granted'); }, []);
+  if (!granted) return null;
+  return <button type="button" className="block text-sm text-gray-400 underline mt-2 text-start" onClick={() => withdrawConsent()}>
+    {english ? 'Withdraw analytics consent (Google Analytics)' : 'ביטול ההסכמה למדידה (Google Analytics)'}
+  </button>;
+}
 
 const Footer = () => {
   const { t, i18n } = useTranslation();
@@ -91,6 +103,7 @@ const Footer = () => {
               {t('footer.aboutText')}
             </p>
             <a href="/privacy.html" className="text-sm text-gray-400 underline mt-4">{i18n.language?.startsWith('en') ? 'Privacy policy' : 'מדיניות פרטיות'}</a>
+            <WithdrawAnalyticsConsent english={i18n.language?.startsWith('en')} />
           </div>
         </div>
 

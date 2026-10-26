@@ -11,8 +11,10 @@ export function routeFromPath(pathname) {
 
 // Only public content pages belong in search/share URLs. Booking references,
 // payment query parameters and personal data must never enter metadata.
-export function applyRouteMetadata({ route, language, isPreprod = ['preprod', 'booking-demo'].includes(import.meta.env.MODE), t, document: doc = document }) {
+export function applyRouteMetadata({ route, language, isPreprod = ['preprod', 'booking-demo'].includes(import.meta.env.MODE), t, document: doc = document, englishHome = false }) {
   const indexed = !isPreprod && ['home', 'terms'].includes(route);
+  // The booking site has an indexable English homepage (/en); its canonical follows the language.
+  const homePath = englishHome && language?.startsWith('en') ? '/en' : '/';
   const key = ['home', 'terms', 'admin', 'booking', 'confirmation'].includes(route) ? route : 'notFound';
   const homeCopy = organicCopy[language?.startsWith('en') ? 'en' : 'he'];
   const title = route === 'home' ? homeCopy.title : t(`seo.${key}.title`);
@@ -40,14 +42,14 @@ export function applyRouteMetadata({ route, language, isPreprod = ['preprod', 'b
   if (indexed && route === 'home') {
     const schema = doc.createElement('script');
     schema.id = 'organic-schema'; schema.type = 'application/ld+json';
-    schema.textContent = JSON.stringify(buildHomeSchema({ language, description, faqs: t('faqs', { returnObjects: true }) })).replace(/</g, '\\u003c');
+    schema.textContent = JSON.stringify(buildHomeSchema({ language, description, faqs: t('faqs', { returnObjects: true }), path: homePath })).replace(/</g, '\\u003c');
     doc.head.append(schema);
   }
   if (!indexed) {
     doc.querySelectorAll('link[rel="canonical"], meta[property="og:url"]').forEach(node => node.remove());
     return;
   }
-  const url = `${publicOrigin}/${route === 'terms' ? 'terms' : ''}`;
+  const url = route === 'terms' ? `${publicOrigin}/terms` : publicOrigin + homePath;
   let canonical = doc.querySelector('link[rel="canonical"]');
   if (!canonical) { canonical = doc.createElement('link'); canonical.rel = 'canonical'; doc.head.append(canonical); }
   canonical.href = url;
