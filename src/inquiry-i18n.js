@@ -48,6 +48,8 @@ function resource(base, lang) {
 // locale. A visitor's explicit language choice still overrides it.
 let initial = 'he';
 try { const saved = localStorage.getItem('language'); if (['he', 'en'].includes(saved)) initial = saved; } catch {}
+// The indexable English homepage always opens in English.
+if (typeof window !== 'undefined' && window.location?.pathname === '/en') initial = 'en';
 i18n.use(initReactI18next).init({ resources: { he: { translation: resource(he, 'he') }, en: { translation: resource(en, 'en') } }, lng: initial, fallbackLng: 'he', interpolation: { escapeValue: false }, react: { useSuspense: false } });
 function applyLanguage(language) {
   if (typeof document === 'undefined') return;

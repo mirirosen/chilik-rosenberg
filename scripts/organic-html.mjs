@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/data/organicContent.js';
 import { bookingFaqOverrides } from '../src/data/bookingFaqCopy.js';
@@ -39,8 +40,21 @@ export function metadataHtml({ title, description, path = '/', language = 'he', 
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(title)}"><meta name="twitter:description" content="${escapeHtml(description)}"><meta name="twitter:image" content="${siteOrigin}/media/hero/bnei-brak-sequence-poster.webp">
 ${graph ? schemaTag(graph) : ''}`;
 }
+// Indexable URLs in the generated sitemap. Only the booking site publishes /en.
+export const sitemapPaths = mode => ['/', ...(mode === 'booking' ? ['/en'] : []), '/terms', ...guidePaths];
+// YYYY-MM-DD of the source commit being built; SOURCE_DATE_EPOCH or today as fallback.
+export function sitemapLastmod() {
+  if (/^\d+$/.test(process.env.SOURCE_DATE_EPOCH || '')) return new Date(Number(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString().slice(0, 10);
+  try {
+    const date = execFileSync('git', ['log', '-1', '--format=%cs'], { cwd: sourceRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  } catch { /* not a git checkout */ }
+  return new Date().toISOString().slice(0, 10);
+}
+// Booking site homepages: Hebrew at /, English at /en; x-default is the Hebrew home.
+export const homeAlternatesHtml = () => `<link rel="alternate" hreflang="he" href="${siteOrigin}/"><link rel="alternate" hreflang="en" href="${siteOrigin}/en"><link rel="alternate" hreflang="x-default" href="${siteOrigin}/">`;
 export function stripMetadata(html) {
-  return html.replace(/<title>[\s\S]*?<\/title>/g, '').replace(/<meta\s+(?:name="(?:description|robots|twitter:[^"]+)"|property="og:[^"]+")[^>]*>/g, '').replace(/<link rel="canonical"[^>]*>/g, '').replace(/<script id="organic-schema"[^>]*>[\s\S]*?<\/script>/g, '');
+  return html.replace(/<title>[\s\S]*?<\/title>/g, '').replace(/<meta\s+(?:name="(?:description|robots|twitter:[^"]+)"|property="og:[^"]+")[^>]*>/g, '').replace(/<link rel="canonical"[^>]*>/g, '').replace(/<link rel="alternate" hreflang="[^"]+"[^>]*>/g, '').replace(/<script id="organic-schema"[^>]*>[\s\S]*?<\/script>/g, '');
 }
 export function organicSeoPlugin(mode) {
   return {
@@ -51,7 +65,7 @@ export function organicSeoPlugin(mode) {
       const booking = mode === 'booking';
       const graph = buildHomeSchema({ language: 'he', description: copy.description, faqs: faqsFor('he', booking) });
       const css = fs.readFileSync(path.join(sourceRoot, 'src', 'organic-seo.css'), 'utf8');
-      return stripMetadata(html).replace('</head>', `${metadataHtml({ ...copy, graph })}<style>${css}</style></head>`)
+      return stripMetadata(html).replace('</head>', `${metadataHtml({ ...copy, graph })}${booking ? homeAlternatesHtml() : ''}<style>${css}</style></head>`)
         .replace(/<noscript>[\s\S]*?<\/noscript>/g, '<noscript><p>להזמנה המקוונת יש להפעיל JavaScript; לבירור אפשר להתקשר לחיליק.</p></noscript>')
         .replace('<div id="root"></div>', `<div id="root">${homeFallback(booking)}</div>`);
     },

@@ -15,6 +15,8 @@ const BookingConfirmation = lazy(() => import('../apps/protected-booking/src/com
 const Terms = lazy(() => import('../apps/protected-booking/src/components/Terms'));
 const Admin = lazy(() => import('../apps/protected-booking/src/components/Admin'));
 
+const HOME_PATHS = ['/', '/index.html', '/en'];
+
 function HomeBookingPicker({ fallback, children }) {
   const container = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -72,8 +74,16 @@ export default function BookingSiteApp() {
     return () => window.removeEventListener('popstate', update);
   }, []);
   useEffect(() => IS_PREPROD ? disablePreviewContacts() : undefined, []);
+  // The homepage URL follows the visible language: Hebrew at /, English at /en.
   useEffect(() => {
-    applyRouteMetadata({ route: location.path === '/manage-bookings' ? 'admin' : isStatus ? 'confirmation' : ['/', '/index.html'].includes(location.path) ? 'home' : ['/terms', '/תקנון'].includes(location.path) ? 'terms' : 'booking', language: i18n.language, t });
+    if (!HOME_PATHS.includes(location.path)) return;
+    const english = i18n.language?.startsWith('en');
+    if (english === (location.path === '/en')) return;
+    window.history.replaceState(window.history.state, '', (english ? '/en' : '/') + window.location.search + window.location.hash);
+    setLocation({ path: window.location.pathname, search: window.location.search });
+  }, [location.path, i18n.language]);
+  useEffect(() => {
+    applyRouteMetadata({ route: location.path === '/manage-bookings' ? 'admin' : isStatus ? 'confirmation' : HOME_PATHS.includes(location.path) ? 'home' : ['/terms', '/תקנון'].includes(location.path) ? 'terms' : 'booking', language: i18n.language, t, englishHome: true });
     if (IS_PREPROD) document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex, nofollow');
   }, [location, i18n.language, t, isStatus]);
 
@@ -96,7 +106,7 @@ export default function BookingSiteApp() {
   const picker = <Suspense fallback={loading}><BookingSection standalone={location.path === '/booking'} onContinue={continueBooking} initialSelection={selection} /></Suspense>;
   const banner = IS_PREPROD && <div className="booking-demo-banner" role="status">{PREVIEW_NOTICE}</div>;
   if (location.path === '/manage-bookings') return <ErrorBoundary><div className="site-management">{banner}<Suspense fallback={loading}><Admin /></Suspense></div></ErrorBoundary>;
-  if (['/', '/index.html'].includes(location.path)) return <>{banner}<InquiryApp bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} /></>;
+  if (HOME_PATHS.includes(location.path)) return <>{banner}<InquiryApp bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} /></>;
   if (['/terms', '/תקנון'].includes(location.path)) return <div className="site-legal">{banner}<Suspense fallback={loading}><Terms /></Suspense></div>;
   if (!['/booking', '/confirmation'].includes(location.path)) return <InquiryApp />;
   return <ErrorBoundary><div className="target-site target-booking-flow">{banner}<Header /><main id="main-content" className={hasSelection || isStatus ? 'booking-details-shell' : 'booking-selection-page'}>

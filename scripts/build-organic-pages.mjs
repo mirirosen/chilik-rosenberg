@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
-import { organicCopy, guidePaths, siteOrigin } from '../src/data/organicContent.js';
-import { escapeHtml as e, metadataHtml, faqsFor } from './organic-html.mjs';
+import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/data/organicContent.js';
+import { escapeHtml as e, metadataHtml, faqsFor, homeAlternatesHtml, sitemapPaths, sitemapLastmod } from './organic-html.mjs';
 
 const mode = process.argv[2];
 if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inquiry mode');
@@ -60,9 +60,34 @@ for (const page of pages) {
     { '@type': 'FAQPage', '@id': url + '#guide-faq', inLanguage: page.language, isPartOf: { '@id': url + '#webpage' }, mainEntity: guideFaqs(page).map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) },
     { '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours', item: siteOrigin + '/' }, { '@type': 'ListItem', position: 2, name: page.h1, item: url } ] },
   ] };
-  const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}">` : '';
-  const html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body><main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main></body></html>`;
+  // x-default is the Hebrew guide of the pair.
+  const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body><main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main></body></html>`;
+  // On the booking site the English guide sends readers to the English homepage.
+  if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
+}
+// Indexable English homepage (/en): the same production shell, styles and bundle as
+// the Hebrew homepage, with English prerendered markup and its own metadata.
+if (mode === 'booking') {
+  const enMarkupFile = path.join(out, '.prerender-en.html');
+  const dom = new JSDOM(entry);
+  const doc = dom.window.document;
+  doc.documentElement.lang = 'en';
+  doc.documentElement.dir = 'ltr';
+  doc.head.querySelectorAll('title,meta[name="description"],meta[name="robots"],meta[property^="og:"],meta[name^="twitter:"],link[rel="canonical"],link[rel="alternate"][hreflang],#organic-schema').forEach(n => n.remove());
+  const copy = organicCopy.en;
+  const graph = buildHomeSchema({ language: 'en', description: copy.description, faqs: faqsFor('en', true), path: '/en' });
+  doc.head.insertAdjacentHTML('beforeend', metadataHtml({ ...copy, path: '/en', language: 'en', graph }) + homeAlternatesHtml());
+  const root = doc.getElementById('root');
+  root.innerHTML = fs.readFileSync(enMarkupFile, 'utf8');
+  root.dataset.prerender = 'en';
+  doc.querySelectorAll('noscript').forEach(node => node.remove());
+  // Serialize first: JSDOM otherwise escapes nested noscript markup as text.
+  const noScript = '<noscript><style>#faq [hidden]{display:block}#faq button{pointer-events:none}</style><p>Online booking requires JavaScript. You can call Chilik: <a href="tel:0506724312">0506724312</a>.</p></noscript>';
+  fs.writeFileSync(path.join(out, 'en.html'), dom.serialize().replace('</body>', noScript + '</body>'));
+  dom.window.close();
+  fs.unlinkSync(enMarkupFile);
 }
 // Distinct initial metadata for legal and private routes. The same React bundle
 // still owns their functionality. Never copy homepage schema into these shells.
@@ -84,7 +109,7 @@ for (const route of ['terms', 'booking', 'confirmation', ...(mode === 'booking' 
   doc.querySelectorAll('script[type="module"][async]').forEach(node => node.removeAttribute('async'));
   doc.getElementById('root').removeAttribute('data-prerender');
   doc.querySelectorAll('noscript').forEach(node => node.remove());
-  doc.head.querySelectorAll('title,meta[name="description"],meta[name="robots"],meta[property^="og:"],meta[name^="twitter:"],link[rel="canonical"],#organic-schema').forEach(n => n.remove());
+  doc.head.querySelectorAll('title,meta[name="description"],meta[name="robots"],meta[property^="og:"],meta[name^="twitter:"],link[rel="canonical"],link[rel="alternate"][hreflang],#organic-schema').forEach(n => n.remove());
   const legal = route === 'terms';
   const title = legal ? locales.seo.terms.title : route === 'manage-bookings' ? 'ניהול הזמנות | חיליק רוזנברג' : locales.seo[route].title;
   if (legal) doc.head.insertAdjacentHTML('beforeend', metadataHtml({ title, description: locales.seo.terms.description, path: '/terms' }));
@@ -93,6 +118,8 @@ for (const route of ['terms', 'booking', 'confirmation', ...(mode === 'booking' 
   fs.writeFileSync(path.join(out, route + '.html'), dom.serialize());
   dom.window.close();
 }
-const urls = ['/', '/terms', ...guidePaths];
-fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(p => `  <url><loc>${siteOrigin + p}</loc></url>`).join('\n')}\n</urlset>\n`);
-console.log(`Organic pages generated: ${pages.length} guides, 4 isolated route shells, ${urls.length} sitemap URLs. No dates or availability fabricated.`);
+const urls = sitemapPaths(mode);
+// lastmod is the date of the source commit being built (falls back to the build date).
+const lastmod = sitemapLastmod();
+fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(p => `  <url><loc>${siteOrigin + p}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
+console.log(`Organic pages generated: ${pages.length} guides, ${mode === 'booking' ? 'English /en homepage, ' : ''}4 isolated route shells, ${urls.length} sitemap URLs (lastmod ${lastmod}). No dates or availability fabricated.`);
