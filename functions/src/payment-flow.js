@@ -48,9 +48,15 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
   // The owner may open a fresh checkout for the SAME booking right away instead of
   // waiting for the 15-minute window to expire. Payment rules are unchanged: no seat
   // is held, 'paid' still comes only from a verified provider receipt, and a second
-  // capture for one booking is still routed to review by change(). When the order
-  // lookup is configured, an existing verified capture is applied instead of
-  // opening another checkout, and an unverifiable lookup refuses the retry.
+  // capture for one booking is still routed to review by change(). The retry needs
+  // the verified order lookup: without it (or without a bound terminal) it is
+  // refused with payment-verification-pending. An existing verified capture is
+  // applied instead of opening another checkout. Only a row the provider reports
+  // as a definite decline (successful report, non-000 processor response) is
+  // skipped; any transport, report or verification error refuses the retry.
+  // Residual gap: Tranzila's report may not yet list a capture made seconds
+  // earlier. A capture that lands after the retry is still routed to
+  // additionalPaymentReview by change(), so it is recorded, never lost.
   async function retry(uid, bookingId) {
     provider.assertReady();
     urlsFor.assertReady?.();
@@ -61,18 +67,18 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
     let b = snap.data();
     if (!open(b)) throw failure('booking-closed');
     if ((b.paymentRetries || 0) >= MAX_PAYMENT_RETRIES) throw failure('payment-retry-limit');
-    if (b.paymentTerminal && provider.findTransactionIndexes && lookupReady()) {
-      let indexes;
-      try { ({ transactionIndexes: indexes } = await provider.findTransactionIndexes({ booking: b, nowMs: clock() })); }
-      catch { throw Object.assign(new Error('payment-verification-pending'), { status: 503 }); }
-      for (const transactionIndex of indexes || []) {
-        let receipt;
-        try { receipt = await provider.verifyTransaction({ booking: b, transactionIndex }); } catch { continue; } // declined/unverified rows are not captures
-        if (receipt?.verified === true && receipt.event === 'paid') {
-          const updated = await bookings.change(bookingId, 'paid', 'provider:tranzila', receipt, clock());
-          return { bookingId, status: updated.status, paymentStatus: updated.paymentStatus };
-        }
-      }
+    const pending = () => Object.assign(new Error('payment-verification-pending'), { status: 503 });
+    if (!b.paymentTerminal || !provider.findTransactionIndexes || !lookupReady()) throw pending();
+    let indexes;
+    try { ({ transactionIndexes: indexes } = await provider.findTransactionIndexes({ booking: b, nowMs: clock() })); }
+    catch { throw pending(); }
+    for (const transactionIndex of indexes || []) {
+      let receipt;
+      try { receipt = await provider.verifyTransaction({ booking: b, transactionIndex }); }
+      catch (error) { if (error?.declined === true) continue; throw pending(); }
+      if (receipt?.verified !== true || receipt.event !== 'paid') throw pending();
+      const updated = await bookings.change(bookingId, 'paid', 'provider:tranzila', receipt, clock());
+      return { bookingId, status: updated.status, paymentStatus: updated.paymentStatus, applied: true };
     }
     const lease = crypto.randomUUID();
     await db.runTransaction(async tx => {

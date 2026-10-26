@@ -5,12 +5,14 @@ const { createBookingService } = require('../src/booking-service');
 const { createPaymentFlow } = require('../src/payment-flow');
 const NOW = Date.parse('2026-10-01T10:00:00Z');
 const KEY = 'a'.repeat(32);
+const declinedRow = () => Object.assign(new Error('provider-verification-pending'), { code: 'provider-verification-pending', declined: true });
 const input = { name: 'Test', phone: '0501234567', email: 'a@example.com', participants: 2, tourDate: '2026-10-08', paymentMethod: 'credit', agreeToTerms: true, adultConfirmed: true };
 
 function setup(extra = {}) {
   const db = fakeDb(), bookings = createBookingService(db, Timestamp);
   let now = NOW, calls = 0;
-  const provider = { assertReady() {}, async createCheckout() { calls++; return { paymentUrl: `https://directng.tranzila.com/t/?attempt=${calls}`, paymentTerminal: 'term' }; }, ...extra };
+  // The verified order lookup is on by default and finds nothing; tests override it.
+  const provider = { assertReady() {}, assertLookupReady() {}, async findTransactionIndexes() { return { complete: true, transactionIndexes: [] }; }, async createCheckout() { calls++; return { paymentUrl: `https://directng.tranzila.com/t/?attempt=${calls}`, paymentTerminal: 'term' }; }, ...extra };
   const flow = createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor: () => ({}), clock: () => now });
   const booking = id => db.data.get(bookings.bookingRef(id).path);
   return { db, bookings, flow, booking, advance: ms => { now += ms; }, calls: () => calls };
@@ -54,10 +56,9 @@ test('retry is refused for other users, closed/expired/paid bookings and after t
 
 test('a verified capture found by the order lookup is applied instead of opening another checkout', async () => {
   const s = setup({
-    assertLookupReady() {},
     async findTransactionIndexes() { return { complete: true, transactionIndexes: [3, 4] }; },
     async verifyTransaction({ booking, transactionIndex }) {
-      if (transactionIndex === 3) throw Object.assign(new Error('provider-verification-pending'), { code: 'provider-verification-pending' }); // the declined attempt
+      if (transactionIndex === 3) throw declinedRow(); // the declined attempt
       return { verified: true, bookingId: booking.bookingId, transactionKey: `term:${transactionIndex}`, amount: 500, currency: 'ILS', event: 'paid' };
     },
   });
@@ -65,19 +66,37 @@ test('a verified capture found by the order lookup is applied instead of opening
   const result = await s.flow.retry('u', bookingId);
   assert.equal(result.paymentUrl, undefined);
   assert.equal(result.paymentStatus, 'paid');
+  assert.equal(result.applied, true);
   assert.equal(s.calls(), 1);
   assert.equal(s.booking(bookingId).status, 'confirmed');
 });
 
-test('declined-only lookup allows the retry; an unverifiable lookup refuses it', async () => {
-  const declined = setup({ assertLookupReady() {}, async findTransactionIndexes() { return { complete: true, transactionIndexes: [3] }; }, async verifyTransaction() { throw new Error('provider-verification-pending'); } });
+test('only a positively declined row allows the retry; every unverifiable state refuses it', async () => {
+  const declined = setup({ async findTransactionIndexes() { return { complete: true, transactionIndexes: [3] }; }, async verifyTransaction() { throw declinedRow(); } });
   const a = await declined.flow.create('u', KEY, input);
-  assert.equal((await declined.flow.retry('u', a.bookingId)).retried, true);
-  const down = setup({ assertLookupReady() {}, async findTransactionIndexes() { throw new Error('provider-lookup-incomplete'); } });
-  const b = await down.flow.create('u', KEY, input);
-  await assert.rejects(down.flow.retry('u', b.bookingId), /payment-verification-pending/);
-  assert.equal(down.calls(), 1);
-  assert.equal(down.booking(b.bookingId).paymentRetries, undefined);
+  const ok = await declined.flow.retry('u', a.bookingId);
+  assert.equal(ok.retried, true); assert.equal(ok.applied, undefined);
+  const unavailable = () => Object.assign(new Error('payment-provider-unavailable'), { code: 'payment-provider-unavailable' });
+  const refusals = {
+    'lookup not configured': { assertLookupReady: undefined },
+    'lookup not verified': { assertLookupReady() { throw new Error('payment-order-lookup-not-configured'); } },
+    'no lookup method': { findTransactionIndexes: undefined },
+    'lookup fails': { async findTransactionIndexes() { throw new Error('provider-lookup-incomplete'); } },
+    'row transport timeout': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [3, 4] }; }, async verifyTransaction({ transactionIndex }) { if (transactionIndex === 3) throw declinedRow(); throw unavailable(); } },
+    'row report error': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [4] }; }, async verifyTransaction() { throw Object.assign(new Error('provider-verification-pending'), { code: 'provider-verification-pending' }); } },
+    'row not a verified capture': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [4] }; }, async verifyTransaction() { return { verified: false }; } },
+  };
+  for (const [name, extra] of Object.entries(refusals)) {
+    const s = setup(extra);
+    const { bookingId } = await s.flow.create('u', KEY, input);
+    await assert.rejects(s.flow.retry('u', bookingId), e => e.message === 'payment-verification-pending' && e.status === 503, name);
+    assert.equal(s.calls(), 1, name);
+    assert.equal(s.booking(bookingId).paymentRetries, undefined, name);
+    assert.equal(s.booking(bookingId).initiationLease, null, name);
+  }
+  const unbound = setup({ async createCheckout() { return { paymentUrl: 'https://directng.tranzila.com/t/?x' }; } });
+  const u = await unbound.flow.create('u', KEY, input);
+  await assert.rejects(unbound.flow.retry('u', u.bookingId), /payment-verification-pending/);
 });
 
 test('a failed retry handshake keeps the existing checkout and booking open', async () => {
