@@ -53,6 +53,8 @@
 .target-site #date-selection.booking-screen[dir] button:disabled{opacity:.5;cursor:not-allowed}
 .target-site #date-selection.booking-screen[dir] .booking-screen__date.date-card:disabled{opacity:1;color:#84796a;background:#ede7dc;border-style:dashed;border-color:#cfc5b5;box-shadow:none}
 .target-site #date-selection.booking-screen[dir] .booking-screen__date:disabled small{color:#5f5446}
+.target-site #date-selection.booking-screen[dir] .booking-screen__date.date-card.is-pending:disabled{color:#6f6658;background:#fbf8f1;border-style:solid;border-color:#e0d8c9}
+.target-site #date-selection.booking-screen[dir] .booking-screen__date.is-pending:disabled small{color:#6f6658}
 .target-site #date-selection.booking-screen[dir] .booking-screen__other-date{font-size:12px;color:#75603b;margin:3px 0 7px}
 .target-site #date-selection.booking-screen[dir] .booking-screen__other-date summary{display:flex;align-items:center;min-height:44px;cursor:pointer;width:-moz-fit-content;width:fit-content;text-underline-offset:4px;text-decoration:underline}
 .target-site #date-selection.booking-screen[dir] .booking-screen__other-date summary:after{content:"+";padding-inline-start:8px;font-size:17px}
@@ -82,6 +84,7 @@
 .target-site #date-selection.booking-screen[dir] .booking-screen__secure svg{flex-shrink:0}
 .target-site #date-selection.booking-screen[dir] .booking-screen__error{color:#8f3c27;background:#fff1e8;font-size:13px;line-height:1.6;padding:12px;border:1px solid #c9907655;border-radius:9px;margin:12px 0}
 .target-site #date-selection.booking-screen[dir] .booking-screen__error p{color:inherit}
+.target-site #date-selection.booking-screen[dir] .booking-screen__notice{color:#5a4f40;background:#f3ecdf;font-size:13px;line-height:1.6;padding:12px;border:1px solid #ddd2bf;border-radius:9px;margin:12px 0}
 .target-site #date-selection.booking-screen[dir] .booking-screen__error button{border:0;background:none;color:#824321;text-decoration:underline;padding:9px 0;min-height:44px}
 .target-site #date-selection.booking-screen[dir] :is(button,input,a,summary):focus-visible{outline:3px solid #277bb0;outline-offset:4px}
 .target-site #date-selection.booking-screen[dir] .booking-screen__intro a:focus-visible{outline-color:#ffe3a4}

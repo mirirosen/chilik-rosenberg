@@ -103,6 +103,23 @@ it('opening the date picker warms the checkout and status functions (never the w
   await act(async () => { await Promise.resolve(); });
   expect(warmups()).toEqual(['createPayment', 'paymentStatus'].map(n => `https://fixture.example.test/${n}?warmup=1`));
 });
+it('server mode never labels a generic closed row as sold out, and unpublished dates read as pending', async () => {
+  // Live calendarAvailability returns the same generic {available:false, availableSpots:0} row for
+  // sold out, admin blocks, unsynced calendar weeks and reconciliation holds.
+  fetch.mockResolvedValue(reply(payload(0)));
+  const { default: BookingSection } = await import('../../src/components/BookingSection');
+  render(<BookingSection />);
+  await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+  const [closed, unpublished] = screen.getAllByRole('button', { name: /^bookingSection.dateCardLabel/ });
+  expect(closed.disabled).toBe(true);
+  expect(closed.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.notOpen');
+  expect(closed.classList.contains('is-pending')).toBe(true);
+  expect(unpublished.disabled).toBe(true);
+  expect(unpublished.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.availabilityPending');
+  expect(unpublished.classList.contains('is-pending')).toBe(true);
+  expect(screen.queryByText('bookingSection.soldOut')).toBeNull();
+  expect(screen.queryByText('common.availabilityUnavailable')).toBeNull();
+});
 it('upcoming Thursdays and cutoff follow Jerusalem before and after DST', async () => {
   const { getUpcomingThursdays, isThursday, getNearestThursday } = await import('../../src/utils/dateUtils');
   vi.setSystemTime(Date.parse('2026-10-08T16:59:00Z')); expect(getUpcomingThursdays(1)[0].dateStr).toBe('2026-10-08');
