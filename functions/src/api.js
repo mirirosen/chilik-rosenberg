@@ -26,8 +26,11 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     return true;
   }
   const identity = (req, needsAdmin) => authenticate(req, verifyIdToken, needsAdmin);
-  function endpoint(method, action, needsAdmin = false, needsPaymentSecrets = false) {
-    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+  // Payment-path functions (createPayment, paymentStatus, tranzilaWebhook) keep one warm
+  // instance while the runtime is enabled, so checkout/return/webhook avoid cold starts.
+  const warm = keepWarm => (enabled === true && keepWarm ? 1 : 0);
+  function endpoint(method, action, needsAdmin = false, needsPaymentSecrets = false, keepWarm = false) {
+    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(keepWarm), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
       if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
       if (!cors(req, res)) return;
       if (req.method !== method) return json(res, 405, { error: 'method-not-allowed' });
@@ -62,14 +65,14 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     if (req.body?.retryBookingId !== undefined) return json(res, 200, await paymentFlow.retry(user.uid, String(req.body.retryBookingId)));
     const result = await paymentFlow.create(user.uid, req.get('x-idempotency-key'), req.body);
     return json(res, result.reused ? 200 : 201, result);
-  }, false, true);
+  }, false, true, true);
   api.paymentStatus = endpoint('GET', async (req, res, user) => {
     const id = String(req.query.id || '');
     if (!/^BK-[a-f0-9]{20,24}$/.test(id)) return json(res, 400, { error: 'invalid-id' });
     const snap = await bookings.bookingRef(id).get();
     if (!snap.exists || !canReadStatus(snap.data(), user)) return json(res, 404, { error: 'not-found' });
     return json(res, 200, publicBooking(snap.data()));
-  });
+  }, false, false, true);
   api.updateBookingStatus = endpoint('POST', async (req, res, user) => {
     const { bookingId, status } = req.body || {};
     if (!/^BK-[a-f0-9]{24}$/.test(bookingId || '') || !['confirmed', 'cancelled'].includes(status)) return json(res, 400, { error: 'invalid-status-request' });
@@ -82,7 +85,7 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     await jobs.retry(db.doc(`integrationJobs/${jobId}`));
     return json(res, 200, { queued: true });
   }, true);
-  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: 0, maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(true), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
     if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
     if (!['POST', 'GET'].includes(req.method)) return json(res, 405, { error: 'method-not-allowed' });
     try {

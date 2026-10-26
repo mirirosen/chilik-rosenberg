@@ -16,6 +16,17 @@ test('default and malformed runtime gates block every booking/payment/admin hand
   for(const o of options){assert.equal(o.invoker,'private');assert.equal(o.minInstances,0);assert.equal(o.maxInstances,1);assert.equal(o.concurrency,1);assert.equal(o.cpu,1);assert.equal(o.memory,'256MiB');assert.equal(o.timeoutSeconds,60);}
  }
 });
+test('enabled runtime keeps exactly one warm instance on payment-path functions only',()=>{
+ const byName={};let pending=[];
+ const onRequest=(o,h)=>{pending.push(o);return h;};
+ const api=createBookingApi({onRequest,onSchedule:forbidden,enabled:true,schedulesEnabled:false});
+ // onRequest is called in declaration order; match each option object to its export.
+ Object.keys(api).forEach((name,i)=>{byName[name]=pending[i];});
+ for(const [name,o] of Object.entries(byName)){
+  assert.equal(o.minInstances,['createPayment','paymentStatus','tranzilaWebhook'].includes(name)?1:0,name);
+  assert.equal(o.region,'us-central1');assert.equal(o.memory,'256MiB');assert.equal(o.maxInstances,1);
+ }
+});
 test('enabled handler transport alone cannot register jobs when scheduler gate is absent or malformed',()=>{
  for(const schedulesEnabled of [undefined,false,'true',1]) {
   const api=createBookingApi({onRequest:(_o,h)=>h,onSchedule:forbidden,enabled:true,schedulesEnabled,paymentReconciler:{runDue:forbidden}});
