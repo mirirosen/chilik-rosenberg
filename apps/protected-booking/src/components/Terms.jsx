@@ -86,19 +86,18 @@ const Terms = () => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {/* AGE RESTRICTION - PROMINENT WARNING */}
-          <section lang="he" dir="rtl" className="bg-red-500/20 border-2 border-red-500/50 rounded-3xl p-8">
+          {/* FAMILIES WELCOME - AGE POLICY */}
+          <section className="bg-brand-gold/10 border-2 border-brand-gold/40 rounded-3xl p-8">
             <div className="text-center">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-serif text-red-400 font-bold mb-4">
-                תנאי לרכישה ולהשתתפות בסיור
+              <h2 className="text-2xl font-serif text-brand-gold font-bold mb-4" dir={dir}>
+                {t('terms.section4.title')}
               </h2>
-              <div className="bg-brand-dark border border-red-500/30 rounded-2xl p-6 space-y-3">
-                <p className="text-xl text-white font-bold text-right" dir="rtl">
-                  הרוכש והמשתתף חייבים להיות בגיל 18 שנים ומעלה 🔞
+              <div className="bg-brand-dark border border-brand-gold/30 rounded-2xl p-6 space-y-3" dir={dir} style={{ textAlign: 'start' }}>
+                <p className="text-xl text-white font-bold text-start" dir={dir}>
+                  {t('terms.section4.families')}
                 </p>
-                <p className="text-gray-300 text-right" dir="rtl">
-                  רכישת כרטיסים והשתתפות בסיור מאשרת שהנך בגיל 18 ומעלה.
+                <p className="text-gray-300 text-start" dir={dir}>
+                  {t('terms.section4.purchaser')}
                 </p>
               </div>
             </div>
