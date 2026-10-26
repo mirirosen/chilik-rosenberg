@@ -32,8 +32,8 @@ function createWaNotifier({ db, send, ownerTo = T.OWNER_DEFAULT, cutoffMs, custo
   async function toCustomer(snap, b, flag, render) {
     if (customerEnabled !== true) return false;          // flag OFF: never send
     const to = T.toIntl(b.phone);
-    if (!to || !(await customerSlot())) return false;
-    if (!(await claim(snap.ref, flag))) return false;
+    if (!to || !(await claim(snap.ref, flag))) return false;
+    if (!(await customerSlot())) { await snap.ref.update({ [`${flag}Error`]: 'rate-limited' }); return false; }
     return deliver(snap.ref, flag, to, render(snap.id, b));
   }
 
@@ -52,7 +52,8 @@ function createWaNotifier({ db, send, ownerTo = T.OWNER_DEFAULT, cutoffMs, custo
     if (a.paymentStatus !== 'paid' || p.paymentStatus === 'paid') return { skipped: 'not-paid-transition' };
     const b = await claim(after.ref, 'waOwnerPaidSentAt');
     const r = { owner: b ? await deliver(after.ref, 'waOwnerPaidSentAt', ownerTo, T.ownerPaidText(after.id, b)) : false };
-    r.customer = await toCustomer(after, a, 'waCustomerPaidSentAt', T.customerPaidText);
+    // Overbooked-at-payment keeps status 'payment_review': the seat is not confirmed.
+    r.customer = a.status === 'confirmed' ? await toCustomer(after, a, 'waCustomerPaidSentAt', T.customerPaidText) : false;
     return r;
   }
   return { onCreated, onUpdated };

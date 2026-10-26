@@ -60,3 +60,8 @@ test('sender: health must be WORKING with the expected number', async () => {
   assert.throws(() => T.createWahaSender({ origin: 'http://x', apiKey: 'k' }), /not-configured/);
 });
 test('toIntl', () => { assert.equal(T.toIntl('0501234567'), '972501234567'); assert.equal(T.toIntl('abc'), ''); });
+test('overbooked paid (payment_review): owner warned, customer not told confirmed', async () => {
+  const db = fakeDb({ 'BK-1': { ...b, paymentStatus: 'paid', status: 'payment_review' } }); const { n, sent } = mk(db, { customerEnabled: true });
+  await n.onUpdated({ data: () => b }, db.snap('BK-1'));
+  assert.equal(sent.length, 1); assert.ok(sent[0].text.includes('דורשת בדיקה'));
+});

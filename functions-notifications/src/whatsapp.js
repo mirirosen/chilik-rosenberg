@@ -47,7 +47,8 @@ function ownerNewBookingText(id, b) {
 }
 function ownerPaidText(id, b) {
   return ['✅ התקבל תשלום', `שם: ${clean(b.name)}`, `תאריך: ${ddmm(b.tourDate)}`, `משתתפים: ${b.participants ?? ''}`,
-    b.totalPrice != null ? `סכום: ${b.totalPrice} ₪` : null, `מספר הזמנה: ${id}`].filter(Boolean).join('\n');
+    b.totalPrice != null ? `סכום: ${b.totalPrice} ₪` : null, b.status === 'confirmed' ? null : '⚠️ ההזמנה דורשת בדיקה (ייתכן שהסיור מלא)',
+    `מספר הזמנה: ${id}`].filter(Boolean).join('\n');
 }
 function customerReceivedText(id, b) {
   return [`שלום ${clean(b.name)},`, `קיבלנו את ההרשמה שלך לסיור הקולינרי בבני ברק בתאריך ${ddmm(b.tourDate)} (${b.participants} משתתפים).`,
