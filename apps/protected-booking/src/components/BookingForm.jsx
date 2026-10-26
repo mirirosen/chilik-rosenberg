@@ -6,6 +6,7 @@ import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateStr
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
 import { normalizeIsraeliMobile } from '../utils/phone';
+import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
@@ -90,6 +91,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         if (cancelled) return;
         setStatusData(state);
         const view = paymentReturnView(state);
+        // GA4 purchase only for a server-confirmed paid booking (no-op without consent/ID).
+        if (view === 'paid' && !IS_PREPROD) trackPurchase({ ...state, bookingId: state.bookingId || paymentBookingId });
         // Tranzila sent the customer to the failure URL and nothing was captured:
         // the booking is still open, so offer an immediate new payment attempt.
         if (view === 'pending' && paymentResult === 'failed' && state.paymentStatus === 'awaiting_payment') { setPaymentReturnState('declined'); return; }
@@ -226,6 +229,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       setPaymentRedirect(true);
       submittedRequest.current = JSON.stringify([formData, i18n.language]);
       const result = await bookingApi.createCreditPayment(booking, key);
+      trackBeginCheckout({ participants: booking.participants, pricePerPerson: PRICE_PER_PERSON, totalPrice: booking.participants * PRICE_PER_PERSON });
       onPaymentRedirect(result.paymentUrl);
 
     } catch (error) {
