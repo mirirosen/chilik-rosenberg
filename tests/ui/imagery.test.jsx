@@ -50,4 +50,13 @@ describe('locally hosted illustrative imagery', () => {
       expect(Number(img.getAttribute('height'))).toBeGreaterThan(0);
     }
   });
+  it('requests the tour photo at the width it is drawn in the taller card, not the card width', () => {
+    const { container } = render(<RatingBar />);
+    const sizes = container.querySelector('.target-tour-pick:not(.target-tour-pick--portrait) img').getAttribute('sizes');
+    const [mobile, tablet, desktop] = sizes.split(',').map(part => parseFloat(part.trim().split(' ').pop()));
+    // 16:9 cover in a 4/5 card: 545px tall on desktop → ≈969px wide; 6/5 mobile ≈ 1.48 × width; 2-up 4/5 tablet ≈ 1.11 × vw.
+    expect(desktop).toBeGreaterThanOrEqual(969);
+    expect(mobile).toBeGreaterThanOrEqual(148);
+    expect(tablet).toBeGreaterThanOrEqual(111);
+  });
 });

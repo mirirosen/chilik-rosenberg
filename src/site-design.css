@@ -110,7 +110,7 @@ html[dir=ltr] .target-site .target-tour-pick:focus-visible .target-tour-pick__ar
 @media (prefers-reduced-motion: reduce) {
   .target-site .target-tour-pick, .target-site .target-tour-pick__visual img, .target-site .target-tour-pick__arrow, .target-tour-pick__arrow svg { transition: none; }
   .target-site .target-tour-pick:hover img { transform: none; }
-  .target-site .target-tour-pick .target-tour-pick__arrow svg { translate: none; }
+  .target-site .target-tour-pick .target-tour-pick__arrow svg, .target-site .target-tour-pick:is(:hover, :focus-visible) .target-tour-pick__arrow svg, html[dir=ltr] .target-site .target-tour-pick:is(:hover, :focus-visible) .target-tour-pick__arrow svg { translate: none; }
 }
 .target-site .target-section-heading>p:not(.target-eyebrow) { color: var(--target-muted); font-size: 17px; }
 .target-site :is(.target-inclusions,.target-lectures) { background: var(--site-charcoal); }
