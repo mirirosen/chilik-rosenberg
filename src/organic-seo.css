@@ -7,4 +7,5 @@
 .organic-overview a{color:#dfc47c;text-decoration:underline;text-underline-offset:.2rem}.organic-overview a:focus-visible{outline:2px solid #dfc47c;outline-offset:4px}
 .organic-overview li{margin:.5rem 0}.organic-overview ul{padding-inline-start:1.5rem}
 .target-site .organic-overview{color:#3c342c}.target-site .organic-overview h2,.target-site .organic-overview h3,.target-site .organic-overview dt,.target-site .organic-overview a{color:#6a4b12}.target-site .organic-overview dl>div{border-color:#6a4b1233}
+main.organic-overview{max-width:52rem;font-size:1.0625rem}.organic-overview p{max-width:48rem}.target-site .organic-overview ul{padding-inline-start:0}
 @media(max-width:600px){.organic-overview dl{grid-template-columns:1fr}.organic-overview{margin:2rem auto}}
