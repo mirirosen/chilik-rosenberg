@@ -59,4 +59,13 @@ describe('locally hosted illustrative imagery', () => {
     expect(mobile).toBeGreaterThanOrEqual(148);
     expect(tablet).toBeGreaterThanOrEqual(111);
   });
+  it('enlarges the lecturer cutout only in the mobile card', () => {
+    const css = readFileSync('src/site-design.css', 'utf8');
+    const rule = '.target-site .target-tour-pick--portrait .target-tour-pick__visual img { height: 132%; bottom: -25%; }';
+    const mobile = css.slice(css.indexOf('@media(max-width:600px)'));
+    // 376×513 cutout, alpha 50–422px: 132% of the 6/5 card puts the head ~6% down and the figure over ~94% of its height.
+    expect(mobile.slice(0, mobile.indexOf('\n}'))).toContain(rule);
+    expect(css.indexOf(rule)).toBe(css.lastIndexOf(rule));
+    expect(css).toContain('.target-site .target-tour-pick--portrait .target-tour-pick__visual img { inset: auto 0 -14.5%; height: 100%;');
+  });
 });

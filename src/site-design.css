@@ -300,6 +300,8 @@ html[dir=ltr] .target-site .target-tour-pick:focus-visible .target-tour-pick__ar
 @media(max-width:600px) {
   .target-site .target-tour-picks { grid-template-columns: 1fr; max-width: 520px; gap: 20px; }
   .target-site .target-tour-pick { aspect-ratio: 6 / 5; }
+  /* The wide 6/5 card left the cutout at ~72% of its height; scale it so the head sits ~6% from the top and the waist cut stays below the edge. */
+  .target-site .target-tour-pick--portrait .target-tour-pick__visual img { height: 132%; bottom: -25%; }
   .target-site .target-tour-pick__caption h2 { font-size: 30px; }
   .target-site .target-tour-pick .target-tour-pick__image-note { top: 12px; inset-inline-start: 12px; max-width: calc(100% - 24px); font-size: 11.5px; }
 }
