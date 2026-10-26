@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
-import { createBooking, createCreditPayment, getPaymentStatus, makeIdempotencyKey } from '../utils/paymentService';
+import { createCreditPayment, getPaymentStatus, makeIdempotencyKey } from '../utils/paymentService';
+import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
 import { DemoBookingNotice, DemoBookingControls, DemoCheckout } from './DemoBookingControls';
@@ -22,25 +23,29 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
   const paymentResult = urlParams.get('payment') || (statusBookingId ? 'status' : null);
   const paymentBookingId = statusBookingId || urlParams.get('id');
   const demoCheckoutId = IS_PREPROD ? urlParams.get('demoCheckout') : null;
-  const bookingApi = IS_PREPROD ? demoBookingApi : { createBooking, createCreditPayment, getPaymentStatus, makeIdempotencyKey };
+  const bookingApi = IS_PREPROD ? demoBookingApi : { createCreditPayment, getPaymentStatus, makeIdempotencyKey };
 
   // Determine if fields should be locked
   const isDateLocked = !!prefilledDate;
   const isParticipantsLocked = !!prefilledParticipants;
 
-  const [formData, setFormData] = useState(() => ({
-    name: '',
-    phone: '',
-    email: '',
-    notes: '',
-    howDidYouHear: '',
-    paymentMethod: '',
-    ...(!paymentResult && !demoCheckoutId ? initialDraft : null),
-    participants: prefilledParticipants ? Number(prefilledParticipants) : 1,
-    tourDate: prefilledDate || '',
-    // A changed selection needs fresh consent; never restore it from a draft.
-    agreeToTerms: false
-  }));
+  const [formData, setFormData] = useState(() => {
+    const data = {
+      name: '',
+      phone: '',
+      email: '',
+      notes: '',
+      howDidYouHear: '',
+      paymentMethod: DEFAULT_PAYMENT_METHOD,
+      ...(!paymentResult && !demoCheckoutId ? initialDraft : null),
+      participants: prefilledParticipants ? Number(prefilledParticipants) : 1,
+      tourDate: prefilledDate || '',
+      // A changed selection needs fresh consent; never restore it from a draft.
+      agreeToTerms: false
+    };
+    // A draft saved before bank transfer / manual Bit were removed must not resend them.
+    return PAYMENT_METHODS.includes(data.paymentMethod) ? data : { ...data, paymentMethod: DEFAULT_PAYMENT_METHOD };
+  });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -173,7 +178,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       newErrors.participants = t('booking.validation.participantsRange');
     }
 
-    if (!formData.paymentMethod) {
+    if (!PAYMENT_METHODS.includes(formData.paymentMethod)) {
       newErrors.paymentMethod = t('booking.validation.paymentRequired');
     }
 
@@ -211,16 +216,11 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
       const key = await bookingApi.makeIdempotencyKey(booking);
       // Preserve the key on network timeouts: the server may already have committed.
-      if (booking.paymentMethod === 'credit') {
-        setPaymentRedirect(true);
-        submittedRequest.current = JSON.stringify([formData, i18n.language]);
-        const result = await bookingApi.createCreditPayment(booking, key);
-        onPaymentRedirect(result.paymentUrl);
-        return;
-      }
+      // Card (and Bit, when enabled) both continue to the secure Tranzila checkout.
+      setPaymentRedirect(true);
       submittedRequest.current = JSON.stringify([formData, i18n.language]);
-      const result = await bookingApi.createBooking(booking, key);
-      onSuccess?.({ ...booking, ...result });
+      const result = await bookingApi.createCreditPayment(booking, key);
+      onPaymentRedirect(result.paymentUrl);
 
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -595,42 +595,20 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             {t('booking.form.paymentMethod')} <span className="text-red-400">*</span>
           </div>
           <div role="radiogroup" aria-labelledby="payment-method-label" aria-invalid={!!errors.paymentMethod} aria-describedby={errors.paymentMethod ? 'paymentMethod-error' : undefined} className="booking-payment-options space-y-3">
-            <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">{t('booking.paymentMethods.bit')}</span>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="bit"
-                checked={formData.paymentMethod === 'bit'}
-                onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                className="w-5 h-5 accent-brand-gold"
-                disabled={isSubmitting}
-              />
-            </label>
-            <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">{t('booking.paymentMethods.credit')}</span>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="credit"
-                checked={formData.paymentMethod === 'credit'}
-                onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                className="w-5 h-5 accent-brand-gold"
-                disabled={isSubmitting}
-              />
-            </label>
-            <label className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
-              <span className="text-white">{t('booking.paymentMethods.bankTransfer')}</span>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="bank_transfer"
-                checked={formData.paymentMethod === 'bank_transfer'}
-                onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
-                className="w-5 h-5 accent-brand-gold"
-                disabled={isSubmitting}
-              />
-            </label>
+            {PAYMENT_METHODS.map(method => (
+              <label key={method} className="flex items-center justify-end gap-3 cursor-pointer bg-brand-dark border border-white/20 rounded-2xl p-4 hover:border-brand-gold transition-all">
+                <span className="text-white">{t(`booking.paymentMethods.${method}`)}</span>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={method}
+                  checked={formData.paymentMethod === method}
+                  onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
+                  className="w-5 h-5 accent-brand-gold"
+                  disabled={isSubmitting}
+                />
+              </label>
+            ))}
           </div>
           {errors.paymentMethod && <p id="paymentMethod-error" className="text-red-400 text-sm mt-1 text-right">{errors.paymentMethod}</p>}
           <p id="no-hold-notice" className="booking-no-hold-notice mt-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm font-bold text-amber-200 text-right" role="note" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>
@@ -698,7 +676,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           disabled={isSubmitting}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {paymentRedirect ? t('booking.payment.redirectingToSecure') : isSubmitting ? t('booking.form.submitting') : t('booking.form.submit')}
+          {paymentRedirect ? t('booking.payment.redirectingToSecure') : isSubmitting ? t('booking.form.submitting') : t(formData.paymentMethod === 'bit' ? 'booking.form.submitBit' : 'booking.form.submit')}
         </button>
 
         <button

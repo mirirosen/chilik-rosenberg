@@ -16,7 +16,8 @@ import BookingForm from '../../src/components/BookingForm';
 import BookingSection from '../../src/components/BookingSection';
 import BookingConfirmation from '../../src/components/BookingConfirmation';
 const ID = 'BK-' + 'a'.repeat(24);
-function fillForm(container, method = 'bit') {
+const CHECKOUT = { bookingId: ID, paymentUrl: 'https://directng.tranzila.com/fixture/' };
+function fillForm(container, method = 'credit') {
   for (const [id, value] of Object.entries({ name: 'Test Customer', phone: '0501234567', email: 'test@example.com', howDidYouHear: 'friend' })) fireEvent.change(container.querySelector(`#${id}`), { target: { value } });
   fireEvent.click(container.querySelector(`input[value="${method}"]`)); fireEvent.click(container.querySelector('input[type="checkbox"]'));
 }
@@ -49,43 +50,44 @@ describe('offline booking components', () => {
   });
   it('reports unknown availability while allowing an existing request to reach its server key', async () => {
     mocks.cloud = { ...mocks.cloud, availabilityStatus: 'error' };
-    const success = vi.fn(); mocks.createBooking.mockResolvedValue({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250 });
-    const { container } = render(<BookingForm onSuccess={success} />);
+    const redirect = vi.fn(); mocks.createCreditPayment.mockResolvedValue(CHECKOUT);
+    const { container } = render(<BookingForm onPaymentRedirect={redirect} />);
     expect(screen.getByRole('status').textContent).toBe('common.availabilityUnavailable');
     fillForm(container); fireEvent.submit(container.querySelector('form'));
-    await waitFor(() => expect(success).toHaveBeenCalled());
+    await waitFor(() => expect(redirect).toHaveBeenCalledWith(CHECKOUT.paymentUrl));
   });
 
   it('homepage selects live availability and passes exact date/count to booking form', async () => {
-    const success = vi.fn(); mocks.createBooking.mockResolvedValue({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 250, pricePerPerson: 250 });
-    function Journey() { const [form, setForm] = useState(false); return form ? <BookingForm onSuccess={success} /> : <BookingSection onContinue={(date, participants) => { window.history.replaceState({}, '', `/booking?date=${date}&participants=${participants}`); setForm(true); }} />; }
+    const redirect = vi.fn(); mocks.createCreditPayment.mockResolvedValue(CHECKOUT);
+    function Journey() { const [form, setForm] = useState(false); return form ? <BookingForm onPaymentRedirect={redirect} /> : <BookingSection onContinue={(date, participants) => { window.history.replaceState({}, '', `/booking?date=${date}&participants=${participants}`); setForm(true); }} />; }
     const { container } = render(<Journey />);
     fireEvent.click(screen.getByRole('button', { name: /^bookingSection\.dateCardLabel/ }));
     fireEvent.click(screen.getByRole('button', { name: /bookingDesign\.continue/ }));
     await waitFor(() => expect(container.querySelector('#name')).not.toBeNull());
     fillForm(container); fireEvent.submit(container.querySelector('form'));
-    await waitFor(() => expect(success).toHaveBeenCalled());
-    expect(mocks.createBooking.mock.calls[0][0]).toMatchObject({ tourDate: '2026-10-08', participants: 1, paymentMethod: 'bit', agreeToTerms: true, adultConfirmed: true });
-    expect(mocks.createBooking.mock.calls[0][0]).not.toHaveProperty('dateOfBirth');
+    await waitFor(() => expect(redirect).toHaveBeenCalled());
+    expect(mocks.createCreditPayment.mock.calls[0][0]).toMatchObject({ tourDate: '2026-10-08', participants: 1, paymentMethod: 'credit', agreeToTerms: true, adultConfirmed: true });
+    expect(mocks.createCreditPayment.mock.calls[0][0]).not.toHaveProperty('dateOfBirth');
+    expect(mocks.createBooking).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
   it('ambiguous last-seat submission can retry same key despite own reservation filling date', async () => {
-    const success = vi.fn(); mocks.createBooking.mockRejectedValueOnce(new Error('network-error')).mockResolvedValueOnce({ bookingId: ID, status: 'pending', totalPrice: 500 });
-    const rendered = render(<BookingForm onSuccess={success} />); fillForm(rendered.container);
+    const redirect = vi.fn(); mocks.createCreditPayment.mockRejectedValueOnce(new Error('network-error')).mockResolvedValueOnce(CHECKOUT);
+    const rendered = render(<BookingForm onPaymentRedirect={redirect} />); fillForm(rendered.container);
     fireEvent.submit(rendered.container.querySelector('form'));
     await screen.findByRole('alert');
     mocks.cloud = { ...mocks.cloud, tourDates: { '2026-10-08': { currentRegistrations: 2 } }, soldOut: ['2026-10-08'] };
-    rendered.rerender(<BookingForm onSuccess={success} />);
+    rendered.rerender(<BookingForm onPaymentRedirect={redirect} />);
     fireEvent.submit(rendered.container.querySelector('form'));
-    await waitFor(() => expect(success).toHaveBeenCalled());
-    expect(mocks.createBooking).toHaveBeenCalledTimes(2);
-    expect(mocks.createBooking.mock.calls[0][1]).toBe(mocks.createBooking.mock.calls[1][1]);
+    await waitFor(() => expect(redirect).toHaveBeenCalled());
+    expect(mocks.createCreditPayment).toHaveBeenCalledTimes(2);
+    expect(mocks.createCreditPayment.mock.calls[0][1]).toBe(mocks.createCreditPayment.mock.calls[1][1]);
   });
-  it('unconfigured Bit booking shows booking outage rather than advising Bit again', async () => {
+  it('unconfigured booking API shows the booking outage and starts no checkout', async () => {
     mocks.makeIdempotencyKey.mockRejectedValueOnce(new Error('booking-api-not-configured'));
     const { container } = render(<BookingForm />); fillForm(container); fireEvent.submit(container.querySelector('form'));
     expect((await screen.findByRole('alert')).textContent).toBe('booking.payment.bookingUnavailable');
-    expect(mocks.createBooking).not.toHaveBeenCalled();
+    expect(mocks.createCreditPayment).not.toHaveBeenCalled(); expect(mocks.createBooking).not.toHaveBeenCalled();
   });
   it.each([
     [{ paymentStatus: 'paid', status: 'confirmed' }, 'paidTitle'],
@@ -179,15 +181,15 @@ describe('offline booking components', () => {
     // The single total sits in the locked summary, not next to the payment methods.
     expect(container.querySelector('[role="radiogroup"]').parentElement.textContent).not.toContain('₪');
   });
-  it('labels the submit button "continue to payment" and keeps the submitting state while in flight', async () => {
-    let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
-    const { container } = render(<BookingForm onSuccess={() => {}} />);
+  it('labels the submit button "continue to secure card payment" and keeps the redirecting state while in flight', async () => {
+    let finish; mocks.createCreditPayment.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const { container } = render(<BookingForm onPaymentRedirect={() => {}} />);
     const submit = container.querySelector('button[type="submit"]');
     expect(submit.textContent).toBe('booking.form.submit');
     fillForm(container); fireEvent.submit(container.querySelector('form'));
-    await waitFor(() => expect(submit.textContent).toBe('booking.form.submitting'));
+    await waitFor(() => expect(submit.textContent).toBe('booking.payment.redirectingToSecure'));
     expect(submit.disabled).toBe(true);
-    await act(async () => finish({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250 }));
+    await act(async () => finish(CHECKOUT));
   });
   it('paid and unpaid confirmations show the booking reference only once, in the reference card', () => {
     for (const data of [{ status: 'confirmed', paymentStatus: 'paid', paymentMethod: 'credit' }, { status: 'pending', paymentStatus: 'pending', paymentMethod: 'bit' }]) {
@@ -213,11 +215,11 @@ describe('offline booking components', () => {
     }
   });
   it('rapid repeated submit starts one request while the first remains in flight', async () => {
-    let finish; mocks.createBooking.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
-    const { container } = render(<BookingForm />); fillForm(container);
+    let finish; mocks.createCreditPayment.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const { container } = render(<BookingForm onPaymentRedirect={() => {}} />); fillForm(container);
     fireEvent.submit(container.querySelector('form')); fireEvent.submit(container.querySelector('form'));
-    await waitFor(() => expect(mocks.createBooking).toHaveBeenCalledTimes(1));
-    await act(async () => finish({ bookingId: ID, status: 'pending' }));
+    await waitFor(() => expect(mocks.createCreditPayment).toHaveBeenCalledTimes(1));
+    await act(async () => finish(CHECKOUT));
   });
 
 });

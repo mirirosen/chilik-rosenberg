@@ -28,17 +28,6 @@ const Terms = () => {
 
   const getPaymentInstructions = () => {
     switch (selectedPaymentMethod) {
-      case 'bit':
-        return {
-          title: t('terms.paymentModal.bit.title'),
-          icon: '💳',
-          instructions: [
-            t('terms.paymentModal.bit.line1'),
-            t('terms.paymentModal.bit.phone'),
-            t('terms.paymentModal.bit.name'),
-            t('terms.paymentModal.bit.line4')
-          ]
-        };
       case 'credit':
         return {
           title: t('terms.paymentModal.credit.title'),
@@ -48,20 +37,6 @@ const Terms = () => {
             t('terms.paymentModal.credit.phone'),
             t('terms.paymentModal.credit.whatsapp'),
             t('terms.paymentModal.credit.line4')
-          ]
-        };
-      case 'bank':
-        return {
-          title: t('terms.paymentModal.bank.title'),
-          icon: '🏦',
-          instructions: [
-            t('terms.paymentModal.bank.details'),
-            t('terms.paymentModal.bank.bankName'),
-            t('terms.paymentModal.bank.accountNumber'),
-            t('terms.paymentModal.bank.branchNumber'),
-            t('terms.paymentModal.bank.beneficiary'),
-            '',
-            t('terms.paymentModal.bank.confirmation')
           ]
         };
       default:
@@ -159,26 +134,10 @@ const Terms = () => {
               <p className="text-sm font-bold text-white mb-3 text-start" dir={dir}>{t('terms.section2.selectMethod')}</p>
 
               <button
-                onClick={() => handlePaymentClick('bit')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
-              >
-                <span className="text-lg font-bold">💳 {t('terms.section2.bit')}</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
-              </button>
-
-              <button
                 onClick={() => handlePaymentClick('credit')}
                 className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
               >
                 <span className="text-lg font-bold">💳 {t('terms.section2.credit')}</span>
-                <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
-              </button>
-
-              <button
-                onClick={() => handlePaymentClick('bank')}
-                className="w-full bg-brand-dark border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 rounded-2xl p-4 text-white transition-all text-start flex  items-center justify-between group"
-              >
-                <span className="text-lg font-bold">🏦 {t('terms.section2.bank')}</span>
                 <span className="text-sm text-gray-400 group-hover:text-brand-gold">← {t('terms.section2.clickForDetails')}</span>
               </button>
             </div>

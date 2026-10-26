@@ -50,6 +50,8 @@ function loadPaymentConfiguration({ env = {}, readSecret = () => '' } = {}) {
     orderReportField: env.TRANZILA_ORDER_REPORT_FIELD || '', checkoutTranmode: env.TRANZILA_CHECKOUT_TRANMODE || '',
     orderLookupVerified: flag(env.TRANZILA_ORDER_LOOKUP_VERIFIED), orderLookupMode: env.TRANZILA_ORDER_LOOKUP_MODE || 'exact-filter', orderFilterParameter: env.TRANZILA_ORDER_FILTER_PARAMETER || '',
     capturePairs: [], appKey: '', secret: '',
+    // Bit via Tranzila: OFF unless explicitly enabled; its issues never block card payments.
+    bitEnabled: flag(env.TRANZILA_BIT_ENABLED), bitCapturePairs: [],
   };
   const issues = [];
   const encodedPairs = env.TRANZILA_CAPTURE_PAIRS_JSON || '';
@@ -59,6 +61,10 @@ function loadPaymentConfiguration({ env = {}, readSecret = () => '' } = {}) {
     if (!Array.isArray(pairs) || pairs.length > 20) throw new Error();
     config.capturePairs = pairs;
   } catch { issues.push('capture-pairs-json-missing-or-invalid'); }
+  try {
+    const encodedBit = env.TRANZILA_BIT_CAPTURE_PAIRS_JSON || '';
+    if (encodedBit && encodedBit.length <= 8192) { const pairs = JSON.parse(encodedBit); if (Array.isArray(pairs) && pairs.length <= 20) config.bitCapturePairs = pairs; }
+  } catch { /* invalid Bit allowlist: Bit stays unavailable (bitConfigurationIssues) */ }
   const urls = { siteOrigin: env.PAYMENT_SITE_ORIGIN || '', apiBase: env.PAYMENT_API_BASE || '', projectId: env.GCLOUD_PROJECT || env.GCP_PROJECT || '' };
   issues.push(...returnUrlIssues(urls));
   // Disabled/unverified configuration does not even read bound secret values.

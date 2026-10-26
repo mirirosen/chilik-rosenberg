@@ -13,7 +13,7 @@ function paymentConfigurationIssues(config = {}) {
   for (const key of ['appKey', 'secret']) if (typeof config[key] !== 'string' || !config[key] || /[\r\n]/.test(config[key])) issues.push(`${key}-missing-or-invalid`);
   let url; try { url = new URL(config.checkoutUrl); } catch { /* reported below */ }
   if (!url || url.protocol !== 'https:' || url.hostname !== 'directng.tranzila.com' || (url.port && url.port !== '443') || url.username || url.password || url.search || url.hash || !url.pathname.startsWith(`/${config.terminal}/`)) issues.push('checkout-url-unverified');
-  const reserved = new Set(['sum', 'currency', 'thtk', 'tranmode', 'supplier', 'cred_type', 'lang', 'success_url_address', 'fail_url_address', 'notify_url_address', 'TranzilaPW', '__proto__', 'constructor', 'prototype', 'index', 'authorization_number', 'child_terminal', 'amount', 'txn_type', 'transtatus', 'txn_payment_method', 'processor_response_code', 'cancelfdid', 'cancelfdnumber']);
+  const reserved = new Set(['sum', 'currency', 'thtk', 'tranmode', 'supplier', 'cred_type', 'lang', 'success_url_address', 'fail_url_address', 'notify_url_address', 'bit_pay', 'TranzilaPW', '__proto__', 'constructor', 'prototype', 'index', 'authorization_number', 'child_terminal', 'amount', 'txn_type', 'transtatus', 'txn_payment_method', 'processor_response_code', 'cancelfdid', 'cancelfdnumber']);
   const validOrderParameter = typeof config.orderParameter === 'string' && /^[a-zA-Z][a-zA-Z0-9_]{0,40}$/.test(config.orderParameter) && !reserved.has(config.orderParameter);
   if (!validOrderParameter) issues.push('order-parameter-invalid');
   // Support the supplier-confirmed same-name echo only when explicitly chosen.
@@ -23,4 +23,16 @@ function paymentConfigurationIssues(config = {}) {
   if (!Array.isArray(config.capturePairs) || !config.capturePairs.length || !config.capturePairs.every(p => p && typeof p === 'object' && typeof p.txnType === 'string' && p.txnType && typeof p.tranmode === 'string' && p.tranmode && Number.isInteger(p.transtatus)) || !config.capturePairs.some(p => p.tranmode === config.checkoutTranmode)) issues.push('capture-semantics-unverified');
   return issues;
 }
-module.exports = { paymentConfigurationIssues };
+// Explicit allowlist of verified Bit capture reports (txn_payment_method plus the
+// same type/mode/status triple as capturePairs). 'CC' stays card-only.
+function validBitCapturePairs(pairs) {
+  return Array.isArray(pairs) && pairs.length > 0 && pairs.length <= 20 && pairs.every(p => p && typeof p === 'object' && typeof p.txnPaymentMethod === 'string' && /^[A-Za-z0-9_-]{1,32}$/.test(p.txnPaymentMethod) && p.txnPaymentMethod !== 'CC' && typeof p.txnType === 'string' && p.txnType && typeof p.tranmode === 'string' && p.tranmode && Number.isInteger(p.transtatus));
+}
+// Bit is offered only with its own flag and verified allowlist; never affects card readiness.
+function bitConfigurationIssues(config = {}) {
+  const issues = [];
+  if (config?.bitEnabled !== true) issues.push('bit-disabled');
+  if (!validBitCapturePairs(config?.bitCapturePairs)) issues.push('bit-capture-semantics-unverified');
+  return issues;
+}
+module.exports = { paymentConfigurationIssues, bitConfigurationIssues, validBitCapturePairs };

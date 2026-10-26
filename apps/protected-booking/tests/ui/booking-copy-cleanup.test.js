@@ -6,9 +6,9 @@ const en = JSON.parse(readFileSync('src/locales/en.json', 'utf8'));
 const form = readFileSync('src/components/BookingForm.jsx', 'utf8');
 const confirmation = readFileSync('src/components/BookingConfirmation.jsx', 'utf8');
 describe('booking copy cleanup', () => {
-  it('labels the submit button "continue to payment" in Hebrew and English', () => {
-    expect(he.booking.form.submit).toBe('המשך לתשלום');
-    expect(en.booking.form.submit).toBe('Continue to payment');
+  it('labels the submit button "continue to secure card payment" in Hebrew and English (task 08)', () => {
+    expect(he.booking.form.submit).toBe('המשך לתשלום מאובטח בכרטיס');
+    expect(en.booking.form.submit).toBe('Continue to secure card payment');
     expect(he.booking.form.submitting).toBe('שולח הזמנה...');
   });
   it('renders the total price exactly once on the form', () => {

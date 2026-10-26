@@ -34,13 +34,13 @@ import Terms from '../../src/components/Terms';
 const ID = 'BK-' + 'a'.repeat(24);
 function fill(container, values) {
   for (const [id, value] of Object.entries(values)) fireEvent.change(container.querySelector(`#${id}`), { target: { value } });
-  fireEvent.click(container.querySelector('input[value="bit"]'));
+  fireEvent.click(container.querySelector('input[value="credit"]'));
 }
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-02T12:00:00Z'));
   mocks.language = 'en';
   mocks.api.makeIdempotencyKey.mockResolvedValue('a'.repeat(32));
-  mocks.api.createBooking.mockResolvedValue({ bookingId: ID, status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250 });
+  mocks.api.createCreditPayment.mockResolvedValue({ bookingId: ID, paymentUrl: 'https://directng.tranzila.com/fixture/' });
   window.history.replaceState({}, '', '/booking?date=2026-10-08&participants=2');
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -68,21 +68,21 @@ describe('combined 18+ and terms consent', () => {
     fireEvent.submit(container.querySelector('form'));
     expect(await screen.findByText('booking.validation.termsRequired')).toBeTruthy();
     expect(container.querySelector('#agreeToTerms').getAttribute('aria-invalid')).toBe('true');
-    expect(mocks.api.createBooking).not.toHaveBeenCalled();
+    expect(mocks.api.createCreditPayment).not.toHaveBeenCalled();
   });
 
   it('sends adultConfirmed:true, never a birth date (even from an old draft), and accepts a missing email', async () => {
-    const success = vi.fn();
-    const { container } = render(<BookingForm onSuccess={success} initialDraft={{ dateOfBirth: '1990-01-01' }} />);
+    const redirect = vi.fn();
+    const { container } = render(<BookingForm onPaymentRedirect={redirect} initialDraft={{ dateOfBirth: '1990-01-01' }} />);
     expect(screen.getAllByText('booking.form.optional')).toHaveLength(2); // email + how did you hear
     fill(container, { name: 'Test Customer', phone: '0501234567' });
     fireEvent.click(container.querySelector('#agreeToTerms'));
     fireEvent.submit(container.querySelector('form'));
-    await waitFor(() => expect(success).toHaveBeenCalled());
-    const sent = mocks.api.createBooking.mock.calls[0][0];
+    await waitFor(() => expect(redirect).toHaveBeenCalled());
+    const sent = mocks.api.createCreditPayment.mock.calls[0][0];
     expect(sent).toMatchObject({ adultConfirmed: true, agreeToTerms: true, email: '', howDidYouHear: '' });
     expect(sent).not.toHaveProperty('dateOfBirth');
-    // The live createBooking accepts exactly this shape.
+    // The live createPayment (validateBooking) accepts exactly this shape.
     expect(validateBooking({ ...sent, tourDate: '2026-10-08' }, new Date('2026-10-02T12:00:00Z'))).toMatchObject({ adultConfirmed: true, email: '' });
     expect(() => validateBooking({ ...sent, adultConfirmed: false, tourDate: '2026-10-08' }, new Date('2026-10-02T12:00:00Z'))).toThrow('adult-required');
   });
@@ -93,7 +93,7 @@ describe('combined 18+ and terms consent', () => {
     fireEvent.click(container.querySelector('#agreeToTerms'));
     fireEvent.submit(container.querySelector('form'));
     expect(await screen.findByText('booking.validation.emailInvalid')).toBeTruthy();
-    expect(mocks.api.createBooking).not.toHaveBeenCalled();
+    expect(mocks.api.createCreditPayment).not.toHaveBeenCalled();
   });
 
   it('keeps the no-seat notice and shows the 3-step progress on the details step', () => {

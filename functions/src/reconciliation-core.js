@@ -64,7 +64,8 @@ function buildReconciliationPlan({ bookings, tours, dispositions = [], snapshot,
     if (b.schemaVersion === 2) {
       if (dispositionMap.has(id)) add('v2-disposition-not-allowed', { id, date });
       if (!states.has(b.status) || !payments.has(b.paymentStatus) || !['credit', 'bit', 'bank_transfer'].includes(b.paymentMethod) || typeof b.capacityReserved !== 'boolean' || !Number.isSafeInteger(b.revision) || b.revision < 1) { add('invalid-v2-lifecycle', { id, date }); continue; }
-      const reserved = b.capacityReserved, credit = b.paymentMethod === 'credit';
+      // Tranzila Bit bookings follow the card lifecycle (paymentProvider is not part of the fingerprint).
+      const reserved = b.capacityReserved, credit = b.paymentMethod === 'credit' || (b.paymentMethod === 'bit' && b.paymentProvider === 'tranzila');
       let valid = false;
       // Since no-hold-before-payment, unpaid requests are unreserved; older ones may still hold seats.
       if (b.status === 'pending') { valid = !credit && b.paymentStatus === 'pending'; row.classification = reserved ? 'held' : 'unreserved'; }

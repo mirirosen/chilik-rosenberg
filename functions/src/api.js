@@ -47,7 +47,8 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
       ...(b.additionalPaymentReview === true ? { additionalPaymentReview: true } : {}) };
   }
   async function create(req, res, user) {
-    if (req.body?.paymentMethod === 'credit') {
+    // Bit is routed through the Tranzila checkout, which rejects it while the flag is off.
+    if (['credit', 'bit'].includes(req.body?.paymentMethod)) {
       const result = await paymentFlow.create(user.uid, req.get('x-idempotency-key'), req.body);
       return json(res, result.reused ? 200 : 201, result);
     }

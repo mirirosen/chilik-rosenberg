@@ -14,7 +14,7 @@ const bookingModule = require('../src/booking-service');
 const NOW = Date.parse('2026-10-01T10:00:00Z');
 const ID = `BK-${'a'.repeat(24)}`;
 const KEY = 'b'.repeat(32);
-const INPUT = { name: 'Test Customer', phone: '0501234567', email: 'customer@example.com', participants: 2, tourDate: '2026-10-08', paymentMethod: 'bit', dateOfBirth: '1990-01-01', agreeToTerms: true };
+const INPUT = { name: 'Test Customer', phone: '0501234567', email: 'customer@example.com', participants: 2, tourDate: '2026-10-08', paymentMethod: 'bank_transfer', dateOfBirth: '1990-01-01', agreeToTerms: true };
 function fixture(env = { CHILIK_BOOKING_RUNTIME_ENABLED: 'true', CHILIK_BOOKING_SCHEDULERS_ENABLED: 'true' }) {
   const db = fakeDb(), originalDoc = db.doc, verifications = [], logs = [];
   let reads = 0, transactions = 0;

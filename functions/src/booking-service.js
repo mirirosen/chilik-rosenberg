@@ -30,7 +30,9 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
   // Creating a booking never reserves capacity (bank transfer, bit or card).
   // Availability is still checked so an already full tour is rejected early,
   // but tour/week counters change only when payment is confirmed (see change()).
-  async function create(uid, key, input, nowMs = Date.now()) {
+  // options.providerCheckout: a Bit booking opened by the Tranzila checkout (payment flow
+  // only). It follows the card lifecycle; without it Bit stays a legacy manual request.
+  async function create(uid, key, input, nowMs = Date.now(), { providerCheckout = false } = {}) {
     const data = validateBooking(input, new Date(nowMs)), id = identifiers(uid, key), ref = bookingRef(id), digest = fingerprint(data);
     return db.runTransaction(async tx => {
       const [existing, tour, settings] = await Promise.all([tx.get(ref), tx.get(tourRef(data.tourDate)), tx.get(settingsRef())]);
@@ -48,10 +50,10 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         assertWeeklyAvailability(calendar.data(), counter.data(), { policy: weeklyPolicy, weekStart: weekKey, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: data.participants, nowMs });
       }
       assertTourRoom(tour.data(), settings.data(), data.tourDate, data.participants);
-      const now = Timestamp.fromMillis(nowMs), credit = data.paymentMethod === 'credit';
+      const now = Timestamp.fromMillis(nowMs), bitCheckout = providerCheckout === true && data.paymentMethod === 'bit', credit = data.paymentMethod === 'credit' || bitCheckout;
       // holdExpiresAt is only the card checkout window (abandoned checkouts are
       // closed by expirePaymentHolds); no seat is held during it.
-      const booking = { ...data, ...(weekKey ? { weekStart: weekKey } : {}), bookingId: id, ownerUid: uid, requestFingerprint: digest, schemaVersion: 2, capacityReserved: false, revision: 1, status: credit ? 'payment_pending' : 'pending', paymentStatus: credit ? 'creating' : 'pending', holdExpiresAt: credit ? Timestamp.fromMillis(nowMs + 15 * 60000) : null, createdAt: now, updatedAt: now };
+      const booking = { ...data, ...(bitCheckout ? { paymentProvider: 'tranzila' } : {}), ...(weekKey ? { weekStart: weekKey } : {}), bookingId: id, ownerUid: uid, requestFingerprint: digest, schemaVersion: 2, capacityReserved: false, revision: 1, status: credit ? 'payment_pending' : 'pending', paymentStatus: credit ? 'creating' : 'pending', holdExpiresAt: credit ? Timestamp.fromMillis(nowMs + 15 * 60000) : null, createdAt: now, updatedAt: now };
       tx.create(ref, booking);
       // Availability is unchanged, so no calendar job is due at creation.
       jobs(tx, booking, 1, now, credit ? [] : ['email']);

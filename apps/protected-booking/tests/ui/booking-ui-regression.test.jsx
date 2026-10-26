@@ -12,7 +12,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key, i18n: 
 import BookingSection from '../../src/components/BookingSection';
 import BookingForm from '../../src/components/BookingForm';
 const NOW = new Date('2026-10-05T12:00:00Z');
-const customer = { name: 'Demo Customer', phone: '0500000000', email: 'demo@example.invalid', notes: 'Food preference', howDidYouHear: 'friend', participants: 2, paymentMethod: 'bit', agreeToTerms: true, tourDate: '2026-10-08' };
+const customer = { name: 'Demo Customer', phone: '0500000000', email: 'demo@example.invalid', notes: 'Food preference', howDidYouHear: 'friend', participants: 2, paymentMethod: 'credit', agreeToTerms: true, tourDate: '2026-10-08' };
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW); window.history.replaceState({}, '', '/booking?date=2026-10-08&participants=2'); api.makeIdempotencyKey.mockResolvedValue('a'.repeat(32)); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
@@ -41,7 +41,7 @@ it('an expired date supplied directly in the route cannot create a new request',
   fireEvent.submit(container.querySelector('form'));
   await screen.findByText('booking.validation.dateUnavailable');
   expect(api.makeIdempotencyKey).not.toHaveBeenCalled();
-  expect(api.createBooking).not.toHaveBeenCalled();
+  expect(api.createCreditPayment).not.toHaveBeenCalled();
 });
 it('date changes restore editable details, adopt the new selection and require consent again without storage', async () => {
   const saved = vi.spyOn(Storage.prototype, 'setItem');
@@ -52,24 +52,24 @@ it('date changes restore editable details, adopt the new selection and require c
   }
   const { container } = render(<Journey />);
   for (const [id, value] of Object.entries({ name: customer.name, phone: customer.phone, email: customer.email, notes: customer.notes, howDidYouHear: customer.howDidYouHear })) fireEvent.change(container.querySelector('#' + id), { target: { value } });
-  fireEvent.click(container.querySelector('input[value=bit]')); fireEvent.click(container.querySelector('#agreeToTerms'));
+  fireEvent.click(container.querySelector('input[value=credit]')); fireEvent.click(container.querySelector('#agreeToTerms'));
   fireEvent.click(screen.getByText('booking.selection.change')); fireEvent.click(screen.getByText('choose another tour'));
   for (const id of ['name','phone','email','notes','howDidYouHear']) expect(container.querySelector('#' + id).value).toBe(customer[id]);
-  expect(container.querySelector('input[value=bit]').checked).toBe(true);
+  expect(container.querySelector('input[value=credit]').checked).toBe(true);
   expect(container.querySelector('#agreeToTerms').checked).toBe(false);
   expect(screen.getAllByText('3').length).toBeGreaterThan(0);
   expect(saved).not.toHaveBeenCalled();
 });
 it('ambiguous existing request can still recover after the date cutoff; a changed request cannot', async () => {
   vi.setSystemTime(new Date('2026-10-08T16:59:00Z'));
-  api.createBooking.mockRejectedValue(new Error('network-error'));
-  const { container } = render(<BookingForm initialDraft={customer} />);
+  api.createCreditPayment.mockRejectedValue(new Error('network-error'));
+  const { container } = render(<BookingForm initialDraft={customer} onPaymentRedirect={() => {}} />);
   fireEvent.click(container.querySelector('#agreeToTerms')); fireEvent.submit(container.querySelector('form'));
-  await waitFor(() => expect(api.createBooking).toHaveBeenCalledTimes(1)); await screen.findByRole('alert');
+  await waitFor(() => expect(api.createCreditPayment).toHaveBeenCalledTimes(1)); await screen.findByRole('alert');
   vi.setSystemTime(new Date('2026-10-08T17:01:00Z'));
-  fireEvent.submit(container.querySelector('form')); await waitFor(() => expect(api.createBooking).toHaveBeenCalledTimes(2));
+  fireEvent.submit(container.querySelector('form')); await waitFor(() => expect(api.createCreditPayment).toHaveBeenCalledTimes(2));
   await screen.findByRole('alert'); fireEvent.change(container.querySelector('#notes'), { target: { value: 'Changed request' } });
-  fireEvent.submit(container.querySelector('form')); expect(api.createBooking).toHaveBeenCalledTimes(2);
+  fireEvent.submit(container.querySelector('form')); expect(api.createCreditPayment).toHaveBeenCalledTimes(2);
 });
 it('Jerusalem midnight and Thursday closing time match the unchanged server guard', () => {
   expect(getJerusalemDateString(new Date('2026-10-04T22:30:00Z'))).toBe('2026-10-05');

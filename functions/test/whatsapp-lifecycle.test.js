@@ -6,7 +6,7 @@ const {createJobRunner}=require('../src/integration-jobs');
 const {Timestamp}=require('./helpers/fake-db');
 const notifications=f=>[...f.db.data.values()].filter(j=>j.kind==='whatsapp' && !j.payloadHash);
 test('pending requests, fake success, expiry and late capture never enqueue confirmed notifications',async()=>{
- const manual=fixture();const m=await manual.call('createBooking',{body:{...INPUT,paymentMethod:'bit'}});assert.equal(notifications(manual).length,0);
+ const manual=fixture();const m=await manual.call('createBooking',{body:{...INPUT,paymentMethod:'bank_transfer'}});assert.equal(notifications(manual).length,0);
  await manual.call('updateBookingStatus',{token:'admin',body:{bookingId:m.body.bookingId,status:'cancelled'}});assert.equal(notifications(manual).length,0);
  const f=fixture(),created=await f.call('createPayment',{body:INPUT}),id=created.body.bookingId;
  assert.equal(notifications(f).length,0);await f.call('paymentStatus',{method:'GET',query:{id,payment:'success'}});assert.equal(notifications(f).length,0);
@@ -14,7 +14,7 @@ test('pending requests, fake success, expiry and late capture never enqueue conf
  assert.equal(f.booking(id).status,'payment_review');assert.equal(notifications(f).length,0);
 });
 test('verified payment and manual confirmation enqueue once; duplicate and distinct captures and cancellation do not duplicate',async()=>{
- for(const method of ['credit','bit','bank_transfer']) {
+ for(const method of ['credit','bank_transfer']) {
   const f=fixture(),created=await f.call('createBooking',{body:{...INPUT,paymentMethod:method}}),id=created.body.bookingId;
   if(method==='credit') {f.record(id);await f.call('tranzilaWebhook',{query:{id},body:{index:42}});await f.call('tranzilaWebhook',{query:{id},body:{index:42}});f.record(id,43);await f.call('tranzilaWebhook',{query:{id},body:{index:43}});}
   else {await f.call('updateBookingStatus',{token:'admin',body:{bookingId:id,status:'confirmed'}});await f.call('updateBookingStatus',{token:'admin',body:{bookingId:id,status:'confirmed'}});}
@@ -40,7 +40,7 @@ test('invalid WhatsApp-only payload does not roll back verified payment',async()
  f.record(id);const result=await f.call('tranzilaWebhook',{query:{id},body:{index:42}});assert.equal(result.statusCode,200);assert.equal(f.booking(id).paymentStatus,'paid');assert.equal(notifications(f).length,1);
 });
 test('only authenticated admin can queue WhatsApp retry and disabled worker remains blocked',async()=>{
- const f=fixture(),r=await f.call('createBooking',{body:{...INPUT,paymentMethod:'bit'}}),id=r.body.bookingId;
+ const f=fixture(),r=await f.call('createBooking',{body:{...INPUT,paymentMethod:'bank_transfer'}}),id=r.body.bookingId;
  await f.call('updateBookingStatus',{token:'admin',body:{bookingId:id,status:'confirmed'}});
  const j=notifications(f)[0],jobId=`${id}-${j.revision}-whatsapp`,ref=f.db.doc(`integrationJobs/${jobId}`);
  await f.jobs.run(ref,NOW);assert.equal(f.db.data.get(ref.path).lastError,'whatsapp-not-configured');
