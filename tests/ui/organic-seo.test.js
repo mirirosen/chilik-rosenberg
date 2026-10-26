@@ -52,7 +52,8 @@ describe('SEO-01: organic metadata and content parity', () => {
     applyRouteMetadata({ route: 'home', language: 'he', t: translate(he) });
     expect(document.title).toBe(raw.title);
     for (const selector of ['meta[name="description"]', 'meta[name="robots"]']) expect(document.querySelector(selector).content).toBe(raw.querySelector(selector).content);
-    expect(raw.querySelector('h1').textContent).toBe(he.hero.title);
+    expect(raw.querySelector('h1').textContent).toBe(`${he.hero.keyword} ${he.hero.title}`);
+    expect(raw.querySelector('h1').textContent).toContain('סיור קולינרי בבני ברק');
     expect(JSON.parse(document.querySelector('#organic-schema').textContent)['@graph'].find(n => n['@type'] === 'WebPage').description).toBe(JSON.parse(raw.querySelector('#organic-schema').textContent)['@graph'].find(n => n['@type'] === 'WebPage').description);
     dom.window.close();
   });

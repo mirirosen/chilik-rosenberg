@@ -21,7 +21,8 @@ export function overviewHtml(language = 'he', heading = 'h1') {
 export function homeFallback(booking) {
   const copy = organicCopy.he;
   const faqs = faqsFor('he', booking);
-  const heroTitle = JSON.parse(fs.readFileSync(path.join(sourceRoot, 'src/locales/he.json'), 'utf8')).hero.title;
+  const { hero } = JSON.parse(fs.readFileSync(path.join(sourceRoot, 'src/locales/he.json'), 'utf8'));
+  const heroTitle = `${hero.keyword} ${hero.title}`;
   return `<main id="main-content" class="organic-overview"><h1>${escapeHtml(heroTitle)}</h1>${overviewHtml('he', 'h2')}<p><a href="https://wa.me/972506724312">${escapeHtml(copy.contact)}</a></p><h2>${copy.faq}</h2>${Object.values(faqs).map(({ question, answer }) => `<section><h3>${escapeHtml(question)}</h3><p>${escapeHtml(answer)}</p></section>`).join('')}<p><a href="tel:0506724312">0506724312</a> · <a href="mailto:hr20192022@gmail.com">hr20192022@gmail.com</a> · <a href="/terms">תנאי שימוש ותקנון</a></p></main>`;
 }
 export function metadataHtml({ title, description, path = '/', language = 'he', graph }) {
