@@ -17,9 +17,14 @@ const sample = {
 };
 const paid = { ...sample, status: 'confirmed', paymentStatus: 'paid' };
 const withPoint = { meetingPoint: 'רחוב רבי עקיבא 100, בני ברק (דוגמה)', tourTime: '11:00' };
+// The real state at creation (what the create trigger sees): card checkout started,
+// createPayment has not written paymentUrl yet.
+const atCreation = { ...sample, paymentStatus: 'creating', paymentUrl: null };
 const files = {
-  'received-with-link-no-meeting-point': customerReceivedEmail('BK-SAMPLE1', sample, NOW),
-  'received-no-link-with-meeting-point': customerReceivedEmail('BK-SAMPLE2', { ...sample, ...withPoint, paymentUrl: null }, NOW),
+  'received-at-creation-card-no-meeting-point': customerReceivedEmail('BK-SAMPLE1', atCreation, NOW),
+  'received-at-creation-card-with-meeting-point': customerReceivedEmail('BK-SAMPLE2', { ...atCreation, ...withPoint }, NOW),
+  'received-with-link-no-meeting-point': customerReceivedEmail('BK-SAMPLE3', sample, NOW),
+  'received-manual-request-no-link': customerReceivedEmail('BK-SAMPLE4', { ...atCreation, paymentMethod: 'bit', status: 'pending', paymentStatus: 'pending' }, NOW),
   'confirmed-no-meeting-point': customerConfirmedEmail('BK-SAMPLE1', paid),
   'confirmed-with-meeting-point': customerConfirmedEmail('BK-SAMPLE2', { ...paid, ...withPoint }),
 };

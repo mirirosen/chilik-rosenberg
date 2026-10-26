@@ -16,6 +16,9 @@ const CONTACT = { phone: '050-6724312', phoneIntl: '+972506724312', email: 'hr20
 const BRAND = 'חיליק רוזנברג – סיורים קולינריים';
 // The site sells a single tour; the booking document carries no tour name.
 const DEFAULT_TOUR = 'סיור קולינרי בבני ברק';
+// Mirrors viaProvider() in functions/src/booking-core.js: these bookings are paid on
+// the Tranzila checkout page; everything else is a manual request handled by Hilik.
+const viaProvider = b => b.paymentMethod === 'credit' || (b.paymentMethod === 'bit' && b.paymentProvider === 'tranzila');
 const WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
 function formatDate(iso) {
@@ -114,8 +117,12 @@ function customerReceivedEmail(id, b, nowMs = Date.now()) {
   const name = String(b.name || '').trim();
   const intro = [`שלום${name ? ` ${name}` : ''},`, 'תודה שנרשמת לסיור! קיבלנו את פרטי ההרשמה שלך.'];
   const noticeText = `${RECEIVED_NOTICE} מיד לאחר שהתשלום יושלם ויאומת, נשלח אליך אימייל אישור הזמנה.`;
+  // The create trigger fires before createPayment writes paymentUrl, so provider
+  // bookings normally have no link yet: the customer is on the checkout page right now.
   const after = link ? ['הקישור לתשלום תקף לזמן מוגבל בלבד. אם פג תוקפו, אפשר להירשם מחדש באתר או לפנות לחיליק.']
-    : ['להשלמת התשלום אפשר לפנות לחיליק בטלפון או באימייל.'];
+    : viaProvider(b) ? ['אם טרם השלמת את התשלום בעמוד התשלום המאובטח, יש להשלים אותו כעת. אם כבר שילמת, אין צורך לעשות דבר – אימייל אישור יישלח אליך בנפרד.',
+      'אם עמוד התשלום נסגר או שפג תוקפו, אפשר להירשם מחדש באתר או לפנות לחיליק.']
+      : ['להשלמת התשלום אפשר לפנות לחיליק בטלפון או באימייל.'];
   const html = layout({
     preheader: `ההרשמה התקבלה (מספר ${id}) – טרם אושרה, נדרש תשלום`,
     badge: 'ממתין לתשלום', badgeBg: C.warnBg, badgeColor: C.goldText,
@@ -144,4 +151,4 @@ function customerConfirmedEmail(id, b) {
   return { subject: `ההזמנה אושרה – ${tourName(b)}, ${formatDate(b.tourDate)} (${id})`, text, html };
 }
 
-module.exports = { customerReceivedEmail, customerConfirmedEmail, formatDate, RECEIVED_NOTICE, CONTACT, DEFAULT_TOUR };
+module.exports = { viaProvider, customerReceivedEmail, customerConfirmedEmail, formatDate, RECEIVED_NOTICE, CONTACT, DEFAULT_TOUR };

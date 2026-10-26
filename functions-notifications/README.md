@@ -14,7 +14,9 @@ Hebrew RTL HTML (table layout, inline CSS, max 600px, no images) + plain-text al
 
 - `notifyCustomerOnBooking` (`bookings/{id}` created, `retry: true`) → "booking received" to the registrant. States that the
   registration is NOT confirmed and no seat is held until payment is completed; payment button only while the hold is open
-  (same `liveLink()` rule as the unpaid notice). Claim flag `customerReceivedSentAt`, counter `customerReceivedAttempts`.
+  (same `liveLink()` rule as the unpaid notice). At creation, card / Bit-via-Tranzila bookings are still `paymentStatus:
+  'creating'` with no `paymentUrl` (createPayment writes it later), so for those the email tells the customer to finish
+  payment on the checkout page they are on; only manual requests are told to contact Hilik to pay. Claim flag `customerReceivedSentAt`, counter `customerReceivedAttempts`.
 - `notifyCustomerOnPaid` (`bookings/{id}` updated, `retry: true`) → "booking confirmed". Sent only on the write where the booking
   becomes verified-paid: `paymentStatus === 'paid' && status === 'confirmed'` and `paymentMethod === 'credit'` (or `'bit'` with
   `paymentProvider === 'tranzila'`), and it was not both before. The live booking service writes `paymentStatus: 'paid'` only from

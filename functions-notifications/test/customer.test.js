@@ -175,6 +175,35 @@ test('received: payment link only while the hold is open (same rule as liveLink)
   assert.ok(!customerReceivedEmail('BK-1', { ...live, paymentUrl: 'javascript:alert(1)' }, NOW_R).html.includes('javascript:'));
 });
 
+test('received at the real creation state (card/Bit-Tranzila, creating, no paymentUrl): points to the checkout page, not to Hilik', () => {
+  const card = { ...created, paymentUrl: undefined }; // the create trigger runs before createPayment writes paymentUrl
+  const bitTranzila = { ...card, paymentMethod: 'bit', paymentProvider: 'tranzila' };
+  for (const b of [card, bitTranzila]) {
+    const m = customerReceivedEmail('BK-1', b, NOW_R);
+    for (const s of [m.text, m.html]) {
+      assert.ok(s.includes('בעמוד התשלום המאובטח'));
+      assert.ok(s.includes('אימייל אישור יישלח אליך בנפרד'));
+      assert.ok(!s.includes('להשלמת התשלום אפשר לפנות לחיליק'));
+      assert.ok(s.includes('ההרשמה אינה מאושרת ולא נשמר עבורך מקום בסיור עד להשלמת התשלום'));
+    }
+    assert.ok(!m.html.includes('<a href="https://directng'));
+  }
+});
+
+test('received end-to-end from the create trigger with the real creation doc', async () => {
+  const { db, n, sent } = setup({ 'BK-1': created });
+  assert.strictEqual(await n.onCustomerBookingCreated(db.snap('BK-1')), true);
+  assert.ok(sent[0].text.includes('בעמוד התשלום המאובטח'));
+});
+
+test('received for manual requests (bit/bank without provider) keeps "contact Hilik"', () => {
+  for (const paymentMethod of ['bit', 'bank_transfer']) {
+    const m = customerReceivedEmail('BK-1', { ...created, paymentMethod, status: 'pending', paymentStatus: 'pending' }, NOW_R);
+    assert.ok(m.text.includes('להשלמת התשלום אפשר לפנות לחיליק'));
+    assert.ok(!m.text.includes('בעמוד התשלום המאובטח'));
+  }
+});
+
 test('content: booking number, tour, date, participants, amount, status, contact details', () => {
   const r = customerReceivedEmail('BK-77', created, NOW_R), c = customerConfirmedEmail('BK-77', paid);
   for (const m of [r, c]) for (const s of [m.text, m.html]) {

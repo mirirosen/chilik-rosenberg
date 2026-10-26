@@ -2,17 +2,16 @@
 // Notification flows, independent of the Functions runtime so they can be tested
 // with a fake Firestore and a mocked mail transport.
 const { ownerEmail, unpaidEmail, isPaid, isClosed } = require('./render');
-const { customerReceivedEmail, customerConfirmedEmail } = require('./customer-render');
+const { customerReceivedEmail, customerConfirmedEmail, viaProvider } = require('./customer-render');
 
 const UNPAID_DELAY_MIN = 30; // give the payer time to finish checkout before warning
 const UNPAID_LOOKBACK_DAYS = 2; // bounds the sweep query; older bookings were already handled
 const UNPAID_MAX_ATTEMPTS = 3; // a permanently bad address must not be retried forever
 const CUSTOMER_MAX_ATTEMPTS = 3; // same bound for the customer received/confirmed emails
 
-// Mirrors viaProvider() in functions/src/booking-core.js: only these bookings can
-// reach paymentStatus 'paid', and only through BookingService.change(event 'paid')
-// with an independently verified Tranzila receipt (tranzilaWebhook / reconcilePayments).
-const viaProvider = b => b.paymentMethod === 'credit' || (b.paymentMethod === 'bit' && b.paymentProvider === 'tranzila');
+// Only viaProvider() bookings can reach paymentStatus 'paid', and only through
+// BookingService.change(event 'paid') with an independently verified Tranzila
+// receipt (tranzilaWebhook / reconcilePayments).
 const verifiedPaid = b => !!b && viaProvider(b) && b.paymentStatus === 'paid' && b.status === 'confirmed';
 // The confirmed email goes out on the first write that makes a booking verified-paid
 // and confirmed. Manual admin confirmations of bit/bank requests keep paymentStatus
