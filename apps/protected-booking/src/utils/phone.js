@@ -1,12 +1,23 @@
-// Mirrors functions/src/phone.js: Israeli mobile numbers written with +972 / 972 /
-// 00972, an optional trunk 0, spaces, dashes, dots or parentheses normalize to
-// the stored national form 05XXXXXXXX. Anything else returns null.
-export function normalizeIsraeliMobile(value) {
+// Mirrors functions/src/phone.js. Israeli mobiles written with +972 / 972 / 00972,
+// an optional trunk 0, spaces, dashes, dots or parentheses normalize to the stored
+// national form 05XXXXXXXX. Other countries need '+' or '00' and a country code and
+// are returned as E.164 (+digits). Anything else returns null.
+const SEPARATORS = /[\s\-.()‎‏‐-―−﹘﹣－]/g;
+export function normalizePhone(value) {
   if (typeof value !== 'string' || value.length > 32) return null;
-  let digits = value.trim().replace(/[\s\-.()‎‏]/g, '');
-  if (digits.startsWith('+')) digits = digits.slice(1);
-  else if (digits.startsWith('00')) digits = digits.slice(2);
+  let digits = value.trim().replace(/\(0\)/g, '').replace(SEPARATORS, '');
+  let international = false;
+  if (digits.startsWith('+')) { digits = digits.slice(1); international = true; }
+  else if (digits.startsWith('00')) { digits = digits.slice(2); international = true; }
   if (!/^\d+$/.test(digits)) return null;
   if (digits.startsWith('972')) digits = `0${digits.slice(3).replace(/^0/, '')}`;
+  else if (international) return /^[1-9]\d{6,14}$/.test(digits) ? `+${digits}` : null;
   return /^05\d{8}$/.test(digits) ? digits : null;
+}
+
+// Stored phone (05XXXXXXXX or +E.164) -> E.164 digits without '+', for wa.me links.
+export function phoneToE164Digits(phone) {
+  const normalized = normalizePhone(String(phone || ''));
+  if (!normalized) return '';
+  return normalized.startsWith('+') ? normalized.slice(1) : `972${normalized.slice(1)}`;
 }

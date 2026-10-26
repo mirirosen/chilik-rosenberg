@@ -104,7 +104,7 @@
     "validation": {
       "nameRequired": "Full name is required",
       "phoneRequired": "Phone / WhatsApp is required",
-      "phoneInvalid": "Please enter an Israeli mobile number, e.g. +972 50-123-4567 or 050-1234567",
+      "phoneInvalid": "Please enter an Israeli mobile number (e.g. 050-1234567) or an international number with its country code (e.g. +1 415 555 0100)",
       "emailRequired": "Email address is required",
       "emailInvalid": "Invalid email address",
       "howRequired": "Please select how you heard about us",
