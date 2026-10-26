@@ -1,6 +1,6 @@
 const test = require('node:test'); const assert = require('node:assert');
 const { createNotifier, CUSTOMER_MAX_ATTEMPTS, becameVerifiedPaid } = require('../src/notifier');
-const { customerReceivedEmail, customerConfirmedEmail, formatDate } = require('../src/customer-render');
+const { customerReceivedEmail, customerConfirmedEmail, formatDate, formatDateEn, TEXT_SEPARATOR } = require('../src/customer-render');
 
 // In-memory Firestore (same shape as notifier.test.js); Timestamps are { ms }.
 const ts = ms => ({ ms, toMillis: () => ms });
@@ -246,4 +246,98 @@ test('formatDate: Hebrew weekday + dd.mm.yyyy, passthrough when not ISO', () => 
   assert.strictEqual(formatDate('2026-11-05'), 'יום חמישי, 05.11.2026');
   assert.strictEqual(formatDate('2026-11-07'), 'יום שבת, 07.11.2026');
   assert.strictEqual(formatDate('soon'), 'soon');
+});
+
+// ---- bilingual (Hebrew first, then English, always) ----
+// The English section container (the header also carries a small lang="en" line).
+const enPart = s => s.slice(s.indexOf('<td dir="ltr" lang="en"'));
+const enText = t => t.split(TEXT_SEPARATOR)[1] || '';
+
+test('bilingual: both emails carry Hebrew then English regardless of booking.language', () => {
+  for (const language of ['he', 'en', undefined]) {
+    for (const m of [customerReceivedEmail('BK-1', { ...created, language }, NOW_R), customerConfirmedEmail('BK-1', { ...paid, language })]) {
+      assert.ok(m.html.indexOf('lang="he"') < m.html.indexOf('<td dir="ltr" lang="en"'));
+      assert.ok(m.html.indexOf('שלום') < m.html.indexOf('Hello'));
+      const [he, en] = m.text.split(TEXT_SEPARATOR);
+      assert.ok(he.includes('שלום') && !he.includes('Hello'));
+      assert.ok(en.includes('Hello') && !/[֐-׿]/.test(en.replace(/בדיקה/g, '')));
+      assert.match(m.subject, /^[^|]*[֐-׿][^|]* \| [A-Z][^֐-׿]*$/);
+    }
+  }
+});
+
+test('bilingual: English section is an LTR container with the same fields', () => {
+  const r = customerReceivedEmail('BK-77', created, NOW_R), c = customerConfirmedEmail('BK-77', paid);
+  for (const m of [r, c]) {
+    assert.match(m.html, /<td dir="ltr" lang="en" align="left"[^>]*>\s*<table role="presentation" width="100%"[^>]*dir="ltr" lang="en">/);
+    const en = enPart(m.html);
+    for (const s of [en, enText(m.text)]) {
+      for (const v of ['Booking number', 'BK-77', 'Culinary tour of Bnei Brak', 'Thursday, 5 November 2026', 'Participants', '₪360 (ILS)', 'Payment status', '050-6724312', 'hr20192022@gmail.com', 'chilik-tours.com']) assert.ok(s.includes(v), v);
+    }
+  }
+  assert.ok(enPart(r.html).includes('border-left:4px solid') && !enPart(r.html).includes('border-right:4px'));
+  assert.ok(enText(r.text).includes('Payment status: Awaiting payment'));
+  assert.ok(enText(c.text).includes('Payment status: Paid'));
+  assert.ok(enText(c.text).includes('Your payment was received and your seat on the tour is reserved'));
+  assert.match(c.subject, /\| Booking confirmed – Culinary tour of Bnei Brak, Thursday, 5 November 2026 \(BK-77\)$/);
+});
+
+test('bilingual: English received wording says NOT confirmed, no seat held, in all three payment branches', () => {
+  const card = customerReceivedEmail('BK-1', created, NOW_R);
+  const withLink = customerReceivedEmail('BK-1', live, NOW_R);
+  const manual = customerReceivedEmail('BK-1', { ...created, paymentMethod: 'bit', status: 'pending', paymentStatus: 'pending' }, NOW_R);
+  for (const m of [card, withLink, manual]) {
+    for (const s of [enText(m.text), enPart(m.html)]) {
+      assert.ok(s.includes('Your registration is NOT confirmed and no seat is held for you on the tour until payment is completed.'));
+      assert.ok(s.includes('not confirmed yet'));
+      assert.ok(!s.includes('Booking confirmed'));
+    }
+    assert.match(m.subject, /\| Registration received – not confirmed, payment required \(BK-1\)$/);
+  }
+  assert.ok(enText(card.text).includes('on the secure payment page') && !enText(card.text).includes('To complete payment, please contact Hilik'));
+  assert.ok(enPart(withLink.html).includes('href="https://directng.tranzila.com/x/iframenew.php?a=1"') && enPart(withLink.html).includes('Complete payment'));
+  assert.ok(enText(withLink.text).includes('Complete payment: https://directng.tranzila.com/x/iframenew.php?a=1'));
+  assert.ok(enText(manual.text).includes('To complete payment, please contact Hilik by phone or email.'));
+  assert.ok(!enText(manual.text).includes('secure payment page'));
+  assert.ok(!enPart(customerReceivedEmail('BK-1', live, 3000).html).includes('tranzila'));
+});
+
+test('bilingual: no meeting point or time in either language when absent; shown in both when present', () => {
+  for (const m of [customerReceivedEmail('BK-1', created, NOW_R), customerConfirmedEmail('BK-1', paid)]) {
+    assert.ok(!m.text.includes('Meeting point:') && !m.html.includes('>Meeting point<'));
+    assert.ok(!m.text.includes('נקודת מפגש:') && !m.html.includes('>נקודת מפגש<'));
+    assert.ok(!m.text.includes('Time:') && !m.html.includes('>Time<'));
+  }
+  const m = customerConfirmedEmail('BK-1', { ...paid, meetingPoint: 'רחוב הדוגמה 1', tourTime: '11:00' });
+  assert.ok(enText(m.text).includes('Meeting point: רחוב הדוגמה 1') && enText(m.text).includes('Time: 11:00'));
+  assert.ok(enPart(m.html).includes('>Meeting point<'));
+  assert.ok(enText(m.text).includes('Please arrive at the meeting point'));
+  assert.ok(enText(customerConfirmedEmail('BK-1', paid).text).includes('For details about the meeting point and arrival time, please contact Hilik.'));
+});
+
+test('bilingual: English part escapes user data too', () => {
+  const evil = '<script>alert("x")</script>\'&';
+  for (const m of [customerReceivedEmail(evil, { ...created, name: evil, meetingPoint: evil, tourName: evil }, NOW_R), customerConfirmedEmail(evil, { ...paid, name: evil, meetingPoint: evil, tourName: evil })]) {
+    const en = enPart(m.html);
+    assert.ok(!en.includes('<script>'));
+    assert.ok(en.includes('Hello &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;,'));
+    assert.ok(en.includes('>&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&#39;&amp;<'));
+  }
+});
+
+test('bilingual plain text: Hebrew block, separator line, English block', () => {
+  for (const m of [customerReceivedEmail('BK-1', created, NOW_R), customerConfirmedEmail('BK-1', paid)]) {
+    const parts = m.text.split(`\n\n${TEXT_SEPARATOR}\n\n`);
+    assert.strictEqual(parts.length, 2);
+    assert.ok(parts[0].startsWith('שלום'));
+    assert.ok(parts[0].includes('תודה, חיליק רוזנברג'));
+    assert.ok(parts[1].startsWith('Hello'));
+    assert.ok(parts[1].endsWith('Thank you, Hilik Rosenberg – Culinary Tours'));
+  }
+});
+
+test('formatDateEn: English weekday + day month year, passthrough when not ISO', () => {
+  assert.strictEqual(formatDateEn('2026-11-05'), 'Thursday, 5 November 2026');
+  assert.strictEqual(formatDateEn('2026-11-07'), 'Saturday, 7 November 2026');
+  assert.strictEqual(formatDateEn('soon'), 'soon');
 });

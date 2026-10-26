@@ -1,5 +1,5 @@
 'use strict';
-// Writes the customer emails with sample data to a folder for visual review.
+// Writes the customer emails (bilingual: Hebrew section, then English) with sample data to a folder for visual review.
 // Usage: node scripts/render-preview.js <out-dir>   (npm run preview -- <out-dir>)
 // No network, no Firestore, no mail.
 const fs = require('fs');

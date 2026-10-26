@@ -10,7 +10,10 @@ Separate Firebase Functions codebase. It never deploys or deletes the live `book
 
 ## Customer emails (OFF by default)
 
-Hebrew RTL HTML (table layout, inline CSS, max 600px, no images) + plain-text alternative, rendered by `src/customer-render.js`.
+Always bilingual, regardless of `booking.language`: a Hebrew RTL section first, a subtle divider, then an English section in an
+LTR container (`dir="ltr" lang="en"`) with the same design, fields and payment wording. Table layout, inline CSS, max 600px,
+no images, plus a plain-text alternative (Hebrew block, `----` separator line, English block). Subjects are "Hebrew | English".
+Rendered by `src/customer-render.js`.
 
 - `notifyCustomerOnBooking` (`bookings/{id}` created, `retry: true`) → "booking received" to the registrant. States that the
   registration is NOT confirmed and no seat is held until payment is completed; payment button only while the hold is open
@@ -36,7 +39,8 @@ Params (both required to send anything):
 | `NOTIFY_CUSTOMER_EMAILS` | `false` | Master switch for customer mail. |
 | `NOTIFY_CUSTOMER_CUTOFF_ISO` | empty | Only bookings created at/after this ISO time. Empty/invalid ⇒ nothing is sent. |
 
-Preview: `npm run preview -- <out-dir>` writes the two emails (with and without meeting point) as `.html` + `.txt`.
+Preview: `npm run preview -- <out-dir>` writes 6 sample emails (received at creation with/without meeting point, with live link,
+manual request; confirmed with/without meeting point) as `.html` + `.txt`.
 
 Provider: Gmail SMTP (`smtp.gmail.com:465`, TLS) via nodemailer, user and sender `hr20192022@gmail.com`.
 Secret: `GMAIL_APP_PASSWORD` (a Google App Password of that account; requires 2-Step Verification).
