@@ -1,11 +1,17 @@
 'use strict';
 const crypto = require('crypto');
+const { viaProvider } = require('./booking-core');
 const failure = code => Object.assign(new Error(code), { status: 409 });
 function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock = Date.now }) {
   async function create(uid, key, input) {
+    // Bit goes through the same Tranzila checkout only when its flag and verified
+    // allowlist are on; otherwise it is rejected before anything is created.
+    // Every other method keeps the card flow exactly as before.
+    const bit = input?.paymentMethod === 'bit';
+    if (bit && provider.bitReady?.() !== true) throw failure('invalid-payment-method');
     provider.assertReady(); // Configuration failure creates nothing. No seat is held until payment.
     urlsFor.assertReady?.();
-    const booking = await bookings.create(uid, key, { ...input, paymentMethod: 'credit' }, clock());
+    const booking = await bookings.create(uid, key, { ...input, paymentMethod: bit ? 'bit' : 'credit' }, clock(), ...(bit ? [{ providerCheckout: true }] : []));
     const ref = bookings.bookingRef(booking.bookingId), lease = crypto.randomUUID();
     const state = await db.runTransaction(async tx => {
       const snap = await tx.get(ref), b = snap.data();
@@ -41,7 +47,7 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
     provider.assertReady();
     if (!/^BK-[a-f0-9]{24}$/.test(bookingId || '') || !/^\d{1,12}$/.test(String(transactionIndex || ''))) throw failure('invalid-provider-reference');
     const snap = await bookings.bookingRef(bookingId).get();
-    if (!snap.exists || snap.data().paymentMethod !== 'credit') throw failure('not-found');
+    if (!snap.exists || !viaProvider(snap.data())) throw failure('not-found');
     // Browser notification only points to a report. No response, amount, nonce,
     // status or customer data from the callback can establish a receipt.
     const receipt = await provider.verifyTransaction({ booking: snap.data(), transactionIndex });

@@ -1,7 +1,7 @@
 'use strict';
 const { authHeaders } = require('./tranzila-auth');
 const { HANDSHAKE_URL, validHandshakeResponse } = require('./tranzila-contract');
-const { paymentConfigurationIssues } = require('../configuration-readiness');
+const { paymentConfigurationIssues, bitConfigurationIssues, validBitCapturePairs } = require('../configuration-readiness');
 // Official protocol sources: docs/PAYMENT_RUNTIME.md. Credentials only supplied by the
 // server caller, never persisted or returned. No network request unless enabled
 // and merchant-specific binding/capture semantics have been explicitly verified.
@@ -36,6 +36,8 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
   function assertReady() {
     if (paymentConfigurationIssues(config).length) throw fail('payment-verification-not-configured');
   }
+  // Bit checkout is offered only behind its own flag and verified report allowlist.
+  const bitReady = () => !bitConfigurationIssues(config).length;
   async function post(url, body) {
     try {
       const response = await fetchImpl(url, { method: 'POST', headers: authHeaders(config.appKey, config.secret, clock()), body: JSON.stringify(body), signal: AbortSignal.timeout(10000), redirect: 'error' });
@@ -47,6 +49,8 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     assertReady();
     if (!/^BK-[a-f0-9]{24}$/.test(booking.bookingId || '')) throw fail('invalid-booking-reference');
     money(booking.totalPrice);
+    const bit = booking.paymentMethod === 'bit';
+    if (bit && !bitReady()) throw fail('payment-method-not-configured');
     for (const key of ['success', 'failure', 'notify']) {
       let parsed; try { parsed = new URL(urls[key]); } catch { throw fail('invalid-return-url'); }
       if (parsed.protocol !== 'https:' || parsed.username || parsed.password) throw fail('invalid-return-url');
@@ -56,7 +60,7 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     const url = new URL(config.checkoutUrl);
     // Only short-lived handshake token + public parameters reach the browser.
     // No terminal password, API key, secret, customer email, phone or DOB.
-    const params = { sum: (money(booking.totalPrice) / 100).toFixed(2), currency: '1', cred_type: '1', tranmode: config.checkoutTranmode, thtk: response.thtk, [config.orderParameter]: booking.bookingId, success_url_address: urls.success, fail_url_address: urls.failure, notify_url_address: urls.notify, lang: booking.language === 'en' ? 'en' : 'il' };
+    const params = { sum: (money(booking.totalPrice) / 100).toFixed(2), currency: '1', cred_type: '1', tranmode: config.checkoutTranmode, thtk: response.thtk, [config.orderParameter]: booking.bookingId, success_url_address: urls.success, fail_url_address: urls.failure, notify_url_address: urls.notify, lang: booking.language === 'en' ? 'en' : 'il', ...(bit ? { bit_pay: '1' } : {}) };
     if (!config.capturePairs.some(p => p.tranmode === config.checkoutTranmode)) throw fail('payment-verification-not-configured');
     for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
     return { paymentUrl: url.toString(), paymentTerminal: config.terminal };
@@ -124,6 +128,14 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     if (indexes.length > 20) throw fail('provider-lookup-incomplete');
     return { complete: true, transactionIndexes: indexes };
   }
+  // Card bookings accept only a 'CC' capture. A Tranzila Bit booking also accepts an
+  // explicitly allowlisted Bit capture, or a card capture made on the same page. The
+  // allowlist is independent of the offer flag, so turning Bit off never strands a paid booking.
+  function verifiedCapture(booking, row) {
+    const card = row.txn_payment_method === 'CC' && config.capturePairs.some(p => p.txnType === row.txn_type && p.tranmode === row.tranmode && p.transtatus === row.transtatus);
+    if (booking.paymentMethod !== 'bit' || booking.paymentProvider !== 'tranzila') return card;
+    return card || (validBitCapturePairs(config.bitCapturePairs) && config.bitCapturePairs.some(p => p.txnPaymentMethod === row.txn_payment_method && p.txnType === row.txn_type && p.tranmode === row.tranmode && p.transtatus === row.transtatus));
+  }
   async function verifyTransaction({ booking, transactionIndex }) {
     assertReady();
     // A terminal change must never reinterpret an older checkout under the new
@@ -135,11 +147,11 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     if (!report || !Array.isArray(report.transactions) || report.transactions.length !== 1 || (Object.hasOwn(report, 'error_code') && report.error_code !== 0)) throw fail('provider-verification-pending');
     const row = report.transactions[0];
     if (!row || typeof row !== 'object') throw fail('provider-verification-pending');
-    if (Number(row.index) !== index || row.child_terminal !== config.terminal || !orderMatches(row, config, booking.bookingId) || reportMinorUnits(row.amount) !== money(booking.totalPrice) || String(row.currency) !== '1' || row.txn_payment_method !== 'CC' || !config.capturePairs.some(p => p.txnType === row.txn_type && p.tranmode === row.tranmode && p.transtatus === row.transtatus) || !Object.hasOwn(row, 'cancelfdid') || !Object.hasOwn(row, 'cancelfdnumber') || row.cancelfdid != null || row.cancelfdnumber != null || row.processor_response_code !== '000' || !Object.hasOwn(row, 'authorization_number')) throw fail('provider-verification-pending');
+    if (Number(row.index) !== index || row.child_terminal !== config.terminal || !orderMatches(row, config, booking.bookingId) || reportMinorUnits(row.amount) !== money(booking.totalPrice) || String(row.currency) !== '1' || !verifiedCapture(booking, row) || !Object.hasOwn(row, 'cancelfdid') || !Object.hasOwn(row, 'cancelfdnumber') || row.cancelfdid != null || row.cancelfdnumber != null || row.processor_response_code !== '000' || !Object.hasOwn(row, 'authorization_number')) throw fail('provider-verification-pending');
     // Unknown/declined reports are NOT accepted as authenticated declines. They
     // remain pending until expiry or manual review; callback fields are ignored.
     return { verified: true, bookingId: booking.bookingId, transactionKey: `${config.terminal}:${index}`, amount: booking.totalPrice, currency: 'ILS', event: 'paid', providerTransaction: { provider: 'tranzila', terminal: config.terminal, transactionIndex: String(index), authorizationNumber: authorizationNumber(row.authorization_number) } };
   }
-  return { assertReady, assertLookupReady, createCheckout, findTransactionIndexes, verifyTransaction };
+  return { assertReady, assertLookupReady, bitReady, createCheckout, findTransactionIndexes, verifyTransaction };
 }
 module.exports = { authHeaders, createTranzilaAdapter, money };

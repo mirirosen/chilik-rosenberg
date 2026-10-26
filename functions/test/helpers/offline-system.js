@@ -35,7 +35,7 @@ function fixture({ weeklyPolicy, paymentConfig = CONFIG } = {}) {
   };
   const ts = { ...Timestamp, now: () => Timestamp.fromMillis(now) };
   const rawBookings = createBookingService(db, ts, { weeklyPolicy });
-  const bookings = { ...rawBookings, create: (uid, key, input) => rawBookings.create(uid, key, input, now), change: (id, event, actor, receipt, _clock, guards) => rawBookings.change(id, event, actor, receipt, now, guards) };
+  const bookings = { ...rawBookings, create: (uid, key, input, _clock, options) => rawBookings.create(uid, key, input, now, options), change: (id, event, actor, receipt, _clock, guards) => rawBookings.change(id, event, actor, receipt, now, guards) };
   const provider = createTranzilaAdapter({ config: paymentConfig, clock: () => now, fetchImpl: async (url, options) => {
     requests.push({ url, method: options.method, body: JSON.parse(options.body) });
     assert.equal(options.redirect, 'error'); assert.equal(options.method, 'POST');

@@ -15,6 +15,7 @@
   "TRANZILA_ORDER_REPORT_FIELD": "user_defined_10",
   "TRANZILA_ORDER_LOOKUP_MODE": "bounded-date-scan",
   "TRANZILA_CHECKOUT_TRANMODE": "A",
+  "TRANZILA_BIT_ENABLED": "false",
   "TRANZILA_CAPTURE_PAIRS_JSON": "[{\"txnType\":\"DEBIT\",\"tranmode\":\"A\",\"transtatus\":0}]",
   "PAYMENT_SITE_ORIGIN": "https://www.chilik-tours.com",
   "PAYMENT_API_BASE": "https://us-central1-hilik-site.cloudfunctions.net",

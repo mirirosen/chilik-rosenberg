@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const { loadPaymentConfiguration } = require('./payment-runtime');
 const { createTranzilaAdapter } = require('./providers/tranzila');
+const { viaProvider } = require('./booking-core');
 const LEASE_MS = 10 * 60000, MAX_ATTEMPTS = 96;
 const safeFailure = error => ['provider-lookup-incomplete', 'provider-verification-pending', 'provider-lookup-window-invalid', 'payment-provider-unavailable', 'payment-order-lookup-not-configured'].includes(error?.code) ? error.code : 'payment-reconciliation-unavailable';
 function createPaymentReconciler({ db, bookings, Timestamp, provider, isEnabled = () => false, clock = Date.now }) {
@@ -16,7 +17,7 @@ function createPaymentReconciler({ db, bookings, Timestamp, provider, isEnabled 
       const job = jobSnap.data();
       if (!['pending', 'retry', 'processing'].includes(job.status) || job.nextAttemptAt?.toMillis() > nowMs || job.leaseUntil?.toMillis() > nowMs) return null;
       const bookingSnap = await tx.get(bookings.bookingRef(ref.id)), booking = bookingSnap.data();
-      if (!bookingSnap.exists || job.bookingId !== ref.id || booking.bookingId !== ref.id || booking.schemaVersion !== 2 || booking.paymentMethod !== 'credit' || booking.paymentTerminal !== job.paymentTerminal || !/^[a-zA-Z0-9_-]+$/.test(job.paymentTerminal || '') || !Number.isInteger(job.attempts) || job.attempts < 0 || !Number.isFinite(job.nextAttemptAt?.toMillis()) || !Number.isFinite(job.monitorUntil?.toMillis()) || !Number.isFinite(job.createdAt?.toMillis()) || job.monitorUntil.toMillis() - job.createdAt.toMillis() !== 24 * 3600000 || job.createdAt.toMillis() > nowMs) {
+      if (!bookingSnap.exists || job.bookingId !== ref.id || booking.bookingId !== ref.id || booking.schemaVersion !== 2 || !viaProvider(booking) || booking.paymentTerminal !== job.paymentTerminal || !/^[a-zA-Z0-9_-]+$/.test(job.paymentTerminal || '') || !Number.isInteger(job.attempts) || job.attempts < 0 || !Number.isFinite(job.nextAttemptAt?.toMillis()) || !Number.isFinite(job.monitorUntil?.toMillis()) || !Number.isFinite(job.createdAt?.toMillis()) || job.monitorUntil.toMillis() - job.createdAt.toMillis() !== 24 * 3600000 || job.createdAt.toMillis() > nowMs) {
         tx.update(ref, { status: 'manual_review', lastErrorCode: 'payment-reconciliation-record-invalid', updatedAt: Timestamp.fromMillis(nowMs) }); return null;
       }
       if (job.attempts >= MAX_ATTEMPTS || nowMs > job.monitorUntil.toMillis() + LEASE_MS) {

@@ -52,9 +52,9 @@ test('wrong provider bindings never confirm; expiry and late capture stay review
 });
 test('lost noncredit response recovers the same booking; seats are reserved only by admin confirmation', async () => {
   const f = fixture(); f.db.data.set('artifacts/hilik-rosenberg-v1/public/data/settings/global', { globalMaxParticipants: 2 });
-  const first = await f.call('createBooking', { body: { ...INPUT, paymentMethod: 'bit' } });
+  const first = await f.call('createBooking', { body: { ...INPUT, paymentMethod: 'bank_transfer' } });
   assert.equal(first.statusCode, 201); assert.equal(f.seats(), 0); assert.equal(first.body.status, 'pending');
-  const recovered = await f.call('createBooking', { body: { ...INPUT, paymentMethod: 'bit' } });
+  const recovered = await f.call('createBooking', { body: { ...INPUT, paymentMethod: 'bank_transfer' } });
   assert.equal(recovered.statusCode, 200); assert.equal(recovered.body.bookingId, first.body.bookingId); assert.equal(f.seats(), 0);
   const other = await f.call('createBooking', { token: 'other', body: { ...INPUT, paymentMethod: 'bank_transfer' } });
   assert.equal(other.statusCode, 201); assert.equal(f.seats(), 0);
@@ -64,7 +64,7 @@ test('lost noncredit response recovers the same booking; seats are reserved only
   assert.equal(full.statusCode, 409); assert.equal(full.body.error, 'capacity-full-at-confirmation');
   assert.match(full.body.message, /אין מספיק מקום/);
   assert.equal(f.booking(other.body.bookingId).status, 'pending'); assert.equal(f.seats(), 2);
-  const late = await f.call('createBooking', { token: 'other', key: 'f'.repeat(32), body: { ...INPUT, paymentMethod: 'bit' } });
+  const late = await f.call('createBooking', { token: 'other', key: 'f'.repeat(32), body: { ...INPUT, paymentMethod: 'bank_transfer' } });
   assert.equal(late.statusCode, 409); assert.equal(late.body.error, 'capacity-exceeded');
 });
 test('failed checkout closes the booking without seats, hides upstream details and rejects reopening the key', async () => {
