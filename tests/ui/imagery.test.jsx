@@ -39,4 +39,33 @@ describe('locally hosted illustrative imagery', () => {
     expect(container.querySelector('.target-tour-pick--portrait img').getAttribute('src')).toContain('hilik-cutout-provided');
     expect(Object.keys(he.imagery)).toEqual(Object.keys(en.imagery));
   });
+  it('announces the tour card AI disclosure as its description, not its name', () => {
+    render(<RatingBar />);
+    const tours = screen.getByRole('link', { name: he.intro.tours });
+    const note = document.getElementById(tours.getAttribute('aria-describedby'));
+    expect(note.textContent).toBe(he.imagery.generated);
+    for (const img of document.querySelectorAll('.target-tour-pick img')) {
+      expect(img.getAttribute('loading')).toBe('lazy');
+      expect(Number(img.getAttribute('width'))).toBeGreaterThan(0);
+      expect(Number(img.getAttribute('height'))).toBeGreaterThan(0);
+    }
+  });
+  it('requests the tour photo at the width it is drawn in the taller card, not the card width', () => {
+    const { container } = render(<RatingBar />);
+    const sizes = container.querySelector('.target-tour-pick:not(.target-tour-pick--portrait) img').getAttribute('sizes');
+    const [mobile, tablet, desktop] = sizes.split(',').map(part => parseFloat(part.trim().split(' ').pop()));
+    // 16:9 cover in a 4/5 card: 545px tall on desktop → ≈969px wide; 6/5 mobile ≈ 1.48 × width; 2-up 4/5 tablet ≈ 1.11 × vw.
+    expect(desktop).toBeGreaterThanOrEqual(969);
+    expect(mobile).toBeGreaterThanOrEqual(148);
+    expect(tablet).toBeGreaterThanOrEqual(111);
+  });
+  it('enlarges the lecturer cutout only in the mobile card', () => {
+    const css = readFileSync('src/site-design.css', 'utf8');
+    const rule = '.target-site .target-tour-pick--portrait .target-tour-pick__visual img { height: 132%; bottom: -25%; }';
+    const mobile = css.slice(css.indexOf('@media(max-width:600px)'));
+    // 376×513 cutout, alpha 50–422px: 132% of the 6/5 card puts the head ~6% down and the figure over ~94% of its height.
+    expect(mobile.slice(0, mobile.indexOf('\n}'))).toContain(rule);
+    expect(css.indexOf(rule)).toBe(css.lastIndexOf(rule));
+    expect(css).toContain('.target-site .target-tour-pick--portrait .target-tour-pick__visual img { inset: auto 0 -14.5%; height: 100%;');
+  });
 });
