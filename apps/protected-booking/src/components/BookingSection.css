@@ -88,7 +88,6 @@
 .target-site #date-selection.booking-screen[dir] button{touch-action:manipulation}
 .booking-selection-page{padding:56px 24px 1px}
 .booking-details-shell{padding:128px 24px 64px;max-width:850px;margin:auto}
-.booking-details-shell .bg-brand-dark-lighter{background:#201e1b}
 .booking-details-shell form{border-color:#e9c46a29;border-radius:24px}
 .booking-details-shell :is(input,select,textarea){border-radius:12px}
 :root{--booking-demo-banner-height: 40px}
