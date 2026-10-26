@@ -105,19 +105,18 @@ const Terms = ({ inquiry = false }) => {
 
         {/* Content Sections */}
         <div className="space-y-8">
-          {/* AGE RESTRICTION - PROMINENT WARNING */}
-          <section lang="he" dir="rtl" className="bg-red-500/20 border-2 border-red-500/50 rounded-3xl p-8">
+          {/* FAMILIES WELCOME - AGE POLICY */}
+          <section className="bg-brand-gold/10 border-2 border-brand-gold/40 rounded-3xl p-8">
             <div className="text-center">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-serif text-red-400 font-bold mb-4">
-                תנאי לרכישה ולהשתתפות בסיור
+              <h2 className="text-2xl font-serif text-brand-gold font-bold mb-4" dir={dir}>
+                {t('terms.section4.title')}
               </h2>
-              <div className="bg-brand-dark border border-red-500/30 rounded-2xl p-6 space-y-3">
-                <p className="text-xl text-white font-bold text-right" dir="rtl">
-                  הרוכש והמשתתף חייבים להיות בגיל 18 שנים ומעלה 🔞
+              <div className="bg-brand-dark border border-brand-gold/30 rounded-2xl p-6 space-y-3" dir={dir} style={{ textAlign: 'start' }}>
+                <p className="text-xl text-white font-bold text-start" dir={dir}>
+                  {t('terms.section4.families')}
                 </p>
-                <p className="text-gray-300 text-right" dir="rtl">
-                  רכישת כרטיסים והשתתפות בסיור מאשרת שהנך בגיל 18 ומעלה.
+                <p className="text-gray-300 text-start" dir={dir}>
+                  {t('terms.section4.purchaser')}
                 </p>
               </div>
             </div>
@@ -257,9 +256,7 @@ const Terms = ({ inquiry = false }) => {
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">מועדי הסיורים :1</h3>
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
                 <p className="text-gray-300 text-right" dir="rtl">הסיורים מתקיימים <strong>בימי חמישי בלבד</strong> <span className="text-brand-gold">📅</span></p>
-                {inquiry
-                  ? <p className="text-gray-300 text-right" dir="rtl">השעה המדויקת של תחילת הסיור מתואמת אישית עם חיליק <span className="text-brand-gold">⏰</span></p>
-                  : <p className="text-gray-300 text-right" dir="rtl">השעה המדויקת של תחילת הסיור תישלח במייל אישור ההזמנה <span className="text-brand-gold">⏰</span></p>}
+                <p className="text-gray-300 text-right" dir="rtl">הסיור מתחיל <strong>בשעה 20:00</strong> בבני ברק <span className="text-brand-gold">⏰</span></p>
                 <p className="text-gray-300 text-right" dir="rtl">מומלץ להגיע <strong>10 דקות לפני</strong> שעת תחילת הסיור <span className="text-brand-gold">⏱️</span></p>
               </div>
             </div>
@@ -268,12 +265,11 @@ const Terms = ({ inquiry = false }) => {
             <div className="mb-6 bg-brand-dark border border-white/20 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-brand-gold mb-4 text-right" dir="rtl">נקודת מפגש :2</h3>
               <div className="space-y-3" dir="rtl" style={{ direction: 'rtl', textAlign: 'right' }}>
-                <p className="text-gray-300 text-right" dir="rtl">נקודת המפגש משתנה בהתאם לסיור הספציפי <span className="text-brand-gold">📍</span></p>
+                <p className="text-gray-300 text-right" dir="rtl">נקודת המפגש נמצאת בבני ברק <span className="text-brand-gold">📍</span></p>
                 {inquiry
-                  ? <p className="text-gray-300 text-right" dir="rtl">פרטי נקודת המפגש המדויקת (כתובת וכיוונים) מתואמים אישית עם חיליק <span className="text-brand-gold">💬</span></p>
+                  ? <p className="text-gray-300 text-right" dir="rtl">הכתובת המדויקת של נקודת המפגש (כתובת וכיוונים) נמסרת אישית על ידי חיליק <strong>בשבוע הסיור</strong> <span className="text-brand-gold">💬</span></p>
                   : <>
-                    <p className="text-gray-300 text-right" dir="rtl">פרטי נקודת המפגש המדויקת (כתובת וכיוונים) יישלחו במייל אישור <span className="text-brand-gold">✉️</span></p>
-                    <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני הסיור</strong> - תישלח תזכורת עם כל הפרטים לנקודת המפגש <span className="text-brand-gold">📧</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl">הכתובת המדויקת של נקודת המפגש (כתובת וכיוונים) תישלח <strong>בשבוע הסיור</strong> <span className="text-brand-gold">✉️</span></p>
                     <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני הסיור</strong> - תתקבל תזכורת SMS/WhatsApp נוספת <span className="text-green-500">💬</span></p>
                   </>}
               </div>
@@ -308,7 +304,7 @@ const Terms = ({ inquiry = false }) => {
                   : <>
                     <p className="text-gray-300 text-right" dir="rtl">לאחר ביצוע התשלום - תקבל/י <strong>מייל אישור מיידי</strong> <span className="text-brand-gold">✅</span></p>
                     <p className="text-gray-300 text-right" dir="rtl">המייל יכלול: מספר הזמנה, תאריך הסיור, מספר משתתפים <span className="text-brand-gold">📝</span></p>
-                    <p className="text-gray-300 text-right" dir="rtl"><strong>שבוע לפני</strong> - מייל עם פרטי נקודת המפגש והוראות הגעה <span className="text-brand-gold">📧</span></p>
+                    <p className="text-gray-300 text-right" dir="rtl"><strong>בשבוע הסיור</strong> - הכתובת המדויקת של נקודת המפגש והוראות הגעה <span className="text-brand-gold">📧</span></p>
                     <p className="text-gray-300 text-right" dir="rtl"><strong>יום לפני</strong> - תזכורת SMS/WhatsApp <span className="text-green-500">💬</span></p>
                   </>}
               </div>

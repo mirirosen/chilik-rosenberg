@@ -118,4 +118,9 @@ export const demoBookingApi = {
     return { ...result, paymentUrl: `${window.location.origin}/booking?demoCheckout=${encodeURIComponent(result.bookingId)}` };
   },
   async getPaymentStatus(id, { signal } = {}) { if (signal?.aborted) fail('booking-request-interrupted'); return getDemoBooking(id); },
+  async retryCreditPayment(id) {
+    const b = getDemoBooking(id);
+    if (b.status !== 'payment_pending' || b.paymentStatus !== 'awaiting_payment') fail('booking-closed');
+    return { bookingId: id, paymentUrl: `${window.location.origin}/booking?demoCheckout=${encodeURIComponent(id)}`, retried: true };
+  },
 };

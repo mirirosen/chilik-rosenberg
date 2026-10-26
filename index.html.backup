@@ -255,9 +255,7 @@
                     <div className="bg-[#1a1a1c] py-16 border-b border-white/5 text-center">
                         <div className="max-w-5xl mx-auto px-6 text-center">
                             <div className="flex flex-col items-center mb-10 text-center">
-                                <div className="flex gap-1 mb-2 text-[#E9C46A]"><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i></div>
-                                <p className="text-lg font-bold">דירוג 5.0/5 מבוסס על 28 ביקורות מאומתות</p>
-                            </div>
+                                <div className="flex gap-1 mb-2 text-[#E9C46A]"><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i><i data-lucide="star" fill="currentColor" size={24}></i></div>                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-right">
                                 <article className="p-8 bg-white/5 rounded-3xl border border-white/5 shadow-2xl">
                                     <h4 className="text-[#E9C46A] font-bold mb-3 text-xl font-serif text-right">מבט של בן-בית</h4>

@@ -19,8 +19,8 @@ for (const [language, resources] of [['he', he], ['en', en]]) {
     faqs: bookingFaqOverrides(language, resources),
     common: resources.common,
     seo: {
-      admin: { title: language === 'he' ? 'ניהול הזמנות — חיליק' : 'Booking management — Chilik', description: '' },
-      booking: { title: language === 'he' ? 'הזמנת סיור עם חיליק' : 'Book a tour with Chilik', description: bookingDesign[language].description },
+      admin: { title: language === 'he' ? 'ניהול הזמנות — חיליק' : 'Booking management — Hilik', description: '' },
+      booking: { title: language === 'he' ? 'הזמנת סיור עם חיליק' : 'Book a tour with Hilik', description: bookingDesign[language].description },
       confirmation: { title: language === 'he' ? 'מצב ההזמנה' : 'Booking status', description: '' },
     },
   }, true, true);

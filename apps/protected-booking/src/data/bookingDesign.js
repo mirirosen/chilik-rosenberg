@@ -2,7 +2,7 @@ export const bookingDesign = {
   he: {
     eyebrow: 'סיור קולינרי עם חיליק בבני ברק', title: 'בואו רעבים.', titleAccent: 'תחזרו עם סיפורים.',
     description: 'ביום חמישי, בני ברק מתכוננת לשבת. בואו לטעום, לפגוש ולשמוע את הסיפורים שמאחורי הרחובות — איתי, מבפנים.',
-    hostNote: 'מחכה לפגוש אתכם, חיליק', food: 'טעימות מהמטבח היהודי', time: 'כ־2.5–3 שעות של גילויים', group: 'חמישי ב־20:00, בני ברק · עד 30 משתתפים',
+    hostNote: 'מחכה לפגוש אתכם, חיליק', food: 'טעימות מהמטבח היהודי', time: 'כ־2.5–3 שעות של גילויים', group: 'חמישי ב־20:00, בני ברק · עברית ואנגלית',
     priceLabel: 'ערב אחד. הרבה מה לגלות.', perGuest: 'למשתתף', priceIncludes: 'כולל הסיור והטעימות',
     personal: 'מתכננים סיור פרטי או מגיעים כקבוצה?', contact: 'דברו איתי',
     steps: 'שלבי ההזמנה', select: 'בוחרים סיור', details: 'פרטים אישיים', payment: 'תשלום', dateTitle: 'איזה חמישי מתאים לכם?', dateHint: 'בחרו תאריך ומספר משתתפים. אני אדאג לסיפורים.',
@@ -12,9 +12,9 @@ export const bookingDesign = {
     schedule: 'תחילת הסיור ב־20:00 · משך הסיור כ־2.5–3 שעות',
   },
   en: {
-    eyebrow: 'A culinary tour of Bnei Brak with Chilik', title: 'Come hungry.', titleAccent: 'Leave with stories.',
+    eyebrow: 'A culinary tour of Bnei Brak with Hilik', title: 'Come hungry.', titleAccent: 'Leave with stories.',
     description: 'On Thursdays, Bnei Brak gets ready for Shabbat. Come taste the food, meet the people and discover the stories behind the streets — with me, from the inside.',
-    hostNote: 'Looking forward to meeting you', food: 'Traditional Jewish food tastings', time: 'Around 2½–3 hours to explore', group: 'Thursday at 20:00, Bnei Brak · up to 30 guests',
+    hostNote: 'Looking forward to meeting you', food: 'Traditional Jewish food tastings', time: 'Around 2½–3 hours to explore', group: 'Thursday at 20:00, Bnei Brak · Hebrew & English',
     priceLabel: 'One evening. So much to discover.', perGuest: 'per guest', priceIncludes: 'Tour and food tastings included',
     personal: 'Planning a private tour or bringing a group?', contact: 'Let’s talk',
     steps: 'Booking steps', select: 'Your tour', details: 'Your details', payment: 'Payment', dateTitle: 'Which Thursday is yours?', dateHint: 'Pick a date and your party size. I’ll bring the stories.',

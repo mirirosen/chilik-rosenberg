@@ -1,0 +1,13 @@
+/* Guide pages only: light brand header and booking CTA, using the main site's
+   header palette (--target-* in site-design.css) and gold button style. */
+html{scroll-padding-top:5rem}
+.guide-header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem clamp(1rem,4vw,4rem);background:rgb(250 247 240 / .97);border-bottom:1px solid #ded5c5;font-family:Arial,sans-serif}
+.guide-header__brand{color:#795719;font-family:Georgia,serif;font-weight:900;font-size:clamp(1rem,3.8vw,1.5rem);line-height:1.15;text-decoration:none}
+.guide-header__brand:focus-visible,.guide-cta__button:focus-visible{outline:2px solid #795719;outline-offset:4px}
+.guide-cta__button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:13px 24px;border-radius:12px;background:#e6b948;color:#302819;font-weight:700;font-size:16px;line-height:1.2;text-align:center;text-decoration:none;transition:background .18s}
+.guide-cta__button:hover{background:#f0c85f}
+.guide-header .guide-cta__button{min-height:44px;padding:8px 16px;white-space:nowrap}
+.organic-overview a.guide-cta__button{color:#302819;text-decoration:none}
+.organic-overview .guide-cta{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.5rem;margin:3rem 0;padding:1.5rem;border:1px solid #dfc47c55;border-radius:16px}
+.organic-overview .guide-cta h2{flex-basis:100%;margin:0}
+main.organic-overview{margin-top:2rem}

@@ -10,6 +10,7 @@ const { createGmailSender } = require('./mailer');
 const { createNotifier } = require('./notifier');
 const { createWahaSender } = require('./whatsapp');
 const { createWaNotifier } = require('./wa-notifier');
+const { isTestMode, guardEmailSend, guardWhatsAppSend } = require('./test-mode');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -34,7 +35,7 @@ function getNotifier() {
   const customerCutoffMs = Date.parse(CUSTOMER_CUTOFF.value() || '');
   notifier = createNotifier({
     customer: { enabled: CUSTOMER_EMAILS.value() === true, cutoffMs: Number.isFinite(customerCutoffMs) ? customerCutoffMs : null },
-    db, send: createGmailSender(GMAIL_APP_PASSWORD.value()), ownerTo: OWNER_TO.value(), cutoffMs,
+    db, send: guardEmailSend(createGmailSender(GMAIL_APP_PASSWORD.value()), isTestMode()), ownerTo: OWNER_TO.value(), cutoffMs,
     serverTimestamp: () => FieldValue.serverTimestamp(), increment: n => FieldValue.increment(n), fromMillis: ms => Timestamp.fromMillis(ms),
   });
   return notifier;
@@ -69,7 +70,7 @@ let wa = null;
 function getWa() {
   if (wa) return wa;
   wa = createWaNotifier({
-    db, send: createWahaSender({ origin: WAHA_API_ORIGIN.value(), apiKey: WAHA_API_KEY.value(), session: WAHA_SESSION.value() }),
+    db, send: guardWhatsAppSend(createWahaSender({ origin: WAHA_API_ORIGIN.value(), apiKey: WAHA_API_KEY.value(), session: WAHA_SESSION.value() }), isTestMode()),
     ownerTo: WA_OWNER_TO.value(), cutoffMs: Date.parse(WA_CUTOFF.value()), customerEnabled: WA_CUSTOMER.value() === 'true',
     serverTimestamp: () => admin.firestore.FieldValue.serverTimestamp(),
   });

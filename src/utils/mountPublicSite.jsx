@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom';
 // Explicit saved English and all isolated/private/demo shells keep client render.
 export function mountPublicSite(element, language) {
   const root = document.getElementById('root');
-  if (root.dataset.prerender === language && ['/', '/index.html'].includes(window.location.pathname)) {
+  if (root.dataset.prerender === language && ['/', '/index.html', '/en'].includes(window.location.pathname)) {
     return ReactDOM.hydrateRoot(root, element);
   }
   const client = ReactDOM.createRoot(root);
