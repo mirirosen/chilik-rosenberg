@@ -47,6 +47,12 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
     assert(faq && faq.mainEntity.length >= 6, file + ' planning FAQ');
     const visible = [...doc.querySelectorAll('#guide-faq section')].map(section => ({ question: section.querySelector('h3').textContent, answer: section.querySelector('p').textContent }));
     assert.deepEqual(faq.mainEntity.map(question => ({ question: question.name, answer: question.acceptedAnswer.text })), visible, file + ' FAQ/schema parity');
+    // On the booking site the English guide links to the English homepage (/en).
+    const home = mode === 'booking' && file.endsWith('-en.html') ? '/en' : '/';
+    assert.equal(doc.querySelector('header.guide-header > a.guide-header__brand')?.getAttribute('href'), home, file + ' brand header links home');
+    const ctas = [...doc.querySelectorAll('a.guide-cta__button')];
+    assert(doc.querySelector('header.guide-header a.guide-cta__button') && doc.querySelector('main .guide-cta a.guide-cta__button'), file + ' booking CTA at top and end');
+    for (const cta of ctas) assert.equal(cta.getAttribute('href'), home + '#date-selection', file + ' booking CTA destination');
   }
   const quotedPrices = [...doc.querySelector('main').textContent.matchAll(/(\d+)\s*(?:ש״ח|₪)|₪\s*(\d+)/g)].map(match => Number(match[1] || match[2]));
   for (const quotedPrice of quotedPrices) assert.equal(quotedPrice, price, `${file}: published price diverged from confirmed server price`);
