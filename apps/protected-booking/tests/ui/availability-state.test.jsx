@@ -46,13 +46,33 @@ it('date cards remain disabled during loading and outage, and recover with data'
   expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, common.loading');
   act(() => mocks.subscriptions.settings.error(new Error('permission-denied')));
   expect(card.disabled).toBe(true);
-  expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, common.availabilityUnavailable');
-  expect(screen.getByRole('status').textContent).toBe('common.availabilityUnavailable');
+  // An outage reads as a neutral pending state, never as a broken-system error.
+  expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.availabilityPending');
+  expect(card.classList.contains('is-pending')).toBe(true);
+  expect(card.querySelector('small i')).toBeNull();
+  const notice = screen.getByRole('status');
+  expect(notice.textContent).toBe('bookingSection.availabilityRetry');
+  expect(notice.className).toBe('booking-screen__notice');
+  expect(screen.queryByText('common.availabilityUnavailable')).toBeNull();
   expect(screen.queryByText('bookingSection.available')).toBeNull();
   act(() => { mocks.subscriptions.settings.next(settings); mocks.subscriptions.tours.next(tours); });
   expect(card.disabled).toBe(false);
+  expect(card.classList.contains('is-pending')).toBe(false);
   expect(screen.getByText('bookingSection.available')).toBeTruthy();
   expect(mocks.getDoc).not.toHaveBeenCalled();
+});
+
+it('real sold-out state still shows on the card', () => {
+  render(<BookingSection />);
+  act(() => {
+    mocks.subscriptions.settings.next({ exists: () => true, data: () => ({ globalMaxParticipants: 12, blocked: [], soldOut: ['2026-10-08'] }) });
+    mocks.subscriptions.tours.next(tours);
+  });
+  const card = screen.getByRole('button', { name: /^bookingSection.dateCardLabel/ });
+  expect(card.disabled).toBe(true);
+  expect(card.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.soldOut');
+  expect(card.classList.contains('is-pending')).toBe(false);
+  expect(screen.queryByRole('status')).toBeNull();
 });
 
 it('participant plus cannot create an uneditable checkout above the server limit of20', () => {
