@@ -7,7 +7,7 @@ const {checkGate,ACK_VAR,ACK_VALUE}=require(gatePath);
 // The live admin UI only confirms capacityReserved bookings, so a functions-only deploy must be refused.
 test('booking functions deploy config runs the no-hold release gate before deploy',()=>{
  const config=JSON.parse(fs.readFileSync(path.join(root,'firebase.booking.functions.json'),'utf8'));
- assert.deepEqual(config.functions.predeploy,['node scripts/assert-no-hold-release-gate.cjs']);
+ assert.deepEqual(config.functions.predeploy,['node scripts/assert-no-hold-release-gate.cjs','node scripts/assert-integration-cutoff.cjs']);
 });
 test('release gate blocks without the explicit functions+hosting acknowledgement',()=>{
  assert.equal(checkGate({}).ok,false);

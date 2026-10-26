@@ -64,7 +64,7 @@ const Hero = () => {
       </div>
       <div className="target-hero__copy">
         <p className="target-eyebrow" data-motion="hero-line">{t('hero.badge')}</p>
-        <h1 data-motion="hero-line">{t('hero.title')}</h1>
+        <h1 data-motion="hero-line"><span className="target-hero__keyword">{t('hero.keyword')}</span>{' '}{t('hero.title')}</h1>
         <p className="target-hero__subtitle" data-motion="hero-line">{t('hero.subtitle')}</p>
         <button onClick={scrollToDateSelection} className="target-button" data-motion="hero-cta">{t('hero.cta')}</button>
         <a className="target-terms" href="/terms">{t('header.terms')}</a>

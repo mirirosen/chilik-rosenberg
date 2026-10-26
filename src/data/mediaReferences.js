@@ -40,7 +40,7 @@ const groups = {
     ['linkedin', 'LinkedIn', 'LinkedIn', 'הפרופיל של חיליק בלינקדאין', 'Hilik’s LinkedIn profile', 'https://www.linkedin.com/in/hilik-rosenberg-424250256', null, 'visit'],
     ['tiktok-magazine', 'TikTok · magazine_food', 'TikTok · magazine_food', 'סרטון מהסיור של magazine_food', 'Tour video by magazine_food', 'https://www.tiktok.com/@magazine_food/video/7370656118009253138', null, 'watch'],
     ['tiktok-eat-drink', 'TikTok · eat.drink.fly.repeat', 'TikTok · eat.drink.fly.repeat', 'סרטון מהסיור של eat.drink.fly.repeat', 'Tour video by eat.drink.fly.repeat', 'https://www.tiktok.com/@eat.drink.fly.repeat/video/7440874625111821586', null, 'watch'],
-    ['tour-site', 'סיורי חיליק', 'Chilik Tours', 'אתר הסיורים הרשמי', 'The official tour website', 'https://www.chilik-tours.com/', null, 'visit'],
+    ['tour-site', 'סיורי חיליק', 'Hilik Tours', 'אתר הסיורים הרשמי', 'The official tour website', 'https://www.chilik-tours.com/', null, 'visit'],
     ['gula-show', 'גולה', 'Gula', '״חרדי במופע חושף״ — המופע בגולה', '“A Haredi Revealing Show” — at Gula', 'https://gula.org.il/87356', null, 'visit'],
     ['foodish-tour', 'FOODISH · מוזיאון אנו', 'FOODISH · ANU Museum', 'סיור החלות בבני ברק — אירוע שהסתיים', 'Bnei Brak challah tour — past event', 'https://foodish.anumuseum.org.il/en/event/bnei-brak-challah-bakery-tour/', '2025-11-13', 'visit'],
     ['funzing', 'Funzing', 'Funzing', 'עמוד המארח של חיליק', 'Hilik’s host profile', 'https://il.funzing.com/host/436734', null, 'visit'],
