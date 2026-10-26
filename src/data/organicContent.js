@@ -1,3 +1,5 @@
+import { mediaReferences } from './mediaReferences.js';
+
 export const siteOrigin = 'https://www.chilik-tours.com';
 export const guidePaths = ['/guides/bnei-brak-food-tour.html', '/guides/private-tour-bnei-brak.html', '/guides/bnei-brak-food-tour-en.html'];
 
@@ -28,14 +30,26 @@ export const organicCopy = {
   },
 };
 
-export function buildHomeSchema({ language, description, faqs }) {
+// Name spellings already used on the site and its linked profiles (Hilik/Chilik, Rosenberg/Rozenberg).
+const personNames = { he: 'חיליק רוזנברג', en: 'Chilik Rosenberg' };
+const nameVariants = ['Chilik Rosenberg', 'Hilik Rosenberg', 'Hilik Rozenberg', 'חיליק רוזנברג'];
+// Only Chilik's own profiles from the site's media data (not third-party coverage).
+const profileIds = ['facebook', 'youtube-channel', 'instagram', 'x', 'linkedin'];
+export const sameAsProfiles = profileIds.map(id => mediaReferences.find(item => item.id === id)?.url).filter(Boolean);
+// The address shown in the site footer (footer.address).
+const footerAddress = { he: { streetAddress: 'רחוב לחי 11', addressLocality: 'בני ברק' }, en: { streetAddress: '11 Lehi Street', addressLocality: 'Bnei Brak' } };
+export const PRICE_PER_GUEST = 250;
+
+export function buildHomeSchema({ language, description, faqs, path = '/' }) {
   const lang = language?.startsWith('en') ? 'en' : 'he';
+  const pageUrl = siteOrigin + path;
   return { '@context': 'https://schema.org', '@graph': [
-    { '@type': 'Person', '@id': `${siteOrigin}/#chilik`, name: lang === 'he' ? 'חיליק רוזנברג' : 'Chilik Rosenberg', url: siteOrigin + '/', description: organicCopy[lang].intro },
-    { '@type': 'Organization', '@id': `${siteOrigin}/#organization`, name: lang === 'he' ? 'סיורים עם חיליק רוזנברג' : 'Chilik Rosenberg Tours', url: siteOrigin + '/', telephone: '+972506724312', email: 'hr20192022@gmail.com', founder: { '@id': `${siteOrigin}/#chilik` } },
-    { '@type': 'WebSite', '@id': `${siteOrigin}/#website`, url: siteOrigin + '/', name: lang === 'he' ? 'חיליק רוזנברג' : 'Chilik Rosenberg', inLanguage: ['he', 'en'], publisher: { '@id': `${siteOrigin}/#organization` } },
-    { '@type': 'WebPage', '@id': `${siteOrigin}/#webpage`, url: siteOrigin + '/', name: organicCopy[lang].title, description, inLanguage: lang, isPartOf: { '@id': `${siteOrigin}/#website` }, about: { '@id': `${siteOrigin}/#tour` } },
-    { '@type': 'Service', '@id': `${siteOrigin}/#tour`, name: organicCopy[lang].title, description: organicCopy[lang].intro, serviceType: lang === 'he' ? 'סיור קולינרי ותרבותי' : 'Culinary and cultural walking tour', areaServed: { '@type': 'City', name: 'Bnei Brak' }, provider: { '@id': `${siteOrigin}/#organization` } },
-    { '@type': 'FAQPage', '@id': `${siteOrigin}/#faq`, inLanguage: lang, mainEntity: Object.values(faqs).map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) },
+    { '@type': 'Person', '@id': `${siteOrigin}/#chilik`, name: personNames[lang], alternateName: nameVariants.filter(name => name !== personNames[lang]), url: siteOrigin + '/', description: organicCopy[lang].intro, sameAs: sameAsProfiles },
+    { '@type': 'LocalBusiness', '@id': `${siteOrigin}/#organization`, name: lang === 'he' ? 'סיורים עם חיליק רוזנברג' : 'Chilik Rosenberg Tours', alternateName: nameVariants, url: siteOrigin + '/', image: `${siteOrigin}/media/hero/bnei-brak-sequence-poster.webp`, telephone: '+972506724312', email: 'hr20192022@gmail.com', address: { '@type': 'PostalAddress', ...footerAddress[lang], addressCountry: 'IL' }, priceRange: `₪${PRICE_PER_GUEST}`, founder: { '@id': `${siteOrigin}/#chilik` }, sameAs: sameAsProfiles },
+    { '@type': 'WebSite', '@id': `${siteOrigin}/#website`, url: siteOrigin + '/', name: personNames[lang], inLanguage: ['he', 'en'], publisher: { '@id': `${siteOrigin}/#organization` } },
+    { '@type': 'WebPage', '@id': `${pageUrl}#webpage`, url: pageUrl, name: organicCopy[lang].title, description, inLanguage: lang, isPartOf: { '@id': `${siteOrigin}/#website` }, about: { '@id': `${siteOrigin}/#tour` } },
+    { '@type': 'TouristTrip', '@id': `${siteOrigin}/#tour`, name: organicCopy[lang].title, description: organicCopy[lang].intro, touristType: lang === 'he' ? 'סיור קולינרי ותרבותי' : 'Culinary and cultural walking tour', itinerary: { '@type': 'City', name: lang === 'he' ? 'בני ברק' : 'Bnei Brak' }, provider: { '@id': `${siteOrigin}/#organization` },
+      offers: { '@type': 'Offer', url: pageUrl, price: String(PRICE_PER_GUEST), priceCurrency: 'ILS', priceSpecification: { '@type': 'UnitPriceSpecification', price: PRICE_PER_GUEST, priceCurrency: 'ILS', referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitText: lang === 'he' ? 'משתתף' : 'participant' } } } },
+    { '@type': 'FAQPage', '@id': `${pageUrl}#faq`, inLanguage: lang, mainEntity: Object.values(faqs).map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) },
   ] };
 }
