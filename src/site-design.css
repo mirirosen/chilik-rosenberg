@@ -303,3 +303,17 @@ html[dir=ltr] .media-reference-card h3 svg { transform: rotate(180deg); }
   .media-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .media-filters button { padding: 10px; font-size: 13px; gap: 6px; }
 }
+
+/* Design round 2, October 2026 (design2/FINDINGS.md). Visual only: no copy,
+   DOM or flow changes. Field boundaries reach 3:1, the select arrow gets
+   breathing room, focus stays visible and the status card matches the form. */
+.booking-details-shell .booking-form-card :is(input:not([type=radio]):not([type=checkbox]),select,textarea), .site-admin-login form :is(input,select,textarea) { border-color: #8f826c; }
+.booking-details-shell .booking-form-card select, .booking-details-shell .booking-form-card :is(input:not([type=radio]):not([type=checkbox]),select,textarea).bg-brand-dark:is(select) { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23795719' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 16px; background-position: left 16px center; padding-inline-end: 44px; }
+.booking-details-shell .booking-form-card select:dir(ltr), .booking-details-shell .booking-form-card :is(input:not([type=radio]):not([type=checkbox]),select,textarea).bg-brand-dark:is(select):dir(ltr) { background-position: right 16px center; }
+.site-admin-login form :is(input,select,textarea):focus-visible { outline: 3px solid #1373e6; outline-offset: 2px; border-color: #795719; }
+.site-admin-login input::placeholder { color: #746a5c; opacity: 1; }
+.site-admin-login form button[type=button] { border-color: #b8aa91; }
+.booking-details-shell .booking-form-card [class~="bg-brand-gold/10"] button[type=button] { color: var(--target-ink); border-color: #b8aa91; background: #fffdf8; }
+.booking-status-card .booking-no-hold-notice { padding: 12px 16px; border-radius: 12px; line-height: 1.6; }
+.booking-status-card>.text-6xl:first-child { display: grid; place-items: center; width: 72px; height: 72px; margin-inline: auto; border-radius: 50%; background: #f6eedc; border: 1px solid #d8c39a; color: #795719; font-size: 36px; line-height: 1; }
+.mobile-navigation .mobile-navigation__content :is(button,a).rounded-full { border-radius: 12px; }
