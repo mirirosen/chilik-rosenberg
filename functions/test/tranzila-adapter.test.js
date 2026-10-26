@@ -45,6 +45,17 @@ test('wrong order/terminal/index/amount/currency/type/cancellation/decline never
     await assert.rejects(p.verifyTransaction({ booking, transactionIndex: 42 }), /verification-pending/);
   }
 });
+test('only a successful report of this exact row with a non-000 processor response is marked declined', async () => {
+  const outcome = async (body, fetchImpl = respond(body)) => {
+    try { await createTranzilaAdapter({ config, fetchImpl }).verifyTransaction({ booking, transactionIndex: 42 }); return 'paid'; }
+    catch (error) { if (error.declined === true) { assert.equal(error.code, 'provider-verification-pending'); return 'declined'; } return error.code; }
+  };
+  assert.equal(await outcome({ transactions: [{ ...row, processor_response_code: '033' }] }), 'declined');
+  for (const patch of [{ processor_response_code: '033', user_defined_3: 'other' }, { processor_response_code: '033', child_terminal: 'other' }, { processor_response_code: '033', index: 43 }, { processor_response_code: undefined }, { processor_response_code: 33 }, { amount: 499 }]) assert.equal(await outcome({ transactions: [{ ...row, ...patch }] }), 'provider-verification-pending');
+  assert.equal(await outcome({ error_code: 5, transactions: [{ ...row, processor_response_code: '033' }] }), 'provider-verification-pending');
+  assert.equal(await outcome(null, async () => ({ ok: false })), 'payment-provider-unavailable');
+  assert.equal(await outcome(null, async () => { throw new Error('timeout'); }), 'payment-provider-unavailable');
+});
 test('ambiguous/empty report and transport outage fail closed', async () => {
   for (const transactions of [[], [row, row]]) await assert.rejects(createTranzilaAdapter({ config, fetchImpl: respond({ transactions }) }).verifyTransaction({ booking, transactionIndex: 42 }), /verification-pending/);
   await assert.rejects(createTranzilaAdapter({ config, fetchImpl: async () => ({ ok: false }) }).verifyTransaction({ booking, transactionIndex: 42 }), /provider-unavailable/);

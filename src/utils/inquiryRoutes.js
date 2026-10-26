@@ -1,6 +1,6 @@
 export function inquiryRoute(pathname, search = '') {
   try { pathname = decodeURIComponent(pathname); } catch { return 'not-found'; }
-  if (pathname === '/' || pathname === '/index.html') return 'home';
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/en') return 'home';
   if (pathname === '/terms' || pathname === '/תקנון') return 'terms';
   if (pathname === '/confirmation') return 'confirmation';
   if (pathname === '/booking') {

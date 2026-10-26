@@ -96,3 +96,10 @@ export async function createCreditPayment(booking, key) {
   if (!/^https:\/\/directng\.tranzila\.com\//.test(data.paymentUrl || '')) throw new Error('invalid-payment-url');
   return data;
 }
+// After a declined card: a fresh checkout for the same booking (server checks ownership).
+// Without paymentUrl the server found an existing capture; the caller re-checks status.
+export async function retryCreditPayment(bookingId) {
+  const data = await request('createPayment', { method: 'POST', body: JSON.stringify({ retryBookingId: bookingId }) });
+  if (data.paymentUrl !== undefined && !/^https:\/\/directng\.tranzila\.com\//.test(data.paymentUrl || '')) throw new Error('invalid-payment-url');
+  return data;
+}

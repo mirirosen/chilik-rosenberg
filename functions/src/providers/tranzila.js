@@ -147,6 +147,11 @@ function createTranzilaAdapter({ config = {}, fetchImpl = global.fetch, clock = 
     if (!report || !Array.isArray(report.transactions) || report.transactions.length !== 1 || (Object.hasOwn(report, 'error_code') && report.error_code !== 0)) throw fail('provider-verification-pending');
     const row = report.transactions[0];
     if (!row || typeof row !== 'object') throw fail('provider-verification-pending');
+    // A successful report for this exact row, terminal and order with a non-000
+    // processor response is a positively identified decline. The error code stays
+    // 'provider-verification-pending' for every caller; only the declined marker
+    // lets the declined-card retry skip this row. Anything else is not a decline.
+    if (Number(row.index) === index && row.child_terminal === config.terminal && orderMatches(row, config, booking.bookingId) && typeof row.processor_response_code === 'string' && /^\d{3}$/.test(row.processor_response_code) && row.processor_response_code !== '000') throw Object.assign(fail('provider-verification-pending'), { declined: true });
     if (Number(row.index) !== index || row.child_terminal !== config.terminal || !orderMatches(row, config, booking.bookingId) || reportMinorUnits(row.amount) !== money(booking.totalPrice) || String(row.currency) !== '1' || !verifiedCapture(booking, row) || !Object.hasOwn(row, 'cancelfdid') || !Object.hasOwn(row, 'cancelfdnumber') || row.cancelfdid != null || row.cancelfdnumber != null || row.processor_response_code !== '000' || !Object.hasOwn(row, 'authorization_number')) throw fail('provider-verification-pending');
     // Unknown/declined reports are NOT accepted as authenticated declines. They
     // remain pending until expiry or manual review; callback fields are ignored.

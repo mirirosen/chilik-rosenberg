@@ -16,15 +16,15 @@ const copy = {
     paymentNotice: 'התשלום ותנאי ההזמנה מתואמים אישית עם חיליק. האתר אינו מבצע תשלום או הרשמה אוטומטית.',
   },
   en: {
-    title: 'Ask about a tour', cta: 'Contact Chilik on WhatsApp', contact: 'Contact Chilik', short: 'Contact Chilik',
+    title: 'Ask about a tour', cta: 'Contact Hilik on WhatsApp', contact: 'Contact Hilik', short: 'Contact Hilik',
     notice: 'Availability and bookings are confirmed personally. An enquiry does not reserve a place or take payment.',
     draftNotice: 'This button opens a message draft. You must send it yourself in WhatsApp.',
-    draft: 'Hi Chilik, I would like to ask about a tour and availability, and arrange the booking personally.',
-    call: 'Call Chilik', email: 'Email Chilik',
+    draft: 'Hi Hilik, I would like to ask about a tour and availability, and arrange the booking personally.',
+    call: 'Call Hilik', email: 'Email Hilik',
     statusTitle: 'Check an existing booking',
-    statusNotice: 'This site currently does not check payment or booking status. Contact Chilik with your booking details for enquiries or cancellation. This page does not confirm payment, cancellation or a reserved place.',
+    statusNotice: 'This site currently does not check payment or booking status. Contact Hilik with your booking details for enquiries or cancellation. This page does not confirm payment, cancellation or a reserved place.',
     reference: 'Booking reference from this link, for enquiries only',
-    paymentNotice: 'Payment and booking arrangements are agreed personally with Chilik. This site does not take payment or register a booking automatically.',
+    paymentNotice: 'Payment and booking arrangements are agreed personally with Hilik. This site does not take payment or register a booking automatically.',
   },
 };
 
@@ -38,8 +38,8 @@ function resource(base, lang) {
     helpHub: { ...base.helpHub, register: inquiry.contact },
     terms: { ...base.terms, ui: { ...base.terms.ui, register: inquiry.title } },
     seo: { ...base.seo,
-      booking: { title: `${inquiry.title} | Chilik`, description: inquiry.notice },
-      confirmation: { title: `${inquiry.statusTitle} | Chilik`, description: inquiry.statusNotice },
+      booking: { title: `${inquiry.title} | Hilik`, description: inquiry.notice },
+      confirmation: { title: `${inquiry.statusTitle} | Hilik`, description: inquiry.statusNotice },
     },
   };
 }
@@ -48,6 +48,8 @@ function resource(base, lang) {
 // locale. A visitor's explicit language choice still overrides it.
 let initial = 'he';
 try { const saved = localStorage.getItem('language'); if (['he', 'en'].includes(saved)) initial = saved; } catch {}
+// The indexable English homepage always opens in English.
+if (typeof window !== 'undefined' && window.location?.pathname === '/en') initial = 'en';
 i18n.use(initReactI18next).init({ resources: { he: { translation: resource(he, 'he') }, en: { translation: resource(en, 'en') } }, lng: initial, fallbackLng: 'he', interpolation: { escapeValue: false }, react: { useSuspense: false } });
 function applyLanguage(language) {
   if (typeof document === 'undefined') return;

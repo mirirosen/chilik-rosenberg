@@ -86,6 +86,6 @@ function createRuntimePaymentFlow({ db, bookings, Timestamp, readConfiguration, 
     if (runtime.paymentIssues.length) throw fail();
     return createPaymentFlow({ db, bookings, Timestamp, provider: providerFactory({ config: runtime.config, clock }), urlsFor: createReturnUrls(runtime.urls), clock });
   };
-  return { create: async (...args) => current().create(...args), notify: async (...args) => current().notify(...args) };
+  return { create: async (...args) => current().create(...args), retry: async (...args) => current().retry(...args), notify: async (...args) => current().notify(...args) };
 }
 module.exports = { SECRET_NAMES, flag, returnUrlIssues, createReturnUrls, lookupConfigurationIssues, loadPaymentConfiguration, createRuntimePaymentFlow };
