@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ i18n: { language: 'he', dir: () => 'rtl' } }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key, i18n: { language: 'he', dir: () => 'rtl' } }) }));
 const gtagScripts = () => document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]');
 const events = () => (window.dataLayer || []).filter(entry => entry[0] === 'event').map(entry => [entry[1], entry[2]]);
 async function fresh(id) {
@@ -129,6 +129,69 @@ describe('purchase', () => {
     expect(events()).toEqual([]);
     // Another booking is still reported once.
     expect(reloaded.analytics.trackPurchase({ ...PAID, bookingId: 'BK-' + 'c'.repeat(24) })).toBe(true);
+  });
+});
+
+describe('page_location and management', () => {
+  const configOf = () => window.dataLayer.find(entry => entry[0] === 'config')[2];
+  afterEach(() => { window.history.replaceState({}, '', '/'); delete window['ga-disable-G-165V7SRZJK']; });
+  it('drops the query string on /booking and /confirmation only', async () => {
+    const { analytics } = await fresh();
+    expect(analytics.pageLocation('https://www.chilik-tours.com/confirmation?payment=failed&id=BK-' + 'a'.repeat(24))).toBe('https://www.chilik-tours.com/confirmation');
+    expect(analytics.pageLocation('https://www.chilik-tours.com/booking?date=2026-10-29&participants=2#x')).toBe('https://www.chilik-tours.com/booking');
+    expect(analytics.pageLocation('https://www.chilik-tours.com/en?utm_source=x')).toBe('https://www.chilik-tours.com/en?utm_source=x');
+    window.history.replaceState({}, '', '/confirmation?id=' + BOOKING);
+    analytics.setConsent(true);
+    expect(configOf().page_location).toBe(window.location.origin + '/confirmation');
+    expect(analytics.beforeNavigate('/booking?date=2026-10-29&participants=2')).toBe(false);
+    expect(window.dataLayer.filter(entry => entry[0] === 'set').at(-1)[1]).toEqual({ page_location: window.location.origin + '/booking' });
+  });
+  it('blocks every hit on /manage-bookings and forces a full page load from the SPA', async () => {
+    const { analytics } = await fresh();
+    analytics.setConsent(true);
+    expect(analytics.beforeNavigate('/manage-bookings')).toBe(true);
+    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+    expect(analytics.beforeNavigate('/terms')).toBe(false);
+    expect(window['ga-disable-G-165V7SRZJK']).toBe(false);
+    // A stored "accept" never loads gtag when the dashboard is opened directly.
+    gtagScripts().forEach(s => s.remove()); delete window.dataLayer;
+    window.history.replaceState({}, '', '/manage-bookings');
+    const direct = await fresh();
+    direct.analytics.initAnalytics();
+    expect(gtagScripts()).toHaveLength(0);
+    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+  });
+});
+
+describe('withdrawing consent', () => {
+  it('footer link appears only after accepting; it clears the choice and GA cookies and reloads', async () => {
+    const { analytics } = await fresh();
+    const { default: Footer } = await import('../../src/components/Footer');
+    const { container } = render(<Footer />);
+    expect(container.textContent).not.toContain('ביטול ההסכמה למדידה');
+    cleanup();
+    analytics.setConsent(true);
+    document.cookie = '_ga=GA1.1.123; path=/'; document.cookie = '_ga_165V7SRZJK=GS1.1.1; path=/'; document.cookie = 'other=1; path=/';
+    const reload = vi.fn();
+    render(<Footer />);
+    const button = screen.getByRole('button', { name: 'ביטול ההסכמה למדידה (Google Analytics)' });
+    expect(analytics.withdrawConsent({ reload })).toBe(true);
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(analytics.consentState()).toBe('unset');
+    expect(document.cookie).not.toMatch(/_ga/);
+    expect(document.cookie).toContain('other=1');
+    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+    expect(button).toBeTruthy();
+    document.cookie = 'other=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    delete window['ga-disable-G-165V7SRZJK'];
+  });
+});
+
+describe('hosting CSP for GA4', () => {
+  it('img-src allows GA collection hosts on public routes', () => {
+    const headers = JSON.parse(readFileSync('firebase.hosting.booking.json', 'utf8')).hosting.headers;
+    const csp = headers.find(rule => (rule.regex || rule.source) === '^[\\\\/]$').headers.find(h => h.key === 'Content-Security-Policy').value;
+    expect(csp).toMatch(/img-src [^;]*https:\/\/\*\.google-analytics\.com/);
   });
 });
 

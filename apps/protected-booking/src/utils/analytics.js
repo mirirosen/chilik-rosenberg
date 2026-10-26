@@ -30,15 +30,47 @@ export function consentState() {
   return value === 'granted' || value === 'denied' ? value : 'unset';
 }
 
+// Booking and confirmation URLs carry booking IDs and selections in the query
+// string; GA receives those pages without it. Other pages keep their URL.
+const QUERYLESS_PATHS = ['/booking', '/confirmation'];
+export function pageLocation(href) {
+  try {
+    const url = new URL(href);
+    if (QUERYLESS_PATHS.includes(url.pathname)) { url.search = ''; url.hash = ''; }
+    return url.toString();
+  } catch { return ''; }
+}
+// The management dashboard is never measured. GA's documented per-property
+// opt-out flag blocks every hit, including history-change page views.
+const MANAGEMENT_PATH = '/manage-bookings';
+function setMeasurementBlocked(blocked) {
+  if (analyticsConfigured() && typeof window !== 'undefined') window[`ga-disable-${measurementId}`] = blocked === true;
+}
+
+// Call BEFORE every SPA navigation (pushState or after popstate). Returns true when
+// the caller must do a full page load instead, because analytics is loaded and the
+// target is the management dashboard.
+export function beforeNavigate(href) {
+  if (!analyticsConfigured() || typeof window === 'undefined') return false;
+  let url;
+  try { url = new URL(href, window.location.href); } catch { return false; }
+  const management = url.pathname === MANAGEMENT_PATH;
+  setMeasurementBlocked(management);
+  if (loaded && !management && typeof window.gtag === 'function') window.gtag('set', { page_location: pageLocation(url.toString()) });
+  return loaded && management;
+}
+
 function load() {
   if (loaded || !analyticsConfigured() || typeof document === 'undefined') return;
+  if (window.location?.pathname === MANAGEMENT_PATH) { setMeasurementBlocked(true); return; }
   loaded = true;
+  setMeasurementBlocked(false);
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
   // Measurement only; advertising storage and signals stay off.
   window.gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   window.gtag('js', new Date());
-  window.gtag('config', measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
+  window.gtag('config', measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false, page_location: pageLocation(window.location.href) });
   const script = document.createElement('script');
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
@@ -50,6 +82,22 @@ export function setConsent(granted) {
   if (!analyticsConfigured()) return;
   storage()?.setItem(CONSENT_KEY, granted ? 'granted' : 'denied');
   if (granted) load();
+}
+
+// Footer "withdraw consent": forget the choice, stop measurement, remove the GA
+// cookies (_ga, _ga_*) for this host and its parent domains, then reload so the
+// gtag script is gone and the banner asks again.
+export function withdrawConsent({ reload = () => window.location.reload() } = {}) {
+  if (!analyticsConfigured() || typeof document === 'undefined') return false;
+  storage()?.removeItem(CONSENT_KEY);
+  setMeasurementBlocked(true);
+  const names = document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => n === '_ga' || n.startsWith('_ga_'));
+  const parts = window.location.hostname.split('.');
+  const domains = [''];
+  for (let i = 0; i < parts.length - 1; i++) domains.push(`; domain=.${parts.slice(i).join('.')}`);
+  for (const name of names) for (const domain of domains) document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+  reload();
+  return true;
 }
 
 // Call once at startup: restores an earlier "accept" without asking again.

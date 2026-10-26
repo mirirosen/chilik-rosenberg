@@ -8,7 +8,7 @@ import { IS_PREPROD, PREVIEW_NOTICE, disablePreviewContacts } from '../apps/prot
 import { applyRouteMetadata } from './utils/routeMetadata';
 import { BOOKING_INTENT } from './navigation/bookingIntent';
 import ConsentBanner from './components/ConsentBanner';
-import { analyticsConfigured, initAnalytics } from '../apps/protected-booking/src/utils/analytics';
+import { analyticsConfigured, beforeNavigate, initAnalytics } from '../apps/protected-booking/src/utils/analytics';
 
 // Load the booking and management SDKs after the public page can render.
 const BookingSection = lazy(() => import('../apps/protected-booking/src/components/BookingSection'));
@@ -71,7 +71,11 @@ export default function BookingSiteApp() {
   }, []);
 
   useEffect(() => {
-    const update = () => setLocation({ path: window.location.pathname, search: window.location.search });
+    // Registered before gtag loads, so it runs first: management is never measured.
+    const update = () => {
+      if (beforeNavigate(window.location.href)) { window.location.reload(); return; }
+      setLocation({ path: window.location.pathname, search: window.location.search });
+    };
     window.addEventListener('popstate', update);
     return () => window.removeEventListener('popstate', update);
   }, []);
@@ -83,7 +87,9 @@ export default function BookingSiteApp() {
     if (!HOME_PATHS.includes(location.path)) return;
     const english = i18n.language?.startsWith('en');
     if (english === (location.path === '/en')) return;
-    window.history.replaceState(window.history.state, '', (english ? '/en' : '/') + window.location.search + window.location.hash);
+    const target = (english ? '/en' : '/') + window.location.search + window.location.hash;
+    beforeNavigate(target);
+    window.history.replaceState(window.history.state, '', target);
     setLocation({ path: window.location.pathname, search: window.location.search });
   }, [location.path, i18n.language]);
   useEffect(() => {
@@ -92,6 +98,7 @@ export default function BookingSiteApp() {
   }, [location, i18n.language, t, isStatus]);
 
   function navigate(path) {
+    if (beforeNavigate(path)) { window.location.assign(path); return; }
     window.history.pushState({}, '', path);
     setLocation({ path: window.location.pathname, search: window.location.search });
     window.scrollTo({ top: 0, behavior: 'auto' });
