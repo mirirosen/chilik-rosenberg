@@ -187,6 +187,13 @@ describe('withdrawing consent', () => {
   });
 });
 
+describe('privacy policy', () => {
+  it('documents GA4: consent only, ID, cookies, withdrawal link and Google as processor', () => {
+    const html = readFileSync('public/privacy.html', 'utf8');
+    for (const text of ['Google Analytics 4', 'G-165V7SRZJK', '_ga_*', 'ביטול ההסכמה למדידה (Google Analytics)', 'https://policies.google.com/privacy', 'מעבד מידע']) expect(html).toContain(text);
+  });
+});
+
 describe('hosting CSP for GA4', () => {
   it('img-src allows GA collection hosts on public routes', () => {
     const headers = JSON.parse(readFileSync('firebase.hosting.booking.json', 'utf8')).hosting.headers;

@@ -226,7 +226,9 @@
       "title": "Privacy & Data Security",
       "secure": "Personal information is stored securely and will not be transferred to third parties",
       "purpose": "Information is used solely for managing the booking",
-      "storage": "Data is stored on secure Firebase servers"
+      "storage": "Data is stored on secure Firebase servers",
+      "analytics": "Google Analytics 4 loads only if you accept it in the consent notice, with advertising features off and no name, phone, email or payment details. You can withdraw consent at any time with the link at the bottom of the site. Full details are in the privacy policy.",
+      "privacyLink": "Privacy policy"
     },
     "section7": {
       "title": "Contact",

@@ -375,6 +375,7 @@ const Terms = () => {
               <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.secure')} <span className="text-brand-gold">•</span></p>
               <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.purpose')} <span className="text-brand-gold">•</span></p>
               <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.storage')} <span className="text-brand-gold">•</span></p>
+              <p className="text-gray-300 text-start" dir={dir}>{t('terms.section6.analytics')} <a href="/privacy" className="text-brand-gold underline">{t('terms.section6.privacyLink')}</a></p>
             </div>
           </section>
 
