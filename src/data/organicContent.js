@@ -35,19 +35,20 @@ const personNames = { he: 'חיליק רוזנברג', en: 'Hilik Rozenberg' };
 export const SHORT_BRAND = { en: 'Hilik Tours', he: 'סיורי חיליק' };
 const nameVariants = ['Hilik Rozenberg', 'Chilik Rosenberg', 'Hilik Rosenberg', 'Chilik Rozenberg', 'חיליק רוזנברג'];
 export const TOUR_START_TIME = '20:00';
-// No sameAs: the social/profile links in mediaReferences are not yet confirmed by the
-// owner as Hilik's own, so the schema does not publish them.
-// The business address shown in the site footer (footer.address). It is NOT the meeting point:
-// the tour starts in Bnei Brak at an address sent during the tour week.
-const footerAddress = { he: { streetAddress: 'רחוב לחי 11', addressLocality: 'בני ברק' }, en: { streetAddress: '11 Lehi Street', addressLocality: 'Bnei Brak' } };
+import { mediaReferences } from './mediaReferences.js';
+// Owner-confirmed (2026-10-26) profiles that belong to Hilik; published as sameAs.
+export const SAME_AS_IDS = ['facebook', 'youtube-channel', 'instagram', 'x', 'linkedin', 'coffee-podcast', 'funzing', 'gula-show'];
+export const sameAsProfiles = SAME_AS_IDS.map(id => mediaReferences.find(item => item.id === id)?.url).filter(Boolean);
+// Business address is the city only (owner decision 2026-10-26: no street address or postal code anywhere).
+const footerAddress = { he: { addressLocality: 'בני ברק' }, en: { addressLocality: 'Bnei Brak' } };
 export const PRICE_PER_GUEST = 250;
 
 export function buildHomeSchema({ language, description, faqs, path = '/' }) {
   const lang = language?.startsWith('en') ? 'en' : 'he';
   const pageUrl = siteOrigin + path;
   return { '@context': 'https://schema.org', '@graph': [
-    { '@type': 'Person', '@id': `${siteOrigin}/#chilik`, name: personNames[lang], alternateName: nameVariants.filter(name => name !== personNames[lang]), url: siteOrigin + '/', description: organicCopy[lang].intro, knowsLanguage: ['he', 'en'] },
-    { '@type': 'LocalBusiness', '@id': `${siteOrigin}/#organization`, name: lang === 'he' ? 'סיורים עם חיליק רוזנברג' : 'Hilik Rozenberg Tours', alternateName: [SHORT_BRAND.en, SHORT_BRAND.he, ...nameVariants], url: siteOrigin + '/', image: `${siteOrigin}/media/hero/bnei-brak-sequence-poster.webp`, telephone: '+972506724312', email: 'hr20192022@gmail.com', address: { '@type': 'PostalAddress', ...footerAddress[lang], addressCountry: 'IL' }, priceRange: `₪${PRICE_PER_GUEST}`, contactPoint: { '@type': 'ContactPoint', contactType: 'reservations', telephone: '+972506724312', email: 'hr20192022@gmail.com', availableLanguage: ['Hebrew', 'English'] }, founder: { '@id': `${siteOrigin}/#chilik` } },
+    { '@type': 'Person', '@id': `${siteOrigin}/#chilik`, name: personNames[lang], alternateName: nameVariants.filter(name => name !== personNames[lang]), url: siteOrigin + '/', description: organicCopy[lang].intro, knowsLanguage: ['he', 'en'], sameAs: sameAsProfiles },
+    { '@type': 'LocalBusiness', '@id': `${siteOrigin}/#organization`, name: lang === 'he' ? 'סיורים עם חיליק רוזנברג' : 'Hilik Rozenberg Tours', alternateName: [SHORT_BRAND.en, SHORT_BRAND.he, ...nameVariants], url: siteOrigin + '/', image: `${siteOrigin}/media/hero/bnei-brak-sequence-poster.webp`, telephone: '+972506724312', email: 'hr20192022@gmail.com', address: { '@type': 'PostalAddress', ...footerAddress[lang], addressCountry: 'IL' }, priceRange: `₪${PRICE_PER_GUEST}`, contactPoint: { '@type': 'ContactPoint', contactType: 'reservations', telephone: '+972506724312', email: 'hr20192022@gmail.com', availableLanguage: ['Hebrew', 'English'] }, founder: { '@id': `${siteOrigin}/#chilik` }, sameAs: sameAsProfiles },
     { '@type': 'WebSite', '@id': `${siteOrigin}/#website`, url: siteOrigin + '/', name: personNames[lang], inLanguage: ['he', 'en'], publisher: { '@id': `${siteOrigin}/#organization` } },
     { '@type': 'WebPage', '@id': `${pageUrl}#webpage`, url: pageUrl, name: organicCopy[lang].title, description, inLanguage: lang, isPartOf: { '@id': `${siteOrigin}/#website` }, about: { '@id': `${siteOrigin}/#tour` } },
     { '@type': 'TouristTrip', '@id': `${siteOrigin}/#tour`, name: organicCopy[lang].title, description: organicCopy[lang].intro, touristType: lang === 'he' ? 'סיור קולינרי ותרבותי' : 'Culinary and cultural walking tour', itinerary: { '@type': 'City', name: lang === 'he' ? 'בני ברק' : 'Bnei Brak' }, departureTime: `${TOUR_START_TIME}:00`,

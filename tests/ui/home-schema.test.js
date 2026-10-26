@@ -22,10 +22,12 @@ describe('home JSON-LD', () => {
       expect(JSON.stringify(node(graph, 'TouristTrip'))).not.toMatch(/רחוב לחי|לחי 11|Lehi|Lechi/);
     }
   });
-  it('LocalBusiness keeps the footer address as its business address, with no rating or review', () => {
-    expect(node(heGraph, 'LocalBusiness').address).toMatchObject({ streetAddress: 'רחוב לחי 11', addressLocality: 'בני ברק', addressCountry: 'IL' });
-    expect(he.footer.address).toBe('רחוב לחי 11, בני ברק');
-    expect(node(enGraph, 'LocalBusiness').address).toMatchObject({ streetAddress: '11 Lehi Street', addressLocality: 'Bnei Brak' });
+  it('LocalBusiness address is Bnei Brak city only (no street or postal code), with no rating or review', () => {
+    expect(node(heGraph, 'LocalBusiness').address).toEqual({ '@type': 'PostalAddress', addressLocality: 'בני ברק', addressCountry: 'IL' });
+    expect(node(enGraph, 'LocalBusiness').address).toEqual({ '@type': 'PostalAddress', addressLocality: 'Bnei Brak', addressCountry: 'IL' });
+    expect(he.footer.address).toBe('בני ברק');
+    expect(en.footer.address).toBe('Bnei Brak');
+    expect(JSON.stringify([heGraph, enGraph, he, en])).not.toMatch(/streetAddress|postalCode|Lehi|Lechi|\u05dc\u05d7\u05d9 11/);
     expect(JSON.stringify([heGraph, enGraph])).not.toMatch(/aggregateRating|"Review"|ratingValue/i);
   });
   it('tour languages are Hebrew and English (valid properties only)', () => {
@@ -41,11 +43,12 @@ describe('home JSON-LD', () => {
     expect(node(enGraph, 'LocalBusiness').alternateName[0]).toBe('Hilik Tours');
     expect(organicCopy.en.title).toBe('Bnei Brak culinary tour with Hilik Rozenberg');
   });
-  it('publishes no sameAs (social profiles await owner confirmation)', () => {
+  it('publishes the 8 owner-confirmed profiles as sameAs on Person and LocalBusiness', () => {
+    const ids = ['facebook', 'youtube-channel', 'instagram', 'x', 'linkedin', 'coffee-podcast', 'funzing', 'gula-show'];
+    const urls = ids.map(id => mediaReferences.find(item => item.id === id).url);
     for (const graph of [heGraph, enGraph]) {
-      expect(JSON.stringify(graph)).not.toContain('sameAs');
-      const text = JSON.stringify(graph);
-      for (const { url } of mediaReferences.filter(item => item.category === 'online' && item.id !== 'tour-site')) expect(text).not.toContain(url);
+      expect(node(graph, 'Person').sameAs).toEqual(urls);
+      expect(node(graph, 'LocalBusiness').sameAs).toEqual(urls);
     }
   });
   it('the FAQ schema carries the start time, meeting point and languages in both languages', () => {
