@@ -42,9 +42,10 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
     if (data.serverAvailabilityEnabled) {
       const row = freshAvailabilityRow(data, dateStr);
       if (!row) return pending;
-      return row.available
-        ? { available: true, spots: row.availableSpots, text: t('bookingSection.available') }
-        : { available: false, text: t('bookingSection.soldOut') };
+      if (row.available) return { available: true, spots: row.availableSpots, text: t('bookingSection.available') };
+      // The server returns the same generic closed row for sold out, admin blocks, unsynced
+      // calendar weeks and reconciliation holds, so it must not claim "sold out".
+      return { available: false, pending: true, text: t('bookingSection.notOpen'), detail: t('bookingSection.notOpenDetail') };
     }
     if (data.blocked?.includes(dateStr)) return { available: false, text: t('bookingSection.blocked') };
     const spots = getAvailableSpots(data, dateStr);
