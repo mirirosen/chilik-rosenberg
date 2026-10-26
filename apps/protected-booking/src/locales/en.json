@@ -45,19 +45,19 @@
       "notes": "Notes / Special Requests",
       "agreeToTerms": "I confirm that I am 18 or older and agree to the terms and conditions (including the cancellation policy)",
       "required": "Required field",
-      "submit": "Continue to payment",
+      "submit": "Continue to secure card payment",
+      "submitBit": "Continue to payment with Bit",
       "submitting": "Submitting booking...",
       "backToHome": "Cancel and return to homepage",
       "optional": "(optional)"
     },
     "paymentMethods": {
-      "bit": "Bit — arrange verified payment details first",
       "credit": "Credit Card",
-      "bankTransfer": "Bank transfer — arrange details first"
+      "bit": "Bit — secure payment in the app"
     },
     "payment": {
       "redirectingToSecure": "Redirecting to secure payment…",
-      "notConfigured": "Card payment is not set up yet. You can choose Bit or bank transfer, or contact us on WhatsApp.",
+      "notConfigured": "Card payment is not set up yet. Please contact us on WhatsApp.",
       "createFailed": "We could not confirm this request. Retry with the same details to recover it safely, or contact us before starting another payment.",
       "paidTitle": "Payment received and booking confirmed",
       "failedTitle": "Payment was not completed",
@@ -159,7 +159,7 @@
     "paidDetail": "Your booking details and booking number are shown below.",
     "noHoldNotice": "Please note: registering does not reserve a place. Your place is reserved only after the payment is completed.",
     "unpaidTitle": "Registration received – your place is not reserved yet",
-    "unpaidDetail": "Your registration was received, but no place on the tour has been reserved for you yet. Please complete the payment (Bit or bank transfer) – your place is reserved only once the payment is received and confirmed."
+    "unpaidDetail": "Your registration was received, but no place on the tour has been reserved for you yet. Please complete the payment – your place is reserved only once the payment is received and confirmed."
   },
   "terms": {
     "title": "Terms & Conditions",
@@ -177,9 +177,7 @@
       "priceAmount": "250 NIS",
       "perPerson": "per person",
       "selectMethod": "Select payment method:",
-      "bit": "Bit",
       "credit": "Credit Card",
-      "bank": "Bank Transfer",
       "clickForDetails": "Click for payment details"
     },
     "section3": {
@@ -228,28 +226,12 @@
     "backToBooking": "Back to Booking Form",
     "backToTop": "Back to Top",
     "paymentModal": {
-      "bit": {
-        "title": "Bit Payment",
-        "line1": "The Bit payment recipient has not been verified.",
-        "phone": "Do not send money to the contact number based on this website.",
-        "name": "Contact Chilik with your booking reference to verify payment details.",
-        "line4": "The request remains pending until payment and booking are confirmed."
-      },
       "credit": {
         "title": "Credit Card Payment",
         "line1": "For credit card payment, please contact:",
         "phone": "Phone: 0506724312",
         "whatsapp": "WhatsApp: 0506724312",
         "line4": "Card payment availability depends on completing the secure integration."
-      },
-      "bank": {
-        "title": "Bank Transfer",
-        "details": "Bank transfer details are not available on this website.",
-        "bankName": "",
-        "accountNumber": "",
-        "branchNumber": "",
-        "beneficiary": "",
-        "confirmation": "Before transferring money, ask Chilik for verified payment details and provide your booking reference."
       },
       "openWhatsapp": "Open WhatsApp Chat",
       "close": "Close"

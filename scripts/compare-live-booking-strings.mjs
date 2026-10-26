@@ -20,6 +20,19 @@ const INTENTIONAL = new Map([
   ['Submit Booking', 'booking-copy-cleanup: the booking form submit button now reads "Continue to payment"'],
   ['מספר ההזמנה שלך', 'booking-copy-cleanup: the confirmation "מה הלאה?" list no longer repeats the booking reference'],
   ['Your booking number', 'booking-copy-cleanup: the confirmation "What\'s Next?" list no longer repeats the booking reference'],
+  // bit-tranzila-flag (approved by Miri): bank transfer removed, manual Bit hidden, card CTA renamed.
+  ['ההרשמה התקבלה, אך עדיין לא נשמר עבורכם מקום בסיור. יש להשלים את התשלום (ביט או העברה בנקאית) – המקום יישמר רק לאחר שהתשלום יתקבל ויאושר.',
+    'bit-tranzila-flag: the unpaid confirmation no longer names Bit or bank transfer'],
+  ['Your registration was received, but no place on the tour has been reserved for you yet. Please complete the payment (Bit or bank transfer) – your place is reserved only once the payment is received and confirmed.',
+    'bit-tranzila-flag: the unpaid confirmation no longer names Bit or bank transfer'],
+  ['תשלום בכרטיס עדיין לא הוגדר. אפשר לבחור Bit או העברה בנקאית, או ליצור קשר ב-WhatsApp.', 'bit-tranzila-flag: no Bit/bank-transfer fallback is offered'],
+  ['Card payment is not set up yet. You can choose Bit or bank transfer, or contact us on WhatsApp.', 'bit-tranzila-flag: no Bit/bank-transfer fallback is offered'],
+  ['Bit — פרטי תשלום בתיאום מראש', 'bit-tranzila-flag: the manual (unverified) Bit option is hidden'],
+  ['Bit — arrange verified payment details first', 'bit-tranzila-flag: the manual (unverified) Bit option is hidden'],
+  ['העברה בנקאית — פרטים בתיאום מראש', 'bit-tranzila-flag: the bank-transfer option is removed'],
+  ['Bank transfer — arrange details first', 'bit-tranzila-flag: the bank-transfer option is removed'],
+  ['המשך לתשלום', 'bit-tranzila-flag: the submit button now reads "המשך לתשלום מאובטח בכרטיס"'],
+  ['Continue to payment', 'bit-tranzila-flag: the submit button now reads "Continue to secure card payment"'],
 ]);
 const HEB = /[֐-׿]/;
 
