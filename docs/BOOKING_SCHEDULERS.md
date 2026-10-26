@@ -59,6 +59,12 @@ Right before deploying the booking functions, replace the placeholder in
 of `date -u +%Y-%m-%dT%H:%M:%SZ`. Do not commit a past date by accident: every job created after
 the cutoff becomes eligible.
 
+This step is enforced: `firebase.booking.functions.json` runs `scripts/assert-integration-cutoff.cjs`
+as a predeploy hook. While `CHILIK_INTEGRATION_SCHEDULER_ENABLED` is `"true"` it exits 1 (and the
+deploy is aborted) if the cutoff is missing, still `SET_TO_DEPLOY_TIME_UTC`, not a valid UTC ISO
+time (`YYYY-MM-DDTHH:MM:SSZ`), or more than an hour in the future. Later redeploys keep the
+cutoff from the first deploy; a past cutoff is accepted.
+
 ### Verify after deploy (read-only)
 
 ```sh
