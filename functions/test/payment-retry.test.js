@@ -11,8 +11,8 @@ const input = { name: 'Test', phone: '0501234567', email: 'a@example.com', parti
 function setup(extra = {}) {
   const db = fakeDb(), bookings = createBookingService(db, Timestamp);
   let now = NOW, calls = 0;
-  // The verified order lookup is on by default and finds nothing; tests override it.
-  const provider = { assertReady() {}, assertLookupReady() {}, async findTransactionIndexes() { return { complete: true, transactionIndexes: [] }; }, async createCheckout() { calls++; return { paymentUrl: `https://directng.tranzila.com/t/?attempt=${calls}`, paymentTerminal: 'term' }; }, ...extra };
+  // The verified order lookup is on by default and finds one declined row; tests override it.
+  const provider = { assertReady() {}, assertLookupReady() {}, async findTransactionIndexes() { return { complete: true, transactionIndexes: [1] }; }, async verifyTransaction() { throw declinedRow(); }, async createCheckout() { calls++; return { paymentUrl: `https://directng.tranzila.com/t/?attempt=${calls}`, paymentTerminal: 'term' }; }, ...extra };
   const flow = createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor: () => ({}), clock: () => now });
   const booking = id => db.data.get(bookings.bookingRef(id).path);
   return { db, bookings, flow, booking, advance: ms => { now += ms; }, calls: () => calls };
@@ -82,6 +82,8 @@ test('only a positively declined row allows the retry; every unverifiable state 
     'lookup not verified': { assertLookupReady() { throw new Error('payment-order-lookup-not-configured'); } },
     'no lookup method': { findTransactionIndexes: undefined },
     'lookup fails': { async findTransactionIndexes() { throw new Error('provider-lookup-incomplete'); } },
+    'empty lookup (report may lag a capture)': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [] }; } },
+    'lookup without rows field': { async findTransactionIndexes() { return { complete: true }; } },
     'row transport timeout': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [3, 4] }; }, async verifyTransaction({ transactionIndex }) { if (transactionIndex === 3) throw declinedRow(); throw unavailable(); } },
     'row report error': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [4] }; }, async verifyTransaction() { throw Object.assign(new Error('provider-verification-pending'), { code: 'provider-verification-pending' }); } },
     'row not a verified capture': { async findTransactionIndexes() { return { complete: true, transactionIndexes: [4] }; }, async verifyTransaction() { return { verified: false }; } },
@@ -99,6 +101,30 @@ test('only a positively declined row allows the retry; every unverifiable state 
   await assert.rejects(unbound.flow.retry('u', u.bookingId), /payment-verification-pending/);
 });
 
+test('empty lookup -> 503, no createCheckout', async () => {
+  let lookups = 0;
+  const s = setup({ async findTransactionIndexes() { lookups++; return { complete: true, transactionIndexes: [] }; } });
+  const { bookingId, paymentUrl } = await s.flow.create('u', KEY, input);
+  await assert.rejects(s.flow.retry('u', bookingId), e => e.message === 'payment-verification-pending' && e.status === 503);
+  assert.equal(lookups, 1);
+  assert.equal(s.calls(), 1);
+  const saved = s.booking(bookingId);
+  assert.equal(saved.paymentUrl, paymentUrl);
+  assert.equal(saved.paymentRetries, undefined);
+  assert.equal(saved.holdExpiresAt.toMillis(), NOW + 15 * 60000);
+});
+
+test('order lookups are capped per booking', async () => {
+  let lookups = 0;
+  const s = setup({ async findTransactionIndexes() { lookups++; return { complete: true, transactionIndexes: [] }; } });
+  const { bookingId } = await s.flow.create('u', KEY, input);
+  for (let i = 0; i < 10; i++) await assert.rejects(s.flow.retry('u', bookingId), /payment-verification-pending/);
+  await assert.rejects(s.flow.retry('u', bookingId), e => e.message === 'payment-retry-limit' && e.status === 409);
+  assert.equal(lookups, 10);
+  assert.equal(s.booking(bookingId).paymentLookups, 10);
+  assert.equal(s.calls(), 1);
+});
+
 test('a failed retry handshake keeps the existing checkout and booking open', async () => {
   let fail = false;
   const s = setup({ async createCheckout() { if (fail) throw new Error('payment-provider-unavailable'); return { paymentUrl: 'https://directng.tranzila.com/t/?first', paymentTerminal: 'term' }; } });
@@ -114,7 +140,7 @@ test('a failed retry handshake keeps the existing checkout and booking open', as
 });
 
 test('a webhook capture after the retry still confirms the booking exactly once', async () => {
-  const s = setup({ async verifyTransaction({ booking, transactionIndex }) { return { verified: true, bookingId: booking.bookingId, transactionKey: `term:${transactionIndex}`, amount: 500, currency: 'ILS', event: 'paid' }; } });
+  const s = setup({ async verifyTransaction({ booking, transactionIndex }) { if (transactionIndex === 1) throw declinedRow(); return { verified: true, bookingId: booking.bookingId, transactionKey: `term:${transactionIndex}`, amount: 500, currency: 'ILS', event: 'paid' }; } });
   const { bookingId } = await s.flow.create('u', KEY, input);
   await s.flow.retry('u', bookingId);
   const paid = await s.flow.notify({ bookingId, transactionIndex: 9 });

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { viaProvider } = require('./booking-core');
 const failure = code => Object.assign(new Error(code), { status: 409 });
 const MAX_PAYMENT_RETRIES = 5;
+const MAX_PAYMENT_LOOKUPS = 10;
 function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock = Date.now }) {
   async function create(uid, key, input) {
     // Bit goes through the same Tranzila checkout only when its flag and verified
@@ -51,12 +52,12 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
   // capture for one booking is still routed to review by change(). The retry needs
   // the verified order lookup: without it (or without a bound terminal) it is
   // refused with payment-verification-pending. An existing verified capture is
-  // applied instead of opening another checkout. Only a row the provider reports
-  // as a definite decline (successful report, non-000 processor response) is
-  // skipped; any transport, report or verification error refuses the retry.
-  // Residual gap: Tranzila's report may not yet list a capture made seconds
-  // earlier. A capture that lands after the retry is still routed to
-  // additionalPaymentReview by change(), so it is recorded, never lost.
+  // applied instead of opening another checkout. A new checkout opens only when
+  // the lookup returned at least one row and every row is a definite decline
+  // (successful report, non-000 processor response). An empty lookup (the report
+  // may lag a capture made seconds earlier) and any transport, report or
+  // verification error refuse the retry. Lookups are capped per booking so a
+  // looping client cannot drive unbounded provider report calls.
   async function retry(uid, bookingId) {
     provider.assertReady();
     urlsFor.assertReady?.();
@@ -69,17 +70,25 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
     if ((b.paymentRetries || 0) >= MAX_PAYMENT_RETRIES) throw failure('payment-retry-limit');
     const pending = () => Object.assign(new Error('payment-verification-pending'), { status: 503 });
     if (!b.paymentTerminal || !provider.findTransactionIndexes || !lookupReady()) throw pending();
+    await db.runTransaction(async tx => {
+      const current = (await tx.get(ref)).data();
+      if (!open(current)) throw failure('booking-closed');
+      if ((current.paymentLookups || 0) >= MAX_PAYMENT_LOOKUPS) throw failure('payment-retry-limit');
+      tx.update(ref, { paymentLookups: (current.paymentLookups || 0) + 1 });
+    });
     let indexes;
     try { ({ transactionIndexes: indexes } = await provider.findTransactionIndexes({ booking: b, nowMs: clock() })); }
     catch { throw pending(); }
+    let declines = 0;
     for (const transactionIndex of indexes || []) {
       let receipt;
       try { receipt = await provider.verifyTransaction({ booking: b, transactionIndex }); }
-      catch (error) { if (error?.declined === true) continue; throw pending(); }
+      catch (error) { if (error?.declined === true) { declines++; continue; } throw pending(); }
       if (receipt?.verified !== true || receipt.event !== 'paid') throw pending();
       const updated = await bookings.change(bookingId, 'paid', 'provider:tranzila', receipt, clock());
       return { bookingId, status: updated.status, paymentStatus: updated.paymentStatus, applied: true };
     }
+    if (!declines) throw pending();
     const lease = crypto.randomUUID();
     await db.runTransaction(async tx => {
       const current = (await tx.get(ref)).data();
