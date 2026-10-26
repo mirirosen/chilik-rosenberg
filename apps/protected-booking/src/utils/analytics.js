@@ -40,6 +40,17 @@ export function pageLocation(href) {
     return url.toString();
   } catch { return ''; }
 }
+// page_referrer never carries a query string or fragment, from any site: the
+// previous page may be /booking?id=..., and an external page (e.g. the checkout)
+// may put customer details in its URL.
+export function pageReferrer(href) {
+  try {
+    const url = new URL(href);
+    url.search = ''; url.hash = '';
+    return url.toString();
+  } catch { return ''; }
+}
+let currentPage = '';
 // The management dashboard is never measured. GA's documented per-property
 // opt-out flag blocks every hit, including history-change page views.
 const MANAGEMENT_PATH = '/manage-bookings';
@@ -56,7 +67,11 @@ export function beforeNavigate(href) {
   try { url = new URL(href, window.location.href); } catch { return false; }
   const management = url.pathname === MANAGEMENT_PATH;
   setMeasurementBlocked(management);
-  if (loaded && !management && typeof window.gtag === 'function') window.gtag('set', { page_location: pageLocation(url.toString()) });
+  if (loaded && !management && typeof window.gtag === 'function') {
+    const next = pageLocation(url.toString());
+    window.gtag('set', { page_referrer: pageReferrer(currentPage), page_location: next });
+    currentPage = next;
+  }
   return loaded && management;
 }
 
@@ -70,7 +85,9 @@ function load() {
   // Measurement only; advertising storage and signals stay off.
   window.gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   window.gtag('js', new Date());
-  window.gtag('config', measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false, page_location: pageLocation(window.location.href) });
+  currentPage = pageLocation(window.location.href);
+  const referrer = pageReferrer(document.referrer);
+  window.gtag('config', measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false, page_location: currentPage, ...(referrer ? { page_referrer: referrer } : {}) });
   const script = document.createElement('script');
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;

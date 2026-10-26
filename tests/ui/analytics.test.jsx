@@ -144,7 +144,23 @@ describe('page_location and management', () => {
     analytics.setConsent(true);
     expect(configOf().page_location).toBe(window.location.origin + '/confirmation');
     expect(analytics.beforeNavigate('/booking?date=2026-10-29&participants=2')).toBe(false);
-    expect(window.dataLayer.filter(entry => entry[0] === 'set').at(-1)[1]).toEqual({ page_location: window.location.origin + '/booking' });
+    expect(window.dataLayer.filter(entry => entry[0] === 'set').at(-1)[1]).toEqual({ page_referrer: window.location.origin + '/confirmation', page_location: window.location.origin + '/booking' });
+    // Leaving /booking?id=... for the homepage: the referrer is the query-free booking page.
+    expect(analytics.beforeNavigate('/en?utm_source=x')).toBe(false);
+    expect(window.dataLayer.filter(entry => entry[0] === 'set').at(-1)[1]).toEqual({ page_referrer: window.location.origin + '/booking', page_location: window.location.origin + '/en?utm_source=x' });
+    expect(analytics.beforeNavigate('/terms')).toBe(false);
+    expect(window.dataLayer.filter(entry => entry[0] === 'set').at(-1)[1].page_referrer).toBe(window.location.origin + '/en');
+  });
+  it('page_referrer never carries a query string or fragment', async () => {
+    const { analytics } = await fresh();
+    expect(analytics.pageReferrer('https://www.chilik-tours.com/booking?id=' + BOOKING + '#x')).toBe('https://www.chilik-tours.com/booking');
+    expect(analytics.pageReferrer('https://directng.tranzila.com/t/?contact=Dana&phone=0501234567')).toBe('https://directng.tranzila.com/t/');
+    expect(analytics.pageReferrer('')).toBe('');
+    const referrer = vi.spyOn(document, 'referrer', 'get').mockReturnValue('https://www.google.com/search?q=private');
+    try {
+      analytics.setConsent(true);
+      expect(configOf().page_referrer).toBe('https://www.google.com/search');
+    } finally { referrer.mockRestore(); }
   });
   it('blocks every hit on /manage-bookings and forces a full page load from the SPA', async () => {
     const { analytics } = await fresh();
