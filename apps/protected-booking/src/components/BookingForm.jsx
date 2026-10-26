@@ -6,7 +6,7 @@ import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateStr
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
 import { normalizeIsraeliMobile } from '../utils/phone';
-import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
+import { trackBeginBooking, trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
@@ -78,6 +78,13 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       return () => clearTimeout(timer);
     }
   }, [prefilledDate, prefilledParticipants, paymentResult, demoCheckoutId]);
+
+  // GA4 begin_booking: the details form opened for a chosen date (no-op without consent).
+  useEffect(() => {
+    if (paymentResult || demoCheckoutId || IS_PREPROD || !prefilledDate || !prefilledParticipants) return;
+    const participants = Number(prefilledParticipants);
+    if (Number.isInteger(participants) && participants > 0) trackBeginBooking({ participants, pricePerPerson: PRICE_PER_PERSON, totalPrice: participants * PRICE_PER_PERSON });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!paymentResult) return;
