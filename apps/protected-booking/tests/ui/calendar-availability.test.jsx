@@ -95,13 +95,13 @@ it('continue rechecks sanitized server availability and a newly blocked date nev
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   expect(availabilityCalls()).toHaveLength(2); expect(onContinue).not.toHaveBeenCalled(); expect(mocks.getDoc).not.toHaveBeenCalled();
 });
-it('opening the date picker warms the three payment functions once per browser session', async () => {
+it('opening the date picker warms the checkout and status functions (never the webhook) once per browser session', async () => {
   sessionStorage.clear(); fetch.mockResolvedValue(reply(payload()));
   const { default: BookingSection } = await import('../../src/components/BookingSection');
   const warmups = () => fetch.mock.calls.map(([url]) => url).filter(url => url.endsWith('?warmup=1'));
   render(<BookingSection />); cleanup(); render(<BookingSection />);
   await act(async () => { await Promise.resolve(); });
-  expect(warmups()).toEqual(['createPayment', 'paymentStatus', 'tranzilaWebhook'].map(n => `https://fixture.example.test/${n}?warmup=1`));
+  expect(warmups()).toEqual(['createPayment', 'paymentStatus'].map(n => `https://fixture.example.test/${n}?warmup=1`));
 });
 it('upcoming Thursdays and cutoff follow Jerusalem before and after DST', async () => {
   const { getUpcomingThursdays, isThursday, getNearestThursday } = await import('../../src/utils/dateUtils');

@@ -1,6 +1,8 @@
 import { IS_PREPROD } from './preview';
 // Kept apart from paymentService so the date picker does not load Firebase Auth.
-const WARM_FUNCTIONS = ['createPayment', 'paymentStatus', 'tranzilaWebhook'];
+// tranzilaWebhook is not warmed from the browser: it runs one request at a time,
+// and a visitor's GET must never queue ahead of Tranzila's real notification.
+const WARM_FUNCTIONS = ['createPayment', 'paymentStatus'];
 export const WARMUP_SESSION_KEY = 'chilik-payment-warmup-v1';
 
 function warmupBase() {

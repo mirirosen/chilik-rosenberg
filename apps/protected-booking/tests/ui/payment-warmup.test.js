@@ -9,10 +9,10 @@ beforeEach(() => {
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
-it('sends one warmup GET to each payment function once per browser session', async () => {
+it('sends one warmup GET to createPayment and paymentStatus (never the webhook) once per browser session', async () => {
   const { warmPaymentFunctions, WARMUP_SESSION_KEY } = await load();
   expect(warmPaymentFunctions()).toBe(true);
-  expect(fetch.mock.calls.map(([url]) => url)).toEqual(['createPayment', 'paymentStatus', 'tranzilaWebhook'].map(n => `https://us-central1-hilik-site.cloudfunctions.net/${n}?warmup=1`));
+  expect(fetch.mock.calls.map(([url]) => url)).toEqual(['createPayment', 'paymentStatus'].map(n => `https://us-central1-hilik-site.cloudfunctions.net/${n}?warmup=1`));
   for (const [, init] of fetch.mock.calls) expect(init).toMatchObject({ method: 'GET', mode: 'no-cors', credentials: 'omit', cache: 'no-store' });
   // No custom headers (no preflight, no Authorization) and no body.
   for (const [, init] of fetch.mock.calls) { expect(init.headers).toBeUndefined(); expect(init.body).toBeUndefined(); }
@@ -20,7 +20,7 @@ it('sends one warmup GET to each payment function once per browser session', asy
   expect(warmPaymentFunctions()).toBe(false); expect(warmPaymentFunctions()).toBe(false);
   // A fresh module (e.g. remounted lazy chunk) still honors the session flag.
   vi.resetModules(); expect((await load()).warmPaymentFunctions()).toBe(false);
-  expect(fetch).toHaveBeenCalledTimes(3);
+  expect(fetch).toHaveBeenCalledTimes(2);
 });
 
 it('a failed warmup is swallowed and not retried in the same session', async () => {
@@ -28,7 +28,7 @@ it('a failed warmup is swallowed and not retried in the same session', async () 
   const { warmPaymentFunctions } = await load();
   expect(() => warmPaymentFunctions()).not.toThrow();
   await Promise.resolve();
-  expect(warmPaymentFunctions()).toBe(false); expect(fetch).toHaveBeenCalledTimes(3);
+  expect(warmPaymentFunctions()).toBe(false); expect(fetch).toHaveBeenCalledTimes(2);
 });
 
 it('never warms in preprod, without an https API base, or when sessionStorage is unavailable', async () => {
