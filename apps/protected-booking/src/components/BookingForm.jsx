@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
-import { createCreditPayment, getPaymentStatus, makeIdempotencyKey } from '../utils/paymentService';
+import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
+import { normalizePhone } from '../utils/phone';
+import { warmPaymentFunctions } from '../utils/paymentWarmup';
+import { trackBeginBooking, trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
@@ -23,7 +26,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
   const paymentResult = urlParams.get('payment') || (statusBookingId ? 'status' : null);
   const paymentBookingId = statusBookingId || urlParams.get('id');
   const demoCheckoutId = IS_PREPROD ? urlParams.get('demoCheckout') : null;
-  const bookingApi = IS_PREPROD ? demoBookingApi : { createCreditPayment, getPaymentStatus, makeIdempotencyKey };
+  // retryCreditPayment is resolved only when a declined card is retried.
+  const bookingApi = IS_PREPROD ? demoBookingApi : { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment: id => retryCreditPayment(id) };
 
   // Determine if fields should be locked
   const isDateLocked = !!prefilledDate;
@@ -56,6 +60,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
   const [paymentRedirect, setPaymentRedirect] = useState(false);
   const [paymentReturnState, setPaymentReturnState] = useState(paymentResult ? 'checking' : null);
   const [statusRefresh, setStatusRefresh] = useState(0);
+  const [statusData, setStatusData] = useState(null);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState('');
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12), []);
@@ -73,6 +80,16 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     }
   }, [prefilledDate, prefilledParticipants, paymentResult, demoCheckoutId]);
 
+  // GA4 begin_booking: the details form opened for a chosen date (no-op without consent).
+  useEffect(() => {
+    if (paymentResult || demoCheckoutId || IS_PREPROD || !prefilledDate || !prefilledParticipants) return;
+    const participants = Number(prefilledParticipants);
+    if (Number.isInteger(participants) && participants > 0) trackBeginBooking({ participants, pricePerPerson: PRICE_PER_PERSON, totalPrice: participants * PRICE_PER_PERSON });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Start the payment functions while the customer fills in details (once per session).
+  useEffect(() => { if (!demoCheckoutId) warmPaymentFunctions(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!paymentResult) return;
     if (!validBookingReference(paymentBookingId)) { setPaymentReturnState('unavailable'); return; }
@@ -83,7 +100,13 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       try {
         const state = await bookingApi.getPaymentStatus(paymentBookingId, { signal: controller.signal });
         if (cancelled) return;
+        setStatusData(state);
         const view = paymentReturnView(state);
+        // GA4 purchase only for a server-confirmed paid booking (no-op without consent/ID).
+        if (view === 'paid' && !IS_PREPROD) trackPurchase({ ...state, bookingId: state.bookingId || paymentBookingId });
+        // Tranzila sent the customer to the failure URL and nothing was captured:
+        // the booking is still open, so offer an immediate new payment attempt.
+        if (view === 'pending' && paymentResult === 'failed' && state.paymentStatus === 'awaiting_payment') { setPaymentReturnState('declined'); return; }
         if (view !== 'pending' || IS_PREPROD) { setPaymentReturnState(view); return; }
         attempts += 1;
         if (attempts < 10) timer = setTimeout(check, 1500);
@@ -129,11 +152,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     };
   }, [formData.tourDate, cloudData]);
 
-  const validatePhone = (phone) => {
-    // Israeli phone format: 05X-XXXXXXX or 05XXXXXXXX
-    const phoneRegex = /^(05\d{1}-?\d{7}|05\d{8})$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
+  // Israeli mobile (05X-XXXXXXX, +972 5X..., 972...) or an international number
+  // with + / 00 and a country code; spaces, dashes and parentheses are ignored.
+  const validatePhone = (phone) => normalizePhone(phone) !== null;
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -213,13 +234,14 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     try {
       // A draft saved before the date-of-birth field was removed may still carry one; never send it.
       const { dateOfBirth: _dateOfBirth, ...details } = formData;
-      const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
+      const booking = { ...details, adultConfirmed: formData.agreeToTerms === true, name: formData.name.trim(), phone: normalizePhone(formData.phone) || formData.phone.trim(), email: formData.email.trim(), participants: Number(formData.participants), notes: formData.notes.trim(), language: i18n.language?.startsWith('en') ? 'en' : 'he' };
       const key = await bookingApi.makeIdempotencyKey(booking);
       // Preserve the key on network timeouts: the server may already have committed.
       // Card (and Bit, when enabled) both continue to the secure Tranzila checkout.
       setPaymentRedirect(true);
       submittedRequest.current = JSON.stringify([formData, i18n.language]);
       const result = await bookingApi.createCreditPayment(booking, key);
+      trackBeginCheckout({ participants: booking.participants, pricePerPerson: PRICE_PER_PERSON, totalPrice: booking.participants * PRICE_PER_PERSON });
       onPaymentRedirect(result.paymentUrl);
 
     } catch (error) {
@@ -261,17 +283,52 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       ? { icon: '!', title: t('booking.payment.cancelledTitle'), detail: t('booking.payment.cancelledDetail') }
       : paymentReturnState === 'paid'
       ? { icon: '✓', title: t('booking.payment.paidTitle'), detail: t('confirmation.paidDetail') }
+      : paymentReturnState === 'declined'
+        ? { icon: '!', title: t('booking.payment.declinedTitle'), detail: t('booking.payment.declinedDetail') }
       : paymentReturnState === 'failed'
         ? { icon: '!', title: t('booking.payment.failedTitle'), detail: t('booking.payment.failedDetail') }
         : paymentReturnState === 'pending'
           ? { icon: '…', title: t('booking.payment.pendingTitle'), detail: t('booking.payment.pendingDetail') }
           : { icon: '…', title: t('booking.payment.checkingTitle'), detail: t('booking.payment.checkingDetail') };
+    const confirmedView = ['paid', 'confirmed'].includes(paymentReturnState);
+    const summaryDate = confirmedView && isThursday(statusData?.tourDate) ? (i18n.language?.startsWith('en') ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeZone: 'Asia/Jerusalem' }).format(new Date(`${statusData.tourDate}T12:00:00Z`)) : formatDateHebrew(statusData.tourDate)) : null;
+    const summaryParticipants = confirmedView && Number.isInteger(statusData?.participants) && statusData.participants > 0 ? statusData.participants : null;
+    const summaryAmount = confirmedView && Number.isFinite(statusData?.totalPrice) && statusData.totalPrice > 0 ? statusData.totalPrice : null;
+    const retryPayment = async () => {
+      if (retrying) return;
+      setRetrying(true); setRetryError('');
+      try {
+        const result = await bookingApi.retryCreditPayment(paymentBookingId);
+        // No URL: the server found an existing verified capture; show the real status.
+        if (result.paymentUrl) onPaymentRedirect(result.paymentUrl);
+        else { setRetrying(false); setStatusRefresh(v => v + 1); }
+      } catch (error) {
+        setRetrying(false);
+        setRetryError(t(error.message === 'payment-retry-limit' ? 'booking.payment.retryLimit' : error.message === 'payment-verification-pending' ? 'booking.payment.retryVerificationPending' : bookingErrorKey(error)));
+      }
+    };
     return <div className="booking-status-card bg-brand-dark-lighter p-8 md:p-12 rounded-5xl border border-white/10 shadow-2xl text-center" role="status" aria-live="polite" dir={i18n.dir()}>
       <div className="text-6xl mb-6">{copy.icon}</div><h1 className="text-2xl font-bold text-white mb-4">{copy.title}</h1>
-      <p className="text-gray-300 mb-6">{copy.detail}</p>{['pending', 'checking'].includes(paymentReturnState) && <p className="booking-no-hold-notice text-amber-300 font-bold mb-6" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>}{validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
+      <p className="text-gray-300 mb-6">{copy.detail}</p>{['pending', 'checking', 'declined'].includes(paymentReturnState) && <p className="booking-no-hold-notice text-amber-300 font-bold mb-6" data-testid="no-hold-notice">{t('booking.noHoldNotice')}</p>}{!confirmedView && validBookingReference(paymentBookingId) && <p className="mb-6 font-mono break-all" dir="ltr">{paymentBookingId}</p>}
+      {confirmedView && <div className="booking-confirmation-summary text-start mb-6" data-testid="confirmation-summary">
+        <h2 className="text-lg font-bold text-brand-gold mb-3">{t('confirmation.bookingDetails')}</h2>
+        <dl className="space-y-2">
+          {validBookingReference(paymentBookingId) && <div><dt className="text-sm text-gray-400">{t('confirmation.bookingReference')}</dt><dd className="font-mono break-all" dir="ltr">{paymentBookingId}</dd></div>}
+          {summaryDate && <div><dt className="text-sm text-gray-400">{t('confirmation.tourDate')}</dt><dd className="font-bold">{summaryDate}</dd></div>}
+          {summaryParticipants && <div><dt className="text-sm text-gray-400">{t('confirmation.participants')}</dt><dd className="font-bold">{summaryParticipants}</dd></div>}
+          {summaryAmount && <div><dt className="text-sm text-gray-400">{t(paymentReturnState === 'paid' ? 'booking.payment.amountPaid' : 'confirmation.totalPayment')}</dt><dd className="font-bold">₪{summaryAmount}</dd></div>}
+        </dl>
+        <h2 className="text-lg font-bold text-brand-gold mt-6 mb-3">{t('confirmation.nextSteps.title')}</h2>
+        <ul className="list-disc ps-5 space-y-2 text-gray-300">
+          <li>{t('confirmation.saveForReference')}</li>
+          <li>{t('booking.payment.nextMeeting')}</li>
+          <li>{t('booking.payment.nextContact')} <a href="tel:0506724312" dir="ltr" className="text-brand-gold underline">0506724312</a> · <a href="https://wa.me/972506724312" target="_blank" rel="noopener noreferrer" className="text-brand-gold underline">WhatsApp</a></li>
+        </ul>
+      </div>}
+      {retryError && <p role="alert" className="text-red-400 mb-6">{retryError}</p>}
       <DemoBookingNotice />
       {IS_PREPROD && validBookingReference(paymentBookingId) && <DemoBookingControls bookingId={paymentBookingId} onChange={() => setStatusRefresh(v => v + 1)} />}
-      <div className="flex flex-wrap gap-4 justify-center"><button type="button" className="target-button" disabled={paymentReturnState === 'checking'} onClick={() => setStatusRefresh(v => v + 1)}>{t('booking.payment.refreshStatus')}</button>{IS_PREPROD && ['paid', 'confirmed', 'pending'].includes(paymentReturnState) && <button type="button" className="target-button" onClick={() => { try { onSuccess?.(getDemoBooking(paymentBookingId)); } catch { setPaymentReturnState('unavailable'); } }}>{t('demo.summary')}</button>}<a className="target-button booking-secondary inline-flex" href="/">{t('booking.payment.backHome')}</a></div>
+      <div className="flex flex-wrap gap-4 justify-center">{paymentReturnState === 'declined' && <button type="button" className="target-button" disabled={retrying} onClick={retryPayment}>{t(retrying ? 'booking.payment.redirectingToSecure' : 'booking.payment.retryPayment')}</button>}<button type="button" className={paymentReturnState === 'declined' ? 'target-button booking-secondary' : 'target-button'} disabled={paymentReturnState === 'checking' || retrying} onClick={() => setStatusRefresh(v => v + 1)}>{t('booking.payment.refreshStatus')}</button>{IS_PREPROD && ['paid', 'confirmed', 'pending'].includes(paymentReturnState) && <button type="button" className="target-button" onClick={() => { try { onSuccess?.(getDemoBooking(paymentBookingId)); } catch { setPaymentReturnState('unavailable'); } }}>{t('demo.summary')}</button>}<a className="target-button booking-secondary inline-flex" href="/">{t('booking.payment.backHome')}</a></div>
     </div>;
   }
 
@@ -405,7 +462,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             value={formData.phone}
             onChange={(e) => handleInputChange('phone', e.target.value)}
             className={`w-full bg-brand-dark border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-right`}
-            placeholder="05X-XXXXXXX"
+            placeholder={t('booking.form.phonePlaceholder')}
+            dir="ltr"
             disabled={isSubmitting}
           />
           {errors.phone && <p id="phone-error" className="text-red-400 text-sm mt-1 text-right">{errors.phone}</p>}
@@ -451,6 +509,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             <option value="google">{t('booking.howOptions.google')}</option>
             <option value="facebook">{t('booking.howOptions.facebook')}</option>
             <option value="instagram">{t('booking.howOptions.instagram')}</option>
+            <option value="youtube">{t('booking.howOptions.youtube')}</option>
+            <option value="tiktok">{t('booking.howOptions.tiktok')}</option>
+            <option value="media">{t('booking.howOptions.media')}</option>
             <option value="other">{t('booking.howOptions.other')}</option>
           </select>
           {errors.howDidYouHear && <p id="howDidYouHear-error" className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}

@@ -5,7 +5,8 @@
     "runtime": "nodejs22",
     "ignore": ["node_modules", ".git", ".env*", "*.log", "test/**"],
     "predeploy": [
-      "node scripts/assert-no-hold-release-gate.cjs"
+      "node scripts/assert-no-hold-release-gate.cjs",
+      "node scripts/assert-integration-cutoff.cjs"
     ]
   }
 }

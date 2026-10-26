@@ -1,5 +1,5 @@
 import { IS_PREPROD } from '../utils/preview';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../utils/firebase';
@@ -7,6 +7,7 @@ import { Utensils, Clock, Users, Calendar, ChevronRight, ChevronLeft, CheckCircl
 import { useFirebaseData, getAvailableSpots } from '../hooks/useFirebaseData';
 import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
 import { serverAvailabilityEnabled, getServerAvailability, freshAvailabilityRow } from '../utils/calendarAvailability';
+import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
 import './BookingSection.css';
 
@@ -23,6 +24,8 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const [isChecking, setIsChecking] = useState(false);
   const [checkError, setCheckError] = useState('');
   const checking = useRef(false);
+  // The picker mounts only on booking intent (scroll-near or CTA on the home page).
+  useEffect(() => { warmPaymentFunctions(); }, []);
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(12, i18n.language), [i18n.language]);
@@ -35,12 +38,17 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   function getStatus(dateStr, data = cloudData) {
     if (!isSelectableTourDate(dateStr)) return { available: false, text: t('bookingSection.dateUnavailable') };
     if (!data || data.availabilityStatus === 'loading') return { available: false, text: t('common.loading') };
-    if (data.availabilityStatus !== 'ready') return { available: false, text: t('common.availabilityUnavailable') };
+    // Unknown availability (outage, or a date the server has not published yet) stays
+    // unselectable but reads as a neutral "coming soon", not as a system error.
+    const pending = { available: false, pending: true, text: t('bookingSection.availabilityPending'), detail: t('bookingSection.availabilityPendingDetail') };
+    if (data.availabilityStatus !== 'ready') return pending;
     if (data.serverAvailabilityEnabled) {
       const row = freshAvailabilityRow(data, dateStr);
-      return row?.available
-        ? { available: true, spots: row.availableSpots, text: t('bookingSection.available') }
-        : { available: false, text: t('common.availabilityUnavailable') };
+      if (!row) return pending;
+      if (row.available) return { available: true, spots: row.availableSpots, text: t('bookingSection.available') };
+      // The server returns the same generic closed row for sold out, admin blocks, unsynced
+      // calendar weeks and reconciliation holds, so it must not claim "sold out".
+      return { available: false, pending: true, text: t('bookingSection.notOpen'), detail: t('bookingSection.notOpenDetail') };
     }
     if (data.blocked?.includes(dateStr)) return { available: false, text: t('bookingSection.blocked') };
     const spots = getAvailableSpots(data, dateStr);
@@ -168,7 +176,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
               <button
                 key={thursday.dateStr}
                 type="button"
-                className={`booking-screen__date date-card${selected ? ' is-selected' : ''}`}
+                className={`booking-screen__date date-card${selected ? ' is-selected' : ''}${dateStatus.pending ? ' is-pending' : ''}`}
                 disabled={!dateStatus.available}
                 aria-pressed={selected}
                 aria-label={`${t('bookingSection.dateCardLabel', { date: fmtDate(thursday.dateStr) })}, ${dateStatus.text}`}
@@ -177,7 +185,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
                 <span className="booking-screen__day-name">{t('bookingSection.thursday')}</span>
                 <strong>{thursday.day}</strong>
                 <span>{thursday.month}</span>
-                <small><i aria-hidden="true" />{dateStatus.text}</small>
+                <small>{!dateStatus.pending && <i aria-hidden="true" />}{dateStatus.text}</small>
                 {selected && <CheckCircle className="booking-screen__selected-mark" aria-hidden="true" size={17} />}
               </button>
             );
@@ -192,10 +200,10 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
           </label>
         </details>
 
-        {cloudData?.availabilityStatus === 'error' && <p className="booking-screen__error" role="status">{t('common.availabilityUnavailable')}</p>}
+        {cloudData?.availabilityStatus === 'error' && <p className="booking-screen__notice" role="status">{t('bookingSection.availabilityRetry')}</p>}
         {selectedDate && !status.available && (
           <div className="booking-screen__error" role="status">
-            <p>{isThursday(selectedDate) ? status.text : t('bookingSection.thursdaysOnly')}</p>
+            <p>{isThursday(selectedDate) ? status.detail || status.text : t('bookingSection.thursdaysOnly')}</p>
             {!isThursday(selectedDate) && (
               <button type="button" onClick={() => selectDate(getNearestThursday(selectedDate < getJerusalemDateString() ? getJerusalemDateString() : selectedDate).toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem' }))}>
                 {t('bookingSection.nextThursday')}

@@ -25,7 +25,7 @@ function renderEmail(job, from) {
     : [title, `מספר הזמנה: ${s.bookingId}`, `תאריך סיור: ${s.tourDate}`, `משתתפים: ${s.participants}`, `סכום ההזמנה: ₪${s.totalPrice.toFixed(2)}`];
   if (s.status === 'pending') lines.push(en ? 'This acknowledges your request. Confirmation and payment are separate.' : 'זו הודעה על קבלת הבקשה. אישור ההזמנה והתשלום הם שלבים נפרדים.');
   if (s.status === 'cancelled') lines.push(en ? 'This cancellation notice does not confirm a refund.' : 'הודעת הביטול אינה אישור להחזר כספי.');
-  return { from, to: [s.email], subject: `Chilik Tours | ${title} | ${s.bookingId}`, text: lines.join('\n') };
+  return { from, to: [s.email], subject: `Hilik Tours | ${title} | ${s.bookingId}`, text: lines.join('\n') };
 }
 /**
  * Explicit, disabled-by-default adapters. getAccessToken(service) returns an

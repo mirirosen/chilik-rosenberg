@@ -82,14 +82,43 @@ it('an older response cannot overwrite a newer availability refresh', async () =
   expect(getAvailableSpots(result.current, DATE)).toBe(1);
 });
 it('continue rechecks sanitized server availability and a newly blocked date never opens checkout', async () => {
-  fetch.mockResolvedValueOnce(reply(payload())).mockResolvedValueOnce(reply(payload(0)));
+  sessionStorage.clear();
+  const replies = [reply(payload()), reply(payload(0))];
+  // Payment warmups (fire-and-forget, sent on mount) are answered separately from availability.
+  fetch.mockImplementation(url => Promise.resolve(url.endsWith('?warmup=1') ? { ok: false, status: 0 } : replies.shift()));
+  const availabilityCalls = () => fetch.mock.calls.filter(([url]) => !url.endsWith('?warmup=1'));
   const { default: BookingSection } = await import('../../src/components/BookingSection');
   const onContinue = vi.fn(); render(<BookingSection onContinue={onContinue} />);
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
   const card = screen.getAllByRole('button', { name: /^bookingSection\.dateCardLabel/ }).find(button => !button.disabled);
   fireEvent.click(card); fireEvent.click(screen.getByRole('button', { name: /bookingDesign\.continue/ }));
   await act(async () => { await Promise.resolve(); await Promise.resolve(); });
-  expect(fetch).toHaveBeenCalledTimes(2); expect(onContinue).not.toHaveBeenCalled(); expect(mocks.getDoc).not.toHaveBeenCalled();
+  expect(availabilityCalls()).toHaveLength(2); expect(onContinue).not.toHaveBeenCalled(); expect(mocks.getDoc).not.toHaveBeenCalled();
+});
+it('opening the date picker warms the checkout and status functions (never the webhook) once per browser session', async () => {
+  sessionStorage.clear(); fetch.mockResolvedValue(reply(payload()));
+  const { default: BookingSection } = await import('../../src/components/BookingSection');
+  const warmups = () => fetch.mock.calls.map(([url]) => url).filter(url => url.endsWith('?warmup=1'));
+  render(<BookingSection />); cleanup(); render(<BookingSection />);
+  await act(async () => { await Promise.resolve(); });
+  expect(warmups()).toEqual(['createPayment', 'paymentStatus'].map(n => `https://fixture.example.test/${n}?warmup=1`));
+});
+it('server mode never labels a generic closed row as sold out, and unpublished dates read as pending', async () => {
+  // Live calendarAvailability returns the same generic {available:false, availableSpots:0} row for
+  // sold out, admin blocks, unsynced calendar weeks and reconciliation holds.
+  fetch.mockResolvedValue(reply(payload(0)));
+  const { default: BookingSection } = await import('../../src/components/BookingSection');
+  render(<BookingSection />);
+  await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+  const [closed, unpublished] = screen.getAllByRole('button', { name: /^bookingSection.dateCardLabel/ });
+  expect(closed.disabled).toBe(true);
+  expect(closed.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.notOpen');
+  expect(closed.classList.contains('is-pending')).toBe(true);
+  expect(unpublished.disabled).toBe(true);
+  expect(unpublished.getAttribute('aria-label')).toBe('bookingSection.dateCardLabel, bookingSection.availabilityPending');
+  expect(unpublished.classList.contains('is-pending')).toBe(true);
+  expect(screen.queryByText('bookingSection.soldOut')).toBeNull();
+  expect(screen.queryByText('common.availabilityUnavailable')).toBeNull();
 });
 it('upcoming Thursdays and cutoff follow Jerusalem before and after DST', async () => {
   const { getUpcomingThursdays, isThursday, getNearestThursday } = await import('../../src/utils/dateUtils');

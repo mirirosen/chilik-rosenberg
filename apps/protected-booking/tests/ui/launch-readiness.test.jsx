@@ -88,7 +88,9 @@ it('keeps the original Hebrew policy provisions unchanged after trailing-whitesp
   // Hashes of the unchanged integrated-source policy blocks after trailing-whitespace cleanup. This fixture
   // protects copy without depending on the author's Windows source path.
   for (const [from,to,hash] of [
-    ['Section 3: מדיניות ביטול רכישה','Section 6: פרטיות','2c93cab6fff60848fbde18ca0a9683c4ce6672a826bd5d9443c83627400ca077']
+    // Updated 2026-10-26 with Miri's approved section 4 wording: 20:00 start in Bnei Brak,
+    // exact meeting address sent during the week of the tour.
+    ['Section 3: מדיניות ביטול רכישה','Section 6: פרטיות','09c113f2f5af575b476d37a5bda61fff8fc103a1f14d837067367562801f2a2b']
   ]) {
     const block = text => text.slice(text.indexOf('{/* '+from),text.indexOf('{/* '+to)).replace(/<section id="terms-section-\d"/g, '<section').replaceAll('<section lang="he" dir="rtl" ', '<section ');
     expect(createHash('sha256').update(block(source)).digest('hex')).toBe(hash);

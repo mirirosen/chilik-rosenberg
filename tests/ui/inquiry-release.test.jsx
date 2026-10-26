@@ -32,14 +32,14 @@ describe('approved public inquiry release', () => {
     await i18n.changeLanguage('en'); window.history.replaceState({}, '', url); const { container } = render(<InquiryApp />);
     expect(container.querySelector('input, select, textarea, form, .date-card')).toBeNull();
     expect(container.textContent).not.toContain('private@example.invalid');
-    expect(screen.getByRole('link', { name: 'Contact Chilik on WhatsApp', exact: true })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Contact Hilik on WhatsApp', exact: true })).toBeTruthy();
     if (!url.startsWith('/booking?date=')) expect(screen.getByText(i18n.t('inquiry.statusNotice'), { exact: true })).toBeTruthy();
     expect(document.querySelector('meta[name="robots"]').content).toBe('noindex, nofollow');
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it.each([['he', 'חיליק רוזנברג'], ['en', 'Chilik Rosenberg']])('renders the %s short brand in the inquiry build (N5)', async (lang, expected) => {
+  it.each([['he', 'חיליק רוזנברג'], ['en', 'Hilik Rozenberg']])('renders the %s short brand in the inquiry build (N5)', async (lang, expected) => {
     await i18n.changeLanguage(lang); const { container } = render(<InquiryApp />);
     expect(container.querySelector('.header-brand__short').textContent).toBe(expected);
   });
@@ -91,7 +91,8 @@ describe('approved public inquiry release', () => {
     await i18n.changeLanguage('he'); window.history.replaceState({}, '', '/terms'); const { container } = render(<InquiryApp />);
     for (const promise of ['מייל אישור', 'תזכורת', 'לאחר ביצוע התשלום', 'יישלחו במייל']) expect(container.textContent).not.toContain(promise);
     expect(container.textContent).toContain('האתר אינו שולח מיילים או תזכורות אוטומטיים');
-    expect(container.textContent).toContain('השעה המדויקת של תחילת הסיור מתואמת אישית עם חיליק');
+    expect(container.textContent).toContain('הסיור מתחיל בשעה 20:00 בבני ברק');
+    expect(container.textContent).toContain('נמסרת אישית על ידי חיליק בשבוע הסיור');
     expect(container.textContent).toContain('תאריך הסיור ושם המזמין (ומספר הזמנה, אם קיבלתם)');
     expect(container.textContent).not.toContain('מספר ההזמנה, תאריך הסיור, שם המזמין');
   });

@@ -3,7 +3,10 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { guidePaths, siteOrigin } from '../src/data/organicContent.js';
-import { faqsFor } from './organic-html.mjs';
+import { faqsFor, sitemapPaths } from './organic-html.mjs';
+// Public URL path of each generated file, and back.
+const urlPath = file => file === 'index.html' ? '/' : file === 'en.html' ? '/en' : file === 'terms.html' ? '/terms' : '/' + file;
+const fileFor = pathname => pathname === '/' ? 'index.html' : pathname === '/en' ? 'en.html' : pathname === '/terms' ? 'terms.html' : pathname.slice(1);
 const mode = process.argv[2] || 'booking';
 const out = path.resolve(`dist-${mode}`);
 const config = JSON.parse(fs.readFileSync(`firebase.hosting.${mode}.json`, 'utf8')).hosting;
@@ -11,10 +14,11 @@ fs.mkdirSync('docs/seo/runtime', { recursive: true });
 const results = [];
 assert.equal(fs.existsSync(path.join(out, '.vite/manifest.json')), false, 'internal SSR map is never deployable');
 const price = Number(fs.readFileSync('functions/src/booking-core.js', 'utf8').match(/const PRICE_PER_PERSON = (\d+);/)[1]);
-for (const file of ['index.html', ...guidePaths.map(p => p.slice(1)), 'terms.html', 'booking.html', 'confirmation.html', ...(mode === 'booking' ? ['manage-bookings.html'] : [])]) {
+for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ...guidePaths.map(p => p.slice(1)), 'terms.html', 'booking.html', 'confirmation.html', ...(mode === 'booking' ? ['manage-bookings.html'] : [])]) {
   const dom = new JSDOM(fs.readFileSync(path.join(out, file), 'utf8'), { url: siteOrigin + '/' + file });
   const doc = dom.window.document;
-  if (file === 'index.html') {
+  const home = ['index.html', 'en.html'].includes(file);
+  if (home) {
     const style = doc.querySelector('style[data-public-styles][data-css-href]');
     assert(style, 'complete inline public CSS');
     assert.match(style.dataset.cssHref, /^\/assets\/[A-Za-z0-9_-]+\.css$/);
@@ -34,7 +38,7 @@ for (const file of ['index.html', ...guidePaths.map(p => p.slice(1)), 'terms.htm
     assert.equal(doc.querySelector('#organic-schema'), null);
   } else {
     assert(doc.querySelector('meta[name="description"]').content.trim());
-    assert.equal(doc.querySelector('link[rel="canonical"]').href, siteOrigin + (file === 'index.html' ? '/' : file === 'terms.html' ? '/terms' : '/' + file));
+    assert.equal(doc.querySelector('link[rel="canonical"]').href, siteOrigin + urlPath(file));
   }
   for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) JSON.parse(script.textContent);
   if (file.startsWith('guides/')) {
@@ -53,16 +57,16 @@ for (const file of ['index.html', ...guidePaths.map(p => p.slice(1)), 'terms.htm
     const target = route?.destination.slice(1) || (url.pathname === '/' ? 'index.html' : url.pathname.slice(1));
     assert(fs.existsSync(path.join(out, target)), `${file} broken link ${url.pathname}`);
   }
-  if (file === 'index.html') {
+  if (home) {
     const faq = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'].find(n => n['@type'] === 'FAQPage');
-    assert.deepEqual(faq.mainEntity.map(n => n.acceptedAnswer.text), Object.values(faqsFor('he', mode === 'booking')).map(n => n.answer));
+    assert.deepEqual(faq.mainEntity.map(n => n.acceptedAnswer.text), Object.values(faqsFor(file === 'en.html' ? 'en' : 'he', mode === 'booking')).map(n => n.answer));
     for (const item of faq.mainEntity) assert(doc.querySelector('#root').textContent.includes(item.acceptedAnswer.text));
   }
   const alternates = [...doc.querySelectorAll('link[hreflang]')];
   for (const alt of alternates) {
-    const otherFile = new URL(alt.href).pathname.slice(1);
+    const otherFile = fileFor(new URL(alt.href).pathname);
     const other = new JSDOM(fs.readFileSync(path.join(out, otherFile), 'utf8'));
-    assert(other.window.document.querySelector(`link[hreflang="${doc.documentElement.lang}"][href="${siteOrigin}/${file}"]`), 'reciprocal hreflang');
+    assert(other.window.document.querySelector(`link[hreflang="${doc.documentElement.lang}"][href="${siteOrigin}${urlPath(file)}"]`), `${file}: reciprocal hreflang from ${otherFile}`);
     other.window.close();
   }
   results.push({ file, title: doc.title, private: privateRoute, h1: doc.querySelector('h1').textContent, schemas: doc.querySelectorAll('script[type="application/ld+json"]').length });
@@ -70,8 +74,10 @@ for (const file of ['index.html', ...guidePaths.map(p => p.slice(1)), 'terms.htm
 }
 const xml = new JSDOM(fs.readFileSync(path.join(out, 'sitemap.xml'), 'utf8'), { contentType: 'application/xml' });
 const urls = [...xml.window.document.querySelectorAll('loc')].map(n => n.textContent);
-assert.deepEqual(urls, ['/', '/terms', ...guidePaths].map(p => siteOrigin + p));
-for (const route of ['terms', 'booking', 'confirmation', ...(mode === 'booking' ? ['manage-bookings'] : [])]) assert.equal(config.rewrites.find(r => r.source === '/' + route)?.destination, '/' + route + '.html');
+assert.deepEqual(urls, sitemapPaths(mode).map(p => siteOrigin + p));
+const lastmods = [...xml.window.document.querySelectorAll('lastmod')].map(n => n.textContent);
+assert(lastmods.length === urls.length && lastmods.every(d => /^\d{4}-\d{2}-\d{2}$/.test(d)), 'every sitemap URL has a lastmod date');
+for (const route of ['terms', 'booking', 'confirmation', ...(mode === 'booking' ? ['manage-bookings', 'en'] : [])]) assert.equal(config.rewrites.find(r => r.source === '/' + route)?.destination, '/' + route + '.html');
 xml.window.close();
 fs.writeFileSync(`docs/seo/runtime/verified-${mode}.json`, JSON.stringify({ results, sitemap: urls, status: 'passed' }, null, 2));
 console.log(`Passed ${results.length} initial-HTML pages: metadata, text/FAQ parity, schema JSON, links, hreflang, private shells and sitemap.`);

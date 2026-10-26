@@ -70,7 +70,7 @@ function fixture(env = { CHILIK_BOOKING_RUNTIME_ENABLED: 'true', CHILIK_BOOKING_
     await exports[name](req, response);
     return response;
   }
-  return { db, call, verifications, logs, counts: () => ({ reads, transactions }), seedBooking: (extra = {}) => db.data.set(`bookings/${ID}`, { bookingId: ID, ownerUid: 'customer', name: 'Private name', email: 'private@example.com', phone: '0501234567', notes: 'Private notes', status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250, ...extra }) };
+  return { db, call, verifications, logs, counts: () => ({ reads, transactions }), seedBooking: (extra = {}) => db.data.set(`bookings/${ID}`, { bookingId: ID, ownerUid: 'customer', name: 'Private name', email: 'private@example.com', phone: '0501234567', notes: 'Private notes', status: 'pending', paymentStatus: 'pending', totalPrice: 500, pricePerPerson: 250, tourDate: '2026-10-08', participants: 2, ...extra }) };
 }
 const endpoints = [['createBooking', 'POST'], ['createPayment', 'POST'], ['paymentStatus', 'GET'], ['updateBookingStatus', 'POST'], ['retryIntegrationJob', 'POST']];
 
@@ -104,7 +104,8 @@ test('status hides missing and cross-owner bookings; owner/admin see only public
   for (const token of ['customer', 'admin']) {
     const r = await f.call('paymentStatus', { method: 'GET', token, query: { id: ID } });
     assert.equal(r.statusCode, 200);
-    assert.deepEqual(Object.keys(r.body).sort(), ['bookingId', 'paymentStatus', 'pricePerPerson', 'reused', 'status', 'totalPrice']);
+    assert.deepEqual(Object.keys(r.body).sort(), ['bookingId', 'participants', 'paymentStatus', 'pricePerPerson', 'reused', 'status', 'totalPrice', 'tourDate']);
+    assert.ok(!/Private|private@|0501234567/.test(JSON.stringify(r.body)));
     assert.equal(r.headers['Cache-Control'], 'no-store');
   }
 });

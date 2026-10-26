@@ -5,9 +5,14 @@ const OWNER_DEFAULT = '972506724312';   // Hilik, 050-6724312
 const SENDER_DEFAULT = '972553094372';  // Newreel WAHA bot, 055-309-4372
 const digits = v => String(v ?? '').replace(/\D/g, '');
 
-// Israeli mobile from the booking form (05XXXXXXXX) -> 9725XXXXXXXX.
+// E.164 digits without '+'. Israeli numbers must be mobiles (9725XXXXXXXX);
+// other countries are 7-15 digits starting with a country code.
+const validRecipient = d => /^9725\d{8}$/.test(d) || (/^[1-9]\d{6,14}$/.test(d) && !d.startsWith('972'));
+// Booking phone -> WhatsApp recipient. Stored forms: Israeli mobile 05XXXXXXXX
+// -> 9725XXXXXXXX; international E.164 '+<digits>' -> '<digits>'.
 function toIntl(phone) {
-  const d = digits(phone);
+  const raw = String(phone ?? '').trim(), d = digits(raw);
+  if (raw.startsWith('+')) return validRecipient(d) ? d : '';
   if (/^05\d{8}$/.test(d)) return `972${d.slice(1)}`;
   if (/^9725\d{8}$/.test(d)) return d;
   return '';
@@ -19,7 +24,7 @@ function createWahaSender({ origin, apiKey, session = 'default', sender = SENDER
   if (!/^https:\/\/[^/@]+$/.test(base) || !key || !/^[A-Za-z0-9_-]{1,64}$/.test(sess)) throw new Error('waha-not-configured');
   const headers = { 'X-Api-Key': key, 'Content-Type': 'application/json' };
   return async function sendText(to, text) {
-    if (!/^9725\d{8}$/.test(to)) throw new Error('waha-invalid-recipient');
+    if (typeof to !== 'string' || !validRecipient(to)) throw new Error('waha-invalid-recipient');
     let health;
     try {
       const r = await fetchImpl(`${base}/api/sessions/${encodeURIComponent(sess)}`, { headers, redirect: 'error', signal: AbortSignal.timeout(5000) });

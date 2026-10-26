@@ -101,6 +101,12 @@ npm run deploy
 - [ ] Test all navigation links
 - [ ] Verify FAQ accordion works
 - [ ] Test date picker and booking flow
+- [ ] Booking functions only: set `CHILIK_INTEGRATION_CUTOFF_ISO` in
+      `functions/booking-deployment-settings.json` to the deploy time in UTC
+      (`date -u +%Y-%m-%dT%H:%M:%SZ`). While `CHILIK_INTEGRATION_SCHEDULER_ENABLED` is `"true"`,
+      the predeploy check `scripts/assert-integration-cutoff.cjs` refuses the deploy if the cutoff
+      is the placeholder `SET_TO_DEPLOY_TIME_UTC`, not a valid UTC ISO time, or more than an hour
+      in the future. See `docs/BOOKING_SCHEDULERS.md`.
 
 ## 🔒 Security Notes
 

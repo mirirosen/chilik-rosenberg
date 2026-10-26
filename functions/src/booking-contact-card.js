@@ -34,7 +34,8 @@ function foldLine(line) {
 function renderContactCard(booking) {
   const name = cleanText(booking?.name, 120), rawPhone = cleanText(booking?.phone, 32);
   const phone = rawPhone.replace(/[ -]/g, '');
-  const e164 = /^05\d{8}$/.test(phone) ? `+972${phone.slice(1)}` : /^\+9725\d{8}$/.test(phone) ? phone : null;
+  // Stored as 05XXXXXXXX (Israeli mobile) or E.164 for other countries.
+  const e164 = /^05\d{8}$/.test(phone) ? `+972${phone.slice(1)}` : /^\+9725\d{8}$/.test(phone) || /^\+(?!972)[1-9]\d{6,14}$/.test(phone) ? phone : null;
   if (!e164 || !realDate(booking.tourDate) || !Number.isInteger(booking.participants) || booking.participants < 1 || booking.participants > 20) throw invalid();
   const displayName = `${name} ב־${booking.tourDate.slice(8, 10)}.${booking.tourDate.slice(5, 7)} ${booking.participants} אנשים`;
   // RFC 6350: UTF-8, CRLF, 75-octet folding without splitting codepoints.
