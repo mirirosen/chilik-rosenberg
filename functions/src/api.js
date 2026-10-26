@@ -29,9 +29,16 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
   // Payment-path functions (createPayment, paymentStatus, tranzilaWebhook) keep one warm
   // instance while the runtime is enabled, so checkout/return/webhook avoid cold starts.
   const warm = keepWarm => (enabled === true && keepWarm ? 1 : 0);
+  // The warm payment functions run one request at a time, so the gen1-sized CPU
+  // (0.1666 vCPU at 256MiB) is enough and keeps the idle min-instance cheap.
+  const cpu = keepWarm => (keepWarm ? 'gcf_gen1' : 1);
+  // GET ?warmup=1 (sent by the booking UI once per session) only starts the
+  // instance: no auth, provider call, Firestore access, rate limit or log line.
+  const isWarmup = req => req.method === 'GET' && req.query?.warmup === '1';
   function endpoint(method, action, needsAdmin = false, needsPaymentSecrets = false, keepWarm = false) {
-    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(keepWarm), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+    return onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(keepWarm), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: cpu(keepWarm), timeoutSeconds: 60, ...(needsPaymentSecrets && paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
       if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
+      if (keepWarm && isWarmup(req)) return res.status(204).set('Cache-Control', 'no-store').end();
       if (!cors(req, res)) return;
       if (req.method !== method) return json(res, 405, { error: 'method-not-allowed' });
       try { return await action(req, res, await identity(req, needsAdmin)); }
@@ -85,8 +92,10 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     await jobs.retry(db.doc(`integrationJobs/${jobId}`));
     return json(res, 200, { queued: true });
   }, true);
-  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(true), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: 1, timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
+  api.tranzilaWebhook = onRequest({ region, serviceAccount: BOOKING_RUNTIME, invoker: enabled === true ? 'public' : 'private', minInstances: warm(true), maxInstances: 1, concurrency: 1, memory: '256MiB', cpu: cpu(true), timeoutSeconds: 60, ...(paymentSecrets.length ? { secrets: paymentSecrets } : {}) }, async (req, res) => {
     if (enabled !== true) return json(res, 503, { error: 'booking-runtime-disabled' });
+    // Checked before reading any notify fields, so a warmup is never processed as a webhook.
+    if (isWarmup(req)) return res.status(204).set('Cache-Control', 'no-store').end();
     if (!['POST', 'GET'].includes(req.method)) return json(res, 405, { error: 'method-not-allowed' });
     try {
       const data = req.method === 'GET' ? req.query : typeof req.body === 'object' && req.body ? req.body : {};

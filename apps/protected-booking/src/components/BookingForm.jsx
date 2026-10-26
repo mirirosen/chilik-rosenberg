@@ -6,6 +6,7 @@ import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateStr
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
 import { normalizeIsraeliMobile } from '../utils/phone';
+import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import { trackBeginBooking, trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
@@ -85,6 +86,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     const participants = Number(prefilledParticipants);
     if (Number.isInteger(participants) && participants > 0) trackBeginBooking({ participants, pricePerPerson: PRICE_PER_PERSON, totalPrice: participants * PRICE_PER_PERSON });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Start the payment functions while the customer fills in details (once per session).
+  useEffect(() => { if (!demoCheckoutId) warmPaymentFunctions(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!paymentResult) return;
