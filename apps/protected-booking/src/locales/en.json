@@ -11,7 +11,7 @@
     "availabilityUnavailable": "Availability is temporarily unavailable"
   },
   "header": {
-    "title": "Chilik Rosenberg | Bnei Brak Tours",
+    "title": "Hilik Rozenberg | Bnei Brak Tours",
     "about": "Who am I?",
     "journey": "What will we see?",
     "menu": "What will we eat?",
@@ -25,7 +25,7 @@
     "upcomingTours": "Upcoming tours"
   },
   "hero": {
-    "badge": "Chilik Rosenberg invites you",
+    "badge": "Hilik Rozenberg invites you",
     "title": "Experience the Haredi world\nas you never have before",
     "subtitle": "Culinary and cultural tours, and talks from me, a Haredi man from Bnei Brak, offering an authentic, thoughtful, light-hearted and humorous glimpse into my world.",
     "cta": "Book a tour",
@@ -69,7 +69,7 @@
       "retryLimit": "This booking has reached the maximum number of payment attempts. Please contact us with your booking number.",
       "retryVerificationPending": "We could not check the previous attempt right now. Please try again in a minute, or contact us with your booking number.",
       "amountPaid": "Amount paid",
-      "nextMeeting": "Exact meeting details are provided after registration closes. Contact Chilik before arrival to confirm the meeting point, parking and directions.",
+      "nextMeeting": "The tour starts at 20:00 in Bnei Brak. The exact meeting address will be sent during the tour week.",
       "nextContact": "Questions:",
       "pendingTitle": "Payment is still being verified",
       "pendingDetail": "Payment has not yet been confirmed. Do not pay again. Use “Check payment status” to check for an update.",
@@ -123,7 +123,7 @@
     },
     "contact": {
       "title": "For questions and inquiries:",
-      "name": "Chilik Rosenberg",
+      "name": "Hilik Rozenberg",
       "whatsapp": "Send WhatsApp Message"
     },
     "redirectTitle": "Choose your tour first",
@@ -231,7 +231,7 @@
     "section7": {
       "title": "Contact",
       "questions": "For questions about terms of use:",
-      "name": "Chilik Rosenberg",
+      "name": "Hilik Rozenberg",
       "whatsapp": "Send WhatsApp Message"
     },
     "lastUpdated": "Last updated: January 2026",
@@ -256,12 +256,12 @@
       "register": "Register for Tour",
       "contactMessage": "Hello, I have a question about the terms and conditions.",
       "paymentMessage": "Hello, I would like payment details for the tour.",
-      "languageNotice": "The full policy below is currently in Hebrew. Please contact Chilik if you need clarification before booking."
+      "languageNotice": "The full policy below is currently in Hebrew. Please contact Hilik if you need clarification before booking."
     }
   },
   "admin": {
     "title": "Tour Management",
-    "name": "Chilik Rosenberg",
+    "name": "Hilik Rozenberg",
     "tabs": {
       "tours": "Manage Dates",
       "bookings": "Bookings"
@@ -277,22 +277,22 @@
     "contact": "Contact",
     "quickLinks": "Quick Links",
     "about": "About the Tours",
-    "aboutText": "Culinary tours in Bnei Brak with Chilik Rosenberg. An authentic experience of flavors, aromas, and stories from the heart of Haredi Bnei Brak.",
+    "aboutText": "Culinary tours in Bnei Brak with Hilik Rozenberg. An authentic experience of flavors, aromas, and stories from the heart of Haredi Bnei Brak.",
     "register": "Register for Tour",
     "terms": "Terms and Conditions",
     "faqs": "FAQs",
     "aboutLink": "About",
-    "copyright": "All Rights Reserved - Chilik Rosenberg | Bnei Brak Tours",
-    "title": "Chilik Rosenberg - Culinary Tours",
+    "copyright": "All Rights Reserved - Hilik Rozenberg | Bnei Brak Tours",
+    "title": "Hilik Rozenberg - Culinary Tours",
     "address": "11 Lehi Street, Bnei Brak"
   },
   "bio": {
-    "title": "I'm Chilik. Let's get acquainted",
+    "title": "I'm Hilik. Let's get acquainted",
     "text": "I was born and have lived my entire life in my beloved city, Bnei Brak. From a deep-rooted Lithuanian family, I studied at Ponevezh Yeshiva. I love the Haredi world and enjoy hosting you in it – of course with all the heart-warming Jewish food.",
     "cta": "Let's discover together",
     "eyebrow": "The story behind the tour",
     "paragraphs": [
-      "I’m Chilik, a Haredi Torah scholar from Bnei Brak. I was born here, grew up here and live this life every day. I studied at Ponevezh, and my family’s roots run deep in this world. My grandfather even founded the first Talmud Torah after the Holocaust. I love Haredi society and its culture, and above all, I love people.",
+      "I’m Hilik, a Haredi Torah scholar from Bnei Brak. I was born here, grew up here and live this life every day. I studied at Ponevezh, and my family’s roots run deep in this world. My grandfather even founded the first Talmud Torah after the Holocaust. I love Haredi society and its culture, and above all, I love people.",
       "When we meet, I invite you on a short, fascinating journey into Haredi life. Who are we? What is life like from the inside? What lies behind matchmaking, military service or becoming a parent at a young age? I answer honestly and openly, with a little humour along the way.",
       "These encounters are moving for me too: seeing your curiosity and discovery of lives so close by, yet seemingly far away.",
       "And between us? I love bringing in warm cholent, fresh Vizhnitz challah or good gefilte fish. An experience needs flavour.",
@@ -425,9 +425,9 @@
     "availabilityCheckError": "Error checking availability. Please try again.",
     "notEnoughSpots": "Sorry, not enough spots available for {{date}}.\n\nRequested: {{requested}} spots\nAvailable: only {{available}} spots",
     "noSpots": "Sorry, no spots available for {{date}}.",
-    "whatsappMessage": "Hi Chilik,\n\nI tried to register {{count}} people for the tour on {{date}} but there aren't enough spots available.\n\nOnly {{available}} spots left.\n\nCan you help?\n\nThanks!",
+    "whatsappMessage": "Hi Hilik,\n\nI tried to register {{count}} people for the tour on {{date}} but there aren't enough spots available.\n\nOnly {{available}} spots left.\n\nCan you help?\n\nThanks!",
     "tryAnyway": "💬 Want to try anyway?",
-    "sendWhatsappNote": "Message Chilik on WhatsApp and we'll see what we can do",
+    "sendWhatsappNote": "Message Hilik on WhatsApp and we'll see what we can do",
     "sendWhatsapp": "Send WhatsApp message",
     "pickAnotherDate": "Pick another date"
   },
@@ -448,11 +448,11 @@
   "faqs": {
     "q1": {
       "question": "Can a private tour be arranged?",
-      "answer": "Yes. Contact Chilik to arrange a private group tour, with the date and content agreed in advance."
+      "answer": "Yes. Contact Hilik to arrange a private group tour, with the date and content agreed in advance."
     },
     "q2": {
       "question": "When are upcoming tours and how can I check availability?",
-      "answer": "Tours open for registration take place on Thursday evenings. Check the date-selection section for the listed dates and availability for your party size."
+      "answer": "Tours open for registration take place on Thursday evenings and start at 20:00. Check the date-selection section for the listed dates and availability for your party size."
     },
     "q3": {
       "question": "How long does the tour last?",
@@ -464,11 +464,11 @@
     },
     "q5": {
       "question": "Can I buy prepared food for Shabbat during the tour?",
-      "answer": "During the tour, Chilik can recommend places to buy prepared food for Shabbat."
+      "answer": "During the tour, Hilik can recommend places to buy prepared food for Shabbat."
     },
     "q6": {
-      "question": "What does a culinary tour of Bnei Brak with Chilik include?",
-      "answer": "The tour combines tastes of Jewish cuisine with stories and an introduction to Haredi life and culture in Bnei Brak, guided by Chilik Rosenberg."
+      "question": "What does a culinary tour of Bnei Brak with Hilik include?",
+      "answer": "The tour combines tastes of Jewish cuisine with stories and an introduction to Haredi life and culture in Bnei Brak, guided by Hilik Rozenberg."
     },
     "q7": {
       "question": "How much does the tour cost?",
@@ -476,23 +476,27 @@
     },
     "q8": {
       "question": "Where do we meet and where can I park?",
-      "answer": "Exact meeting details are provided after registration closes. Contact Chilik before arrival to confirm the meeting point, parking and directions for your date."
+      "answer": "The meeting point is in Bnei Brak. The exact address is sent during the week of your tour. For parking and directions, contact Hilik before arrival."
     },
     "q9": {
       "question": "What food will we taste?",
-      "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Chilik before registering for details of the tastings on your chosen tour."
+      "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Hilik before registering for details of the tastings on your chosen tour."
     },
     "q10": {
       "question": "What is the kashrut standard, and are vegetarian or allergy adjustments available?",
-      "answer": "Before registering, contact Chilik to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
+      "answer": "Before registering, contact Hilik to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
     },
     "q11": {
       "question": "Is the tour suitable for children, strollers or people with walking difficulties?",
-      "answer": "Contact Chilik before registering to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
+      "answer": "Contact Hilik before registering to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
     },
     "q12": {
       "question": "What if I need to cancel or postpone my booking?",
-      "answer": "Cancellation and postponement conditions are listed in the registration terms. Before changing a booking, read the terms and contact Chilik with your booking reference."
+      "answer": "Cancellation and postponement conditions are listed in the registration terms. Before changing a booking, read the terms and contact Hilik with your booking reference."
+    },
+    "q13": {
+      "question": "In which languages is the tour guided?",
+      "answer": "The tour is guided in Hebrew and English."
     }
   },
   "helpHub": {
@@ -500,7 +504,7 @@
     "register": "Register"
   },
   "intro": {
-    "label": "Tours and talks with Chilik",
+    "label": "Tours and talks with Hilik",
     "paragraphs": [
       "You may know about us, but now it is time to taste, discover and experience our world up close, authentically and directly.",
       "This is what I love most: meeting you, opening a door into my world and the Haredi community, and sharing an unforgettable experience.",
@@ -550,27 +554,27 @@
   },
   "seo": {
     "home": {
-      "title": "Chilik Rosenberg | Culinary Tours in Bnei Brak",
-      "description": "Explore culinary and cultural tours in Bnei Brak with Chilik Rosenberg. Tour information, frequently asked questions and upcoming dates."
+      "title": "Hilik Rozenberg | Culinary Tours in Bnei Brak",
+      "description": "Explore culinary and cultural tours in Bnei Brak with Hilik Rozenberg. Tour information, frequently asked questions and upcoming dates."
     },
     "terms": {
-      "title": "Terms & Conditions | Chilik Rosenberg",
-      "description": "Booking terms, cancellation policy and contact information for Chilik Rosenberg tours in Bnei Brak."
+      "title": "Terms & Conditions | Hilik Rozenberg",
+      "description": "Booking terms, cancellation policy and contact information for Hilik Rozenberg tours in Bnei Brak."
     },
     "booking": {
-      "title": "Tour Booking | Chilik Rosenberg",
+      "title": "Tour Booking | Hilik Rozenberg",
       "description": "Tour booking form and booking status."
     },
     "confirmation": {
-      "title": "Booking Status | Chilik Rosenberg",
+      "title": "Booking Status | Hilik Rozenberg",
       "description": "Check an existing booking status."
     },
     "admin": {
-      "title": "Admin Sign In | Chilik Rosenberg",
+      "title": "Admin Sign In | Hilik Rozenberg",
       "description": "Sign in to the administration area."
     },
     "notFound": {
-      "title": "Page Unavailable | Chilik Rosenberg",
+      "title": "Page Unavailable | Hilik Rozenberg",
       "description": "The requested address is unavailable."
     }
   }

@@ -32,14 +32,14 @@ describe('approved public inquiry release', () => {
     await i18n.changeLanguage('en'); window.history.replaceState({}, '', url); const { container } = render(<InquiryApp />);
     expect(container.querySelector('input, select, textarea, form, .date-card')).toBeNull();
     expect(container.textContent).not.toContain('private@example.invalid');
-    expect(screen.getByRole('link', { name: 'Contact Chilik on WhatsApp', exact: true })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Contact Hilik on WhatsApp', exact: true })).toBeTruthy();
     if (!url.startsWith('/booking?date=')) expect(screen.getByText(i18n.t('inquiry.statusNotice'), { exact: true })).toBeTruthy();
     expect(document.querySelector('meta[name="robots"]').content).toBe('noindex, nofollow');
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it.each([['he', 'חיליק רוזנברג'], ['en', 'Chilik Rosenberg']])('renders the %s short brand in the inquiry build (N5)', async (lang, expected) => {
+  it.each([['he', 'חיליק רוזנברג'], ['en', 'Hilik Rozenberg']])('renders the %s short brand in the inquiry build (N5)', async (lang, expected) => {
     await i18n.changeLanguage(lang); const { container } = render(<InquiryApp />);
     expect(container.querySelector('.header-brand__short').textContent).toBe(expected);
   });

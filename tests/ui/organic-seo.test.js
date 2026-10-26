@@ -18,7 +18,7 @@ describe('SEO-01: organic metadata and content parity', () => {
     expect(doc.querySelectorAll('h1')).toHaveLength(1);
     expect(doc.querySelector('#root').textContent).toContain('סיור קולינרי בבני ברק');
     expect(doc.querySelector('link[rel="canonical"]').href).toBe('https://www.chilik-tours.com/');
-    expect(faq.mainEntity).toHaveLength(12);
+    expect(faq.mainEntity).toHaveLength(13);
     for (const question of faq.mainEntity) {
       expect(doc.querySelector('#root').textContent).toContain(question.name);
       expect(doc.querySelector('#root').textContent).toContain(question.acceptedAnswer.text);
