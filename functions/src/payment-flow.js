@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const { viaProvider } = require('./booking-core');
 const failure = code => Object.assign(new Error(code), { status: 409 });
+const MAX_PAYMENT_RETRIES = 5;
 function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock = Date.now }) {
   async function create(uid, key, input) {
     // Bit goes through the same Tranzila checkout only when its flag and verified
@@ -43,6 +44,65 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
       throw error;
     }
   }
+  // A declined card returns the customer while the booking is still awaiting_payment.
+  // The owner may open a fresh checkout for the SAME booking right away instead of
+  // waiting for the 15-minute window to expire. Payment rules are unchanged: no seat
+  // is held, 'paid' still comes only from a verified provider receipt, and a second
+  // capture for one booking is still routed to review by change(). When the order
+  // lookup is configured, an existing verified capture is applied instead of
+  // opening another checkout, and an unverifiable lookup refuses the retry.
+  async function retry(uid, bookingId) {
+    provider.assertReady();
+    urlsFor.assertReady?.();
+    if (!/^BK-[a-f0-9]{24}$/.test(bookingId || '')) throw Object.assign(new Error('invalid-booking-reference'), { status: 400 });
+    const ref = bookings.bookingRef(bookingId), snap = await ref.get();
+    if (!snap.exists || snap.data().ownerUid !== uid || !viaProvider(snap.data())) throw Object.assign(new Error('not-found'), { status: 404 });
+    const open = b => b.status === 'payment_pending' && b.paymentStatus === 'awaiting_payment' && b.holdExpiresAt?.toMillis() > clock();
+    let b = snap.data();
+    if (!open(b)) throw failure('booking-closed');
+    if ((b.paymentRetries || 0) >= MAX_PAYMENT_RETRIES) throw failure('payment-retry-limit');
+    if (b.paymentTerminal && provider.findTransactionIndexes && lookupReady()) {
+      let indexes;
+      try { ({ transactionIndexes: indexes } = await provider.findTransactionIndexes({ booking: b, nowMs: clock() })); }
+      catch { throw Object.assign(new Error('payment-verification-pending'), { status: 503 }); }
+      for (const transactionIndex of indexes || []) {
+        let receipt;
+        try { receipt = await provider.verifyTransaction({ booking: b, transactionIndex }); } catch { continue; } // declined/unverified rows are not captures
+        if (receipt?.verified === true && receipt.event === 'paid') {
+          const updated = await bookings.change(bookingId, 'paid', 'provider:tranzila', receipt, clock());
+          return { bookingId, status: updated.status, paymentStatus: updated.paymentStatus };
+        }
+      }
+    }
+    const lease = crypto.randomUUID();
+    await db.runTransaction(async tx => {
+      const current = (await tx.get(ref)).data();
+      if (!open(current)) throw failure('booking-closed');
+      if (current.initiationLeaseUntil?.toMillis() > clock()) throw failure('payment-initiation-in-progress');
+      tx.update(ref, { initiationLease: lease, initiationLeaseUntil: Timestamp.fromMillis(clock() + 120000) });
+    });
+    let checkout;
+    try { checkout = await provider.createCheckout({ booking: b, urls: urlsFor(bookingId) }); }
+    catch (error) {
+      // The previous checkout stays as it was; only the retry lease is released.
+      await db.runTransaction(async tx => {
+        if ((await tx.get(ref)).data().initiationLease === lease) tx.update(ref, { initiationLease: null, initiationLeaseUntil: null });
+      });
+      throw error;
+    }
+    await db.runTransaction(async tx => {
+      b = (await tx.get(ref)).data();
+      if (b.initiationLease !== lease || !open(b) || (b.paymentTerminal && b.paymentTerminal !== checkout.paymentTerminal)) throw failure('booking-closed');
+      const now = clock();
+      // A new checkout window for the same unreserved booking (no seat is held).
+      tx.update(ref, { paymentUrl: checkout.paymentUrl, paymentRetries: (b.paymentRetries || 0) + 1, holdExpiresAt: Timestamp.fromMillis(now + 15 * 60000), initiationLease: null, initiationLeaseUntil: null, updatedAt: Timestamp.fromMillis(now) });
+    });
+    return { bookingId, paymentUrl: checkout.paymentUrl, retried: true };
+  }
+  function lookupReady() {
+    if (!provider.assertLookupReady) return false;
+    try { provider.assertLookupReady(); return true; } catch { return false; }
+  }
   async function notify({ bookingId, transactionIndex }) {
     provider.assertReady();
     if (!/^BK-[a-f0-9]{24}$/.test(bookingId || '') || !/^\d{1,12}$/.test(String(transactionIndex || ''))) throw failure('invalid-provider-reference');
@@ -53,6 +113,6 @@ function createPaymentFlow({ db, bookings, Timestamp, provider, urlsFor, clock =
     const receipt = await provider.verifyTransaction({ booking: snap.data(), transactionIndex });
     return bookings.change(bookingId, receipt.event, 'provider:tranzila', receipt, clock());
   }
-  return { create, notify };
+  return { create, retry, notify };
 }
 module.exports = { createPaymentFlow };

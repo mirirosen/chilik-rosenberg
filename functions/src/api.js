@@ -42,7 +42,8 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
     });
   }
   function publicBooking(b) {
-    return { bookingId: b.bookingId, status: b.status, paymentStatus: b.paymentStatus, totalPrice: b.totalPrice, pricePerPerson: b.pricePerPerson, reused: b.reused === true,
+    // tourDate/participants let the owner's confirmation screen show the booking summary.
+    return { bookingId: b.bookingId, status: b.status, paymentStatus: b.paymentStatus, totalPrice: b.totalPrice, pricePerPerson: b.pricePerPerson, tourDate: b.tourDate, participants: b.participants, reused: b.reused === true,
       ...(b.refundStatus === 'manual_review_required' ? { refundStatus: b.refundStatus } : {}),
       ...(b.additionalPaymentReview === true ? { additionalPaymentReview: true } : {}) };
   }
@@ -57,6 +58,8 @@ function createBookingApi({ onRequest, onSchedule, db, Timestamp, bookings, jobs
   }
   api.createBooking = endpoint('POST', create, false, true);
   api.createPayment = endpoint('POST', async (req, res, user) => {
+    // After a declined card: a fresh checkout for the caller's own open booking.
+    if (req.body?.retryBookingId !== undefined) return json(res, 200, await paymentFlow.retry(user.uid, String(req.body.retryBookingId)));
     const result = await paymentFlow.create(user.uid, req.get('x-idempotency-key'), req.body);
     return json(res, result.reused ? 200 : 201, result);
   }, false, true);
