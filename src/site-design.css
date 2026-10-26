@@ -68,22 +68,50 @@
   font-size: clamp(32px, 3.2vw, 48px); line-height: 1.2; font-weight: 500; font-style: normal;
 }
 .target-site :is(.target-journey,.target-menu,.target-videos,.target-inclusions,.target-lectures,#media,#faq) { padding-block: var(--site-space); }
-.target-site .target-intro { padding-block: 64px 56px; }
-.target-site .target-intro__lead { max-width: 760px; font-size: 19px; line-height: 1.8; margin-bottom: 32px; }
-.target-site .target-tour-picks { max-width: 920px; gap: 24px; }
-.target-site .target-tour-pick { display: flex; flex-direction: column; height: auto; min-height: 0; aspect-ratio: auto; border: 1px solid var(--site-line); border-radius: var(--site-radius); background: #fffdf8; text-decoration: none; transition: border-color .2s, box-shadow .2s; }
+/* Task 11: premium intro cards. Both cards share one aspect ratio, one warm
+   gradient and one title band, so the dark food photo and the cutout portrait
+   read as a set. The whole card is the link; the arrow is decorative. */
+.target-site .target-intro { padding-block: clamp(64px, 7vw, 104px) clamp(56px, 6vw, 96px); }
+.target-site .target-intro__lead { max-width: 60ch; margin: 0 auto clamp(40px, 4vw, 56px); font-family: var(--eti-body-font); font-size: clamp(17px, 1.2vw, 20px); line-height: 1.8; color: var(--target-ink); text-wrap: pretty; }
+.target-site .target-intro__lead p:first-child { color: var(--target-muted); }
+.target-site .target-intro__lead p+p { margin-top: 14px; }
+.target-site .target-intro__lead .target-intro__key { margin-top: 30px; font-family: var(--eti-heading-font); font-size: clamp(21px, 1.7vw, 27px); line-height: 1.5; font-weight: 500; color: var(--target-gold-text); text-wrap: balance; }
+.target-intro__key::before { content: ""; display: block; width: 48px; height: 2px; margin: 0 auto 22px; border-radius: 2px; background: var(--target-gold); }
+.target-site .target-tour-picks { max-width: 900px; gap: 28px; }
+.target-site .target-tour-pick { display: block; position: relative; height: auto; min-height: 0; aspect-ratio: 4 / 5; overflow: hidden; isolation: isolate; border: 1px solid rgb(48 44 37 / .08); border-radius: 20px; background: var(--site-charcoal); text-decoration: none; box-shadow: 0 1px 2px rgb(39 38 34 / .06), 0 12px 32px -12px rgb(39 38 34 / .28); transition: box-shadow .3s ease; }
 .target-site .target-tour-pick::after { display: none; }
-.target-site .target-tour-pick:hover { border-color: #bba172; box-shadow: 0 8px 24px #3028190a; }
-.target-tour-pick__visual { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
-.target-site .target-tour-pick__visual img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.target-site .target-tour-pick--portrait .target-tour-pick__visual { background: radial-gradient(ellipse at 50% 80%, #d3c4aa, #e9decc 65%, #f0e8da); }
-.target-site .target-tour-pick--portrait .target-tour-pick__visual img { top: -10%; height: 130%; object-fit: contain; object-position: center; }
-.target-site .target-tour-pick--portrait:hover img { transform: none; }
-.target-tour-pick__caption { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; text-align: start; }
-.target-tour-pick__caption h2 { color: var(--target-ink); font-size: 30px; line-height: 1.2; font-weight: 500; margin: 0; }
-.target-tour-pick__arrow { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border: 1px solid var(--site-line); border-radius: 50%; color: var(--target-gold-text); }
+.target-site .target-tour-pick:focus-visible { outline: 3px solid var(--target-gold-text); outline-offset: 4px; }
+.target-tour-pick__visual { position: absolute; inset: 0; overflow: hidden; }
+.target-tour-pick__visual::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgb(39 38 34 / .10) 0%, transparent 32%, rgb(39 38 34 / .35) 58%, rgb(28 25 21 / .90) 100%); }
+.target-site .target-tour-pick__visual img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; filter: saturate(.9) contrast(1.04); transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.target-site .target-tour-pick:hover img { transform: none; }
+/* The flat beige cutout sits on a warm dark studio backdrop matching the food photo. The supplied
+   cutout has 73 of 513 px transparent below the waist: the negative offset rests the body on the card edge. */
+.target-site .target-tour-pick--portrait .target-tour-pick__visual { background: radial-gradient(ellipse 80% 70% at 50% 38%, #8a7254 0%, #574734 45%, #2f2a23 80%, #272622 100%); }
+.target-site .target-tour-pick--portrait .target-tour-pick__visual img { inset: auto 0 -14.5%; height: 100%; object-fit: contain; object-position: 50% 100%; filter: drop-shadow(0 0 28px rgb(230 185 72 / .18)); }
+.target-tour-pick__caption { position: absolute; inset-inline: 0; bottom: 0; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 28px; text-align: start; }
+.target-site .target-tour-pick__caption h2 { margin: 0; color: #fffdf8; font-family: var(--eti-heading-font); font-size: clamp(30px, 2.6vw, 40px); line-height: 1.1; font-weight: 500; text-shadow: 0 1px 12px rgb(0 0 0 / .35); }
+.target-tour-pick__caption h2::before { content: ""; display: block; width: 32px; height: 2px; margin-bottom: 14px; border-radius: 2px; background: var(--target-gold); }
+.target-site .target-tour-pick__arrow { display: grid; place-items: center; flex-shrink: 0; width: 56px; height: 56px; border: 0; border-radius: 50%; background: var(--target-gold); color: #302819; box-shadow: 0 6px 16px -6px rgb(0 0 0 / .45); transition: background .2s ease; }
+.target-tour-pick__arrow svg { transition: translate .25s ease; }
 html[dir=ltr] .target-tour-pick__arrow svg { transform: rotate(180deg); }
-.target-site .target-tour-pick__image-note { inset-inline: auto 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 4px 8px; border-radius: 6px; background: #181612c9; font-size: 11px; line-height: 1.5; }
+.target-site .target-tour-pick .target-tour-pick__image-note { position: absolute; top: 16px; bottom: auto; inset-inline: 16px auto; z-index: 2; display: inline-flex; align-items: center; gap: 7px; max-width: calc(100% - 32px); padding: 5px 11px 5px 10px; border: 1px solid rgb(255 255 255 / .18); border-radius: 999px; background: rgb(24 22 18 / .62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #fffdf8; font: 500 12px/1.4 var(--eti-body-font); text-shadow: none; }
+.target-tour-pick__image-note::before { content: ""; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--target-gold); }
+.target-site .target-tour-pick:focus-visible .target-tour-pick__arrow { background: #f0c85f; }
+.target-site .target-tour-pick:focus-visible .target-tour-pick__arrow svg { translate: -4px 0; }
+html[dir=ltr] .target-site .target-tour-pick:focus-visible .target-tour-pick__arrow svg { translate: 4px 0; }
+@media (hover: hover) {
+  .target-site .target-tour-pick:hover { box-shadow: 0 2px 4px rgb(39 38 34 / .08), 0 22px 44px -14px rgb(39 38 34 / .42); }
+  .target-site .target-tour-pick:hover img { transform: scale(1.04); }
+  .target-site .target-tour-pick:hover .target-tour-pick__arrow { background: #f0c85f; }
+  .target-site .target-tour-pick:hover .target-tour-pick__arrow svg { translate: -4px 0; }
+  html[dir=ltr] .target-site .target-tour-pick:hover .target-tour-pick__arrow svg { translate: 4px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .target-site .target-tour-pick, .target-site .target-tour-pick__visual img, .target-site .target-tour-pick__arrow, .target-tour-pick__arrow svg { transition: none; }
+  .target-site .target-tour-pick:hover img { transform: none; }
+  .target-site .target-tour-pick .target-tour-pick__arrow svg { translate: none; }
+}
 .target-site .target-section-heading>p:not(.target-eyebrow) { color: var(--target-muted); font-size: 17px; }
 .target-site :is(.target-inclusions,.target-lectures) { background: var(--site-charcoal); }
 .target-site .target-inclusions ol { background: #fffdf8; border-radius: var(--site-radius); }
@@ -241,11 +269,13 @@ html[dir=ltr] .target-tour-pick__arrow svg { transform: rotate(180deg); }
   html[dir=ltr] .target-site .target-hero .target-hero__person-frame { right: auto; left: 4px; }
   .target-site .target-hero .target-hero__veil { background: linear-gradient(180deg,transparent 20%,#27262233 48%,#272622cc 76%,#272622); }
   .target-site .target-hero { background: var(--site-charcoal); --media-h: clamp(280px,90vw,380px); }
-  .target-site .target-intro { padding: 40px 20px; }
+  .target-site .target-intro { padding: 48px 20px 56px; }
   .target-site .target-intro__lead { font-size: 17px; }
-  .target-site .target-tour-picks { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; max-width: 920px; }
-  .target-tour-pick__caption { padding: 16px 20px; }
-  .target-tour-pick__caption h2 { font-size: 26px; }
+  .target-site .target-intro__lead .target-intro__key { font-size: 21px; margin-top: 26px; }
+  .target-site .target-tour-picks { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; max-width: 900px; }
+  .target-tour-pick__caption { padding: 20px; }
+  .target-site .target-tour-pick__caption h2 { font-size: 28px; }
+  .target-site .target-tour-pick__arrow { width: 48px; height: 48px; }
   .target-site .target-menu__rail { grid-template-columns: 1fr; gap: 20px; }
   .target-site .target-menu__rail article>div { padding: 22px; }
   .target-site .target-videos__grid { grid-template-columns: 1fr; }
@@ -268,7 +298,10 @@ html[dir=ltr] .target-tour-pick__arrow svg { transform: rotate(180deg); }
   .site-admin-login .max-w-md { padding: 28px 22px; }
 }
 @media(max-width:600px) {
-  .target-site .target-tour-picks { grid-template-columns: 1fr; max-width: 430px; gap: 20px; }
+  .target-site .target-tour-picks { grid-template-columns: 1fr; max-width: 520px; gap: 20px; }
+  .target-site .target-tour-pick { aspect-ratio: 6 / 5; }
+  .target-site .target-tour-pick__caption h2 { font-size: 30px; }
+  .target-site .target-tour-pick .target-tour-pick__image-note { top: 12px; inset-inline-start: 12px; max-width: calc(100% - 24px); font-size: 11.5px; }
 }
 
 /* A compact directory for the full press, podcast and social-link archive. */

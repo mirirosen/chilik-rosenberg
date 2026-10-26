@@ -39,4 +39,15 @@ describe('locally hosted illustrative imagery', () => {
     expect(container.querySelector('.target-tour-pick--portrait img').getAttribute('src')).toContain('hilik-cutout-provided');
     expect(Object.keys(he.imagery)).toEqual(Object.keys(en.imagery));
   });
+  it('announces the tour card AI disclosure as its description, not its name', () => {
+    render(<RatingBar />);
+    const tours = screen.getByRole('link', { name: he.intro.tours });
+    const note = document.getElementById(tours.getAttribute('aria-describedby'));
+    expect(note.textContent).toBe(he.imagery.generated);
+    for (const img of document.querySelectorAll('.target-tour-pick img')) {
+      expect(img.getAttribute('loading')).toBe('lazy');
+      expect(Number(img.getAttribute('width'))).toBeGreaterThan(0);
+      expect(Number(img.getAttribute('height'))).toBeGreaterThan(0);
+    }
+  });
 });
