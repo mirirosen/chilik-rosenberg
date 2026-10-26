@@ -66,7 +66,7 @@ it('localizes ordinary Terms controls while explicitly retaining the Hebrew poli
   expect(screen.getByRole('heading', { name: '1. General' })).toBeTruthy();
   expect(screen.getByRole('button', { name: en.terms.ui.register })).toBeTruthy();
   expect(screen.getByRole('link', { name: en.terms.section7.whatsapp })).toBeTruthy();
-  expect(container.querySelectorAll('section[lang="he"][dir="rtl"]')).toHaveLength(4);
+  expect(container.querySelectorAll('section[lang="he"][dir="rtl"]')).toHaveLength(3);
   expect(screen.getByText('ביטול עד 7 ימים לפני מועד הסיור - החזר כספי מלא (100%) ✓')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: en.terms.backToTop }));
   expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'auto' });
@@ -88,10 +88,22 @@ it('keeps the original Hebrew policy provisions unchanged after trailing-whitesp
   // Hashes of the unchanged integrated-source policy blocks after trailing-whitespace cleanup. This fixture
   // protects copy without depending on the author's Windows source path.
   for (const [from,to,hash] of [
-    ['AGE RESTRICTION - PROMINENT WARNING','Section 1: כללי','5ae90d5cff9a1a7e528eb17efe9aa87163187193a83bf71e5b3687a4fdf47cdb'],
     ['Section 3: מדיניות ביטול רכישה','Section 6: פרטיות','2c93cab6fff60848fbde18ca0a9683c4ce6672a826bd5d9443c83627400ca077']
   ]) {
     const block = text => text.slice(text.indexOf('{/* '+from),text.indexOf('{/* '+to)).replace(/<section id="terms-section-\d"/g, '<section').replaceAll('<section lang="he" dir="rtl" ', '<section ');
     expect(createHash('sha256').update(block(source)).digest('hex')).toBe(hash);
   }
+});
+
+it('welcomes families with children on the Terms page instead of an adults-only rule', () => {
+  for (const [lang, locale] of [['he', he], ['en', en]]) {
+    language = lang;
+    const { container } = render(<Terms />);
+    expect(screen.getByRole('heading', { name: locale.terms.section4.title })).toBeTruthy();
+    expect(screen.getByText(locale.terms.section4.families)).toBeTruthy();
+    expect(screen.getByText(locale.terms.section4.purchaser)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/המשתתף חייבים להיות בגיל 18|🔞/);
+    cleanup();
+  }
+  for (const locale of [he, en]) expect(locale.faqs.q11.answer).toMatch(/משפחות עם ילדים מוזמנות בברכה|Families with children are welcome/);
 });

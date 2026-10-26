@@ -108,7 +108,7 @@
       "emailInvalid": "Invalid email address",
       "howRequired": "Please select how you heard about us",
       "dobRequired": "Date of birth is required",
-      "ageRestriction": "Registration is only for ages 18+",
+      "ageRestriction": "The person booking must be 18 or older. Children are welcome with an adult",
       "dateRequired": "Please select a tour date",
       "thursdayOnly": "Only Thursdays can be selected",
       "dateUnavailable": "Selected date is not available (blocked or sold out)",
@@ -211,7 +211,8 @@
       "title": "Suitable for All Ages",
       "allAges": "The tour is suitable for all ages!",
       "babies": "Mothers are welcome to bring babies",
-      "families": "Families with children - welcome!"
+      "families": "Families with children - welcome!",
+      "purchaser": "Booking and payment are made by an adult aged 18 or older, and children take part accompanied by a parent or responsible adult."
     },
     "section5": {
       "title": "Liability",
@@ -520,7 +521,7 @@
     },
     "q11": {
       "question": "Is the tour suitable for children, strollers or people with walking difficulties?",
-      "answer": "Contact Chilik before arranging the tour to discuss participant ages and accessibility needs. Check the walking route and access conditions at the places visited in advance."
+      "answer": "Families with children are welcome, and children take part with an adult. For strollers or walking difficulties, contact Chilik before arranging the tour to discuss accessibility needs. Check the walking route and access conditions at the places visited in advance."
     },
     "q12": {
       "question": "What if I need to cancel or postpone?",
