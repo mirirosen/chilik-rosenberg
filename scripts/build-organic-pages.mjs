@@ -8,7 +8,7 @@ const mode = process.argv[2];
 if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inquiry mode');
 const out = path.resolve(mode === 'booking' ? 'dist-booking' : 'dist-inquiry');
 const entry = fs.readFileSync(path.join(out, `${mode}-index.html`), 'utf8');
-const css = fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8');
+const css = fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
 const heSections = [
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
   ['למה מבקרים בבני ברק ביום חמישי בערב?', 'הסיורים מתקיימים בדרך כלל בחמישי בערב, לקראת שבת. חיליק מספר על העיר שבה נולד וחי, ומחבר בין האוכל לבין מוסדות, מנהגים וחיי החברה החרדית. זו הזדמנות לשאול שאלות על דברים שרואים בדרך ולקבל תשובה ממדריך מקומי. המועד בפועל תלוי בתיאום ובזמינות; מידע כללי על חמישי אינו אישור להרשמה.'],
@@ -49,6 +49,19 @@ function planningDetails(page) {
   const coverage = `<section><h2>${english ? 'Read about previous visits' : 'לקריאה על ביקורים קודמים'}</h2><p>${english ? 'Mako’s March 2024 report describes a Thursday-night food tour with Chilik, combining tastings and local stories. Yuvi Yam’s account also describes the food and cultural encounters during a visit with him. These are reports of previous visits, rather than current booking instructions; stops, menus and arrangements can change.' : 'כתבת מאקו ממרץ 2024 מתארת סיור ליל שישי עם חיליק, המשלב טעימות וסיפורים מקומיים. גם בתיאור הביקור של יובי ים מופיעים המאכלים והמפגש עם התרבות בעיר לצד חיליק. אלה תיאורים של ביקורים קודמים, ולא הוראות הזמנה עדכניות; תחנות, תפריטים וסידורי הגעה עשויים להשתנות.'}</p><ul><li><a href="https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm" target="_blank" rel="noopener noreferrer">${english ? 'Mako — a Thursday-night tour with Chilik, 2024' : 'מאקו — סיור ליל שישי עם חיליק, 2024'}</a></li><li><a href="https://www.yuviyam.com/post/bnei-brak" target="_blank" rel="noopener noreferrer">${english ? 'Yuvi Yam — a culinary visit to Bnei Brak' : 'יובי ים — קולינריה בבני ברק'}</a></li></ul><p><a href="/#about">${english ? 'More about Chilik Rosenberg' : 'עוד על חיליק רוזנברג'}</a></p></section>`;
   return dishes + faq + coverage;
 }
+const headerCopy = language => JSON.parse(fs.readFileSync(path.resolve('src/locales/' + language + '.json'), 'utf8')).header;
+// Same destination and wording as the main site header CTA; the inquiry build keeps its neutral label.
+function bookingButton(page) {
+  const header = headerCopy(page.language);
+  return `<a class="guide-cta__button" href="/#date-selection">${e(mode === 'booking' ? header.register : header.upcomingTours)}</a>`;
+}
+function guideHeader(page) {
+  return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${bookingButton(page)}</header>`;
+}
+function closingCta(page) {
+  const heading = page.language === 'en' ? 'Ready to join a tour?' : page.path.includes('private-tour') ? 'רוצים להצטרף לסיור פתוח?' : 'רוצים להצטרף לסיור?';
+  return `<section class="guide-cta"><h2>${heading}</h2>${bookingButton(page)}<a href="https://wa.me/972506724312">${e(organicCopy[page.language].contact)}</a></section>`;
+}
 for (const page of pages) {
   const copy = organicCopy[page.language];
   const primaryContact = page.path.includes('private-tour')
@@ -61,7 +74,7 @@ for (const page of pages) {
     { '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours', item: siteOrigin + '/' }, { '@type': 'ListItem', position: 2, name: page.h1, item: url } ] },
   ] };
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}">` : '';
-  const html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body><main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main></body></html>`;
+  const html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Chilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main></body></html>`;
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
 }
 // Distinct initial metadata for legal and private routes. The same React bundle
