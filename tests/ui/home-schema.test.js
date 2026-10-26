@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildHomeSchema, sameAsProfiles, organicCopy } from '../../src/data/organicContent';
+import { buildHomeSchema, organicCopy } from '../../src/data/organicContent';
 import { mediaReferences } from '../../src/data/mediaReferences';
 import he from '../../src/locales/he.json';
 import en from '../../src/locales/en.json';
@@ -38,13 +38,15 @@ describe('home JSON-LD', () => {
     expect(node(enGraph, 'Person').alternateName).toEqual(['Chilik Rosenberg', 'Hilik Rosenberg', 'Chilik Rozenberg', 'חיליק רוזנברג']);
     expect(node(heGraph, 'Person').alternateName).toEqual(['Hilik Rozenberg', 'Chilik Rosenberg', 'Hilik Rosenberg', 'Chilik Rozenberg']);
     expect(node(enGraph, 'LocalBusiness').name).toBe('Hilik Rozenberg Tours');
+    expect(node(enGraph, 'LocalBusiness').alternateName[0]).toBe('Hilik Tours');
     expect(organicCopy.en.title).toBe('Bnei Brak culinary tour with Hilik Rozenberg');
   });
-  it('sameAs uses only profile links already present in the site media data', () => {
-    const known = new Set(mediaReferences.map(item => item.url));
-    expect(sameAsProfiles.length).toBe(5);
-    for (const url of sameAsProfiles) expect(known.has(url)).toBe(true);
-    expect(node(heGraph, 'Person').sameAs).toEqual(sameAsProfiles);
+  it('publishes no sameAs (social profiles await owner confirmation)', () => {
+    for (const graph of [heGraph, enGraph]) {
+      expect(JSON.stringify(graph)).not.toContain('sameAs');
+      const text = JSON.stringify(graph);
+      for (const { url } of mediaReferences.filter(item => item.category === 'online' && item.id !== 'tour-site')) expect(text).not.toContain(url);
+    }
   });
   it('the FAQ schema carries the start time, meeting point and languages in both languages', () => {
     for (const [graph, words] of [[heGraph, ['20:00', 'הכתובת המדויקת נשלחת בשבוע הסיור', 'בעברית ובאנגלית']], [enGraph, ['20:00', 'exact address is sent during the week', 'Hebrew and English']]]) {
