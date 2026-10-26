@@ -423,9 +423,7 @@
     "sendWhatsapp": "Send WhatsApp message",
     "pickAnotherDate": "Pick another date"
   },
-  "ratings": {
-    "stars": "Rated 5.0/5 based on 28 verified reviews",
-    "reason1": {
+  "ratings": {    "reason1": {
       "title": "An Insider's Perspective",
       "desc": "My tour is based on deep familiarity with the alleys where I grew up. This is not an external guide, but a rare glimpse into my Haredi life."
     },
