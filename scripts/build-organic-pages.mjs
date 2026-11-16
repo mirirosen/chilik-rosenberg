@@ -59,14 +59,26 @@ function bookingButton(page) {
   return `<a class="guide-cta__button" href="/#date-selection">${e(mode === 'booking' ? header.register : header.upcomingTours)}</a>`;
 }
 function guideHeader(page) {
-  return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${bookingButton(page)}</header>`;
+  return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${page.path === guidePaths[1] ? privateTourButton() : bookingButton(page)}</header>`;
+}
+function privateTourButton() {
+  return '<a class="guide-cta__button" href="https://wa.me/972506724312">לתיאום סיור פרטי לקבוצה</a>';
+}
+function openingDetails(page) {
+  if (page.path === guidePaths[1]) return `<p class="guide-intro-action">${privateTourButton()}</p>`;
+  const copy = organicCopy[page.language];
+  return `<section class="guide-quick-facts"><h2>${page.language === 'en' ? 'Tour planning at a glance' : 'פרטי הסיור במבט מהיר'}</h2><dl>${copy.facts.slice(0, 3).map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section>`;
 }
 function closingCta(page) {
-  const heading = page.language === 'en' ? 'Ready to join a tour?' : page.path.includes('private-tour') ? 'רוצים להצטרף לסיור פתוח?' : 'רוצים להצטרף לסיור?';
+  if (page.path === guidePaths[1]) return `<section class="guide-cta"><h2>מתכננים סיור פרטי לקבוצה?</h2>${privateTourButton()}<a href="/#date-selection">${mode === 'booking' ? 'להצטרפות לסיור פתוח' : 'לפרטי הסיור הפתוח'}</a></section>`;
+  const heading = page.language === 'en' ? 'Ready to join a tour?' : 'רוצים להצטרף לסיור?';
   return `<section class="guide-cta"><h2>${heading}</h2>${bookingButton(page)}<a href="https://wa.me/972506724312">${e(organicCopy[page.language].contact)}</a></section>`;
 }
 for (const page of pages) {
   const copy = organicCopy[page.language];
+  const intro = page.path === guidePaths[1]
+    ? 'לתכנון סיור פרטי בבני ברק עם חיליק רוזנברג, פונים עם המועד המבוקש, מספר המשתתפים ושפת ההדרכה. המחיר, התחנות וההתאמות לקבוצה נקבעים בתיאום אישי.'
+    : copy.intro;
   const primaryContact = page.path.includes('private-tour')
     ? `<a href="https://wa.me/972506724312">${e(copy.contact)}</a>`
     : `<a href="/#date-selection">${e(mode === 'booking' ? copy.booking : copy.contact)}</a> · <a href="https://wa.me/972506724312">${e(copy.contact)}</a>`;
@@ -80,7 +92,7 @@ for (const page of pages) {
   ] };
   // x-default is the Hebrew guide of the pair.
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
-  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
   // On the booking site the English guide sends readers to the English homepage.
   if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);

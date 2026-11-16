@@ -138,6 +138,9 @@ html[dir=ltr] .target-site .target-tour-pick:focus-visible .target-tour-pick__ar
 .target-site .target-lectures p { font-size: 18px; line-height: 1.8; color: #e2dacd; }
 .target-site .target-bio { padding-block: var(--site-space); gap: 40px; }
 .target-site .target-bio p:not(.target-eyebrow) { color: var(--target-muted); font-size: 18px; line-height: 1.8; }
+.target-bio__sources h3 { font-family: var(--eti-body-font); font-size: 18px; margin: 20px 0 8px; }
+.target-bio__sources ul { margin: 0; padding-inline-start: 20px; }
+.target-bio__sources a { display: inline-flex; align-items: center; min-height: 44px; color: var(--target-gold-text); line-height: 1.6; text-underline-offset: 4px; }
 .target-site #media .media-card { background: #fffdf8; border: 1px solid var(--site-line); border-radius: var(--site-radius); padding: 28px; box-shadow: none; text-align: start; }
 .target-site #media .media-card h3 { color: var(--target-ink); }
 .target-site #media .media-card a { min-height: 44px; display: inline-flex; align-items: center; border-radius: 10px; font-size: 14px; }
