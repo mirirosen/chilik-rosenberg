@@ -47,7 +47,7 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         validatePolicy(weeklyPolicy, true);
         weekKey = weekStartDate(data.tourDate, weeklyPolicy);
         const [calendar, counter] = await Promise.all([tx.get(calendarWeekRef(weekKey)), tx.get(weekRef(weekKey))]);
-        assertWeeklyAvailability(calendar.data(), counter.data(), { policy: weeklyPolicy, weekStart: weekKey, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: data.participants, nowMs });
+        assertWeeklyAvailability(calendar.data(), counter.data(), { policy: weeklyPolicy, weekStart: weekKey, tourDate: data.tourDate, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: data.participants, nowMs });
       }
       assertTourRoom(tour.data(), settings.data(), data.tourDate, data.participants);
       const now = Timestamp.fromMillis(nowMs), bitCheckout = providerCheckout === true && data.paymentMethod === 'bit', credit = data.paymentMethod === 'credit' || bitCheckout;
@@ -106,7 +106,7 @@ function createBookingService(db, Timestamp, { weeklyPolicy = APPROVED_WEEK_POLI
         try {
           if (weeklyEnabled) {
             validatePolicy(weeklyPolicy, true);
-            assertWeeklyAvailability(calendar.data(), weekly?.data(), { policy: weeklyPolicy, weekStart: weekKey, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: b.participants, nowMs });
+            assertWeeklyAvailability(calendar.data(), weekly?.data(), { policy: weeklyPolicy, weekStart: weekKey, tourDate: b.tourDate, maxParticipants: settings.data()?.globalMaxParticipants ?? 30, participants: b.participants, nowMs });
           }
           assertTourRoom(tour.data(), settings.data(), b.tourDate, b.participants);
           room = { available: true, code: null };

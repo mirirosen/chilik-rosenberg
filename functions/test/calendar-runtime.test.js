@@ -80,9 +80,9 @@ test('public projection uses combined weekly quota and date cap without exposing
   assert.doesNotMatch(JSON.stringify(result), /SECRET|private-source|Fingerprint|weekStart|externalDeclared|heldParticipants|confirmedParticipants/);
   db.data.set(`artifacts/hilik-rosenberg-v1/public/data/tourDates/${DATE}`, { useGlobalMax: false, customMax: 12, currentRegistrations: 10 });
   assert.equal((await publicAvailability(db, POLICY, NOW)).publicAvailability[DATE].availableSpots, 2);
-  db.data.get(`calendarAvailability/${WEEK}`).blocked = true;
+  db.data.get(`calendarAvailability/${WEEK}`).privateTourWindows = [{ startMs: Date.parse('2026-11-12T20:00:00+02:00'), endMs: Date.parse('2026-11-12T22:00:00+02:00') }];
   const blocked = (await publicAvailability(db, POLICY, NOW)).publicAvailability[DATE];
-  db.data.get(`calendarAvailability/${WEEK}`).blocked = false; db.data.get(`bookingWeeks/${WEEK}`).reconciled = false;
+  db.data.get(`calendarAvailability/${WEEK}`).privateTourWindows = []; db.data.get(`bookingWeeks/${WEEK}`).reconciled = false;
   assert.deepEqual((await publicAvailability(db, POLICY, NOW)).publicAvailability[DATE], blocked);
 });
 test('missing, stale, unreconciled, full, manually blocked and quota-reduced data all return zero seats', async () => {

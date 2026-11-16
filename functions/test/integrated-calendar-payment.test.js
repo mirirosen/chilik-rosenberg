@@ -34,8 +34,8 @@ test('weekly public quota changes only at verified capture and cancellation, wit
   assert.equal((await f.availability()).availableSpots, 30); assert.equal(f.week().currentRegistrations, 0); assert.equal(f.booking(id).refundStatus, 'manual_review_required');
   const jobs = f.jobsCount(); await f.call('updateBookingStatus', { token: 'admin', body: { bookingId: id, status: 'cancelled' } }); assert.equal(f.jobsCount(), jobs);
 });
-test('private event blocks the whole Jerusalem week before checkout without exposing its contents', async () => {
-  const f = setup([{ summary: 'סיור פרטי Private Fixture', transparency: 'transparent', start: { date: '2026-10-06' }, end: { date: '2026-10-07' } }]);
+test('overlapping private event blocks checkout without exposing its contents', async () => {
+  const f = setup([{ summary: 'סיור פרטי Private Fixture', transparency: 'transparent', start: { date: '2026-10-08' }, end: { date: '2026-10-09' } }]);
   const row = await f.availability(); assert.equal(row.availableSpots, 0); assert.equal(row.available, false);
   assert.doesNotMatch(JSON.stringify(row), /Private|Fixture|summary|blocked|event/);
   const result = await f.call('createPayment', { body: INPUT }); assert.equal(result.statusCode, 409); assert.equal(result.body.error, 'tour-unavailable');
