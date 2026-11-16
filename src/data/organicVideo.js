@@ -21,6 +21,6 @@ export const bakeryCaptionCues = [
   { start: 1.36, end: 3.3, he: 'ככה סובבים סביב עצמם.', en: 'They rotate around like this.' },
   { start: 3.68, end: 5.35, he: 'בכוונה עושים את זה קצת שרוף.', en: 'They deliberately bake it a little burnt.' },
   { start: 5.35, end: 7.79, he: 'רוב החרדים אוהבים את זה טיפה שרוף.', en: 'Most Haredim like it a little burnt.' },
-  { start: 7.79, end: 10.55, he: 'לפעמים הם מוציאים חצי בשבילכם וחצי', en: 'Sometimes they take half out for you, and half' },
-  { start: 10.55, end: 12.2, he: 'הם משאירים שרוף בשבילנו.', en: 'They leave it burnt for us.' },
+  { start: 7.79, end: 10.55, he: 'לפעמים הם מוציאים חצי בשבילכם וחצי', en: 'Sometimes they take half out for you;' },
+  { start: 10.55, end: 12.2, he: 'הם משאירים שרוף בשבילנו.', en: 'the other half is left burnt for us.' },
 ];
