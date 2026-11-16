@@ -444,7 +444,7 @@
     "afterClickNote": "After clicking, you'll be taken to the registration form with your chosen details",
     "totalToPay": "Total to pay",
     "perPerson": "{{count}} × ₪{{price}} per person",
-    "dateUnavailable": "Choose an upcoming Thursday within the next 12 weeks. Registration closes at 20:00 on the tour date.",
+    "dateUnavailable": "Choose an available upcoming Thursday through the end of 2028. Registration closes at 20:00 on the tour date.",
     "dateAvailable": "✓ Date available",
     "spotsRemainingOf": "{{available}} of {{max}} spots remaining",
     "dateSoldOut": "⚠️ This date is sold out",
