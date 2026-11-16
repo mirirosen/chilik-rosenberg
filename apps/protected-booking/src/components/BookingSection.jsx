@@ -12,7 +12,6 @@ import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
 import './BookingSection.css';
 
 const PRICE_PER_PERSON = 250;
-const DATES_PER_PAGE = 6;
 
 // Step 1 of the booking flow: date and participants. The layout matches the live
 // booking-screen design (BookingSection.css); availability rules are unchanged.
@@ -20,7 +19,10 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const { t, i18n } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(initialSelection?.date || '');
   const [participants, setParticipants] = useState(initialSelection?.participants || 1);
-  const [datePage, setDatePage] = useState(0);
+  const [visibleMonth, setVisibleMonth] = useState(initialSelection?.date?.slice(0, 7) || '');
+  const selectedCard = useRef(null);
+  const heading = useRef(null);
+  const restoredFocus = useRef(false);
   const [isChecking, setIsChecking] = useState(false);
   const [checkError, setCheckError] = useState('');
   const checking = useRef(false);
@@ -29,11 +31,20 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
 
   const cloudData = useFirebaseData();
   const thursdays = useMemo(() => getUpcomingThursdays(undefined, i18n.language), [i18n.language]);
-  const visibleDates = thursdays.slice(datePage * DATES_PER_PAGE, datePage * DATES_PER_PAGE + DATES_PER_PAGE);
+  const months = useMemo(() => [...new Set(thursdays.map(date => date.dateStr.slice(0, 7)))], [thursdays]);
+  const monthIndex = Math.max(0, months.indexOf(visibleMonth));
+  const currentMonth = months[monthIndex];
+  const visibleDates = thursdays.filter(date => date.dateStr.startsWith(currentMonth));
   const fmtDate = (d) => formatDateHebrew(d, i18n.language);
   const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
   // On /booking the picker is the page itself, so it owns the h1.
   const Heading = standalone ? 'h1' : 'h2';
+  useEffect(() => {
+    if (!standalone || !initialSelection?.date || restoredFocus.current || cloudData?.availabilityStatus !== 'ready') return;
+    const destination = selectedCard.current && !selectedCard.current.disabled ? selectedCard.current : heading.current;
+    destination?.focus();
+    restoredFocus.current = true;
+  }, [standalone, initialSelection?.date, cloudData?.availabilityStatus]);
 
   function getStatus(dateStr, data = cloudData) {
     if (!isSelectableTourDate(dateStr)) return { available: false, text: t('bookingSection.dateUnavailable') };
@@ -62,6 +73,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
 
   const selectDate = (dateStr) => {
     setSelectedDate(dateStr);
+    if (months.includes(dateStr.slice(0, 7))) setVisibleMonth(dateStr.slice(0, 7));
     setCheckError('');
   };
 
@@ -104,7 +116,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
     <section id="date-selection" className="booking-screen" dir={dir} aria-labelledby="inquiry-title">
       <div className="booking-screen__intro">
         <span className="booking-screen__eyebrow">{t('bookingDesign.eyebrow')}</span>
-        <Heading id="inquiry-title" tabIndex={-1}>
+        <Heading ref={heading} id="inquiry-title" tabIndex={-1}>
           {t('bookingDesign.title')}
           <em>{t('bookingDesign.titleAccent')}</em>
         </Heading>
@@ -131,6 +143,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
           <li><Clock aria-hidden="true" size={19} /><span>{t('bookingDesign.time')}</span></li>
           <li><Users aria-hidden="true" size={19} /><span>{t('bookingDesign.group')}</span></li>
         </ul>
+        <p className="booking-screen__compact-schedule">{t('bookingDesign.schedule')}</p>
         <p className="booking-screen__personal">
           {t('bookingDesign.personal')}
           <br />
@@ -157,12 +170,17 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         </div>
 
         <div className="booking-screen__date-nav">
-          <span>{t('bookingDesign.upcoming')}</span>
+          <label className="booking-screen__month">
+            <span>{t('bookingDesign.monthYear')}</span>
+            <select value={currentMonth || ''} onChange={event => setVisibleMonth(event.target.value)}>
+              {months.map(month => <option key={month} value={month}>{new Date(`${month}-01T12:00:00Z`).toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', { month: 'long', year: 'numeric', timeZone: 'Asia/Jerusalem' })}</option>)}
+            </select>
+          </label>
           <div>
-            <button type="button" disabled={datePage === 0} onClick={() => setDatePage(page => page - 1)} aria-label={t('bookingDesign.previousDates')}>
+            <button type="button" disabled={monthIndex === 0} onClick={() => setVisibleMonth(months[monthIndex - 1])} aria-label={t('bookingDesign.previousDates')}>
               <ChevronRight aria-hidden="true" size={18} />
             </button>
-            <button type="button" disabled={(datePage + 1) * DATES_PER_PAGE >= thursdays.length} onClick={() => setDatePage(page => page + 1)} aria-label={t('bookingDesign.nextDates')}>
+            <button type="button" disabled={monthIndex + 1 >= months.length} onClick={() => setVisibleMonth(months[monthIndex + 1])} aria-label={t('bookingDesign.nextDates')}>
               <ChevronLeft aria-hidden="true" size={18} />
             </button>
           </div>
@@ -175,6 +193,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
             return (
               <button
                 key={thursday.dateStr}
+                ref={selected ? selectedCard : null}
                 type="button"
                 className={`booking-screen__date date-card${selected ? ' is-selected' : ''}${dateStatus.pending ? ' is-pending' : ''}`}
                 disabled={!dateStatus.available}
@@ -184,7 +203,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
               >
                 <span className="booking-screen__day-name">{t('bookingSection.thursday')}</span>
                 <strong>{thursday.day}</strong>
-                <span>{thursday.month}</span>
+                <span>{thursday.month} {thursday.dateStr.slice(0, 4)}</span>
                 <small>{!dateStatus.pending && <i aria-hidden="true" />}{dateStatus.text}</small>
                 {selected && <CheckCircle className="booking-screen__selected-mark" aria-hidden="true" size={17} />}
               </button>

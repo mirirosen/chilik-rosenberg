@@ -43,6 +43,16 @@ export const sameAsProfiles = SAME_AS_IDS.map(id => mediaReferences.find(item =>
 const footerAddress = { he: { addressLocality: 'בני ברק' }, en: { addressLocality: 'Bnei Brak' } };
 export const PRICE_PER_GUEST = 250;
 
+// Concise presentation of the same approved public-tour facts, never a private quote.
+export function publicTourQuickFacts(language = 'he') {
+  const english = language.startsWith('en');
+  return [
+    english ? `₪${PRICE_PER_GUEST} per guest · public tour` : `${PRICE_PER_GUEST} ש״ח למשתתף בסיור פתוח`,
+    organicCopy[english ? 'en' : 'he'].facts[0][1],
+    english ? `Usually Thursday at ${TOUR_START_TIME}` : `בדרך כלל חמישי ב־${TOUR_START_TIME}`,
+  ];
+}
+
 export function buildHomeSchema({ language, description, faqs, path = '/' }) {
   const lang = language?.startsWith('en') ? 'en' : 'he';
   const pageUrl = siteOrigin + path;

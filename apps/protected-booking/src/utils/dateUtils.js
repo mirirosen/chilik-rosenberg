@@ -85,6 +85,6 @@ export const formatDateHebrew = (dateStr, lang = 'he') => {
   return new Date(`${dateStr}T12:00:00Z`).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
     weekday: 'long',
     day: 'numeric',
-    month: 'long', timeZone: 'Asia/Jerusalem'
+    month: 'long', year: 'numeric', timeZone: 'Asia/Jerusalem'
   });
 };

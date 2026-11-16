@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { guidePaths, siteOrigin, organicCopy } from '../src/data/organicContent.js';
+import { guidePaths, siteOrigin, organicCopy, publicTourQuickFacts } from '../src/data/organicContent.js';
 import { faqsFor, sitemapPaths } from './organic-html.mjs';
 import { bakeryVideo } from '../src/data/organicVideo.js';
 // Public URL path of each generated file, and back.
@@ -20,6 +20,9 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
   const doc = dom.window.document;
   const home = ['index.html', 'en.html'].includes(file);
   if (home) {
+    const heroFacts = [...doc.querySelectorAll('.target-hero__facts li')].map(item => item.textContent);
+    assert.deepEqual(heroFacts, mode === 'booking' ? publicTourQuickFacts(file === 'en.html' ? 'en' : 'he') : [], file + ' public-tour facts match the shared source and edition');
+    if (mode === 'booking') assert(heroFacts[0].includes(String(price)), 'hero price matches booking server price');
     const style = doc.querySelector('style[data-public-styles][data-css-href]');
     assert(style, 'complete inline public CSS');
     assert.match(style.dataset.cssHref, /^\/assets\/[A-Za-z0-9_-]+\.css$/);

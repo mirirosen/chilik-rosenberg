@@ -355,3 +355,49 @@ html[dir=ltr] .media-reference-card h3 svg { transform: rotate(180deg); }
 .booking-status-card .booking-no-hold-notice { padding: 12px 16px; border-radius: 12px; line-height: 1.6; }
 .booking-status-card>.text-6xl:first-child { display: grid; place-items: center; width: 72px; height: 72px; margin-inline: auto; border-radius: 50%; background: #f6eedc; border: 1px solid #d8c39a; color: #795719; font-size: 36px; line-height: 1; }
 .mobile-navigation .mobile-navigation__content :is(button,a).rounded-full { border-radius: 12px; }
+
+/* Booking UX: a visible month jump, concise selection and optional detail fields. */
+.booking-screen__compact-schedule { display: none; }
+.target-site #date-selection.booking-screen[dir] .booking-screen__month { display: grid; gap: 3px; min-width: 0; max-width: calc(100% - 104px); }
+.target-site #date-selection.booking-screen[dir] .booking-screen__month>span { font-size: 12px; }
+.target-site #date-selection.booking-screen[dir] .booking-screen__month select { width: 100%; min-height: 44px; border: 1px solid #8f826c; border-radius: 8px; background: #fffdf8; color: #302c25; padding: 8px; font: inherit; font-size: 16px; }
+.target-site #date-selection.booking-screen[dir] select:focus-visible { outline: 3px solid #277bb0; outline-offset: 3px; }
+.booking-details-shell .booking-selection-summary { padding: 14px 16px; margin: 0 0 22px; border: 1px solid #c7b17e; border-radius: 14px; background: #f6eedc; color: var(--target-ink); }
+.booking-selection-summary__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.booking-selection-summary__heading h2 { margin: 0; font: inherit; font-size: 14px; font-weight: 700; }
+.booking-details-shell .booking-selection-summary__heading button { min-height: 44px; padding: 6px 10px; border: 1px solid #b8aa91; border-radius: 8px; font-size: 13px; flex-shrink: 0; cursor: pointer; }
+.booking-selection-summary__facts { display: grid; gap: 6px; margin: 8px 0; }
+.booking-selection-summary__facts>div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
+.booking-selection-summary__facts dt { color: #655b4b; flex-shrink: 0; }
+.booking-selection-summary__facts dd { margin: 0; text-align: end; font-weight: 700; }
+.booking-selection-summary__schedule { font-size: 13px; color: #655b4b; margin: 8px 0; }
+.booking-selection-summary__total { padding-top: 10px; border-top: 1px solid #d8c9ab; text-align: end; }
+.booking-extra-details { border-block: 1px solid #d8cdb9; }
+.booking-extra-details>summary { min-height: 44px; padding: 10px 0; cursor: pointer; font-size: 14px; font-weight: 700; }
+.booking-extra-details>summary>span { font-weight: 400; color: #655b4b; }
+.booking-extra-details>div { padding-block: 6px 16px; }
+.booking-form-card :is(summary,button):focus-visible { outline: 3px solid #277bb0; outline-offset: 3px; }
+.target-site .target-hero__facts { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; padding: 0; margin: 0 0 20px; color: #fff7e2; font-size: 14px; line-height: 1.6; }
+.target-site .target-hero__facts li { border-inline-start: 2px solid #e6b948; padding-inline-start: 9px; }
+@media (max-width: 1023px) {
+  .target-site #date-selection.booking-screen[dir] { gap: 16px; padding: 20px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__intro { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; column-gap: 12px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__eyebrow { grid-column: 1 / -1; margin-bottom: 8px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__intro :is(h1,h2) { grid-column: 1; font-size: 28px; line-height: 1.2; margin: 0; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__intro :is(.booking-screen__description,.booking-screen__host,.booking-screen__highlights) { display: none; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__compact-schedule { display: block; grid-column: 1 / -1; margin: 10px 0 0; font-size: 12px; line-height: 1.6; color: #ede2c9; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__price { grid-column: 2; grid-row: 2; border: 0; padding: 0; margin: 0; display: block; text-align: end; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__price>span,.target-site #date-selection.booking-screen[dir] .booking-screen__price p { display: none; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__price strong { font-size: 30px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__personal { grid-column: 1 / -1; margin: 10px 0 0; font-size: 12px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__personal br { display: none; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__personal a { margin-inline-start: 5px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__panel { padding: 18px 14px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__steps { margin-bottom: 14px; padding-bottom: 14px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__heading h3 { font-size: 20px; }
+  .target-site #date-selection.booking-screen[dir] .booking-screen__heading p { font-size: 12px; }
+  .booking-details-shell .booking-form-card h1 { font-size: 30px; margin-bottom: 18px; }
+  .booking-flow-steps { gap: 5px; padding-bottom: 16px; margin-bottom: 18px; font-size: 12px; }
+  .booking-flow-steps li { gap: 5px; }
+  .booking-flow-steps span { width: 23px; height: 23px; }
+}
