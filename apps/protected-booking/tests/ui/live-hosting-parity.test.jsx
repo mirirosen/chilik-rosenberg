@@ -74,7 +74,11 @@ describe('combined 18+ and terms consent', () => {
   it('sends adultConfirmed:true, never a birth date (even from an old draft), and accepts a missing email', async () => {
     const redirect = vi.fn();
     const { container } = render(<BookingForm onPaymentRedirect={redirect} initialDraft={{ dateOfBirth: '1990-01-01' }} />);
-    expect(screen.getAllByText('booking.form.optional')).toHaveLength(2); // email + how did you hear
+    for (const id of ['email', 'howDidYouHear', 'notes']) expect(container.querySelector(`#${id}`).required).toBe(false);
+    for (const [id, purpose] of [['name', 'name'], ['phone', 'tel'], ['email', 'email']]) {
+      expect(container.querySelector(`#${id}`).getAttribute('autocomplete')).toBe(purpose);
+    }
+    for (const id of ['name', 'phone', 'agreeToTerms']) expect(container.querySelector(`#${id}`).getAttribute('aria-required')).toBe('true');
     fill(container, { name: 'Test Customer', phone: '0501234567' });
     fireEvent.click(container.querySelector('#agreeToTerms'));
     fireEvent.submit(container.querySelector('form'));

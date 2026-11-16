@@ -26,6 +26,7 @@
     "upcomingTours": "Upcoming tours"
   },
   "hero": {
+    "planningFacts": "Public tour details",
     "ambientPause": "Pause the Bnei Brak videos",
     "ambientPlay": "Play the Bnei Brak videos",
     "chapters": {

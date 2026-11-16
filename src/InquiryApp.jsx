@@ -51,7 +51,7 @@ export default function InquiryApp({ bookingSection } = {}) {
     <Header showVideos={populatedTourVideoGroups(tourVideos).length > 0} />
     <main ref={motion} id="main-content" tabIndex={-1}>
       {route === 'home' ? <>
-        <Hero /><RatingBar />{bookingSection || <InquirySection />}<TourOverview />
+        <Hero showPlanningFacts={Boolean(bookingSection)} /><RatingBar />{bookingSection || <InquirySection />}<TourOverview />
         {/* Independent hydration boundaries keep below-fold work interruptible.
             Their complete HTML is still rendered at build time. */}
         <Suspense fallback={null}><TourInclusions /></Suspense>

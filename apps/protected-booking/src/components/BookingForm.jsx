@@ -12,7 +12,7 @@ import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
 import { DemoBookingNotice, DemoBookingControls, DemoCheckout } from './DemoBookingControls';
-import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus, Lock, CheckCircle } from '../utils/icons';
+import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
 
@@ -362,50 +362,19 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
 
       {/* Pre-filled Summary Card */}
       {(isDateLocked || isParticipantsLocked) && (
-        <div className="bg-brand-gold/10 border-2 border-brand-gold/50 rounded-3xl p-6 mb-8" dir={i18n.dir()}>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <CheckCircle size={24} className="text-green-400" />
-            <h3 className="text-lg font-bold text-white">{t('booking.selectedDetails')}</h3>
+        <section className="booking-selection-summary bg-brand-gold/10" aria-label={t('booking.selectedDetails')} dir={i18n.dir()}>
+          <div className="booking-selection-summary__heading">
+            <h2>{t('booking.selectedDetails')}</h2>
+            <button type="button" id={isDateLocked ? 'tourDate' : undefined}
+              aria-describedby={isDateLocked && errors.tourDate ? 'tourDate-error' : undefined}
+              onClick={changeSelection}>{t('booking.selection.change')}</button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isDateLocked && (
-              <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Calendar size={20} className="text-brand-gold" />
-                  <span className="text-sm text-gray-400">{t('booking.form.tourDate')}</span>
-                </div>
-                <p className="text-xl font-bold text-brand-gold">
-                  {isThursday(formData.tourDate) ? (i18n.language?.startsWith('en') ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeZone: 'Asia/Jerusalem' }).format(new Date(`${formData.tourDate}T12:00:00Z`)) : formatDateHebrew(formData.tourDate)) : t('booking.validation.dateUnavailable')}
-                </p>
-                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
-                  <Lock size={12} />
-                  <span>{t('booking.selection.locked')}</span>
-                </div>
-              </div>
-            )}
-
-            {isParticipantsLocked && (
-              <div className="bg-brand-dark/50 rounded-2xl p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Users size={20} className="text-brand-gold" />
-                  <span className="text-sm text-gray-400">{t('booking.form.participants')}</span>
-                </div>
-                <p className="text-3xl font-black text-brand-gold">
-                  {formData.participants}
-                </p>
-                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
-                  <Lock size={12} />
-                  <span>{t('booking.selection.locked')}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <p className="mt-4 text-center text-sm text-gray-300">{t('bookingDesign.schedule')}</p>
-
-          {/* Total Price: the only price on the form, with the per-guest breakdown */}
-          <div className="mt-4 pt-4 border-t border-white/10 text-center" data-testid="booking-total">
+          <dl className="booking-selection-summary__facts">
+            {isDateLocked && <div><dt>{t('booking.form.tourDate')}</dt><dd>{isThursday(formData.tourDate) ? formatDateHebrew(formData.tourDate, i18n.language) : t('booking.validation.dateUnavailable')}</dd></div>}
+            {isParticipantsLocked && <div><dt>{t('booking.form.participants')}</dt><dd>{formData.participants}</dd></div>}
+          </dl>
+          <p className="booking-selection-summary__schedule">{t('bookingDesign.schedule')}</p>
+          <div className="booking-selection-summary__total" data-testid="booking-total">
             <span className="text-gray-400 text-sm">{t('booking.price.total')}: </span>
             <span className="text-2xl font-black text-brand-gold">₪{totalPrice}</span>
             <div className="text-xs text-gray-400 mt-1">
@@ -413,18 +382,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             </div>
           </div>
 
-          {/* Change Selection Button */}
           {isDateLocked && errors.tourDate && <p id="tourDate-error" role="alert" className="text-red-400 text-sm mt-4">{errors.tourDate}</p>}
-          <button
-            type="button"
-            id={isDateLocked ? 'tourDate' : undefined}
-            aria-describedby={isDateLocked && errors.tourDate ? 'tourDate-error' : undefined}
-            onClick={changeSelection}
-            className="w-full mt-4 bg-transparent border border-white/20 text-gray-400 py-2 rounded-full text-sm hover:text-white hover:border-white/40 transition-all"
-          >
-            {t('booking.selection.change')}
-          </button>
-        </div>
+        </section>
       )}
 
       {cloudData?.availabilityStatus !== 'ready' && <p role="status">{t(cloudData?.availabilityStatus === 'error' ? 'common.availabilityUnavailable' : 'common.loading')}</p>}
@@ -437,6 +396,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           <input
             type="text"
             id="name"
+            autoComplete="name"
+            aria-required="true"
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? 'name-error' : undefined}
             value={formData.name}
@@ -457,6 +418,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           <input
             type="tel"
             id="phone"
+            autoComplete="tel"
+            aria-required="true"
             aria-invalid={!!errors.phone}
             aria-describedby={errors.phone ? 'phone-error' : undefined}
             value={formData.phone}
@@ -478,6 +441,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           <input
             type="email"
             id="email"
+            autoComplete="email"
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
             value={formData.email}
@@ -491,7 +455,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         </div>
 
         {/* How Did You Hear About Us */}
-        <div>
+        <details className="booking-extra-details" open={Boolean(initialDraft?.howDidYouHear) || undefined}>
+          <summary>{t('booking.form.howDidYouHear')} <span>{t('booking.form.optional')}</span></summary>
+          <div>
           <label htmlFor="howDidYouHear" className="block text-sm font-bold mb-2 text-right">
             {t('booking.form.howDidYouHear')} <span className="text-gray-400">{t('booking.form.optional')}</span>
           </label>
@@ -515,7 +481,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             <option value="other">{t('booking.howOptions.other')}</option>
           </select>
           {errors.howDidYouHear && <p id="howDidYouHear-error" className="text-red-400 text-sm mt-1 text-right">{errors.howDidYouHear}</p>}
-        </div>
+          </div>
+        </details>
 
         {/* Tour Date - Locked if pre-filled */}
         {!isDateLocked ? (
@@ -677,7 +644,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
         </div>
 
         {/* Notes Field */}
-        <div>
+        <details className="booking-extra-details" open={Boolean(initialDraft?.notes) || undefined}>
+          <summary>{t('booking.form.notes')} <span>{t('booking.form.optional')}</span></summary>
+          <div>
           <label htmlFor="notes" className="block text-sm font-bold mb-2 text-right">
             <MessageSquare size={16} className="inline me-2" />
             {t('booking.form.notes')}
@@ -692,7 +661,8 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             rows={3}
             disabled={isSubmitting}
           />
-        </div>
+          </div>
+        </details>
 
         {/* Terms & Conditions */}
         <div dir={i18n.dir()}>
@@ -700,6 +670,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
             <input
               type="checkbox"
               id="agreeToTerms"
+              aria-required="true"
               aria-invalid={!!errors.agreeToTerms}
               aria-describedby={errors.agreeToTerms ? 'agreeToTerms-error' : undefined}
               checked={formData.agreeToTerms}

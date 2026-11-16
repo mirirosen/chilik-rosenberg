@@ -6,6 +6,7 @@ import { useAmbientVideo } from '../hooks/useAmbientVideo';
 import { useNavigation } from '../navigation/NavigationContext';
 import { settle } from '../animations/registry';
 import { setupFigureLife } from '../animations/figureLife';
+import { publicTourQuickFacts } from '../data/organicContent';
 
 // Hero v2 (board 7): one silent loop of five chapters from Chilik's own footage, full-bleed. The left two thirds stay
 // clear; a veil darkens the right third, where the copy sits; Chilik stands on the line between them.
@@ -21,8 +22,8 @@ const AMBIENT = {
 export const CHAPTERS = [['food', 0], ['street', 2.2], ['store', 4.8], ['people', 6.04], ['chilik', 9.24]];
 export const chapterAt = time => CHAPTERS.reduce((index, [, start], i) => (time >= start ? i : index), 0);
 
-const Hero = () => {
-  const { t } = useTranslation();
+const Hero = ({ showPlanningFacts = false } = {}) => {
+  const { t, i18n } = useTranslation();
   const posterRef = useRef(null);
   const ambient = useAmbientVideo({ ...AMBIENT, posterRef });
   const { goToInquiry } = useNavigation();
@@ -66,6 +67,9 @@ const Hero = () => {
         <p className="target-eyebrow" data-motion="hero-line">{t('hero.badge')}</p>
         <h1 data-motion="hero-line"><span className="target-hero__keyword">{t('hero.keyword')}</span>{' '}{t('hero.title')}</h1>
         <p className="target-hero__subtitle" data-motion="hero-line">{t('hero.subtitle')}</p>
+        {showPlanningFacts && <ul className="target-hero__facts" aria-label={t('hero.planningFacts')}>
+          {publicTourQuickFacts(i18n?.resolvedLanguage || i18n?.language || 'he').map(fact => <li key={fact}>{fact}</li>)}
+        </ul>}
         <button onClick={scrollToDateSelection} className="target-button" data-motion="hero-cta">{t('hero.cta')}</button>
         <a className="target-terms" href="/terms">{t('header.terms')}</a>
       </div>
