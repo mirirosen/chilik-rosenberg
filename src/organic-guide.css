@@ -17,3 +17,7 @@ main.organic-overview{margin-top:2rem}
 .guide-privacy{max-width:52rem;margin:2rem auto;padding:0 1.5rem 2rem;color:#d1d5db;font-size:.9375rem}.guide-privacy a,.guide-privacy button{color:inherit}.guide-privacy button{display:block;margin-top:.75rem;padding:.5rem 0;border:0;background:none;text-decoration:underline;cursor:pointer;font:inherit}.guide-privacy button[hidden]{display:none}
 .watch-video{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain;background:#000;border-radius:12px}
 .watch-page h1{font-size:clamp(1.5rem,4vw,2.2rem)}
+.guide-quick-facts{margin:2rem 0;padding:1.25rem;border-inline-start:3px solid #dfc47c}
+.guide-quick-facts h2{margin-top:0}
+.guide-intro-action{margin:1.5rem 0}
+@media(max-width:420px){.guide-header{gap:.75rem}.guide-header .guide-cta__button{white-space:normal;font-size:14px;padding:8px 12px;max-width:58%}}

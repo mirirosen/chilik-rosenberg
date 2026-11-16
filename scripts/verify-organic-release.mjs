@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { guidePaths, siteOrigin } from '../src/data/organicContent.js';
+import { guidePaths, siteOrigin, organicCopy } from '../src/data/organicContent.js';
 import { faqsFor, sitemapPaths } from './organic-html.mjs';
 import { bakeryVideo } from '../src/data/organicVideo.js';
 // Public URL path of each generated file, and back.
@@ -57,7 +57,16 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
     assert.equal(doc.querySelector('header.guide-header > a.guide-header__brand')?.getAttribute('href'), home, file + ' brand header links home');
     const ctas = [...doc.querySelectorAll('a.guide-cta__button')];
     assert(doc.querySelector('header.guide-header a.guide-cta__button') && doc.querySelector('main .guide-cta a.guide-cta__button'), file + ' booking CTA at top and end');
-    for (const cta of ctas) assert.equal(cta.getAttribute('href'), home + '#date-selection', file + ' booking CTA destination');
+    if (file.includes('private-tour')) {
+      for (const cta of ctas) assert.equal(cta.getAttribute('href'), 'https://wa.me/972506724312', file + ' private inquiry is the primary action');
+      assert(doc.querySelector('main .guide-intro-action a.guide-cta__button'), file + ' private inquiry before the photograph');
+      assert(doc.querySelector('main .guide-cta a[href="/#date-selection"]'), file + ' open tour remains a secondary option');
+    } else {
+      for (const cta of ctas) assert.equal(cta.getAttribute('href'), home + '#date-selection', file + ' booking CTA destination');
+      const language = file.endsWith('-en.html') ? 'en' : 'he';
+      const facts = [...doc.querySelectorAll('.guide-quick-facts dl > div')].map(row => [row.querySelector('dt').textContent, row.querySelector('dd').textContent]);
+      assert.deepEqual(facts, organicCopy[language].facts.slice(0, 3), file + ' public tour planning facts match the shared source');
+    }
   }
   if (file === bakeryVideo.path.slice(1)) {
     const video = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'].find(n => n['@type'] === 'VideoObject');
