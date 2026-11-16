@@ -1,6 +1,7 @@
 // Google Analytics 4 starts automatically, without an approval banner.
 // Previously stored and new explicit opt-outs remain effective.
 const CONSENT_KEY = 'chilik-analytics-consent';
+const OPT_OUT_COOKIE = 'chilik-analytics-opt-out';
 const PURCHASE_KEY_PREFIX = 'chilik-analytics-purchase:';
 // Property 560779012, web stream 16203937010.
 export const DEFAULT_MEASUREMENT_ID = 'G-165V7SRZJK';
@@ -16,7 +17,7 @@ export function resolveMeasurementId(envValue, mode) {
 }
 
 let measurementId = resolveMeasurementId(import.meta.env.VITE_GA4_MEASUREMENT_ID, import.meta.env.MODE);
-let loaded = false, clicksBound = false;
+let loaded = false, clicksBound = false, optedOutThisVisit = false;
 
 export const analyticsConfigured = () => measurementId !== '';
 export const currentMeasurementId = () => measurementId;
@@ -24,10 +25,12 @@ export const currentMeasurementId = () => measurementId;
 export function __setMeasurementIdForTests(id) { measurementId = id; loaded = false; }
 
 function storage() { try { return window.localStorage; } catch { return null; } }
+function optOutCookie() { try { return document.cookie.split(';').some(value => value.trim() === `${OPT_OUT_COOKIE}=1`); } catch { return false; } }
 export function consentState() {
   if (!analyticsConfigured()) return 'unavailable';
-  const value = storage()?.getItem(CONSENT_KEY);
-  return value === 'denied' ? 'denied' : 'granted';
+  let value;
+  try { value = storage()?.getItem(CONSENT_KEY); } catch { /* Storage can be disabled. */ }
+  return optedOutThisVisit || optOutCookie() || value === 'denied' ? 'denied' : 'granted';
 }
 
 // Booking and confirmation URLs carry booking IDs and selections in the query
@@ -66,7 +69,7 @@ export function beforeNavigate(href) {
   let url;
   try { url = new URL(href, window.location.href); } catch { return false; }
   const management = url.pathname === MANAGEMENT_PATH;
-  setMeasurementBlocked(management);
+  setMeasurementBlocked(management || consentState() === 'denied');
   if (loaded && !management && typeof window.gtag === 'function') {
     const next = pageLocation(url.toString());
     window.gtag('set', { page_referrer: pageReferrer(currentPage), page_location: next });
@@ -76,7 +79,7 @@ export function beforeNavigate(href) {
 }
 
 function load() {
-  if (loaded || !analyticsConfigured() || typeof document === 'undefined') return;
+  if (loaded || !analyticsConfigured() || typeof document === 'undefined' || consentState() === 'denied') return;
   if (window.location?.pathname === MANAGEMENT_PATH) { setMeasurementBlocked(true); return; }
   loaded = true;
   setMeasurementBlocked(false);
@@ -98,6 +101,7 @@ function load() {
 export function setConsent(granted) {
   if (!analyticsConfigured()) return;
   storage()?.setItem(CONSENT_KEY, granted ? 'granted' : 'denied');
+  if (granted) { optedOutThisVisit = false; document.cookie = `${OPT_OUT_COOKIE}=; Max-Age=0; path=/`; }
   if (granted) load();
 }
 
@@ -106,14 +110,23 @@ export function setConsent(granted) {
 // gtag script is gone and stays off after subsequent visits.
 export function withdrawConsent({ reload = () => window.location.reload() } = {}) {
   if (!analyticsConfigured() || typeof document === 'undefined') return false;
-  storage()?.setItem(CONSENT_KEY, 'denied');
+  // Stop first: a full/disabled storage area must never leave measurement on.
+  optedOutThisVisit = true;
   setMeasurementBlocked(true);
-  const names = document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => n === '_ga' || n.startsWith('_ga_'));
+  loaded = false;
+  let persisted = false;
+  try { const store = storage(); store?.setItem(CONSENT_KEY, 'denied'); persisted = store?.getItem(CONSENT_KEY) === 'denied'; } catch { /* Fall back to a preference cookie. */ }
+  if (!persisted) {
+    try { document.cookie = `${OPT_OUT_COOKIE}=1; Max-Age=31536000; path=/; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`; persisted = optOutCookie(); } catch { /* Keep this visit opted out without reloading. */ }
+  }
+  let names = [];
+  try { names = document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => n === '_ga' || n.startsWith('_ga_')); } catch { /* Cookies can also be disabled. */ }
   const parts = window.location.hostname.split('.');
   const domains = [''];
   for (let i = 0; i < parts.length - 1; i++) domains.push(`; domain=.${parts.slice(i).join('.')}`);
-  for (const name of names) for (const domain of domains) document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
-  reload();
+  for (const name of names) for (const domain of domains) { try { document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`; } catch { /* Measurement is already blocked. */ } }
+  document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]').forEach(script => script.remove());
+  if (persisted) reload();
   return true;
 }
 

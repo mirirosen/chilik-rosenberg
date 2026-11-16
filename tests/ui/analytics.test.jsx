@@ -15,7 +15,7 @@ async function fresh(id) {
 }
 const BOOKING = 'BK-' + 'b'.repeat(24);
 const PAID = { bookingId: BOOKING, status: 'confirmed', paymentStatus: 'paid', totalPrice: 500, pricePerPerson: 250, participants: 2 };
-beforeEach(() => { localStorage.clear(); sessionStorage.clear(); delete window.dataLayer; delete window.gtag; gtagScripts().forEach(s => s.remove()); });
+beforeEach(() => { localStorage.clear(); sessionStorage.clear(); document.cookie = 'chilik-analytics-opt-out=; Max-Age=0; path=/'; delete window.dataLayer; delete window.gtag; gtagScripts().forEach(s => s.remove()); });
 afterEach(() => cleanup());
 
 describe('GA4 configuration', () => {
@@ -178,6 +178,36 @@ describe('page_location and management', () => {
 });
 
 describe('withdrawing consent', () => {
+  it('storage quota failure still disables measurement, clears GA cookies and persists a fallback across reload', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    document.cookie = '_ga=fixture; path=/';
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('full', 'QuotaExceededError'); });
+    const reload = vi.fn();
+    try {
+      expect(() => analytics.withdrawConsent({ reload })).not.toThrow();
+      expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+      expect(document.cookie).not.toMatch(/_ga=/);
+      expect(document.cookie).toContain('chilik-analytics-opt-out=1');
+      expect(reload).toHaveBeenCalledTimes(1);
+      gtagScripts().forEach(s => s.remove()); delete window.dataLayer; delete window.gtag;
+      const next = await fresh(); next.analytics.initAnalytics();
+      expect(next.analytics.consentState()).toBe('denied'); expect(gtagScripts()).toHaveLength(0);
+    } finally { write.mockRestore(); }
+  });
+  it('when storage and cookies both reject writes it stays disabled without reloading or SPA re-enabling', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('full', 'QuotaExceededError'); });
+    const cookie = vi.spyOn(document, 'cookie', 'set').mockImplementation(() => {});
+    const reload = vi.fn();
+    try {
+      analytics.withdrawConsent({ reload });
+      expect(reload).not.toHaveBeenCalled();
+      expect(analytics.consentState()).toBe('denied');
+      analytics.beforeNavigate('/terms'); analytics.initAnalytics();
+      expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+      expect(analytics.trackBeginBooking({participants:1,pricePerPerson:250,totalPrice:250})).toBe(false);
+    } finally { write.mockRestore(); cookie.mockRestore(); }
+  });
   it('footer opt-out removes GA cookies and persists across reloads', async () => {
     const { analytics } = await fresh();
     const { default: Footer } = await import('../../src/components/Footer');

@@ -13,7 +13,10 @@ script, cookies or measurement requests are started for them.
 
 The footer's **כיבוי המדידה (Google Analytics) / Turn off analytics (Google Analytics)**
 stores that same persistent opt-out, disables measurement, clears accessible GA cookies
-and reloads. The prerendered HTML never contains gtag; it loads only after mount.
+and reloads. If localStorage cannot be written, a one-year `chilik-analytics-opt-out`
+preference cookie preserves the choice instead. If both storage methods are blocked,
+measurement stops for this visit and no automatic reload occurs. Deleted historical
+choices cannot be reconstructed. The prerendered HTML never contains gtag; it loads only after mount.
 
 When measurement is enabled, `gtag.js` loads once with `analytics_storage` granted and advertising storage,
 ad user data, ad personalization and Google signals denied.

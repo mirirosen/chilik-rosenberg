@@ -8,7 +8,7 @@ function WithdrawAnalyticsConsent({ english }) {
   const [granted, setGranted] = useState(false);
   useEffect(() => { setGranted(consentState() === 'granted'); }, []);
   if (!granted) return null;
-  return <button type="button" className="block text-sm text-gray-400 underline mt-2 text-start" onClick={() => withdrawConsent()}>
+  return <button type="button" className="block text-sm text-gray-400 underline mt-2 text-start" onClick={() => { if (withdrawConsent()) setGranted(false); }}>
     {english ? 'Turn off analytics (Google Analytics)' : 'כיבוי המדידה (Google Analytics)'}
   </button>;
 }
