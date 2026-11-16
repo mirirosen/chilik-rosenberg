@@ -1,12 +1,17 @@
 'use strict';
 const { FUNCTION_REGION, INTEGRATION_RUNTIME } = require('./deployment-config');
-const { assertWeeklyAvailability, weekStartDate } = require('./weekly-availability');
+const { assertWeeklyAvailability, weekStartDate, localDateAt } = require('./weekly-availability');
 const { upcomingThursdays } = require('./calendar-runtime');
+const { lastBookableDate } = require('./booking-horizon.json');
 const APP = 'artifacts/hilik-rosenberg-v1/public/data';
 const validMax = n => Number.isInteger(n) && n >= 1 && n <= 100;
 // Read Firestore only; public requests never refresh tokens or fetch Calendar.
-async function publicAvailability(db, policy, nowMs = Date.now()) {
-  const dates = upcomingThursdays(nowMs), unavailable = { available: false, availableSpots: 0, maxParticipants: 30, validUntilMs: nowMs + 30000 };
+async function publicAvailability(db, policy, nowMs = Date.now(), { extended = true } = {}) {
+  // Already-open older clients reject more than 13 rows. Extend only when the
+  // HTTP client explicitly requests the approved horizon; keep their old window.
+  const legacyEnd = Date.parse(`${localDateAt(nowMs, policy.timeZone)}T00:00:00Z`) + 84 * 86400000;
+  const dates = upcomingThursdays(nowMs).filter(date => extended || Date.parse(`${date}T00:00:00Z`) <= legacyEnd);
+  const unavailable = { available: false, availableSpots: 0, maxParticipants: 30, validUntilMs: nowMs + 30000 };
   const result = await db.runTransaction(async tx => {
     const settings = (await tx.get(db.doc(`${APP}/settings/global`))).data() || {};
     const globalMax = settings.globalMaxParticipants ?? 30;
@@ -49,7 +54,7 @@ function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now,
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'GET') return res.status(405).json({ error: 'method-not-allowed' });
     if (!runtime.publicEnabled) return res.status(503).json({ error: 'availability-unavailable' });
-    try { return res.status(200).json(await publicAvailability(db, runtime.policy, now())); }
+    try { return res.status(200).json(await publicAvailability(db, runtime.policy, now(), { extended: req.query?.through === lastBookableDate })); }
     catch { return res.status(503).json({ error: 'availability-unavailable' }); }
   });
   // No schedule export/registration at all while the feature is off.

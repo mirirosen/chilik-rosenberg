@@ -12,8 +12,8 @@ const CONFIG = { enabled: true, readEnabled: true, provider: 'google', mode: 're
 function transport(runtime, db = fakeDb(), logger = { error: () => {} }) {
   const schedules = [];
   const api = createCalendarApi({ db, runtime, now: () => NOW, logger, onRequest: (_options, fn) => fn, onSchedule: (options, fn) => { schedules.push(options); return fn; } });
-  async function request(method = 'GET', origin) {
-    const req = { method, get: () => origin }, res = { headers: {}, status(n) { this.statusCode = n; return this; }, set(k, v) { this.headers[k] = v; return this; }, json(value) { this.body = value; return this; }, end() { return this; } };
+  async function request(method = 'GET', origin, query = {}) {
+    const req = { method, get: () => origin, query }, res = { headers: {}, status(n) { this.statusCode = n; return this; }, set(k, v) { this.headers[k] = v; return this; }, json(value) { this.body = value; return this; }, end() { return this; } };
     await api.calendarAvailability(req, res); return res;
   }
   return { api, request, schedules };
@@ -96,6 +96,19 @@ test('public endpoint method/origin/DB errors are generic and do not use Calenda
   const bad = transport({ publicEnabled: true, readsEnabled: false, policy: POLICY }, { runTransaction: async () => { throw new Error('PRIVATE DB BODY'); } });
   assert.deepEqual((await bad.request()).body, { error: 'availability-unavailable' });
 });
+test('HTTP availability preserves old open tabs and extends only for clients requesting the approved horizon', async () => {
+  const db = fakeDb(); seed(db); const t = transport({ publicEnabled: true, readsEnabled: false, policy: POLICY }, db);
+  const legacy = (await t.request()).body.publicAvailability;
+  assert.equal(Object.keys(legacy).length, 12);
+  assert.equal(legacy['2028-12-28'], undefined);
+  const extended = (await t.request('GET', undefined, { through: '2028-12-31' })).body.publicAvailability;
+  assert.equal(Object.keys(extended).filter(d => d.startsWith('2027-')).length, 52);
+  assert.equal(Object.keys(extended).filter(d => d.startsWith('2028-')).length, 52);
+  assert.ok(extended['2028-12-28']); assert.equal(extended['2029-01-04'], undefined);
+  const unapproved = (await t.request('GET', undefined, { through: '2029-12-31' })).body.publicAvailability;
+  assert.equal(Object.keys(unapproved).length, 12);
+});
+
 test('Thursday cutoff follows Jerusalem, including DST and a UTC previous-day boundary', () => {
   assert.equal(upcomingThursdays(Date.parse('2026-10-08T16:59:00Z'))[0], '2026-10-08');
   assert.equal(upcomingThursdays(Date.parse('2026-10-08T17:00:00Z'))[0], '2026-10-15');

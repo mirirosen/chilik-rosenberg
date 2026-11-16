@@ -31,7 +31,7 @@ export async function getServerAvailability({ signal } = {}) {
   if (signal?.aborted) controller.abort();
   const timer = setTimeout(abort, 15000);
   try {
-    const response = await fetch(`${API_BASE}/calendarAvailability`, { method: 'GET', credentials: 'omit', redirect: 'error', cache: 'no-store', signal: controller.signal });
+    const response = await fetch(`${API_BASE}/calendarAvailability?through=${bookingHorizon.lastBookableDate}`, { method: 'GET', credentials: 'omit', redirect: 'error', cache: 'no-store', signal: controller.signal });
     if (!response.ok) throw new Error('availability-unavailable');
     return sanitizeAvailabilityResponse(await response.json());
   } catch { throw new Error('availability-unavailable'); }
