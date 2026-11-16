@@ -24,7 +24,7 @@ it('public transport sends no token/customer credentials and removes unexpected 
   const api = await import('../../src/utils/calendarAvailability');
   const result = await api.getServerAvailability();
   expect(JSON.stringify(result)).not.toMatch(/PRIVATE|attendees|private@example/);
-  expect(fetch).toHaveBeenCalledWith('https://fixture.example.test/calendarAvailability', expect.objectContaining({ method: 'GET', credentials: 'omit', cache: 'no-store', redirect: 'error' }));
+  expect(fetch).toHaveBeenCalledWith('https://fixture.example.test/calendarAvailability?through=2028-12-31', expect.objectContaining({ method: 'GET', credentials: 'omit', cache: 'no-store', redirect: 'error' }));
   expect(fetch.mock.calls[0][1].headers).toBeUndefined();
 });
 it('expired, malformed and contradictory availability never advertises seats', async () => {

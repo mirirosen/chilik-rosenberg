@@ -228,7 +228,7 @@
       "secure": "Personal information is stored securely and will not be transferred to third parties",
       "purpose": "Information is used solely for managing the booking",
       "storage": "Data is stored on secure Firebase servers",
-      "analytics": "Google Analytics 4 loads only if you accept it in the consent notice, with advertising features off and no name, phone, email or payment details. You can withdraw consent at any time with the link at the bottom of the site. Full details are in the privacy policy.",
+      "analytics": "Google Analytics 4 measures public site use automatically, with advertising features off and no name, phone, email or payment details. You can turn off measurement at any time using the link at the bottom of the site; earlier opt-outs remain effective. Full details are in the privacy policy.",
       "privacyLink": "Privacy policy"
     },
     "section7": {
@@ -331,8 +331,8 @@
         "desc": "We'll experience up close what really happens all day in a yeshiva and how a Haredi child grows up."
       },
       "bakery": {
-        "title": "Warm Vizhnitz challah",
-        "desc": "We'll enter the heart of the mythological bakery and see how challah is braided."
+        "title": "The famous challahs of Vizhnitz Bakery",
+        "desc": "Warm Vizhnitz challah — a taste of Bnei Brak's culinary tradition."
       },
       "volunteering": {
         "title": "Volunteering and Charity",
@@ -420,7 +420,7 @@
     "afterClickNote": "After clicking, you'll be taken to the registration form with your chosen details",
     "totalToPay": "Total to pay",
     "perPerson": "{{count}} × ₪{{price}} per person",
-    "dateUnavailable": "Choose an upcoming Thursday within the next 12 weeks. Registration closes at 20:00 on the tour date.",
+    "dateUnavailable": "Choose an available upcoming Thursday through the end of 2028. Registration closes at 20:00 on the tour date.",
     "dateAvailable": "✓ Date available",
     "spotsRemainingOf": "{{available}} of {{max}} spots remaining",
     "dateSoldOut": "⚠️ This date is sold out",

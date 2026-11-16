@@ -1,3 +1,6 @@
+import bookingHorizon from '../../../../functions/src/booking-horizon.json';
+export const LAST_BOOKABLE_DATE = bookingHorizon.lastBookableDate;
+
 /**
  * Get the nearest Thursday from a given date
  */
@@ -36,7 +39,7 @@ export const isSelectableTourDate = (dateStr, now = new Date()) => {
   const today = getJerusalemDateString(now);
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(now));
   return dateStr >= today && !(dateStr === today && hour >= 20)
-    && new Date(`${dateStr}T12:00:00Z`) - now <= 84 * 86400000;
+    && dateStr <= LAST_BOOKABLE_DATE;
 };
 
 /**
@@ -44,7 +47,7 @@ export const isSelectableTourDate = (dateStr, now = new Date()) => {
  * @param {number} count
  * @param {string} lang - 'he' or 'en' for month names
  */
-export const getUpcomingThursdays = (count = 9, lang = 'he') => {
+export const getUpcomingThursdays = (count = Infinity, lang = 'he') => {
   const now = new Date();
   const parts = new Intl.DateTimeFormat('en', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
   const part = type => parts.find(p => p.type === type).value;
@@ -61,6 +64,7 @@ export const getUpcomingThursdays = (count = 9, lang = 'he') => {
   const list = [];
   for (let i = 0; i < count; i++) {
     const dateStr = d.toISOString().slice(0, 10);
+    if (dateStr > LAST_BOOKABLE_DATE) break;
     list.push({
       dateStr,
       day: d.getUTCDate(),

@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
+const { maxCalendarRangeDays } = require('./booking-horizon.json');
 const fault = code => Object.assign(new Error(code), { code });
 // Confirmed business policy. Runtime synchronization remains disabled.
 const APPROVED_WEEK_POLICY = Object.freeze({ enabled: false, approved: true, timeZone: 'Asia/Jerusalem', weekStartsOn: 0, fullWhen: 'at-capacity', maxAgeMs: 300000 });
@@ -65,7 +66,7 @@ function buildCalendarWeekSnapshots(events, { policy, fromDate, toDate, complete
   validatePolicy(policy);
   if (complete !== true || !Array.isArray(events) || !Number.isFinite(nowMs)) throw fault('calendar-unavailable');
   const from = realDate(fromDate), to = realDate(toDate);
-  if (to <= from || to - from > 370 * 86400000) throw fault('calendar-data-invalid');
+  if (to <= from || to - from > maxCalendarRangeDays * 86400000) throw fault('calendar-data-invalid');
   const fingerprint = policyFingerprint(policy), weeks = {};
   for (let day = from; day < to; day += 86400000) {
     const key = weekStartDate(new Date(day).toISOString().slice(0, 10), policy);
@@ -80,7 +81,7 @@ function buildCalendarWeekSnapshots(events, { policy, fromDate, toDate, complete
     if (!privateTour && !countMatch) continue;
     if (Array.isArray(event.recurrence) && event.recurrence.length) throw fault('calendar-data-invalid'); // Require expanded instances (singleEvents=true), including exceptions.
     const [start, last] = eventDateRange(event, policy), firstMs = Math.max(from, realDate(start)), lastMs = Math.min(to - 86400000, realDate(last));
-    if (lastMs - firstMs > 370 * 86400000) throw fault('calendar-data-invalid');
+    if (lastMs - firstMs > maxCalendarRangeDays * 86400000) throw fault('calendar-data-invalid');
     const privateWindow = privateTour ? {
       startMs: event.start.date ? localHourMs(event.start.date, 0, policy.timeZone) : Date.parse(event.start.dateTime),
       endMs: event.end.date ? localHourMs(event.end.date, 0, policy.timeZone) : Date.parse(event.end.dateTime),

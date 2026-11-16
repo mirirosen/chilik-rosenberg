@@ -2,6 +2,7 @@
 const { APPROVED_WEEK_POLICY, localDateAt, weekStartDate } = require('./weekly-availability');
 const { createCalendarImporter } = require('./calendar-importer');
 const { createGoogleCalendarTokenProvider, tokenConfigurationReady, SECRET_NAMES } = require('./google-calendar-token');
+const { lastBookableDate, maxAvailabilityDates } = require('./booking-horizon.json');
 const DISABLED_CALENDAR_FEATURES = Object.freeze({ scheduler: false, publicAvailability: false, weeklyEnforcement: false, calendarWrites: false });
 const DISABLED_CALENDAR_CONFIG = Object.freeze({ enabled: false, readEnabled: false, provider: 'google', mode: 'reconciled-event', calendarId: 'hr20192022@gmail.com', idempotencyVerified: false, reconciliationVerified: false, privateEventAccessVerified: false, accessRole: null, oauth: Object.freeze({ enabled: false, existingGrantVerified: false, grantedScopes: [] }) });
 function loadCalendarConfiguration(env = {}) {
@@ -28,15 +29,18 @@ function upcomingThursdays(nowMs = Date.now()) {
   let day = Date.parse(`${today}T00:00:00Z`);
   const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date(nowMs)));
   const dates = [];
-  for (let i = 0; i <= 84; i++, day += 86400000) {
+  const end = Date.parse(`${lastBookableDate}T00:00:00Z`);
+  for (let i = 0; day <= end; i++, day += 86400000) {
     if (new Date(day).getUTCDay() === 4 && !(i === 0 && hour >= 20)) dates.push(new Date(day).toISOString().slice(0, 10));
+    if (dates.length > maxAvailabilityDates) throw new Error('booking-horizon-too-wide');
   }
   return dates;
 }
 function calendarImportRange(nowMs = Date.now(), policy = APPROVED_WEEK_POLICY) {
   const fromDate = weekStartDate(localDateAt(nowMs, policy.timeZone), policy);
-  // 13 complete weeks cover the booking horizon including the final Thursday.
-  const toDate = new Date(Date.parse(`${fromDate}T00:00:00Z`) + 91 * 86400000).toISOString().slice(0, 10);
+  // Keep complete weeks, including the week that contains the final approved date.
+  const finalWeek = weekStartDate(lastBookableDate, policy);
+  const toDate = new Date(Date.parse(`${finalWeek}T00:00:00Z`) + 7 * 86400000).toISOString().slice(0, 10);
   return { fromDate, toDate };
 }
 function createCalendarRuntime({ db, config = DISABLED_CALENDAR_CONFIG, features = DISABLED_CALENDAR_FEATURES, secretFactory, getAccessToken, OAuth2ClientFactory, fetchImpl, now = Date.now }) {

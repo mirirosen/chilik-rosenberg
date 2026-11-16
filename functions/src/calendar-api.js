@@ -1,19 +1,28 @@
 'use strict';
 const { FUNCTION_REGION, INTEGRATION_RUNTIME } = require('./deployment-config');
-const { assertWeeklyAvailability, weekStartDate } = require('./weekly-availability');
+const { assertWeeklyAvailability, weekStartDate, localDateAt } = require('./weekly-availability');
 const { upcomingThursdays } = require('./calendar-runtime');
+const { lastBookableDate } = require('./booking-horizon.json');
 const APP = 'artifacts/hilik-rosenberg-v1/public/data';
 const validMax = n => Number.isInteger(n) && n >= 1 && n <= 100;
 // Read Firestore only; public requests never refresh tokens or fetch Calendar.
-async function publicAvailability(db, policy, nowMs = Date.now()) {
-  const dates = upcomingThursdays(nowMs), unavailable = { available: false, availableSpots: 0, maxParticipants: 30, validUntilMs: nowMs + 30000 };
+async function publicAvailability(db, policy, nowMs = Date.now(), { extended = true } = {}) {
+  // Already-open older clients reject more than 13 rows. Extend only when the
+  // HTTP client explicitly requests the approved horizon; keep their old window.
+  const legacyEnd = Date.parse(`${localDateAt(nowMs, policy.timeZone)}T00:00:00Z`) + 84 * 86400000;
+  const dates = upcomingThursdays(nowMs).filter(date => extended || Date.parse(`${date}T00:00:00Z`) <= legacyEnd);
+  const unavailable = { available: false, availableSpots: 0, maxParticipants: 30, validUntilMs: nowMs + 30000 };
   const result = await db.runTransaction(async tx => {
     const settings = (await tx.get(db.doc(`${APP}/settings/global`))).data() || {};
     const globalMax = settings.globalMaxParticipants ?? 30;
     const rows = {};
-    for (const date of dates) {
-      const week = weekStartDate(date, policy);
-      const [calendar, counter, tour] = await Promise.all([tx.get(db.doc(`calendarAvailability/${week}`)), tx.get(db.doc(`bookingWeeks/${week}`)), tx.get(db.doc(`${APP}/tourDates/${date}`))]);
+    // One batch avoids hundreds of sequential network round trips for the two-year horizon.
+    const weeks = dates.map(date => weekStartDate(date, policy));
+    const refs = dates.flatMap((date, i) => [db.doc(`calendarAvailability/${weeks[i]}`), db.doc(`bookingWeeks/${weeks[i]}`), db.doc(`${APP}/tourDates/${date}`)]);
+    const snapshots = refs.length ? await tx.getAll(...refs) : [];
+    for (let i = 0; i < dates.length; i++) {
+      const date = dates[i], week = weeks[i];
+      const [calendar, counter, tour] = snapshots.slice(i * 3, i * 3 + 3);
       const td = tour.data() || {}, snapshot = calendar.data();
       const max = td.useGlobalMax === false ? td.customMax : globalMax;
       const publicMax = validMax(globalMax) && validMax(max) ? Math.min(globalMax, max) : 30;
@@ -30,7 +39,7 @@ async function publicAvailability(db, policy, nowMs = Date.now()) {
     }
     return rows;
   });
-  return { availabilityStatus: 'ready', publicAvailability: result, validUntilMs: Math.min(...Object.values(result).map(r => r.validUntilMs)) };
+  return { availabilityStatus: 'ready', publicAvailability: result, validUntilMs: Object.keys(result).length ? Math.min(...Object.values(result).map(r => r.validUntilMs)) : nowMs + 30000 };
 }
 function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now, logger = console }) {
   const region = FUNCTION_REGION;
@@ -45,7 +54,7 @@ function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now,
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'GET') return res.status(405).json({ error: 'method-not-allowed' });
     if (!runtime.publicEnabled) return res.status(503).json({ error: 'availability-unavailable' });
-    try { return res.status(200).json(await publicAvailability(db, runtime.policy, now())); }
+    try { return res.status(200).json(await publicAvailability(db, runtime.policy, now(), { extended: req.query?.through === lastBookableDate })); }
     catch { return res.status(503).json({ error: 'availability-unavailable' }); }
   });
   // No schedule export/registration at all while the feature is off.

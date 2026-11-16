@@ -2,7 +2,7 @@ import { IS_PREPROD } from '../utils/preview';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFirebaseData, getEffectiveMax, getCurrentRegistrations, getAvailableSpots } from '../hooks/useFirebaseData';
-import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
+import { getUpcomingThursdays, formatDateHebrew, isThursday, getJerusalemDateString, isSelectableTourDate, LAST_BOOKABLE_DATE } from '../utils/dateUtils';
 import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
 import { normalizePhone } from '../utils/phone';
@@ -65,7 +65,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
   const [retryError, setRetryError] = useState('');
 
   const cloudData = useFirebaseData();
-  const thursdays = useMemo(() => getUpcomingThursdays(12), []);
+  const thursdays = useMemo(() => getUpcomingThursdays(), []);
 
   // Redirect to date selection if no pre-filled data
   useEffect(() => {
@@ -544,6 +544,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
                 }
               }}
               min={getJerusalemDateString()}
+              max={LAST_BOOKABLE_DATE}
               className={`w-full bg-brand-dark border ${errors.tourDate ? 'border-red-500' : 'border-white/20'} rounded-2xl p-4 text-white outline-none focus:border-brand-gold text-center`}
               style={{ colorScheme: 'dark' }}
               disabled={isSubmitting}
