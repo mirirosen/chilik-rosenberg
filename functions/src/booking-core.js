@@ -1,6 +1,7 @@
 'use strict';
 const crypto = require('crypto');
 const { normalizePhone } = require('./phone');
+const { lastBookableDate } = require('./booking-horizon.json');
 const PRICE_PER_PERSON = 250;
 const fault = code => Object.assign(new Error(code), { code });
 function localDate(now) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now); }
@@ -11,7 +12,7 @@ function validateBooking(input, now = new Date()) {
   const phone = normalizePhone(input.phone);
   if (!phone) throw fault('invalid-phone');
   if (input.email != null && input.email !== '' && (!text(input.email, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email))) throw fault('invalid-email');
-  if (!realDate(input.tourDate) || new Date(input.tourDate + 'T12:00:00Z').getUTCDay() !== 4 || (input.tourDate < localDate(now) || (input.tourDate === localDate(now) && Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(now)) >= 20)) || new Date(input.tourDate + 'T12:00:00Z') - now > 84 * 86400000) throw fault('invalid-date');
+  if (!realDate(input.tourDate) || new Date(input.tourDate + 'T12:00:00Z').getUTCDay() !== 4 || (input.tourDate < localDate(now) || (input.tourDate === localDate(now) && Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(now)) >= 20)) || input.tourDate > lastBookableDate) throw fault('invalid-date');
   if (!['number', 'string'].includes(typeof input.participants) || (typeof input.participants === 'string' && !/^\d+$/.test(input.participants))) throw fault('invalid-participants');
   const participants = Number(input.participants);
   if (input.notes != null && (typeof input.notes !== 'string' || input.notes.length > 1000)) throw fault('invalid-notes');

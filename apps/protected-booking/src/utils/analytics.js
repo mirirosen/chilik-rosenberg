@@ -1,5 +1,5 @@
-// Google Analytics 4, loaded ONLY after the visitor explicitly accepts the consent banner.
-// Before that (and after "No thanks") there is no gtag script, no cookie and no request.
+// Google Analytics 4 starts automatically, without an approval banner.
+// Previously stored and new explicit opt-outs remain effective.
 const CONSENT_KEY = 'chilik-analytics-consent';
 const PURCHASE_KEY_PREFIX = 'chilik-analytics-purchase:';
 // Property 560779012, web stream 16203937010.
@@ -27,7 +27,7 @@ function storage() { try { return window.localStorage; } catch { return null; } 
 export function consentState() {
   if (!analyticsConfigured()) return 'unavailable';
   const value = storage()?.getItem(CONSENT_KEY);
-  return value === 'granted' || value === 'denied' ? value : 'unset';
+  return value === 'denied' ? 'denied' : 'granted';
 }
 
 // Booking and confirmation URLs carry booking IDs and selections in the query
@@ -101,12 +101,12 @@ export function setConsent(granted) {
   if (granted) load();
 }
 
-// Footer "withdraw consent": forget the choice, stop measurement, remove the GA
+// Footer opt-out: persist the choice, stop measurement, remove the GA
 // cookies (_ga, _ga_*) for this host and its parent domains, then reload so the
-// gtag script is gone and the banner asks again.
+// gtag script is gone and stays off after subsequent visits.
 export function withdrawConsent({ reload = () => window.location.reload() } = {}) {
   if (!analyticsConfigured() || typeof document === 'undefined') return false;
-  storage()?.removeItem(CONSENT_KEY);
+  storage()?.setItem(CONSENT_KEY, 'denied');
   setMeasurementBlocked(true);
   const names = document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => n === '_ga' || n.startsWith('_ga_'));
   const parts = window.location.hostname.split('.');
@@ -117,7 +117,7 @@ export function withdrawConsent({ reload = () => window.location.reload() } = {}
   return true;
 }
 
-// Call once at startup: restores an earlier "accept" without asking again.
+// Call once at startup; an explicit opt-out is never overridden.
 export function initAnalytics() {
   if (consentState() === 'granted') load();
 }

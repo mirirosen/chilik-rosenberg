@@ -16,7 +16,7 @@ const customer = { name: 'Demo Customer', phone: '0500000000', email: 'demo@exam
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW); window.history.replaceState({}, '', '/booking?date=2026-10-08&participants=2'); api.makeIdempotencyKey.mockResolvedValue('a'.repeat(32)); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
-it.each(['', 'invalid', '2026-02-30', '2026-10-01', '2026-10-06', '2027-01-07'])('never advertises an invalid/past/out-of-window date %s', value => {
+it.each(['', 'invalid', '2026-02-30', '2026-10-01', '2026-10-06', '2029-01-04'])('never advertises an invalid/past/out-of-window date %s', value => {
   const proceed = vi.fn(); const { container } = render(<BookingSection initialSelection={{ date: value, participants: 2 }} onContinue={proceed} />);
   expect(container.querySelector('.booking-screen__chosen')).toBeNull();
   expect(screen.queryByRole('button', { name: /bookingDesign\.continue/ })).toBeNull();
@@ -77,7 +77,7 @@ it('Jerusalem midnight and Thursday closing time match the unchanged server guar
     ['2026-10-08', NOW, true], ['2026-10-01', NOW, false], ['2026-02-30', NOW, false],
     ['2026-10-08', new Date('2026-10-08T16:59:00Z'), true],
     ['2026-10-08', new Date('2026-10-08T17:00:00Z'), false],
-    ['2027-01-07', NOW, false],
+    ['2029-01-04', NOW, false],
   ]) {
     expect(isSelectableTourDate(date, now)).toBe(valid);
     if (valid) expect(validateBooking({ ...customer, adultConfirmed: true, tourDate: date }, now).tourDate).toBe(date);

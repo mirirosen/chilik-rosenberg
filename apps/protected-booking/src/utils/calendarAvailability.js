@@ -1,4 +1,5 @@
 import { IS_PREPROD } from './preview';
+import bookingHorizon from '../../../../functions/src/booking-horizon.json';
 const FLAG = import.meta.env.VITE_CALENDAR_AVAILABILITY_ENABLED === 'true';
 const API_BASE = (import.meta.env.VITE_PAYMENT_API_BASE || '').replace(/\/$/, '');
 const DEMO = import.meta.env.VITE_FIREBASE_EMULATORS === 'true';
@@ -12,11 +13,11 @@ function configuredBase() {
 export function sanitizeAvailabilityResponse(data, nowMs = Date.now()) {
   if (data?.availabilityStatus !== 'ready' || !data.publicAvailability || Array.isArray(data.publicAvailability) || typeof data.publicAvailability !== 'object' || !Number.isFinite(data.validUntilMs) || data.validUntilMs <= nowMs || data.validUntilMs > nowMs + 300000) throw new Error('availability-unavailable');
   const entries = Object.entries(data.publicAvailability);
-  if (entries.length < 1 || entries.length > 13) throw new Error('availability-unavailable');
+  if (entries.length < 1 || entries.length > bookingHorizon.maxAvailabilityDates) throw new Error('availability-unavailable');
   const rows = {};
   for (const [date, row] of entries) {
     const ms = Date.parse(`${date}T00:00:00Z`);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(ms) || new Date(ms).toISOString().slice(0, 10) !== date || new Date(ms).getUTCDay() !== 4 || typeof row?.available !== 'boolean' || !Number.isInteger(row.availableSpots) || !Number.isInteger(row.maxParticipants) || row.maxParticipants < 1 || row.maxParticipants > 100 || row.availableSpots < 0 || row.availableSpots > row.maxParticipants || row.available !== (row.availableSpots > 0) || !Number.isFinite(row.validUntilMs) || row.validUntilMs < data.validUntilMs || row.validUntilMs > nowMs + 300000) throw new Error('availability-unavailable');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > bookingHorizon.lastBookableDate || !Number.isFinite(ms) || new Date(ms).toISOString().slice(0, 10) !== date || new Date(ms).getUTCDay() !== 4 || typeof row?.available !== 'boolean' || !Number.isInteger(row.availableSpots) || !Number.isInteger(row.maxParticipants) || row.maxParticipants < 1 || row.maxParticipants > 100 || row.availableSpots < 0 || row.availableSpots > row.maxParticipants || row.available !== (row.availableSpots > 0) || !Number.isFinite(row.validUntilMs) || row.validUntilMs < data.validUntilMs || row.validUntilMs > nowMs + 300000) throw new Error('availability-unavailable');
     rows[date] = { available: row.available, availableSpots: row.availableSpots, maxParticipants: row.maxParticipants, validUntilMs: row.validUntilMs };
   }
   // Copy a whitelist only. No upstream metadata/customer/calendar fields survive.

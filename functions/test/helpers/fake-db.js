@@ -8,8 +8,8 @@ function fakeDb() {
   const doc = path => ({ path, id: path.split('/').at(-1), get: async () => snapshot(data.get(path)) });
   const collection = name => {
     const query = filters => ({
-      where: (key, op, value) => { if (op !== '==') throw new Error('unsupported-query'); return query([...filters, [key, value]]); },
-      get: async () => ({ docs: [...data.entries()].filter(([path, value]) => path.startsWith(`${name}/`) && path.split('/').length === 2 && filters.every(([key, expected]) => value[key] === expected)).map(([path, value]) => ({ ...snapshot(value), id: path.split('/').at(-1), ref: doc(path) })) }),
+      where: (key, op, value) => { if (!['==','>=','>','<=','<'].includes(op)) throw new Error('unsupported-query'); return query([...filters, [key, op, value]]); },
+      get: async () => ({ docs: [...data.entries()].filter(([path, value]) => path.startsWith(`${name}/`) && path.split('/').length === name.split('/').length + 1 && filters.every(([key, op, expected]) => op === '==' ? value[key] === expected : op === '>=' ? value[key] >= expected : op === '>' ? value[key] > expected : op === '<=' ? value[key] <= expected : value[key] < expected)).map(([path, value]) => ({ ...snapshot(value), id: path.split('/').at(-1), ref: doc(path) })) }),
     });
     return query([]);
   };
@@ -18,6 +18,7 @@ function fakeDb() {
       const writes = []; let writing = false;
       const tx = {
         async get(ref) { if (writing) throw new Error('read-after-write'); return ref.path ? snapshot(data.get(ref.path)) : ref.get(); },
+        async getAll(...refs) { if (writing) throw new Error('read-after-write'); return refs.map(ref => snapshot(data.get(ref.path))); },
         create(ref, value) { writing = true; if (data.has(ref.path)) throw new Error('already-exists'); writes.push(() => data.set(ref.path, value)); },
         set(ref, value, opts) { writing = true; writes.push(() => data.set(ref.path, opts?.merge ? { ...data.get(ref.path), ...value } : value)); },
         update(ref, value) { writing = true; writes.push(() => data.set(ref.path, { ...data.get(ref.path), ...value })); },

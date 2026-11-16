@@ -32,22 +32,20 @@ describe('GA4 configuration', () => {
   });
 });
 
-describe('consent gating', () => {
-  it('nothing loads before an explicit choice: no script, no dataLayer, no events', async () => {
+describe('automatic analytics and retained opt-outs', () => {
+  it('loads measurement for a new visitor without displaying an approval banner', async () => {
     const { analytics, ConsentBanner } = await fresh();
     analytics.initAnalytics();
     render(<ConsentBanner />);
-    expect(screen.getByTestId('consent-banner')).toBeTruthy();
-    expect(gtagScripts()).toHaveLength(0);
-    expect(window.dataLayer).toBeUndefined();
-    expect(analytics.trackBeginBooking({ participants: 2, pricePerPerson: 250, totalPrice: 500 })).toBe(false);
-    expect(analytics.trackPurchase(PAID)).toBe(false);
-    expect(localStorage.getItem('chilik-analytics-purchase:' + BOOKING)).toBeNull();
+    expect(screen.queryByTestId('consent-banner')).toBeNull();
+    expect(gtagScripts()).toHaveLength(1);
+    expect(analytics.trackBeginBooking({ participants: 2, pricePerPerson: 250, totalPrice: 500 })).toBe(true);
+    expect(window.dataLayer.find(entry => entry[0] === 'consent')[2]).toMatchObject({ analytics_storage:'granted', ad_storage:'denied' });
   });
   it('"No thanks" is remembered and never loads gtag', async () => {
     const { analytics, ConsentBanner } = await fresh();
+    localStorage.setItem('chilik-analytics-consent', 'denied');
     render(<ConsentBanner />);
-    fireEvent.click(screen.getByText('לא, תודה'));
     expect(screen.queryByTestId('consent-banner')).toBeNull();
     expect(analytics.consentState()).toBe('denied');
     analytics.initAnalytics();
@@ -59,11 +57,11 @@ describe('consent gating', () => {
     again.analytics.initAnalytics();
     expect(gtagScripts()).toHaveLength(0);
   });
-  it('"Accept" loads gtag for G-165V7SRZJK with ad storage denied; a returning visitor is not asked again', async () => {
+  it('automatic loading retains the configured property and keeps advertising disabled', async () => {
     const { analytics, ConsentBanner } = await fresh();
     render(<ConsentBanner />);
-    expect(screen.getByTestId('consent-banner').querySelector('a').getAttribute('href')).toBe('/privacy');
-    fireEvent.click(screen.getByText('אישור'));
+    analytics.initAnalytics();
+    expect(screen.queryByTestId('consent-banner')).toBeNull();
     expect([...gtagScripts()].map(s => s.src)).toEqual(['https://www.googletagmanager.com/gtag/js?id=G-165V7SRZJK']);
     expect(window.dataLayer.find(entry => entry[0] === 'consent')[2]).toMatchObject({ analytics_storage: 'granted', ad_storage: 'denied' });
     expect(window.dataLayer.find(entry => entry[0] === 'config')[1]).toBe('G-165V7SRZJK');
@@ -180,33 +178,36 @@ describe('page_location and management', () => {
 });
 
 describe('withdrawing consent', () => {
-  it('footer link appears only after accepting; it clears the choice and GA cookies and reloads', async () => {
+  it('footer opt-out removes GA cookies and persists across reloads', async () => {
     const { analytics } = await fresh();
     const { default: Footer } = await import('../../src/components/Footer');
     const { container } = render(<Footer />);
-    expect(container.textContent).not.toContain('ביטול ההסכמה למדידה');
+    expect(container.textContent).toContain('כיבוי המדידה');
     cleanup();
     analytics.setConsent(true);
     document.cookie = '_ga=GA1.1.123; path=/'; document.cookie = '_ga_165V7SRZJK=GS1.1.1; path=/'; document.cookie = 'other=1; path=/';
     const reload = vi.fn();
     render(<Footer />);
-    const button = screen.getByRole('button', { name: 'ביטול ההסכמה למדידה (Google Analytics)' });
+    const button = screen.getByRole('button', { name: 'כיבוי המדידה (Google Analytics)' });
     expect(analytics.withdrawConsent({ reload })).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(analytics.consentState()).toBe('unset');
+    expect(analytics.consentState()).toBe('denied');
     expect(document.cookie).not.toMatch(/_ga/);
     expect(document.cookie).toContain('other=1');
     expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
     expect(button).toBeTruthy();
+    gtagScripts().forEach(s => s.remove()); delete window.dataLayer; delete window.gtag;
+    const afterReload = await fresh(); afterReload.analytics.initAnalytics();
+    expect(gtagScripts()).toHaveLength(0);
     document.cookie = 'other=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
     delete window['ga-disable-G-165V7SRZJK'];
   });
 });
 
 describe('privacy policy', () => {
-  it('documents GA4: consent only, ID, cookies, withdrawal link and Google as processor', () => {
+  it('documents GA4, ID, cookies, opt-out link and Google as processor', () => {
     const html = readFileSync('public/privacy.html', 'utf8');
-    for (const text of ['Google Analytics 4', 'G-165V7SRZJK', '_ga_*', 'ביטול ההסכמה למדידה (Google Analytics)', 'https://policies.google.com/privacy', 'מעבד מידע']) expect(html).toContain(text);
+    for (const text of ['Google Analytics 4', 'G-165V7SRZJK', '_ga_*', 'כיבוי המדידה (Google Analytics)', 'https://policies.google.com/privacy', 'מעבד מידע']) expect(html).toContain(text);
   });
 });
 

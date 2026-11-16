@@ -6,19 +6,16 @@
   or `off` removes analytics completely (no banner, no script).
 - Preprod/demo builds and `/manage-bookings` never load analytics.
 
-**Nothing loads before explicit consent.** Until the visitor clicks **אישור / Accept** on
-the consent banner (`src/components/ConsentBanner.jsx`, Hebrew + English, links to `/privacy`)
-there is:
+Per the owner's November 16, 2026 instruction, measurement starts automatically after
+mount, without an approval banner. Earlier visitors' explicit "No thanks" choice
+(`localStorage` `chilik-analytics-consent` = `denied`) remains effective: no analytics
+script, cookies or measurement requests are started for them.
 
-- no `googletagmanager.com` script
-- no `dataLayer`
-- no cookie and no request
+The footer's **כיבוי המדידה (Google Analytics) / Turn off analytics (Google Analytics)**
+stores that same persistent opt-out, disables measurement, clears accessible GA cookies
+and reloads. The prerendered HTML never contains gtag; it loads only after mount.
 
-"No thanks" is remembered (`localStorage` `chilik-analytics-consent` = `denied`), and the banner is
-not shown again. The prerendered HTML never contains the banner or gtag; the banner is
-rendered after mount.
-
-After consent, `gtag.js` loads once with `analytics_storage` granted and advertising storage,
+When measurement is enabled, `gtag.js` loads once with `analytics_storage` granted and advertising storage,
 ad user data, ad personalization and Google signals denied.
 
 ## Events
@@ -59,6 +56,6 @@ List unwanted referrals**, add a rule with match type "Referral domain contains"
 
 ## Owner checklist
 
-- Privacy policy (`public/privacy.html` and the terms) should mention Google Analytics and the
-  consent choice. That wording is not changed in code.
+- Privacy policy (`public/privacy.html`) and the terms describe automatic Google Analytics
+  measurement and the persistent footer opt-out.
 - In GA4, mark `purchase` as a key event and add the unwanted-referral rule above.

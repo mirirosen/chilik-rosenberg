@@ -11,9 +11,13 @@ async function publicAvailability(db, policy, nowMs = Date.now()) {
     const settings = (await tx.get(db.doc(`${APP}/settings/global`))).data() || {};
     const globalMax = settings.globalMaxParticipants ?? 30;
     const rows = {};
-    for (const date of dates) {
-      const week = weekStartDate(date, policy);
-      const [calendar, counter, tour] = await Promise.all([tx.get(db.doc(`calendarAvailability/${week}`)), tx.get(db.doc(`bookingWeeks/${week}`)), tx.get(db.doc(`${APP}/tourDates/${date}`))]);
+    // One batch avoids hundreds of sequential network round trips for the two-year horizon.
+    const weeks = dates.map(date => weekStartDate(date, policy));
+    const refs = dates.flatMap((date, i) => [db.doc(`calendarAvailability/${weeks[i]}`), db.doc(`bookingWeeks/${weeks[i]}`), db.doc(`${APP}/tourDates/${date}`)]);
+    const snapshots = refs.length ? await tx.getAll(...refs) : [];
+    for (let i = 0; i < dates.length; i++) {
+      const date = dates[i], week = weeks[i];
+      const [calendar, counter, tour] = snapshots.slice(i * 3, i * 3 + 3);
       const td = tour.data() || {}, snapshot = calendar.data();
       const max = td.useGlobalMax === false ? td.customMax : globalMax;
       const publicMax = validMax(globalMax) && validMax(max) ? Math.min(globalMax, max) : 30;
@@ -30,7 +34,7 @@ async function publicAvailability(db, policy, nowMs = Date.now()) {
     }
     return rows;
   });
-  return { availabilityStatus: 'ready', publicAvailability: result, validUntilMs: Math.min(...Object.values(result).map(r => r.validUntilMs)) };
+  return { availabilityStatus: 'ready', publicAvailability: result, validUntilMs: Object.keys(result).length ? Math.min(...Object.values(result).map(r => r.validUntilMs)) : nowMs + 30000 };
 }
 function createCalendarApi({ db, onRequest, onSchedule, runtime, now = Date.now, logger = console }) {
   const region = FUNCTION_REGION;

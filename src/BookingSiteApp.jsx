@@ -7,8 +7,7 @@ import ErrorBoundary from '../apps/protected-booking/src/components/ErrorBoundar
 import { IS_PREPROD, PREVIEW_NOTICE, disablePreviewContacts } from '../apps/protected-booking/src/utils/preview';
 import { applyRouteMetadata } from './utils/routeMetadata';
 import { BOOKING_INTENT } from './navigation/bookingIntent';
-import ConsentBanner from './components/ConsentBanner';
-import { analyticsConfigured, beforeNavigate, initAnalytics } from '../apps/protected-booking/src/utils/analytics';
+import { beforeNavigate, initAnalytics } from '../apps/protected-booking/src/utils/analytics';
 
 // Load the booking and management SDKs after the public page can render.
 const BookingSection = lazy(() => import('../apps/protected-booking/src/components/BookingSection'));
@@ -80,7 +79,7 @@ export default function BookingSiteApp() {
     return () => window.removeEventListener('popstate', update);
   }, []);
   useEffect(() => IS_PREPROD ? disablePreviewContacts() : undefined, []);
-  // Restores an earlier explicit "accept" only; analytics never loads on management.
+  // Automatic public measurement respects stored opt-outs and excludes management.
   useEffect(() => { if (!IS_PREPROD && window.location.pathname !== '/manage-bookings') initAnalytics(); }, []);
   // The homepage URL follows the visible language: Hebrew at /, English at /en.
   useEffect(() => {
@@ -116,13 +115,11 @@ export default function BookingSiteApp() {
   const loading = <div className="site-route-loading" role="status">{t('common.loading')}</div>;
   const picker = <Suspense fallback={loading}><BookingSection standalone={location.path === '/booking'} onContinue={continueBooking} initialSelection={selection} /></Suspense>;
   const banner = IS_PREPROD && <div className="booking-demo-banner" role="status">{PREVIEW_NOTICE}</div>;
-  // GA4 consent: nothing at all unless a measurement ID is configured; never on management.
-  const consent = !IS_PREPROD && analyticsConfigured() && <ConsentBanner />;
   if (location.path === '/manage-bookings') return <ErrorBoundary><div className="site-management">{banner}<Suspense fallback={loading}><Admin /></Suspense></div></ErrorBoundary>;
-  if (HOME_PATHS.includes(location.path)) return <>{banner}<InquiryApp bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} />{consent}</>;
-  if (['/terms', '/תקנון'].includes(location.path)) return <div className="site-legal">{banner}<Suspense fallback={loading}><Terms /></Suspense>{consent}</div>;
-  if (!['/booking', '/confirmation'].includes(location.path)) return <><InquiryApp />{consent}</>;
+  if (HOME_PATHS.includes(location.path)) return <>{banner}<InquiryApp bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} /></>;
+  if (['/terms', '/תקנון'].includes(location.path)) return <div className="site-legal">{banner}<Suspense fallback={loading}><Terms /></Suspense></div>;
+  if (!['/booking', '/confirmation'].includes(location.path)) return <InquiryApp />;
   return <ErrorBoundary><div className="target-site target-booking-flow">{banner}<Header /><main id="main-content" className={hasSelection || isStatus ? 'booking-details-shell' : 'booking-selection-page'}>
     <Suspense fallback={loading}>{confirmation ? <BookingConfirmation bookingData={confirmation} onBackToHome={() => { setBookingData(null); navigate('/'); }} /> : hasSelection || isStatus ? <BookingForm key={location.path + location.search} initialDraft={draft} onChangeSelection={changeSelection} statusBookingId={isStatus ? params.get('id') : undefined} onSuccess={bookingSuccess} /> : picker}</Suspense>
-  </main><Footer />{consent}</div></ErrorBoundary>;
+  </main><Footer /></div></ErrorBoundary>;
 }

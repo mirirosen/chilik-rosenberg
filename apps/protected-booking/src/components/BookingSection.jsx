@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db, APP_ID } from '../utils/firebase';
 import { Utensils, Clock, Users, Calendar, ChevronRight, ChevronLeft, CheckCircle, Minus, Plus, Lock } from '../utils/icons';
 import { useFirebaseData, getAvailableSpots } from '../hooks/useFirebaseData';
-import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew, getJerusalemDateString, isSelectableTourDate } from '../utils/dateUtils';
+import { getUpcomingThursdays, isThursday, getNearestThursday, formatDateHebrew, getJerusalemDateString, isSelectableTourDate, LAST_BOOKABLE_DATE } from '../utils/dateUtils';
 import { serverAvailabilityEnabled, getServerAvailability, freshAvailabilityRow } from '../utils/calendarAvailability';
 import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
@@ -28,7 +28,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   useEffect(() => { warmPaymentFunctions(); }, []);
 
   const cloudData = useFirebaseData();
-  const thursdays = useMemo(() => getUpcomingThursdays(12, i18n.language), [i18n.language]);
+  const thursdays = useMemo(() => getUpcomingThursdays(undefined, i18n.language), [i18n.language]);
   const visibleDates = thursdays.slice(datePage * DATES_PER_PAGE, datePage * DATES_PER_PAGE + DATES_PER_PAGE);
   const fmtDate = (d) => formatDateHebrew(d, i18n.language);
   const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
@@ -196,7 +196,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
           <summary>{t('bookingDesign.otherDate')}</summary>
           <label>
             {t('bookingSection.selectDate')}
-            <input type="date" aria-label={t('bookingSection.selectDate')} min={getJerusalemDateString()} value={selectedDate} onChange={(e) => selectDate(e.target.value)} />
+            <input type="date" aria-label={t('bookingSection.selectDate')} min={getJerusalemDateString()} max={LAST_BOOKABLE_DATE} value={selectedDate} onChange={(e) => selectDate(e.target.value)} />
           </label>
         </details>
 

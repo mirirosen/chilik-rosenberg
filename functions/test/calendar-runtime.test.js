@@ -42,9 +42,9 @@ test('approved mocked scheduler has bounded backoff, correct complete horizon an
   const t = transport(runtime, db);
   assert.equal(reads.length, 0); assert.deepEqual(declared.sort(), Object.values(SECRET_NAMES).sort());
   assert.equal(t.schedules[0].schedule, 'every 2 minutes'); assert.equal(t.schedules[0].timeZone, 'Asia/Jerusalem'); assert.equal(t.schedules[0].retryCount, 3); assert.equal(t.schedules[0].secrets.length, 3);
-  assert.deepEqual(await t.api.refreshCalendarAvailability(), { status: 'complete', weeks: 13 });
+  assert.deepEqual(await t.api.refreshCalendarAvailability(), { status: 'complete', weeks: 114 });
   assert.equal(reads.length, 3); assert.equal(network.length, 1); assert.equal(network[0].method, 'GET');
-  assert.deepEqual(calendarImportRange(NOW), { fromDate: '2026-11-01', toDate: '2027-01-31' });
+  assert.deepEqual(calendarImportRange(NOW), { fromDate: '2026-11-01', toDate: '2029-01-07' });
 });
 test('scheduler failure exposes no provider detail or credential value', async () => {
   const logs = [], runtime = { readsEnabled: true, publicEnabled: false, secretBindings: [], importUpcoming: async () => { throw new Error('PRIVATE TITLE TOKEN'); } };
