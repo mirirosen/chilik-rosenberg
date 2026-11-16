@@ -1,6 +1,6 @@
 # Analytics (GA4) on the booking site
 
-- Measurement ID **G-165V7SRZJK**: GA4 property 560779012, web stream 16203937010.
+- Measurement ID **G-CXTM7ZJZYX**: GA4 property 541673749, web stream 16052109569.
 - It is the built-in default in `apps/protected-booking/src/utils/analytics.js`.
 - `VITE_GA4_MEASUREMENT_ID` in `.env.booking.local` overrides it with another `G-...` ID,
   or `off` removes analytics completely (no banner, no script).
@@ -44,8 +44,10 @@ send it again. No name, phone, email or notes are ever sent to GA4.
 - `https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com` in `connect-src`
 - `https://www.google-analytics.com https://www.googletagmanager.com` in `img-src`
 
-The guides (no JavaScript) and `/manage-bookings` keep their stricter policies. The inquiry
-hosting config is unchanged; the inquiry build has no analytics.
+Static guides and the video watch page load a small entry that reuses the same analytics
+module and opt-out behavior. Their CSP permits only the local entry and Google measurement,
+without Firebase, payment API connections or form submission. `/manage-bookings` keeps its
+stricter policy. The inquiry hosting config is unchanged; its build has no analytics.
 
 ## Tranzila referral exclusion: set in GA4 admin, not in code
 
@@ -53,7 +55,7 @@ After paying, the customer returns from Tranzila's hosted page to `/booking?paym
 Without an exclusion GA4 would credit those sessions to `tranzila.com`. This is configured in
 Google Analytics only, and nothing in the site code fakes or replaces it:
 
-**Admin → Data streams → web stream 16203937010 → Configure tag settings → Show all →
+**Admin → Data streams → web stream 16052109569 → Configure tag settings → Show all →
 List unwanted referrals**, add a rule with match type "Referral domain contains" and value
 `tranzila.com`. It covers `directng.tranzila.com`.
 

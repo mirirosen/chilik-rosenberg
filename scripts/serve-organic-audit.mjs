@@ -10,7 +10,7 @@ const root = path.resolve(`dist-${mode}`);
 const port = Number(process.argv[3] || 4173);
 const config = JSON.parse(fs.readFileSync(`firebase.hosting.${mode}.json`, 'utf8')).hosting;
 const match = (rule, pathname) => rule.regex ? new RegExp(rule.regex).test(pathname) : rule.source?.endsWith('/**') ? pathname.startsWith(rule.source.slice(0, -2)) : rule.source === pathname;
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain', '.webp': 'image/webp', '.png': 'image/png', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff2': 'font/woff2' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.txt': 'text/plain', '.vtt': 'text/vtt; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff2': 'font/woff2' };
 http.createServer((req, res) => {
   if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); res.end(); return; }
   let pathname, query; try { const url = new URL(req.url, 'http://localhost'); pathname = decodeURIComponent(url.pathname); query = url.search; } catch { res.writeHead(400); res.end(); return; }
@@ -21,6 +21,20 @@ http.createServer((req, res) => {
   if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) { res.writeHead(404, { 'Content-Type': types['.html'] }); res.end(fs.readFileSync(path.join(root, '404.html'))); return; }
   const headers = { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' };
   for (const rule of config.headers.filter(rule => match(rule, pathname))) for (const header of rule.headers) headers[header.key] = header.value;
+  // Native players seek while loading metadata. Model Hosting's byte-range
+  // response instead of repeatedly sending an entire MP4 for every seek.
+  if (['.mp4','.webm'].includes(path.extname(file))) {
+    const size = fs.statSync(file).size, range = req.headers.range?.match(/^bytes=(\d+)-(\d*)$/);
+    headers['Accept-Ranges'] = 'bytes';
+    if (range) {
+      const start = Number(range[1]), end = range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= size) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); res.end(); return; }
+      res.writeHead(206, { ...headers, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+      if (req.method === 'HEAD') res.end(); else { const stream=fs.createReadStream(file,{start,end});res.on('close',()=>stream.destroy());stream.pipe(res); }
+      return;
+    }
+    headers['Content-Length'] = size;
+  }
   const compress = /\b gzip\b|^gzip|,gzip/.test(req.headers['accept-encoding'] || '') && ['.html', '.js', '.css', '.xml', '.txt', '.svg'].includes(path.extname(file));
   if (compress) { headers['Content-Encoding'] = 'gzip'; headers.Vary = 'Accept-Encoding'; }
   res.writeHead(200, headers);

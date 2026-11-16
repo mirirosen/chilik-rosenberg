@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { guidePaths, siteOrigin } from '../src/data/organicContent.js';
 import { faqsFor, sitemapPaths } from './organic-html.mjs';
+import { bakeryVideo } from '../src/data/organicVideo.js';
 // Public URL path of each generated file, and back.
 const urlPath = file => file === 'index.html' ? '/' : file === 'en.html' ? '/en' : file === 'terms.html' ? '/terms' : '/' + file;
 const fileFor = pathname => pathname === '/' ? 'index.html' : pathname === '/en' ? 'en.html' : pathname === '/terms' ? 'terms.html' : pathname.slice(1);
@@ -14,7 +15,7 @@ fs.mkdirSync('docs/seo/runtime', { recursive: true });
 const results = [];
 assert.equal(fs.existsSync(path.join(out, '.vite/manifest.json')), false, 'internal SSR map is never deployable');
 const price = Number(fs.readFileSync('functions/src/booking-core.js', 'utf8').match(/const PRICE_PER_PERSON = (\d+);/)[1]);
-for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ...guidePaths.map(p => p.slice(1)), 'terms.html', 'booking.html', 'confirmation.html', ...(mode === 'booking' ? ['manage-bookings.html'] : [])]) {
+for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ...guidePaths.map(p => p.slice(1)), bakeryVideo.path.slice(1), 'terms.html', 'booking.html', 'confirmation.html', ...(mode === 'booking' ? ['manage-bookings.html'] : [])]) {
   const dom = new JSDOM(fs.readFileSync(path.join(out, file), 'utf8'), { url: siteOrigin + '/' + file });
   const doc = dom.window.document;
   const home = ['index.html', 'en.html'].includes(file);
@@ -43,6 +44,10 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
   for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) JSON.parse(script.textContent);
   if (file.startsWith('guides/')) {
     const graph = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'];
+    const article = graph.find(node => node['@type'] === 'Article');
+    assert.equal(article.author['@type'], 'Organization', file + ' truthful site-team attribution');
+    assert.equal(article.dateModified, doc.querySelector('time').dateTime, file + ' visible update date');
+    assert.equal(article.image, siteOrigin + doc.querySelector('.guide-photo img').getAttribute('src'));
     const faq = graph.find(node => node['@type'] === 'FAQPage');
     assert(faq && faq.mainEntity.length >= 6, file + ' planning FAQ');
     const visible = [...doc.querySelectorAll('#guide-faq section')].map(section => ({ question: section.querySelector('h3').textContent, answer: section.querySelector('p').textContent }));
@@ -53,6 +58,19 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
     const ctas = [...doc.querySelectorAll('a.guide-cta__button')];
     assert(doc.querySelector('header.guide-header a.guide-cta__button') && doc.querySelector('main .guide-cta a.guide-cta__button'), file + ' booking CTA at top and end');
     for (const cta of ctas) assert.equal(cta.getAttribute('href'), home + '#date-selection', file + ' booking CTA destination');
+  }
+  if (file === bakeryVideo.path.slice(1)) {
+    const video = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'].find(n => n['@type'] === 'VideoObject');
+    assert.equal(doc.querySelectorAll('video').length, 1);
+    assert.equal(video.contentUrl, siteOrigin + doc.querySelector('video').getAttribute('src'));
+    assert.equal(video.transcript, doc.querySelector('[data-video-text]').textContent);
+    assert.equal(video.uploadDate, doc.querySelector('[data-video-published]').dateTime);
+    for (const track of doc.querySelectorAll('track')) assert(fs.existsSync(path.join(out, track.getAttribute('src').slice(1))));
+  }
+  if (file.startsWith('guides/') || file.startsWith('videos/')) {
+    const scripts = [...doc.querySelectorAll('script[type="module"]')];
+    assert.equal(scripts.length, mode === 'booking' ? 1 : 0, file + ' edition-specific analytics');
+    for (const script of scripts) assert(fs.existsSync(path.join(out, script.getAttribute('src').slice(1))));
   }
   const quotedPrices = [...doc.querySelector('main').textContent.matchAll(/(\d+)\s*(?:ש״ח|₪)|₪\s*(\d+)/g)].map(match => Number(match[1] || match[2]));
   for (const quotedPrice of quotedPrices) assert.equal(quotedPrice, price, `${file}: published price diverged from confirmed server price`);

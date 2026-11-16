@@ -3,8 +3,8 @@
 const CONSENT_KEY = 'chilik-analytics-consent';
 const OPT_OUT_COOKIE = 'chilik-analytics-opt-out';
 const PURCHASE_KEY_PREFIX = 'chilik-analytics-purchase:';
-// Property 560779012, web stream 16203937010.
-export const DEFAULT_MEASUREMENT_ID = 'G-165V7SRZJK';
+// Property 541673749, web stream 16052109569.
+export const DEFAULT_MEASUREMENT_ID = 'G-CXTM7ZJZYX';
 
 // VITE_GA4_MEASUREMENT_ID overrides the default; "off" disables analytics entirely.
 // Preprod/demo builds never load analytics.

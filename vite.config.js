@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
     outDir: booking ? mode === 'booking-demo' ? 'dist-booking-demo' : 'dist-booking' : mode === 'inquiry' ? 'dist-inquiry' : mode === 'preprod' ? 'dist-preprod' : 'dist',
     sourcemap: !['preprod', 'inquiry', 'booking', 'booking-demo'].includes(mode),
     rollupOptions: {
-      ...(mode === 'inquiry' ? { input: 'inquiry-index.html' } : booking ? { input: 'booking-index.html' } : {}),
+      ...(mode === 'inquiry' ? { input: 'inquiry-index.html' } : mode === 'booking' ? { input: { 'booking-index': 'booking-index.html', 'guide-analytics': 'src/guideAnalytics.js' } } : booking ? { input: 'booking-index.html' } : {}),
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],

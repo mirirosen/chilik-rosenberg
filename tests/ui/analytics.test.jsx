@@ -19,11 +19,11 @@ beforeEach(() => { localStorage.clear(); sessionStorage.clear(); document.cookie
 afterEach(() => cleanup());
 
 describe('GA4 configuration', () => {
-  it('uses G-165V7SRZJK by default; env overrides it; "off" and preprod disable it', async () => {
+  it('uses G-CXTM7ZJZYX by default; env overrides it; "off" and preprod disable it', async () => {
     const { analytics } = await fresh();
-    expect(analytics.currentMeasurementId()).toBe('G-165V7SRZJK');
-    expect(analytics.resolveMeasurementId('', 'booking')).toBe('G-165V7SRZJK');
-    expect(analytics.resolveMeasurementId(undefined, 'booking')).toBe('G-165V7SRZJK');
+    expect(analytics.currentMeasurementId()).toBe('G-CXTM7ZJZYX');
+    expect(analytics.resolveMeasurementId('', 'booking')).toBe('G-CXTM7ZJZYX');
+    expect(analytics.resolveMeasurementId(undefined, 'booking')).toBe('G-CXTM7ZJZYX');
     expect(analytics.resolveMeasurementId('G-OTHER123', 'booking')).toBe('G-OTHER123');
     expect(analytics.resolveMeasurementId('off', 'booking')).toBe('');
     expect(analytics.resolveMeasurementId('not-an-id', 'booking')).toBe('');
@@ -62,9 +62,9 @@ describe('automatic analytics and retained opt-outs', () => {
     render(<ConsentBanner />);
     analytics.initAnalytics();
     expect(screen.queryByTestId('consent-banner')).toBeNull();
-    expect([...gtagScripts()].map(s => s.src)).toEqual(['https://www.googletagmanager.com/gtag/js?id=G-165V7SRZJK']);
+    expect([...gtagScripts()].map(s => s.src)).toEqual(['https://www.googletagmanager.com/gtag/js?id=G-CXTM7ZJZYX']);
     expect(window.dataLayer.find(entry => entry[0] === 'consent')[2]).toMatchObject({ analytics_storage: 'granted', ad_storage: 'denied' });
-    expect(window.dataLayer.find(entry => entry[0] === 'config')[1]).toBe('G-165V7SRZJK');
+    expect(window.dataLayer.find(entry => entry[0] === 'config')[1]).toBe('G-CXTM7ZJZYX');
     cleanup(); gtagScripts().forEach(s => s.remove());
     const again = await fresh();
     again.analytics.initAnalytics();
@@ -132,7 +132,7 @@ describe('purchase', () => {
 
 describe('page_location and management', () => {
   const configOf = () => window.dataLayer.find(entry => entry[0] === 'config')[2];
-  afterEach(() => { window.history.replaceState({}, '', '/'); delete window['ga-disable-G-165V7SRZJK']; });
+  afterEach(() => { window.history.replaceState({}, '', '/'); delete window['ga-disable-G-CXTM7ZJZYX']; });
   it('drops the query string on /booking and /confirmation only', async () => {
     const { analytics } = await fresh();
     expect(analytics.pageLocation('https://www.chilik-tours.com/confirmation?payment=failed&id=BK-' + 'a'.repeat(24))).toBe('https://www.chilik-tours.com/confirmation');
@@ -164,16 +164,16 @@ describe('page_location and management', () => {
     const { analytics } = await fresh();
     analytics.setConsent(true);
     expect(analytics.beforeNavigate('/manage-bookings')).toBe(true);
-    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+    expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(true);
     expect(analytics.beforeNavigate('/terms')).toBe(false);
-    expect(window['ga-disable-G-165V7SRZJK']).toBe(false);
+    expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(false);
     // A stored "accept" never loads gtag when the dashboard is opened directly.
     gtagScripts().forEach(s => s.remove()); delete window.dataLayer;
     window.history.replaceState({}, '', '/manage-bookings');
     const direct = await fresh();
     direct.analytics.initAnalytics();
     expect(gtagScripts()).toHaveLength(0);
-    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+    expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(true);
   });
 });
 
@@ -185,7 +185,7 @@ describe('withdrawing consent', () => {
     const reload = vi.fn();
     try {
       expect(() => analytics.withdrawConsent({ reload })).not.toThrow();
-      expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+      expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(true);
       expect(document.cookie).not.toMatch(/_ga=/);
       expect(document.cookie).toContain('chilik-analytics-opt-out=1');
       expect(reload).toHaveBeenCalledTimes(1);
@@ -204,7 +204,7 @@ describe('withdrawing consent', () => {
       expect(reload).not.toHaveBeenCalled();
       expect(analytics.consentState()).toBe('denied');
       analytics.beforeNavigate('/terms'); analytics.initAnalytics();
-      expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+      expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(true);
       expect(analytics.trackBeginBooking({participants:1,pricePerPerson:250,totalPrice:250})).toBe(false);
     } finally { write.mockRestore(); cookie.mockRestore(); }
   });
@@ -224,20 +224,20 @@ describe('withdrawing consent', () => {
     expect(analytics.consentState()).toBe('denied');
     expect(document.cookie).not.toMatch(/_ga/);
     expect(document.cookie).toContain('other=1');
-    expect(window['ga-disable-G-165V7SRZJK']).toBe(true);
+    expect(window['ga-disable-G-CXTM7ZJZYX']).toBe(true);
     expect(button).toBeTruthy();
     gtagScripts().forEach(s => s.remove()); delete window.dataLayer; delete window.gtag;
     const afterReload = await fresh(); afterReload.analytics.initAnalytics();
     expect(gtagScripts()).toHaveLength(0);
     document.cookie = 'other=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-    delete window['ga-disable-G-165V7SRZJK'];
+    delete window['ga-disable-G-CXTM7ZJZYX'];
   });
 });
 
 describe('privacy policy', () => {
   it('documents GA4, ID, cookies, opt-out link and Google as processor', () => {
     const html = readFileSync('public/privacy.html', 'utf8');
-    for (const text of ['Google Analytics 4', 'G-165V7SRZJK', '_ga_*', 'כיבוי המדידה (Google Analytics)', 'https://policies.google.com/privacy', 'מעבד מידע']) expect(html).toContain(text);
+    for (const text of ['Google Analytics 4', 'G-CXTM7ZJZYX', '_ga_*', 'כיבוי המדידה (Google Analytics)', 'https://policies.google.com/privacy', 'מעבד מידע']) expect(html).toContain(text);
   });
 });
 
@@ -257,8 +257,13 @@ describe('hosting CSP for GA4', () => {
     expect(csp(route)).toMatch(/connect-src [^;]*https:\/\/\*\.google-analytics\.com/);
     expect(csp(route)).toMatch(/connect-src [^;]*https:\/\/\*\.analytics\.google\.com/);
   });
-  it('management and guides keep their stricter policies', () => {
+  it('management keeps its stricter policy', () => {
     expect(csp('^[\\\\/]manage-bookings$')).not.toMatch(/googletagmanager|google-analytics/);
-    expect(csp('/guides/**')).toContain("script-src 'none'");
+  });
+  it.each(['/guides/**','/videos/**'])('%s allows only public content measurement, without booking SDK connections or form submission', route => {
+    expect(csp(route)).toContain("script-src 'self' https://www.googletagmanager.com;");
+    expect(csp(route)).toMatch(/connect-src [^;]*https:\/\/\*\.google-analytics\.com/);
+    expect(csp(route)).not.toMatch(/firebase|cloudfunctions|identitytoolkit|securetoken/);
+    expect(csp(route)).toContain("form-action 'none'");
   });
 });
