@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tourVideos } from '../data/content';
 import { populatedTourVideoGroups, tourVideoSource } from '../utils/tourVideos';
+import { WATCH_VIDEO_PATH } from '../data/organicVideo';
 
 // Plan §18 (S8): the tour videos sit right after the intro, in the site's light design. Native players with a
 // poster each and preload="none", so no video bytes are requested before a visitor presses play.
@@ -30,6 +31,7 @@ export default function TourVideos({ groups = tourVideos, compact = false }) {
               </video>
             </div>
             <h4 id={titleId} dir="auto" className="target-videos__title">{video.title[language]}</h4>
+            {['booking','inquiry'].includes(import.meta.env.MODE) && video.id === 'CUYEMWo96u8' && <a className="target-videos__text-link" href={WATCH_VIDEO_PATH}>{language === 'he' ? 'לסרטון החלות ולכיתוב הנגיש' : 'Watch the challah clip with readable text'}</a>}
             {video.durationSec && <p className="target-videos__duration"><span dir="ltr">{Math.floor(video.durationSec / 60)}:{String(video.durationSec % 60).padStart(2, '0')}</span> {language === 'he' ? 'דקות' : 'min'}</p>}
           </article>;
         })}

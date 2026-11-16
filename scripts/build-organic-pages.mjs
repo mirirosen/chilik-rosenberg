@@ -3,11 +3,14 @@ import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/data/organicContent.js';
 import { escapeHtml as e, metadataHtml, faqsFor, homeAlternatesHtml, sitemapPaths, sitemapLastmod } from './organic-html.mjs';
+import { guideEnrichment, guideTracking, watchPage, videoVtt } from './guide-growth.mjs';
+import { bakeryVideo, GUIDE_UPDATED } from '../src/data/organicVideo.js';
 
 const mode = process.argv[2];
 if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inquiry mode');
 const out = path.resolve(mode === 'booking' ? 'dist-booking' : 'dist-inquiry');
 const entry = fs.readFileSync(path.join(out, `${mode}-index.html`), 'utf8');
+const analyticsScript = mode === 'booking' ? '/' + JSON.parse(fs.readFileSync(path.join(out, '.vite/manifest.json'), 'utf8'))['src/guideAnalytics.js'].file : undefined;
 const css = fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
 const heSections = [
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
@@ -68,18 +71,24 @@ for (const page of pages) {
     ? `<a href="https://wa.me/972506724312">${e(copy.contact)}</a>`
     : `<a href="/#date-selection">${e(mode === 'booking' ? copy.booking : copy.contact)}</a> · <a href="https://wa.me/972506724312">${e(copy.contact)}</a>`;
   const url = siteOrigin + page.path;
+  const enrichment = guideEnrichment(page);
   const graph = { '@context': 'https://schema.org', '@graph': [
-    { '@type': 'WebPage', '@id': url + '#webpage', url, name: page.title, description: page.description, inLanguage: page.language, about: { '@id': siteOrigin + '/#tour' }, hasPart: { '@id': url + '#guide-faq' } },
+    { '@type': 'WebPage', '@id': url + '#webpage', url, name: page.title, description: page.description, inLanguage: page.language, about: { '@id': siteOrigin + '/#tour' }, mainEntity: { '@id': url + '#article' }, hasPart: { '@id': url + '#guide-faq' } },
+    { ...enrichment.article, headline: page.h1 },
     { '@type': 'FAQPage', '@id': url + '#guide-faq', inLanguage: page.language, isPartOf: { '@id': url + '#webpage' }, mainEntity: guideFaqs(page).map(({ question, answer }) => ({ '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer } })) },
     { '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours', item: siteOrigin + '/' }, { '@type': 'ListItem', position: 2, name: page.h1, item: url } ] },
   ] };
   // x-default is the Hebrew guide of the pair.
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
-  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main></body></html>`;
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(copy.intro)}</p>${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
   // On the booking site the English guide sends readers to the English homepage.
   if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
 }
+fs.mkdirSync(path.join(out, 'videos'), { recursive: true });
+fs.mkdirSync(path.join(out, 'media/captions'), { recursive: true });
+fs.writeFileSync(path.join(out, bakeryVideo.path.slice(1)), watchPage({mode,analyticsScript,css}));
+for (const language of ['he','en']) fs.writeFileSync(path.join(out, `media/captions/vizhnitz-${language}.vtt`), videoVtt(language));
 // Indexable English homepage (/en): the same production shell, styles and bundle as
 // the Hebrew homepage, with English prerendered markup and its own metadata.
 if (mode === 'booking') {
@@ -134,5 +143,6 @@ for (const route of ['terms', 'booking', 'confirmation', ...(mode === 'booking' 
 const urls = sitemapPaths(mode);
 // lastmod is the date of the source commit being built (falls back to the build date).
 const lastmod = sitemapLastmod();
-fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(p => `  <url><loc>${siteOrigin + p}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n')}\n</urlset>\n`);
+const videoSitemap = `<video:video><video:thumbnail_loc>${siteOrigin + bakeryVideo.poster}</video:thumbnail_loc><video:title>${e(bakeryVideo.name)}</video:title><video:description>${e(bakeryVideo.description)}</video:description><video:content_loc>${siteOrigin + bakeryVideo.src}</video:content_loc></video:video>`;
+fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">\n${urls.map(p => `  <url><loc>${siteOrigin + p}</loc><lastmod>${p === bakeryVideo.path ? GUIDE_UPDATED : lastmod}</lastmod>${p === bakeryVideo.path ? videoSitemap : ''}</url>`).join('\n')}\n</urlset>\n`);
 console.log(`Organic pages generated: ${pages.length} guides, ${mode === 'booking' ? 'English /en homepage, ' : ''}4 isolated route shells, ${urls.length} sitemap URLs (lastmod ${lastmod}). No dates or availability fabricated.`);
