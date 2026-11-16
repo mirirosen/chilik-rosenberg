@@ -20,7 +20,7 @@ async function publicAvailability(db, policy, nowMs = Date.now()) {
       rows[date] = { ...unavailable, maxParticipants: publicMax };
       try {
         if ((settings.blocked || []).includes(date) || (settings.soldOut || []).includes(date) || !validMax(max)) continue;
-        const weeklyCurrent = assertWeeklyAvailability(snapshot, counter.data(), { policy, weekStart: week, maxParticipants: globalMax, participants: 1, nowMs });
+        const weeklyCurrent = assertWeeklyAvailability(snapshot, counter.data(), { policy, weekStart: week, tourDate: date, maxParticipants: globalMax, participants: 1, nowMs });
         const dailyCurrent = td.currentRegistrations ?? 0;
         if (!Number.isSafeInteger(dailyCurrent) || dailyCurrent < 0) continue;
         const spots = Math.max(0, Math.min(globalMax - weeklyCurrent, max - dailyCurrent));

@@ -77,7 +77,7 @@ test('managed Calendar count imports only the reconciled external baseline and w
   await f.run(RANGE);
   const snapshot = f.db.data.get('calendarAvailability/2026-11-08'); assert.deepEqual(snapshot.externalDeclaredCounts, [27]);
   const counter = { reconciled: true, currentRegistrations: 29, heldParticipants: 2, confirmedParticipants: 27, reconciledCalendarCountFingerprint: snapshot.externalCountFingerprint };
-  assert.equal(assertWeeklyAvailability(snapshot, counter, { policy: POLICY, weekStart: '2026-11-08', maxParticipants: 30, participants: 1, nowMs: NOW }), 29);
+  assert.equal(assertWeeklyAvailability(snapshot, counter, { policy: POLICY, weekStart: '2026-11-08', tourDate: '2026-11-12', maxParticipants: 30, participants: 1, nowMs: NOW }), 29);
 });
 test('multi-day numeric annotation contributes once per week, distinct annotations remain distinct', () => {
   const event = { ...countEvent('span'), start: { date: '2026-11-10' }, end: { date: '2026-11-14' } };

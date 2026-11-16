@@ -29,6 +29,21 @@ function weekStartDate(date, policy) {
   const ms = realDate(date), weekday = new Date(ms).getUTCDay();
   return new Date(ms - ((weekday - policy.weekStartsOn + 7) % 7) * 86400000).toISOString().slice(0, 10);
 }
+// Resolve a local wall-clock hour with the offset at that date, including DST.
+// No fixed Jerusalem UTC offset is used for all-day events or public tours.
+function localHourMs(date, hour, timeZone) {
+  const target = realDate(date) + hour * 3600000;
+  const format = new Intl.DateTimeFormat('en-GB', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  let instant = target;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const parts = format.formatToParts(new Date(instant));
+    const part = type => Number(parts.find(p => p.type === type).value);
+    const wall = Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'));
+    if (wall === target) return instant;
+    instant += target - wall;
+  }
+  throw fault('calendar-data-invalid');
+}
 function eventDateRange(event, policy) {
   if (event.start?.date && event.end?.date && !event.start.dateTime && !event.end.dateTime) {
     const start = realDate(event.start.date), end = realDate(event.end.date);
@@ -54,7 +69,7 @@ function buildCalendarWeekSnapshots(events, { policy, fromDate, toDate, complete
   const fingerprint = policyFingerprint(policy), weeks = {};
   for (let day = from; day < to; day += 86400000) {
     const key = weekStartDate(new Date(day).toISOString().slice(0, 10), policy);
-    weeks[key] ||= { weekStart: key, blocked: false, complete: true, policyFingerprint: fingerprint, verifiedAtMs: nowMs, validUntilMs: nowMs + policy.maxAgeMs };
+    weeks[key] ||= { weekStart: key, blocked: false, privateTourWindows: [], complete: true, policyFingerprint: fingerprint, verifiedAtMs: nowMs, validUntilMs: nowMs + policy.maxAgeMs };
   }
   for (const event of events) {
     if (!event || typeof event !== 'object') throw fault('calendar-data-invalid');
@@ -66,17 +81,27 @@ function buildCalendarWeekSnapshots(events, { policy, fromDate, toDate, complete
     if (Array.isArray(event.recurrence) && event.recurrence.length) throw fault('calendar-data-invalid'); // Require expanded instances (singleEvents=true), including exceptions.
     const [start, last] = eventDateRange(event, policy), firstMs = Math.max(from, realDate(start)), lastMs = Math.min(to - 86400000, realDate(last));
     if (lastMs - firstMs > 370 * 86400000) throw fault('calendar-data-invalid');
+    const privateWindow = privateTour ? {
+      startMs: event.start.date ? localHourMs(event.start.date, 0, policy.timeZone) : Date.parse(event.start.dateTime),
+      endMs: event.end.date ? localHourMs(event.end.date, 0, policy.timeZone) : Date.parse(event.end.dateTime),
+    } : null;
     const countedWeeks = new Set();
     for (let day = firstMs; day <= lastMs; day += 86400000) {
       const key = weekStartDate(new Date(day).toISOString().slice(0, 10), policy);
-      if (weeks[key]) {
-        if (privateTour) weeks[key].blocked = true;
+      if (weeks[key] && !countedWeeks.has(key)) {
+        if (privateTour) {
+          // Keep the conservative legacy flag while old function revisions may
+          // still be running. New consumers use only the exact private interval.
+          weeks[key].blocked = true;
+          weeks[key].privateTourWindows.push(privateWindow);
+        }
         // One annotation spanning multiple days belongs to its week once.
-        if (countMatch && !countedWeeks.has(key)) { weeks[key].externalDeclaredCounts ||= []; weeks[key].externalDeclaredCounts.push(Number(countMatch[1])); countedWeeks.add(key); }
+        if (countMatch) { weeks[key].externalDeclaredCounts ||= []; weeks[key].externalDeclaredCounts.push(Number(countMatch[1])); }
+        countedWeeks.add(key);
       }
     }
   }
-  // Only flags, aggregate counts, range and freshness survive. Never retain a title,
+  // Only flags, anonymous time intervals, aggregate counts and freshness survive. Never retain a title,
   // description, attendee, source event ID or private customer's information.
   for (const week of Object.values(weeks)) {
     if (week.externalDeclaredCounts) {
@@ -92,10 +117,21 @@ function assertWeeklyCounter(counter) {
   if (!counter || counter.reconciled !== true || ![counter.currentRegistrations,counter.heldParticipants,counter.confirmedParticipants].every(n=>Number.isInteger(n)&&n>=0) || counter.heldParticipants+counter.confirmedParticipants!==counter.currentRegistrations) throw fault('capacity-requires-reconciliation');
   return counter;
 }
-function assertWeeklyAvailability(snapshot, counter, { policy, weekStart, maxParticipants, participants, nowMs = Date.now() }) {
+function assertWeeklyAvailability(snapshot, counter, { policy, weekStart, tourDate, maxParticipants, participants, nowMs = Date.now() }) {
   validatePolicy(policy, true);
   if (!snapshot || snapshot.weekStart !== weekStart || snapshot.complete !== true || typeof snapshot.blocked !== 'boolean' || snapshot.policyFingerprint !== policyFingerprint(policy) || !Number.isFinite(snapshot.verifiedAtMs) || snapshot.verifiedAtMs > nowMs || nowMs - snapshot.verifiedAtMs > policy.maxAgeMs || !Number.isFinite(snapshot.validUntilMs) || snapshot.validUntilMs <= nowMs) throw fault('calendar-unavailable');
-  if (snapshot.blocked) throw fault('tour-unavailable');
+  // Missing intervals identify a legacy snapshot: wait for the next complete
+  // scheduled import instead of assuming that an unknown private window is free.
+  if (!Array.isArray(snapshot.privateTourWindows) || !snapshot.privateTourWindows.every(w => Number.isSafeInteger(w?.startMs) && Number.isSafeInteger(w?.endMs) && w.endMs > w.startMs)) throw fault('calendar-unavailable');
+  let tourStart;
+  try {
+    if (weekStartDate(tourDate, policy) !== weekStart) throw fault('calendar-unavailable');
+    tourStart = localHourMs(tourDate, 20, policy.timeZone);
+  } catch { throw fault('calendar-unavailable'); }
+  // The currently advertised public tour starts at 20:00 and lasts up to three
+  // hours. Half-open intervals allow a private tour to end at 20:00 or start at 23:00.
+  const tourEnd = tourStart + 3 * 3600000;
+  if (snapshot.privateTourWindows.some(w => w.startMs < tourEnd && w.endMs > tourStart)) throw fault('tour-unavailable');
   // Calendar annotation may already include the same website participants.
   // Never add it to the quota automatically: an approved reconciliation must
   // bind this exact aggregate snapshot to an authoritative weekly counter.

@@ -48,7 +48,7 @@ test('private snapshots discard titles, IDs and attendees and handle cancellatio
   assert.throws(() => snapshots([{summary:'סיור פרטי',start:{dateTime:'2026-10-08T20:00:00'},end:{dateTime:'2026-10-08T22:00:00'}}]), /calendar-data-invalid/);
 });
 test('stale, incomplete and policy-mismatched snapshots fail closed', () => {
-  const snapshot = snapshots()[WEEK], counter = { reconciled:true,currentRegistrations:0,heldParticipants:0,confirmedParticipants:0 }, options = {policy:POLICY,weekStart:WEEK,maxParticipants:30,participants:2,nowMs:NOW};
+  const snapshot = snapshots()[WEEK], counter = { reconciled:true,currentRegistrations:0,heldParticipants:0,confirmedParticipants:0 }, options = {policy:POLICY,weekStart:WEEK,tourDate:DATE,maxParticipants:30,participants:2,nowMs:NOW};
   assert.equal(assertWeeklyAvailability(snapshot,counter,options),0);
   assert.throws(() => assertWeeklyAvailability(snapshot,counter,{...options,nowMs:NOW+300001}), /calendar-unavailable/);
   assert.throws(() => assertWeeklyAvailability({...snapshot,complete:false},counter,options), /calendar-unavailable/);
@@ -59,7 +59,7 @@ test('stale, incomplete and policy-mismatched snapshots fail closed', () => {
 test('transparent/free business events are read by content; external count is not added twice', () => {
   const countDate='2026-11-12', week='2026-11-08';
   const result=snapshots([{summary:'27 אנשים',transparency:'transparent',status:'confirmed',start:{date:countDate},end:{date:'2026-11-13'}}],{fromDate:'2026-11-08',toDate:'2026-11-15'});
-  const snapshot=result[week], options={policy:POLICY,weekStart:week,maxParticipants:30,participants:2,nowMs:NOW};
+  const snapshot=result[week], options={policy:POLICY,weekStart:week,tourDate:countDate,maxParticipants:30,participants:2,nowMs:NOW};
   assert.equal(snapshot.requiresCountReconciliation,true); assert.deepEqual(snapshot.externalDeclaredCounts,[27]);
   assert.throws(()=>assertWeeklyAvailability(snapshot,{reconciled:true,currentRegistrations:27,heldParticipants:0,confirmedParticipants:27},options),/capacity-requires-reconciliation/);
   const counter={reconciled:true,currentRegistrations:27,heldParticipants:0,confirmedParticipants:27,reconciledCalendarCountFingerprint:snapshot.externalCountFingerprint};
@@ -69,9 +69,9 @@ test('transparent/free business events are read by content; external count is no
 });
 test('>= versus > is an explicit policy choice; neither permits overbooking', () => {
   assert.equal(weekIsFull(30,30,POLICY),true); const alternate={...POLICY,fullWhen:'over-capacity'}; assert.equal(weekIsFull(30,30,alternate),false);
-  assert.throws(() => assertWeeklyAvailability(snapshots([], {policy:alternate})[WEEK],counter(30),{policy:alternate,weekStart:WEEK,maxParticipants:30,participants:1,nowMs:NOW}), /capacity-exceeded/);
+  assert.throws(() => assertWeeklyAvailability(snapshots([], {policy:alternate})[WEEK],counter(30),{policy:alternate,weekStart:WEEK,tourDate:DATE,maxParticipants:30,participants:1,nowMs:NOW}), /capacity-exceeded/);
 });
-test('server blocks a private-tour week without exposing event details', async () => {
+test('server blocks an all-day private tour on the selected date without exposing event details', async () => {
   const {db,service,count}=fixture(); db.data.set(`calendarAvailability/${WEEK}`,snapshots([{summary:'סיור פרטי Secret',start:{date:DATE},end:{date:'2026-10-09'}}])[WEEK]);
   await assert.rejects(service.create('owner','a'.repeat(32),INPUT,NOW), /tour-unavailable/); assert.equal(count(),0); assert.equal([...db.data.keys()].filter(k=>k.startsWith('bookings/')).length,0);
 });
