@@ -19,6 +19,7 @@ export function resolveMeasurementId(envValue, mode) {
 
 let measurementId = resolveMeasurementId(import.meta.env.VITE_GA4_MEASUREMENT_ID, import.meta.env.MODE);
 let loaded = false, clicksBound = false, optedOutThisVisit = false;
+const purchasesThisPage = new Set();
 
 export const analyticsConfigured = () => measurementId !== '';
 export const currentMeasurementId = () => measurementId;
@@ -185,9 +186,13 @@ export function trackPurchase(state) {
   if (!state || state.paymentStatus !== 'paid' || state.status !== 'confirmed' || !/^BK-[a-f0-9]{20,24}$/.test(state.bookingId || '')) return false;
   if (!loaded || !Number.isFinite(state.totalPrice) || state.totalPrice <= 0) return false;
   const key = PURCHASE_KEY_PREFIX + state.bookingId;
-  if (storage()?.getItem(key)) return false;
+  if (purchasesThisPage.has(key)) return false;
+  try { if (storage()?.getItem(key)) return false; } catch { /* Measurement storage must not interrupt confirmation. */ }
   const participants = Number.isInteger(state.participants) ? state.participants : undefined;
   const ok = track('purchase', { transaction_id: state.bookingId, currency: 'ILS', value: state.totalPrice, ...(participants ? { items: tourItem(participants, state.pricePerPerson) } : {}) });
-  if (ok) storage()?.setItem(key, String(Date.now()));
+  if (ok) {
+    purchasesThisPage.add(key);
+    try { storage()?.setItem(key, String(Date.now())); } catch { /* Same-page deduplication remains effective without persistence. */ }
+  }
   return ok;
 }

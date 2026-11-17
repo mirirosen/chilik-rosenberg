@@ -153,6 +153,17 @@ describe('events after consent', () => {
 });
 
 describe('purchase', () => {
+  it.each(['getItem', 'setItem'])('storage %s failure does not interrupt a paid confirmation or repeat a purchase in the same page', async method => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    const broken = vi.spyOn(Storage.prototype, method).mockImplementation(() => { throw new DOMException('storage unavailable', 'QuotaExceededError'); });
+    try {
+      expect(() => analytics.trackPurchase(PAID)).not.toThrow();
+      expect(analytics.trackPurchase(PAID)).toBe(false);
+      expect(events().filter(([name]) => name === 'purchase')).toHaveLength(1);
+      expect(analytics.trackPurchase({ ...PAID, bookingId: 'BK-' + 'd'.repeat(24) })).toBe(true);
+      expect(events().filter(([name]) => name === 'purchase')).toHaveLength(2);
+    } finally { broken.mockRestore(); }
+  });
   it('fires only for a server-verified paid + confirmed booking, with transaction_id, ILS value and currency', async () => {
     const { analytics } = await fresh();
     analytics.setConsent(true);

@@ -33,7 +33,10 @@ ad user data, ad personalization and Google signals denied.
 
 `purchase` is sent once per booking per browser. The key `chilik-analytics-purchase:<booking
 number>` in `localStorage` is set when it is sent, so reloading the confirmation page does not
-send it again. No name, phone, email or notes are ever sent to GA4.
+send it again. If storage reads or writes fail, measurement must not interrupt the paid
+confirmation. An in-memory marker still suppresses repeated status checks on that page;
+cross-reload suppression cannot be guaranteed when the browser cannot persist or read the
+marker. The transaction ID remains the same. No name, phone, email or notes are ever sent to GA4.
 
 ## Content-Security-Policy
 
