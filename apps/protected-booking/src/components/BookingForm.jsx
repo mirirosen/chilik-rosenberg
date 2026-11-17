@@ -8,6 +8,8 @@ import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditP
 import { normalizePhone } from '../utils/phone';
 import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import { trackBeginBooking, trackBeginCheckout, trackPurchase } from '../utils/analytics';
+import MobileBookingBar from '../../../../src/components/MobileBookingBar';
+import BookingReassurance from '../../../../src/components/BookingReassurance';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
 import { paymentReturnView, validBookingReference, bookingErrorKey } from '../utils/paymentState';
 import { demoBookingApi, getDemoBooking } from '../utils/demoBookingService';
@@ -18,6 +20,7 @@ const PRICE_PER_PERSON = 250;
 
 const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelection, onPaymentRedirect = url => window.location.assign(url) }) => {
   const { t, i18n } = useTranslation();
+  const formElement = useRef(null), submitButton = useRef(null);
 
   // Get pre-filled data from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -387,7 +390,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       )}
 
       {cloudData?.availabilityStatus !== 'ready' && <p role="status">{t(cloudData?.availabilityStatus === 'error' ? 'common.availabilityUnavailable' : 'common.loading')}</p>}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form ref={formElement} onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-bold mb-2 text-right">
@@ -703,8 +706,11 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           </div>
         )}
 
+        <BookingReassurance language={i18n.language} />
+
         {/* Submit Button */}
         <button
+          ref={submitButton}
           type="submit"
           disabled={isSubmitting}
           className="w-full bg-brand-gold text-brand-dark py-5 rounded-full font-black text-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -757,6 +763,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
           </div>
         </div>
       </form>
+      {isThursday(formData.tourDate) && <MobileBookingBar language={i18n.language} date={formData.tourDate} participants={Number(formData.participants)} total={totalPrice} actionLabel={paymentRedirect ? t('booking.payment.redirectingToSecure') : t(formData.paymentMethod === 'bit' ? 'booking.form.submitBit' : 'booking.form.submit')} onContinue={() => formElement.current?.requestSubmit()} disabled={isSubmitting || paymentRedirect} primaryActionRef={submitButton} />}
     </div>
   );
 };

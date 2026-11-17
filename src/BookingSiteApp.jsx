@@ -1,6 +1,21 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InquiryApp from './InquiryApp';
+import BookingDiscovery from './components/BookingDiscovery';
+import './booking-conversion.css';
+async function loadDiscoveryAvailability(options) {
+  if (IS_PREPROD) {
+    const {getDemoAvailability}=await import('../apps/protected-booking/src/utils/demoBookingService');
+    const {getUpcomingThursdays}=await import('../apps/protected-booking/src/utils/dateUtils');
+    const {getAvailableSpots}=await import('../apps/protected-booking/src/hooks/useFirebaseData');
+    const data=getDemoAvailability(), validUntilMs=Date.now()+60000;
+    return {...data,validUntilMs,publicAvailability:Object.fromEntries(getUpcomingThursdays().map(({dateStr})=>{
+      const spots=getAvailableSpots(data,dateStr);return [dateStr,{available:spots>0,availableSpots:spots,validUntilMs}];
+    }))};
+  }
+  const {getServerAvailability}=await import('../apps/protected-booking/src/utils/calendarAvailability');
+  return getServerAvailability(options);
+}
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorBoundary from '../apps/protected-booking/src/components/ErrorBoundary';
@@ -102,6 +117,7 @@ export default function BookingSiteApp() {
     setLocation({ path: window.location.pathname, search: window.location.search });
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
+  const chooseSuggestedDate = date => { setSelection({date,participants:1}); navigate('/booking'); };
   const continueBooking = (date, participants) => navigate(`/booking?date=${encodeURIComponent(date)}&participants=${participants}`);
   const bookingSuccess = result => {
     setBookingData(result); setDraft(null); setSelection(null);
@@ -116,7 +132,7 @@ export default function BookingSiteApp() {
   const picker = <Suspense fallback={loading}><BookingSection standalone={location.path === '/booking'} onContinue={continueBooking} initialSelection={selection} /></Suspense>;
   const banner = IS_PREPROD && <div className="booking-demo-banner" role="status">{PREVIEW_NOTICE}</div>;
   if (location.path === '/manage-bookings') return <ErrorBoundary><div className="site-management">{banner}<Suspense fallback={loading}><Admin /></Suspense></div></ErrorBoundary>;
-  if (HOME_PATHS.includes(location.path)) return <>{banner}<InquiryApp bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} /></>;
+  if (HOME_PATHS.includes(location.path)) return <>{banner}<InquiryApp bookingDiscovery={<BookingDiscovery language={i18n.language} loadAvailability={loadDiscoveryAvailability} onSelectDate={chooseSuggestedDate} />} bookingSection={<HomeBookingPicker fallback={loading}>{picker}</HomeBookingPicker>} /></>;
   if (['/terms', '/תקנון'].includes(location.path)) return <div className="site-legal">{banner}<Suspense fallback={loading}><Terms /></Suspense></div>;
   if (!['/booking', '/confirmation'].includes(location.path)) return <InquiryApp />;
   return <ErrorBoundary><div className="target-site target-booking-flow">{banner}<Header /><main id="main-content" className={hasSelection || isStatus ? 'booking-details-shell' : 'booking-selection-page'}>
