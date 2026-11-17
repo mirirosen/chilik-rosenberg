@@ -13,7 +13,7 @@ if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inq
 const out = path.resolve(mode === 'booking' ? 'dist-booking' : 'dist-inquiry');
 const entry = fs.readFileSync(path.join(out, `${mode}-index.html`), 'utf8');
 const analyticsScript = mode === 'booking' ? '/' + JSON.parse(fs.readFileSync(path.join(out, '.vite/manifest.json'), 'utf8'))['src/guideAnalytics.js'].file : undefined;
-const css = fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
+const css = fs.readFileSync(new URL('../src/typography.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
 const heSections = [
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
   ['למה מבקרים בבני ברק ביום חמישי בערב?', 'הסיורים מתקיימים בדרך כלל בחמישי בערב, לקראת שבת, ומתחילים בשעה 20:00. חיליק מספר על העיר שבה נולד וחי, ומחבר בין האוכל לבין מוסדות, מנהגים וחיי החברה החרדית. זו הזדמנות לשאול שאלות על דברים שרואים בדרך ולקבל תשובה ממדריך מקומי. המועד בפועל תלוי בתיאום ובזמינות; מידע כללי על חמישי אינו אישור להרשמה.'],

@@ -1,4 +1,4 @@
-/* System fonts are used by name only: no remote requests or font redistribution. */
+@import './typography.css';
 
 @tailwind base;
 @tailwind components;
@@ -354,12 +354,10 @@ html[dir="ltr"] .target-site .target-hero__copy { direction:ltr; text-align:left
 
 .target-site #date-selection .date-card > span:nth-child(n+4) { font-size:.75rem; }
 
-/* Explicit local font stacks keep the isolated preview faithful without remote
-   stylesheets or unlicensed design fonts. Latin headings use Georgia; Hebrew
-   glyphs use David when installed, then the local sans-serif fallback. */
+/* Licensed self-hosted families are shared with booking and guide pages. */
 :root {
- --eti-heading-font:Georgia,David,"Segoe UI",Arial,sans-serif;
- --eti-body-font:"Segoe UI",Tahoma,Arial,sans-serif;
+ --eti-heading-font:"Frank Ruhl Libre",Georgia,David,serif;
+ --eti-body-font:"Assistant","Segoe UI",Arial,sans-serif;
 }
 .target-site { font-family:var(--eti-body-font); }
 .target-site :where(h1,h2,h3,h4) { font-family:var(--eti-heading-font); }
