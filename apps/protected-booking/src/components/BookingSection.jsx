@@ -12,6 +12,7 @@ import { serverAvailabilityEnabled, getServerAvailability, freshAvailabilityRow 
 import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
 import './BookingSection.css';
+import MobileBookingBar from '../../../../src/components/MobileBookingBar';
 
 const PRICE_PER_PERSON = 250;
 
@@ -25,6 +26,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const [participants, setParticipants] = useState(initialSelection?.participants || 1);
   const [visibleMonth, setVisibleMonth] = useState(initialSelection?.date?.slice(0, 7) || '');
   const selectedCard = useRef(null);
+  const continueButton = useRef(null);
   const heading = useRef(null);
   const restoredFocus = useRef(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -269,7 +271,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         {checkError && <p className="booking-screen__error" role="alert">{checkError}</p>}
 
         {selectedDate && status.available ? (
-          <button type="button" className="booking-screen__continue" disabled={!canContinue || isChecking} onClick={continueToBooking}>
+          <button ref={continueButton} type="button" className="booking-screen__continue" disabled={!canContinue || isChecking} onClick={continueToBooking}>
             {t(isChecking ? 'bookingSection.checkingAvailability' : 'bookingDesign.continue')}
             <span aria-hidden="true">{dir === 'rtl' ? '←' : '→'}</span>
           </button>
@@ -279,6 +281,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         <p className="booking-screen__no-charge">{t('bookingDesign.noCharge')}</p>
         <p className="booking-screen__secure"><Lock size={13} aria-hidden="true" />{t('bookingDesign.secureNote')}</p>
       </div>
+      {canContinue && <MobileBookingBar language={i18n.language} date={selectedDate} participants={participants} total={participants * PRICE_PER_PERSON} actionLabel={t(isChecking ? 'bookingSection.checkingAvailability' : 'bookingDesign.continue')} onContinue={continueToBooking} disabled={isChecking} primaryActionRef={continueButton} />}
     </section>
   );
 };

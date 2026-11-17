@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowUp, Phone, MessageCircle, XCircle } from '../utils/icons';
 import { useTranslation } from 'react-i18next';
 
 const Terms = () => {
   const { t, i18n } = useTranslation();
+  useEffect(() => {
+    if (/^#terms-section-[1-7]$/.test(window.location.hash)) document.getElementById(window.location.hash.slice(1))?.scrollIntoView({behavior:'auto'});
+  }, []);
   const dir = i18n.language === 'he' ? 'rtl' : 'ltr';
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);

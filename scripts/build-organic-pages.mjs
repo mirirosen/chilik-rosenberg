@@ -59,7 +59,8 @@ const headerCopy = language => JSON.parse(fs.readFileSync(path.resolve('src/loca
 // Same destination and wording as the main site header CTA; the inquiry build keeps its neutral label.
 function bookingButton(page) {
   const header = headerCopy(page.language);
-  return `<a class="guide-cta__button" href="/#date-selection">${e(mode === 'booking' ? header.register : header.upcomingTours)}</a>`;
+  const bookingHref = mode === 'booking' && page.language === 'en' ? '/en#date-selection' : '/#date-selection';
+  return `<a class="guide-cta__button" href="${bookingHref}">${e(mode === 'booking' ? header.register : header.upcomingTours)}</a>`;
 }
 function guideHeader(page) {
   return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${page.path === guidePaths[1] ? privateTourButton() : bookingButton(page)}</header>`;
@@ -75,7 +76,7 @@ function openingDetails(page) {
 function closingCta(page) {
   if (page.path === guidePaths[1]) return `<section class="guide-cta"><h2>מתכננים סיור פרטי לקבוצה?</h2>${privateTourButton()}<a href="/#date-selection">${mode === 'booking' ? 'להצטרפות לסיור פתוח' : 'לפרטי הסיור הפתוח'}</a></section>`;
   const heading = page.language === 'en' ? 'Ready to join a tour?' : 'רוצים להצטרף לסיור?';
-  return `<section class="guide-cta"><h2>${heading}</h2>${bookingButton(page)}<a href="https://wa.me/972506724312">${e(organicCopy[page.language].contact)}</a></section>`;
+  return `<section class="guide-cta"><h2>${heading}</h2>${bookingButton(page)}<a href="/guides/private-tour-bnei-brak.html">${page.language === 'en' ? 'Planning a private group? (Hebrew guide)' : 'לתכנון סיור פרטי לקבוצה'}</a><a href="https://wa.me/972506724312">${e(organicCopy[page.language].contact)}</a></section>`;
 }
 for (const page of pages) {
   const copy = organicCopy[page.language];

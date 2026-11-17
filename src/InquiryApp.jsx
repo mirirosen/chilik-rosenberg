@@ -26,7 +26,7 @@ import './organic-seo.css';
 
 // Dedicated public entry: no imports of booking, Firebase, admin, payment or
 // geolocation modules. Legacy admin is served by Hosting as its own document.
-export default function InquiryApp({ bookingSection } = {}) {
+export default function InquiryApp({ bookingSection, bookingDiscovery } = {}) {
   const { t, i18n } = useTranslation();
   const route = inquiryRoute(typeof window === 'undefined' ? '/' : window.location.pathname, typeof window === 'undefined' ? '' : window.location.search);
   const motion = useHomeMotion(route);
@@ -51,7 +51,7 @@ export default function InquiryApp({ bookingSection } = {}) {
     <Header showVideos={populatedTourVideoGroups(tourVideos).length > 0} />
     <main ref={motion} id="main-content" tabIndex={-1}>
       {route === 'home' ? <>
-        <Hero showPlanningFacts={Boolean(bookingSection)} /><RatingBar />{bookingSection || <InquirySection />}<TourOverview />
+        <Hero showPlanningFacts={Boolean(bookingSection)} />{bookingDiscovery}<RatingBar />{bookingSection || <InquirySection />}<TourOverview />
         {/* Independent hydration boundaries keep below-fold work interruptible.
             Their complete HTML is still rendered at build time. */}
         <Suspense fallback={null}><TourInclusions /></Suspense>
