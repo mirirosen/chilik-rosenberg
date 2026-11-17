@@ -5,6 +5,7 @@ import { JSDOM } from 'jsdom';
 import { guidePaths, siteOrigin, organicCopy, publicTourQuickFacts } from '../src/data/organicContent.js';
 import { faqsFor, sitemapPaths } from './organic-html.mjs';
 import { bakeryVideo } from '../src/data/organicVideo.js';
+import { privateTourContactHref } from '../src/data/privateTourContact.js';
 // Public URL path of each generated file, and back.
 const urlPath = file => file === 'index.html' ? '/' : file === 'en.html' ? '/en' : file === 'terms.html' ? '/terms' : '/' + file;
 const fileFor = pathname => pathname === '/' ? 'index.html' : pathname === '/en' ? 'en.html' : pathname === '/terms' ? 'terms.html' : pathname.slice(1);
@@ -61,7 +62,10 @@ for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ..
     const ctas = [...doc.querySelectorAll('a.guide-cta__button')];
     assert(doc.querySelector('header.guide-header a.guide-cta__button') && doc.querySelector('main .guide-cta a.guide-cta__button'), file + ' booking CTA at top and end');
     if (file.includes('private-tour')) {
-      for (const cta of ctas) assert.equal(cta.getAttribute('href'), 'https://wa.me/972506724312', file + ' private inquiry is the primary action');
+      for (const cta of ctas) {
+        assert.equal(cta.getAttribute('href'), privateTourContactHref('he'), file + ' editable private inquiry is the primary action');
+        assert.equal(cta.dataset.contactContext, 'private_tour', file + ' private inquiry has a fixed measurement context');
+      }
       assert(doc.querySelector('main .guide-intro-action a.guide-cta__button'), file + ' private inquiry before the photograph');
       assert(doc.querySelector('main .guide-cta a[href="/#date-selection"]'), file + ' open tour remains a secondary option');
     } else {

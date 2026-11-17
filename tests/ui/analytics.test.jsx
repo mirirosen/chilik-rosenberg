@@ -15,7 +15,7 @@ async function fresh(id) {
 }
 const BOOKING = 'BK-' + 'b'.repeat(24);
 const PAID = { bookingId: BOOKING, status: 'confirmed', paymentStatus: 'paid', totalPrice: 500, pricePerPerson: 250, participants: 2 };
-beforeEach(() => { localStorage.clear(); sessionStorage.clear(); document.cookie = 'chilik-analytics-opt-out=; Max-Age=0; path=/'; delete window.dataLayer; delete window.gtag; gtagScripts().forEach(s => s.remove()); });
+beforeEach(() => { document.documentElement.lang = 'he'; localStorage.clear(); sessionStorage.clear(); document.cookie = 'chilik-analytics-opt-out=; Max-Age=0; path=/'; delete window.dataLayer; delete window.gtag; gtagScripts().forEach(s => s.remove()); });
 afterEach(() => cleanup());
 
 describe('GA4 configuration', () => {
@@ -83,6 +83,41 @@ describe('automatic analytics and retained opt-outs', () => {
 });
 
 describe('events after consent', () => {
+  it('measures the current interface language at each funnel event, including a language change', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    const booking = { participants: 2, pricePerPerson: 250, totalPrice: 500 };
+    document.documentElement.lang = 'en';
+    analytics.trackBeginBooking(booking);
+    document.documentElement.lang = 'he';
+    analytics.trackBeginCheckout(booking);
+    document.documentElement.lang = 'en';
+    analytics.trackPurchase({ ...PAID, language: 'he' });
+    expect(events().map(([name, data]) => [name, data.page_language])).toEqual([
+      ['begin_booking', 'en'], ['begin_checkout', 'he'], ['purchase', 'en'],
+    ]);
+  });
+  it('keeps the language dimension closed and prevents callers from overriding it', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    document.documentElement.lang = 'en-GB';
+    analytics.track('begin_booking', { page_language: 'customer input' });
+    expect(events()[0][1].page_language).toBe('en');
+    document.documentElement.lang = 'unsupported-customer-input';
+    analytics.trackBeginCheckout({ participants: 1, pricePerPerson: 250, totalPrice: 250 });
+    expect(events()[1][1]).not.toHaveProperty('page_language');
+  });
+  it('distinguishes private inquiries without leaking the message or an unrecognized context', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    const link = document.createElement('a'); link.href = 'https://wa.me/972506724312?text=Customer%20secret#fragment';
+    link.dataset.contactContext = 'private_tour'; link.addEventListener('click', e => e.preventDefault());
+    document.body.append(link);
+    try {
+      link.click(); link.dataset.contactContext = 'Customer secret'; link.click();
+      expect(events().map(([, data]) => data)).toEqual([
+        { page_language: 'he', contact_context: 'private_tour', link_url: 'https://wa.me/972506724312' },
+        { page_language: 'he', contact_context: 'general', link_url: 'https://wa.me/972506724312' },
+      ]);
+    } finally { link.remove(); }
+  });
   it('begin_booking, begin_checkout, whatsapp_click and phone_click', async () => {
     const { analytics } = await fresh();
     analytics.setConsent(true);
@@ -96,8 +131,8 @@ describe('events after consent', () => {
       expect(events()).toEqual([
         ['begin_booking', expect.objectContaining({ currency: 'ILS', value: 500 })],
         ['begin_checkout', expect.objectContaining({ currency: 'ILS', value: 500 })],
-        ['whatsapp_click', { link_url: 'https://wa.me/972506724312' }],
-        ['phone_click', { link_url: 'tel' }],
+        ['whatsapp_click', { link_url: 'https://wa.me/972506724312', page_language: 'he', contact_context: 'general' }],
+        ['phone_click', { link_url: 'tel', page_language: 'he' }],
       ]);
     } finally { wa.remove(); tel.remove(); }
   });

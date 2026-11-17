@@ -1,7 +1,7 @@
 // Owner-provided source: public/media/tour/README.md. YouTube publication date
 // checked via public metadata for CUYEMWo96u8 on 2026-11-16. Duration: ffprobe.
 export const WATCH_VIDEO_PATH = '/videos/vizhnitz-challah.html';
-export const GUIDE_UPDATED = '2026-11-16';
+export const GUIDE_UPDATED = '2026-11-17';
 export const bakeryVideo = {
   path: WATCH_VIDEO_PATH,
   name: 'החלות המפורסמות והידועות של מאפיית ויזניץ',

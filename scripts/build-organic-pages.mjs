@@ -6,6 +6,7 @@ import { escapeHtml as e, metadataHtml, faqsFor, homeAlternatesHtml, sitemapPath
 import { guideEnrichment, guideTracking, watchPage, videoVtt } from './guide-growth.mjs';
 import { bakeryVideo, GUIDE_UPDATED } from '../src/data/organicVideo.js';
 import { tourServiceFacts } from '../src/data/tourServiceFacts.js';
+import { privateTourContactHref } from '../src/data/privateTourContact.js';
 
 const mode = process.argv[2];
 if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inquiry mode');
@@ -51,7 +52,8 @@ function planningDetails(page) {
   const menu = JSON.parse(fs.readFileSync(path.resolve('src/locales/' + page.language + '.json'), 'utf8')).menu.items;
   const dishes = `<section><h2>${english ? 'The food shown on Hilik’s website' : 'המאכלים המוצגים באתר של חיליק'}</h2><p>${english ? 'These are published menu examples. Ask which tastings are planned for your date; do not use this list as a dietary certification or a guaranteed itinerary.' : 'אלה דוגמאות מתוך התפריט המוצג באתר. בררו אילו טעימות מתוכננות למועד שלכם; הרשימה אינה אישור כשרות או התאמה תזונתית ואינה מסלול מובטח.'}</p><dl>${Object.values(menu).map(item => `<div><dt>${e(item.title)}</dt><dd>${e(item.desc)}</dd></div>`).join('')}</dl><p><a href="/#menu">${english ? 'See the menu on the tour website' : 'לתפריט באתר הסיור'}</a> · <a href="/#videos">${english ? 'Watch clips from the tours' : 'לסרטונים מהסיורים'}</a></p></section>`;
   const coverage = `<section><h2>${english ? 'Read about previous visits' : 'לקריאה על ביקורים קודמים'}</h2><p>${english ? 'Mako’s March 2024 report describes a Thursday-night food tour with Hilik, combining tastings and local stories. Yuvi Yam’s account also describes the food and cultural encounters during a visit with him. These are reports of previous visits, rather than current booking instructions; stops, menus and arrangements can change.' : 'כתבת מאקו ממרץ 2024 מתארת סיור ליל שישי עם חיליק, המשלב טעימות וסיפורים מקומיים. גם בתיאור הביקור של יובי ים מופיעים המאכלים והמפגש עם התרבות בעיר לצד חיליק. אלה תיאורים של ביקורים קודמים, ולא הוראות הזמנה עדכניות; תחנות, תפריטים וסידורי הגעה עשויים להשתנות.'}</p><ul><li><a href="https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm" target="_blank" rel="noopener noreferrer">${english ? 'Mako — a Thursday-night tour with Hilik, 2024' : 'מאקו — סיור ליל שישי עם חיליק, 2024'}</a></li><li><a href="https://www.yuviyam.com/post/bnei-brak" target="_blank" rel="noopener noreferrer">${english ? 'Yuvi Yam — a culinary visit to Bnei Brak' : 'יובי ים — קולינריה בבני ברק'}</a></li></ul><p><a href="/#about">${english ? 'More about Hilik Rozenberg' : 'עוד על חיליק רוזנברג'}</a></p></section>`;
-  return dishes + faq + coverage;
+  const privateInquiry = english ? `<section><h2>Planning a private group tour?</h2><p>${e(tourServiceFacts.en.privateGroup)} ${e(tourServiceFacts.en.privateWindow)}</p><p><a href="${e(privateTourContactHref('en'))}" data-contact-context="private_tour">Ask Hilik about a private tour in English</a></p><p>The WhatsApp link opens an editable message with prompts for your group size, preferred date, tour language and occasion. Availability, language, price and content are agreed with Hilik before confirmation.</p></section>` : '';
+  return dishes + faq + coverage + privateInquiry;
 }
 const headerCopy = language => JSON.parse(fs.readFileSync(path.resolve('src/locales/' + language + '.json'), 'utf8')).header;
 // Same destination and wording as the main site header CTA; the inquiry build keeps its neutral label.
@@ -63,10 +65,10 @@ function guideHeader(page) {
   return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${page.path === guidePaths[1] ? privateTourButton() : bookingButton(page)}</header>`;
 }
 function privateTourButton() {
-  return '<a class="guide-cta__button" href="https://wa.me/972506724312">לתיאום סיור פרטי לקבוצה</a>';
+  return `<a class="guide-cta__button" href="${e(privateTourContactHref('he'))}" data-contact-context="private_tour">לתיאום סיור פרטי לקבוצה</a>`;
 }
 function openingDetails(page) {
-  if (page.path === guidePaths[1]) return `<section class="guide-quick-facts"><h2>פרטי הסיור הפרטי במבט מהיר</h2><dl>${tourServiceFacts.he.privateQuickFacts.map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section><p class="guide-intro-action">${privateTourButton()}</p>`;
+  if (page.path === guidePaths[1]) return `<section class="guide-quick-facts"><h2>פרטי הסיור הפרטי במבט מהיר</h2><dl>${tourServiceFacts.he.privateQuickFacts.map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section><p class="guide-intro-action">${privateTourButton()}</p><p>הקישור פותח טיוטת הודעה שאפשר לערוך לפני השליחה, עם שאלות על מספר המשתתפים, המועד, שפת ההדרכה ומטרת המפגש.</p>`;
   const copy = organicCopy[page.language];
   return `<section class="guide-quick-facts"><h2>${page.language === 'en' ? 'Tour planning at a glance' : 'פרטי הסיור במבט מהיר'}</h2><dl>${copy.facts.slice(0, 3).map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section>`;
 }
@@ -81,7 +83,7 @@ for (const page of pages) {
     ? `${tourServiceFacts.he.privateGroup} לתכנון סיור פרטי בבני ברק עם חיליק רוזנברג, פונים עם המועד המבוקש ושפת ההדרכה. המחיר, התחנות וההתאמות לקבוצה נקבעים בתיאום אישי.`
     : copy.intro;
   const primaryContact = page.path.includes('private-tour')
-    ? `<a href="https://wa.me/972506724312">${e(copy.contact)}</a>`
+    ? `<a href="${e(privateTourContactHref('he'))}" data-contact-context="private_tour">${e(copy.contact)}</a>`
     : `<a href="/#date-selection">${e(mode === 'booking' ? copy.booking : copy.contact)}</a> · <a href="https://wa.me/972506724312">${e(copy.contact)}</a>`;
   const url = siteOrigin + page.path;
   const enrichment = guideEnrichment(page);

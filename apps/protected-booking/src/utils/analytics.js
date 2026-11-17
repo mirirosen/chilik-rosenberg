@@ -137,7 +137,13 @@ export function initAnalytics() {
 
 export function track(name, params = {}) {
   if (!loaded || typeof window.gtag !== 'function') return false;
-  window.gtag('event', name, params);
+  const measured = { ...params };
+  delete measured.page_language;
+  // Read at emission: the language may change between opening the form and paying.
+  // This is the visible interface language, not browser language or booking data.
+  const language = document.documentElement.lang.toLowerCase().split('-')[0];
+  if (language === 'he' || language === 'en') measured.page_language = language;
+  window.gtag('event', name, measured);
   return true;
 }
 
@@ -150,7 +156,10 @@ function bindContactClicks() {
   window.__chilikContactClicks = event => {
     const link = event.target?.closest?.('a[href]');
     const href = link?.getAttribute('href') || '';
-    if (/^https:\/\/(?:wa\.me|api\.whatsapp\.com)\//.test(href)) track('whatsapp_click', { link_url: href.split('?')[0] });
+    if (/^https:\/\/(?:wa\.me|api\.whatsapp\.com)\//.test(href)) track('whatsapp_click', {
+      link_url: href.split(/[?#]/)[0],
+      contact_context: link.dataset.contactContext === 'private_tour' ? 'private_tour' : 'general',
+    });
     else if (/^tel:/.test(href)) track('phone_click', { link_url: 'tel' });
   };
   document.addEventListener('click', window.__chilikContactClicks, { capture: true });
