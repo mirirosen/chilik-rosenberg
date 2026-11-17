@@ -1,4 +1,5 @@
 import { IS_PREPROD } from '../utils/preview';
+import { privateTourContactHref } from '../../../../src/data/privateTourContact';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc } from 'firebase/firestore';
@@ -147,7 +148,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         <p className="booking-screen__personal">
           {t('bookingDesign.personal')}
           <br />
-          <a href="https://wa.me/972506724312" target="_blank" rel="noopener noreferrer">
+          <a href={privateTourContactHref(i18n.language)} data-contact-context="private_tour" target="_blank" rel="noopener noreferrer">
             {t('bookingDesign.contact')}
             <span aria-hidden="true"> {dir === 'rtl' ? '←' : '→'}</span>
           </a>
