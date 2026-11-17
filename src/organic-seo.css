@@ -1,5 +1,5 @@
 .organic-overview{max-width:72rem;margin:4rem auto;padding:2rem 1.5rem;color:#d1d5db;line-height:1.85;text-align:start}
-.organic-overview h1,.organic-overview h2,.organic-overview h3{color:#dfc47c;font-family:Georgia,serif;line-height:1.4;margin:0 0 1.25rem}
+.organic-overview h1,.organic-overview h2,.organic-overview h3{color:#dfc47c;font-family:var(--eti-heading-font,Georgia,serif);line-height:1.4;margin:0 0 1.25rem}
 .organic-overview h1,.organic-overview h2{font-size:clamp(1.6rem,3vw,2.3rem)}
 .organic-overview h3{font-size:1.3rem;margin-top:2rem}
 .organic-overview p{margin:1rem 0}.organic-overview dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:2rem 0}
