@@ -7,6 +7,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key, i18n: 
 vi.mock('../../src/utils/firebase', () => ({ db: {}, APP_ID: 'demo-chilik-repair' }));
 vi.mock('../../src/hooks/useFirebaseData', () => ({ useFirebaseData: () => ({ availabilityStatus: 'ready', blocked: [], soldOut: [], globalMaxParticipants: 30, tourDates: {} }), getEffectiveMax: () => 30, getCurrentRegistrations: () => 0, getAvailableSpots: () => 30 }));
 import BookingForm from '../../src/components/BookingForm';
+import * as analytics from '../../src/utils/analytics';
 
 const ID = 'BK-' + 'a'.repeat(24);
 const OPEN = { bookingId: ID, status: 'payment_pending', paymentStatus: 'awaiting_payment', totalPrice: 500, pricePerPerson: 250, tourDate: '2026-10-08', participants: 2 };
@@ -52,6 +53,27 @@ describe('declined card return', () => {
 });
 
 describe('confirmation and pending screens', () => {
+  it('keeps a server-paid confirmation visible when analytics cannot persist its purchase marker', async () => {
+    window.history.replaceState({}, '', `/confirmation?id=${ID}`);
+    mocks.getPaymentStatus.mockResolvedValue({ ...OPEN, status: 'confirmed', paymentStatus: 'paid' });
+    localStorage.clear(); delete window.gtag; delete window.dataLayer;
+    analytics.__setMeasurementIdForTests('G-CXTM7ZJZYX'); analytics.initAnalytics();
+    const full = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('full', 'QuotaExceededError'); });
+    try {
+      render(<BookingForm statusBookingId={ID} />);
+      await screen.findByText('booking.payment.paidTitle');
+      expect(screen.queryByText('booking.payment.statusUnavailableTitle')).toBeNull();
+      expect((window.dataLayer || []).filter(entry => entry[0] === 'event' && entry[1] === 'purchase')).toHaveLength(1);
+      fireEvent.click(screen.getByText('booking.payment.refreshStatus'));
+      await screen.findByText('booking.payment.paidTitle');
+      expect((window.dataLayer || []).filter(entry => entry[0] === 'event' && entry[1] === 'purchase')).toHaveLength(1);
+      expect(mocks.createCreditPayment).not.toHaveBeenCalled();
+    } finally {
+      full.mockRestore(); analytics.__setMeasurementIdForTests('G-CXTM7ZJZYX');
+      delete window.gtag; delete window.dataLayer;
+      document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]').forEach(script => script.remove());
+    }
+  });
   it('paid confirmation shows reference, date, participants, amount and next steps without inventing a meeting point', async () => {
     window.history.replaceState({}, '', `/confirmation?id=${ID}`);
     mocks.getPaymentStatus.mockResolvedValue({ ...OPEN, status: 'confirmed', paymentStatus: 'paid' });
