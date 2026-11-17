@@ -2,6 +2,9 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import he from '../../src/locales/he.json';
 import en from '../../src/locales/en.json';
+import bookingHe from '../../apps/protected-booking/src/locales/he.json';
+import bookingEn from '../../apps/protected-booking/src/locales/en.json';
+import { serviceFaqs } from '../../src/data/tourServiceFacts.js';
 import { applyRouteMetadata } from '../../src/utils/routeMetadata';
 import { organicSeoPlugin, faqsFor } from '../../scripts/organic-html.mjs';
 
@@ -10,6 +13,14 @@ const translate = resources => key => key.split('.').reduce((value, part) => val
 afterEach(() => { document.head.innerHTML = ''; });
 
 describe('SEO-01: organic metadata and content parity', () => {
+  it('keeps owner-confirmed service facts consistent across editions, languages and prerendered FAQs', () => {
+    for (const [language, resources] of [['he', [he, bookingHe]], ['en', [en, bookingEn]]]) {
+      for (const [key, faq] of Object.entries(serviceFaqs[language])) {
+        for (const resource of resources) expect(resource.faqs[key]).toEqual(faq);
+        for (const booking of [false, true]) expect(faqsFor(language, booking)[key]).toEqual(faq);
+      }
+    }
+  });
   it.each(['inquiry', 'booking'])('makes %s initial text and FAQ schema agree without JavaScript', mode => {
     const dom = new JSDOM(organicSeoPlugin(mode).transformIndexHtml(template));
     const doc = dom.window.document;

@@ -5,6 +5,7 @@ import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/dat
 import { escapeHtml as e, metadataHtml, faqsFor, homeAlternatesHtml, sitemapPaths, sitemapLastmod } from './organic-html.mjs';
 import { guideEnrichment, guideTracking, watchPage, videoVtt } from './guide-growth.mjs';
 import { bakeryVideo, GUIDE_UPDATED } from '../src/data/organicVideo.js';
+import { tourServiceFacts } from '../src/data/tourServiceFacts.js';
 
 const mode = process.argv[2];
 if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inquiry mode');
@@ -15,19 +16,19 @@ const css = fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 
 const heSections = [
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
   ['למה מבקרים בבני ברק ביום חמישי בערב?', 'הסיורים מתקיימים בדרך כלל בחמישי בערב, לקראת שבת, ומתחילים בשעה 20:00. חיליק מספר על העיר שבה נולד וחי, ומחבר בין האוכל לבין מוסדות, מנהגים וחיי החברה החרדית. זו הזדמנות לשאול שאלות על דברים שרואים בדרך ולקבל תשובה ממדריך מקומי. המועד בפועל תלוי בתיאום ובזמינות; מידע כללי על חמישי אינו אישור להרשמה.'],
-  ['איך מתכוננים לביקור?', 'הגיעו בלבוש צנוע ומכבד ובדקו מראש את מסלול ההליכה ואת תנאי הגישה אם יש קושי בהליכה, עגלה או צורך נגישות אחר. פנו לחיליק לפני ההזמנה כדי לברר כשרות, צמחונות ואלרגיות, ולא ביום הסיור בלבד. אל תניחו שכל תחנה יכולה להתאים לכל מגבלה. נקודת המפגש נמצאת בבני ברק, והכתובת המדויקת נשלחת בשבוע הסיור. לשאלות על חניה ודרכי הגעה, פנו לחיליק לפני ההגעה. הסיור מתקיים בעברית ובאנגלית.'],
+  ['איך מתכוננים לביקור?', `הגיעו בלבוש צנוע ומכבד. ${tourServiceFacts.he.accessibility} ${tourServiceFacts.he.kosher} ${tourServiceFacts.he.dietary} נקודת המפגש נמצאת בבני ברק, והכתובת המדויקת נשלחת בשבוע הסיור. לשאלות על חניה ודרכי הגעה, פנו לחיליק לפני ההגעה. הסיור מתקיים בעברית ובאנגלית.`],
   ['סיור פתוח או מפגש פרטי?', 'לפני הצטרפות לסיור פתוח, בדקו איזה מועדים זמינים וכיצד מאשרים את ההזמנה. קבוצה המעוניינת במועד ובתוכן שיתואמו מראש יכולה לברר על סיור פרטי. מחיר של 250 ש״ח למשתתף מתייחס לסיור המוצג באתר ואינו הצעת מחיר לקבוצה פרטית. את התאמת הסיור לצורכי הקבוצה ואת התנאים יש לקבל מחיליק.'],
 ];
 const enSections = [
   ['What food can you expect?', 'Hilik’s published menu includes cholent, Jerusalem kugel, fish and chopped liver. These dishes provide an introduction to Jewish food traditions and preparations for Shabbat. Tastings are combined with stories about the city and the people who live there. Ask what is planned for your chosen date; a dish listed on the website is not a promise that it will be served on every tour.'],
   ['Why visit on a Thursday evening?', 'Tours usually take place on Thursday evenings, before Shabbat, and start at 20:00. Hilik connects the food with stories about everyday life, traditions and the Haredi community. As a guide who was born in Bnei Brak and lives there, he brings a local perspective to the visit. A general description of Thursday tours does not confirm a particular date: availability and your booking must still be checked.'],
-  ['How should you prepare?', 'Wear modest, respectful clothing. Before booking, ask about the walking route, access to stops, kosher supervision, vegetarian options and allergies. Do not assume every stop can accommodate every requirement. The meeting point is in Bnei Brak; the exact address is sent during the week of your tour. Ask Hilik about parking and transport before arrival. Tours are guided in Hebrew and English.'],
+  ['How should you prepare?', `Wear modest, respectful clothing. ${tourServiceFacts.en.accessibility} ${tourServiceFacts.en.kosher} ${tourServiceFacts.en.dietary} The meeting point is in Bnei Brak; the exact address is sent during the week of your tour. Ask Hilik about parking and transport before arrival. Tours are guided in Hebrew and English.`],
   ['An open tour or a private group?', 'Before joining an open tour, check which dates are available and how to confirm your booking. A group can ask Hilik about a private tour with timing and content agreed beforehand. The listed price of ₪250 per guest relates to the tour shown on the website and is not a quotation for a private group. Contact Hilik for the group’s requirements, language and terms.'],
 ];
 const privateSections = [
-  ['למי מיועד סיור פרטי בבני ברק?', 'אפשר לברר על סיור פרטי לקבוצה שרוצה מועד ותוכן שייקבעו מראש: מפגש חברים, צוות או קבוצה שמתעניינת באוכל ובחיים החרדיים. הסיור של חיליק מחבר בין טעימות, סיפורים ושיחה עם תושב העיר. התאמת הסיור לקבוצה אינה מובטחת לפני תיאום; גילי המשתתפים, מספרם וצורכי הגישה חשובים לתכנון.'],
+  ['למי מיועד סיור פרטי בבני ברק?', `${tourServiceFacts.he.privateGroup} ${tourServiceFacts.he.privateWindow} מפגש חברים, צוות או קבוצה שמתעניינת באוכל ובחיים החרדיים יכולים לתאם מועד ותוכן מראש. גילי המשתתפים וצורכי הגישה חשובים לתכנון.`],
   ['אילו פרטים כדאי להעביר לחיליק?', 'הכינו את המועד או טווח המועדים הרצוי, מספר המשתתפים, גילאים בקבוצה ושפת ההדרכה המבוקשת. ספרו מה מעניין אתכם: אוכל יהודי, היכרות עם העיר או שיחה על התרבות החרדית. אם נדרשת התאמת הליכה, כיסאות גלגלים או עגלות, ציינו זאת בתחילת הבירור. כך אפשר לברר את מסלול הסיור ואת התאמת התחנות לפני קבלת החלטה.'],
-  ['איך מתאמים את האוכל ואת רמת הכשרות?', 'יש לברר עם חיליק את ההכשרים בתחנות המתוכננות ואת האפשרות להתאים את הטעימות לצמחונים או למשתתפים עם אלרגיות. אין להסיק מהתפריט הכללי שכל תחנה מתאימה לכל דרישה. ציינו את הצרכים במדויק מראש ובקשו תשובה על הסיור הפרטי שאתם מתכננים. המאכלים והתחנות נקבעים לפי התיאום; אין כאן תפריט פרטי קבוע.'],
+  ['איך מתאמים את האוכל ואת הנגישות?', `${tourServiceFacts.he.kosher} ${tourServiceFacts.he.dietary} ${tourServiceFacts.he.accessibility} המאכלים והתחנות נקבעים לפי התיאום; אין כאן תפריט פרטי קבוע.`],
   ['מה המחיר, משך הסיור ונקודת המפגש?', 'הסיור המוצג באתר עולה 250 ש״ח למשתתף ונמשך בדרך כלל כשעתיים וחצי עד שלוש שעות. המחיר והתנאים לסיור פרטי דורשים תיאום נפרד; אין להשתמש במחיר הסיור הפתוח כהצעת מחיר לקבוצה. יש לברר מראש את משך המפגש המתוכנן, נקודת ההתחלה, חניה, לבוש ותנאי ביטול ודחייה.'],
   ['איך מתקדמים מהבירור להזמנה?', 'פונים לחיליק עם פרטי הקבוצה ומבררים זמינות והתאמה. לפני האישור ודאו שהמועד, המחיר, התוכן ודרישות מיוחדות ברורים לשני הצדדים. פנייה ב־WhatsApp היא התחלת בירור ואינה שומרת מקום או מאשרת סיור פרטי. אם אתם מעוניינים להצטרף לסיור פתוח, חזרו לאתר לפרטי ההזמנה או פנו לחיליק לבירור.'],
 ];
@@ -65,7 +66,7 @@ function privateTourButton() {
   return '<a class="guide-cta__button" href="https://wa.me/972506724312">לתיאום סיור פרטי לקבוצה</a>';
 }
 function openingDetails(page) {
-  if (page.path === guidePaths[1]) return `<p class="guide-intro-action">${privateTourButton()}</p>`;
+  if (page.path === guidePaths[1]) return `<section class="guide-quick-facts"><h2>פרטי הסיור הפרטי במבט מהיר</h2><dl>${tourServiceFacts.he.privateQuickFacts.map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section><p class="guide-intro-action">${privateTourButton()}</p>`;
   const copy = organicCopy[page.language];
   return `<section class="guide-quick-facts"><h2>${page.language === 'en' ? 'Tour planning at a glance' : 'פרטי הסיור במבט מהיר'}</h2><dl>${copy.facts.slice(0, 3).map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section>`;
 }
@@ -77,7 +78,7 @@ function closingCta(page) {
 for (const page of pages) {
   const copy = organicCopy[page.language];
   const intro = page.path === guidePaths[1]
-    ? 'לתכנון סיור פרטי בבני ברק עם חיליק רוזנברג, פונים עם המועד המבוקש, מספר המשתתפים ושפת ההדרכה. המחיר, התחנות וההתאמות לקבוצה נקבעים בתיאום אישי.'
+    ? `${tourServiceFacts.he.privateGroup} לתכנון סיור פרטי בבני ברק עם חיליק רוזנברג, פונים עם המועד המבוקש ושפת ההדרכה. המחיר, התחנות וההתאמות לקבוצה נקבעים בתיאום אישי.`
     : copy.intro;
   const primaryContact = page.path.includes('private-tour')
     ? `<a href="https://wa.me/972506724312">${e(copy.contact)}</a>`

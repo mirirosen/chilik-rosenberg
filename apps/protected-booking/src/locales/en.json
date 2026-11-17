@@ -440,7 +440,8 @@
     "sendWhatsapp": "Send WhatsApp message",
     "pickAnotherDate": "Pick another date"
   },
-  "ratings": {    "reason1": {
+  "ratings": {
+    "reason1": {
       "title": "An Insider's Perspective",
       "desc": "My tour is based on deep familiarity with the alleys where I grew up. This is not an external guide, but a rare glimpse into my Haredi life."
     },
@@ -457,7 +458,7 @@
   "faqs": {
     "q1": {
       "question": "Can a private tour be arranged?",
-      "answer": "Yes. Contact Hilik to arrange a private group tour, with the date and content agreed in advance."
+      "answer": "Private tours accommodate groups of 10–45 participants. A private tour can be arranged from Wednesday at 12:00 through Friday noon, subject to availability and confirmation by Hilik. The date, content and price are agreed individually in advance."
     },
     "q2": {
       "question": "When are upcoming tours and how can I check availability?",
@@ -492,12 +493,12 @@
       "answer": "The menu section shows examples of Jewish cuisine, including cholent, kugel, fish and chopped liver. Contact Hilik before registering for details of the tastings on your chosen tour."
     },
     "q10": {
-      "question": "What is the kashrut standard, and are vegetarian or allergy adjustments available?",
-      "answer": "Before registering, contact Hilik to check the certifications at tour stops and whether tastings can meet your needs. Do not assume every stop can accommodate every dietary restriction."
+      "question": "What is the kashrut standard, and are vegetarian, vegan or allergy adjustments available?",
+      "answer": "Tastings are Badatz kosher. Vegetarian, vegan and allergy requirements can be accommodated. Tell Hilik about your needs in advance to arrange suitable tastings; individual tastings may not suit every restriction."
     },
     "q11": {
       "question": "Is the tour suitable for children, strollers or people with walking difficulties?",
-      "answer": "Families with children are welcome, and children take part with an adult. For strollers or walking difficulties, contact Hilik before registering to discuss accessibility needs. Check the walking route and access conditions at the places visited in advance."
+      "answer": "Families with children are welcome, and children take part with an adult. The tour involves a modest amount of walking on a route without stairs and can accommodate accessibility needs. Contact Hilik in advance about walking difficulties, strollers or specific access requirements to coordinate the details."
     },
     "q12": {
       "question": "What if I need to cancel or postpone my booking?",

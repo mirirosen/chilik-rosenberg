@@ -18,7 +18,7 @@ const verifiedPaid = b => !!b && viaProvider(b) && b.paymentStatus === 'paid' &&
 // 'pending' and never qualify; late captures stay 'payment_review' until confirmed.
 const becameVerifiedPaid = (before, after) => verifiedPaid(after) && !verifiedPaid(before);
 
-function createNotifier({ db, send, ownerTo, cutoffMs, serverTimestamp, increment, fromMillis, now = () => Date.now(), customer = {} }) {
+function createNotifier({ db, send, ownerTo, ownerEnabled = false, cutoffMs, serverTimestamp, increment, fromMillis, now = () => Date.now(), customer = {} }) {
   // Customer mail is opt-in: flag on AND a valid cutoff, otherwise nothing is sent.
   const customerOn = customer.enabled === true && Number.isFinite(customer.cutoffMs);
   // Claim a flag in a transaction so retries/overlaps never send twice.
@@ -35,6 +35,7 @@ function createNotifier({ db, send, ownerTo, cutoffMs, serverTimestamp, incremen
   const afterCutoff = snap => snap.createTime.toMillis() >= cutoffMs;
 
   async function onBookingCreated(snap) {
+    if (ownerEnabled !== true) return false;
     if (!snap || !afterCutoff(snap)) return false;
     const b = await claim(snap.ref, 'ownerNoticeSentAt');
     if (!b) return false;

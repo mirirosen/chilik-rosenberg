@@ -28,12 +28,28 @@ function fakeDb(docs) {
 
 const CUTOFF = Date.parse('2026-10-24T17:30:00Z'), NOW = CUTOFF + 3 * 3600000;
 const base = { name: 'בדיקה', phone: '0500000000', email: 'a@b.c', tourDate: '2026-11-05', participants: 2, language: 'he', paymentMethod: 'bank_transfer', status: 'pending', paymentStatus: 'pending', createdAt: ts(NOW - 60 * 60000) };
-function setup(docs, send) {
+function setup(docs, send, ownerEnabled = true) {
   const db = fakeDb(docs), sent = [];
-  const n = createNotifier({ db, send: send || (async m => { sent.push(m); }), ownerTo: 'hr20192022@gmail.com', cutoffMs: CUTOFF, now: () => NOW,
+  const n = createNotifier({ db, send: send || (async m => { sent.push(m); }), ownerEnabled, ownerTo: 'hr20192022@gmail.com', cutoffMs: CUTOFF, now: () => NOW,
     serverTimestamp: () => SERVER_TS, increment: n => ({ increment: n }), fromMillis: ts });
   return { db, n, sent };
 }
+
+test('disabled owner email does not read or claim a booking or call SMTP', async () => {
+  const unexpected = () => { throw new Error('disabled owner email touched an integration'); };
+  for (const ownerEnabled of [undefined, false, 'true']) {
+    const n = createNotifier({ db: { runTransaction: unexpected }, send: unexpected, ownerEnabled });
+    assert.strictEqual(await n.onBookingCreated({ get createTime() { return unexpected(); } }), false);
+  }
+});
+
+test('disabled owner email leaves the unpaid customer reminder working', async () => {
+  const { db, n, sent } = setup({ 'BK-1': base }, undefined, false);
+  assert.strictEqual(await n.onBookingCreated(db.snap('BK-1')), false);
+  assert.strictEqual(db.store.get('BK-1').ownerNoticeSentAt, undefined);
+  assert.deepStrictEqual(await n.sweepUnpaid(), { sent: 1, failed: 0 });
+  assert.deepStrictEqual(sent.map(m => m.key), ['unpaid-BK-1']);
+});
 
 test('owner notice: sent once to the owner, idempotent on redelivery', async () => {
   const { db, n, sent } = setup({ 'BK-1': base });
