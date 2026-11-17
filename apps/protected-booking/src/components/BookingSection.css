@@ -163,3 +163,6 @@
 @media (max-width: 360px){
   .booking-edition .target-site .main-header .header-brand{font-size:12px}
 }
+.target-site #date-selection.booking-screen[dir] .booking-screen__coverage{grid-column:1/-1;margin:8px 0 0;font-size:13px;line-height:1.7}
+.target-site #date-selection.booking-screen[dir] .booking-screen__coverage a{color:#e6b948;text-decoration:underline;text-underline-offset:3px}
+.target-site #date-selection.booking-screen[dir] .booking-screen__coverage a:focus-visible{outline:2px solid #e6b948;outline-offset:4px}

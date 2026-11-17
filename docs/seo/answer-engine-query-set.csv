@@ -1,13 +1,13 @@
 id,language,query,intent,status
-HE01,he,"מה כולל סיור קולינרי בבני ברק עם חיליק רוזנברג?",brand_service,not_measured
-HE02,he,"כמה עולה סיור אוכל בבני ברק עם חיליק?",price,not_measured
-HE03,he,"כמה זמן נמשך סיור קולינרי בבני ברק ומתי הוא מתקיים?",duration_dates,not_measured
-HE04,he,"איך מתלבשים לסיור אוכל בבני ברק ומה כדאי לברר על כשרות ואלרגיות?",preparation,not_measured
-HE05,he,"איך מתאמים סיור פרטי בבני ברק לקבוצה?",private_group,not_measured
-HE06,he,"האם הסיורים של חיליק בבני ברק מתקיימים באנגלית?",language,not_measured
-EN01,en,"What does a Bnei Brak food tour with Chilik Rosenberg include?",brand_service,not_measured
-EN02,en,"How much does Chilik's Bnei Brak food tour cost?",price,not_measured
-EN03,en,"How long is a Bnei Brak food tour and when are tours offered?",duration_dates,not_measured
-EN04,en,"What should visitors wear and ask about kosher food and allergies on a Bnei Brak food tour?",preparation,not_measured
-EN05,en,"How can a group arrange a private food tour in Bnei Brak?",private_group,not_measured
-EN06,en,"Does Chilik Rosenberg offer Bnei Brak food tours in English?",language,not_measured
+HE01,he,"מה כולל סיור קולינרי בבני ברק עם חיליק רוזנברג?",brand_service,baseline_completed
+HE02,he,"כמה עולה סיור אוכל בבני ברק עם חיליק?",price,baseline_completed
+HE03,he,"כמה זמן נמשך סיור קולינרי בבני ברק ומתי הוא מתקיים?",duration_dates,baseline_completed
+HE04,he,"איך מתלבשים לסיור אוכל בבני ברק ומה כדאי לברר על כשרות ואלרגיות?",preparation,baseline_completed
+HE05,he,"איך מתאמים סיור פרטי בבני ברק לקבוצה?",private_group,baseline_completed
+HE06,he,"האם הסיורים של חיליק בבני ברק מתקיימים באנגלית?",language,baseline_completed
+EN01,en,"What does a Bnei Brak food tour with Chilik Rosenberg include?",brand_service,baseline_completed
+EN02,en,"How much does Chilik's Bnei Brak food tour cost?",price,baseline_completed
+EN03,en,"How long is a Bnei Brak food tour and when are tours offered?",duration_dates,baseline_completed
+EN04,en,"What should visitors wear and ask about kosher food and allergies on a Bnei Brak food tour?",preparation,baseline_partial
+EN05,en,"How can a group arrange a private food tour in Bnei Brak?",private_group,baseline_partial
+EN06,en,"Does Chilik Rosenberg offer Bnei Brak food tours in English?",language,baseline_partial

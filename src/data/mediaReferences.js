@@ -1,9 +1,10 @@
 // User-supplied links and verified additions, 2026-10-08. Counts of followers
 // and views are deliberately not stored as they change over time.
+import { makoTourCoverage } from './tourCoverage.js';
 const groups = {
   articles: [
     ['maariv-cholent', 'מעריב', 'Maariv', 'הקרע מגיע עד הצ׳ולנט', 'The divide reaches the cholent', 'https://www.maariv.co.il/news/israel/article-1366350', '2026-09-15'],
-    ['mako-tour', 'מאקו', 'Mako', 'סיור ליל שישי עם חיליק', 'Thursday-night food tour with Hilik', 'https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm', '2024-03-14'],
+    [makoTourCoverage.id, 'מאקו', 'Mako', 'סיור ליל שישי עם חיליק', 'Thursday-night food tour with Hilik', makoTourCoverage.url, makoTourCoverage.date],
     ['yedioth-interview', 'ידיעות אחרונות', 'Yedioth Ahronoth', 'ראיון משותף עם אורטל בן דיין', 'Joint interview with Ortal Ben Dayan', 'https://www.ynet.co.il/yedioth/article/yokra14357576', '2025-05-09'],
     ['jdn-interview', 'JDN', 'JDN', 'ראיון על משבר הגיוס', 'Interview about the conscription debate', 'https://www.jdn.co.il/blog/2388488/', '2025-04-16'],
     ['bb-now-tour', 'בני ברק עכשיו', 'Bnei Brak Now', 'מפגינים שיבשו את הסיור ברחוב נחמיה', 'Protesters disrupted the tour on Nehemiah Street', 'https://bb-n.co.il/my-neighborhood/98411/', '2026-07-03'],

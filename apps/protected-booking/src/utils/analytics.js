@@ -1,5 +1,6 @@
 // Google Analytics 4 starts automatically, without an approval banner.
 // Previously stored and new explicit opt-outs remain effective.
+import { makoTourCoverage } from '../../../../src/data/tourCoverage.js';
 const CONSENT_KEY = 'chilik-analytics-consent';
 const OPT_OUT_COOKIE = 'chilik-analytics-opt-out';
 const PURCHASE_KEY_PREFIX = 'chilik-analytics-purchase:';
@@ -161,6 +162,7 @@ function bindContactClicks() {
       contact_context: link.dataset.contactContext === 'private_tour' ? 'private_tour' : 'general',
     });
     else if (/^tel:/.test(href)) track('phone_click', { link_url: 'tel' });
+    else if (link?.dataset.bookingCoverage === makoTourCoverage.id && href === makoTourCoverage.url) track('booking_coverage_click');
   };
   document.addEventListener('click', window.__chilikContactClicks, { capture: true });
 }

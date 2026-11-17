@@ -16,6 +16,19 @@ const customer = { name: 'Demo Customer', phone: '0500000000', email: 'demo@exam
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(NOW); window.history.replaceState({}, '', '/booking?date=2026-10-08&participants=2'); api.makeIdempotencyKey.mockResolvedValue('a'.repeat(32)); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+it('offers one dated report of a previous tour without replacing the booking action', () => {
+  const { container } = render(<BookingSection />);
+  const coverage = container.querySelector('.booking-screen__coverage a');
+  expect(coverage).not.toBeNull();
+  expect(coverage.href).toBe('https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm');
+  expect(coverage.target).toBe('_blank');
+  expect(coverage.rel).toContain('noopener');
+  expect(coverage.rel).toContain('noreferrer');
+  expect(coverage.querySelector('time').dateTime).toBe('2024-03-14');
+  expect(container.querySelectorAll('.booking-screen__coverage a')).toHaveLength(1);
+  expect(container.querySelector('.booking-screen__continue')).not.toBeNull();
+});
+
 it.each(['', 'invalid', '2026-02-30', '2026-10-01', '2026-10-06', '2029-01-04'])('never advertises an invalid/past/out-of-window date %s', value => {
   const proceed = vi.fn(); const { container } = render(<BookingSection initialSelection={{ date: value, participants: 2 }} onContinue={proceed} />);
   expect(container.querySelector('.booking-screen__chosen')).toBeNull();
