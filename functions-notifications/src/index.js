@@ -16,11 +16,13 @@ admin.initializeApp();
 const db = admin.firestore();
 const GMAIL_APP_PASSWORD = defineSecret('GMAIL_APP_PASSWORD');
 const OWNER_TO = defineString('NOTIFY_OWNER_TO', { default: 'hr20192022@gmail.com' });
+// Owner registration alerts use WhatsApp. Email stays off unless explicitly enabled.
+const OWNER_EMAILS = defineBoolean('NOTIFY_OWNER_EMAILS', { default: false });
 // Only bookings created after this moment are eligible (no retroactive mail).
 const CUTOFF = defineString('NOTIFY_CUTOFF_ISO', { default: '2026-10-24T17:30:00Z' });
 // Customer emails ("booking received" / "booking confirmed") are OFF unless both
 // NOTIFY_CUSTOMER_EMAILS=true and NOTIFY_CUSTOMER_CUTOFF_ISO is a valid ISO time;
-// only bookings created at/after that cutoff are mailed. Owner mail is unaffected.
+// only bookings created at/after that cutoff are mailed. Separate from owner mail.
 const CUSTOMER_EMAILS = defineBoolean('NOTIFY_CUSTOMER_EMAILS', { default: false });
 const CUSTOMER_CUTOFF = defineString('NOTIFY_CUSTOMER_CUTOFF_ISO', { default: '' });
 // Firestore (default) is in nam5; triggers and schedules run next to the booking codebase.
@@ -34,6 +36,7 @@ function getNotifier() {
   const { FieldValue, Timestamp } = admin.firestore;
   const customerCutoffMs = Date.parse(CUSTOMER_CUTOFF.value() || '');
   notifier = createNotifier({
+    ownerEnabled: OWNER_EMAILS.value() === true,
     customer: { enabled: CUSTOMER_EMAILS.value() === true, cutoffMs: Number.isFinite(customerCutoffMs) ? customerCutoffMs : null },
     db, send: guardEmailSend(createGmailSender(GMAIL_APP_PASSWORD.value()), isTestMode()), ownerTo: OWNER_TO.value(), cutoffMs,
     serverTimestamp: () => FieldValue.serverTimestamp(), increment: n => FieldValue.increment(n), fromMillis: ms => Timestamp.fromMillis(ms),
@@ -42,7 +45,7 @@ function getNotifier() {
 }
 
 exports.notifyOwnerOnBooking = onDocumentCreated({ document: 'bookings/{id}', region: REGION, secrets: [GMAIL_APP_PASSWORD], retry: false },
-  async event => { await getNotifier().onBookingCreated(event.data); });
+  async event => { if (OWNER_EMAILS.value() !== true) return; await getNotifier().onBookingCreated(event.data); });
 
 exports.notifyUnpaidBookings = onSchedule({ schedule: 'every 10 minutes', region: REGION, secrets: [GMAIL_APP_PASSWORD] },
   async () => { await getNotifier().sweepUnpaid(); });

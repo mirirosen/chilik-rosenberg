@@ -1,9 +1,11 @@
+import { tourServiceFacts } from './tourServiceFacts.js';
+
 export const siteOrigin = 'https://www.chilik-tours.com';
 export const guidePaths = ['/guides/bnei-brak-food-tour.html', '/guides/private-tour-bnei-brak.html', '/guides/bnei-brak-food-tour-en.html'];
 
 // Only facts published on the site or confirmed by the owner (2026-10-26: start 20:00,
 // meeting point in Bnei Brak with the exact address sent in the tour week, Hebrew and English).
-// Dietary suitability and date availability still require confirmation. No group size is published.
+// Service facts were confirmed on 2026-11-17; date availability needs confirmation.
 export const organicCopy = {
   he: {
     title: 'סיור קולינרי בבני ברק עם חיליק רוזנברג',
@@ -11,7 +13,7 @@ export const organicCopy = {
     intro: 'סיור קולינרי בבני ברק עם חיליק רוזנברג משלב טעימות מהמטבח היהודי עם סיפורים והיכרות עם החיים והתרבות החרדית. חיליק, תושב בני ברק שלמד בישיבת פוניבז׳, מדריך את המפגש מתוך היכרות אישית עם העיר.',
     heading: 'מה כדאי לדעת לפני הסיור?',
     facts: [['משך הסיור', 'כשעתיים וחצי עד שלוש שעות'], ['מחיר למשתתף', '250 ש״ח לסיור המוצג באתר'], ['מועד', 'בדרך כלל ביום חמישי בערב, תחילת הסיור בשעה 20:00; יש לבדוק זמינות למועד המבוקש'], ['נקודת המפגש', 'בבני ברק; הכתובת המדויקת נשלחת בשבוע הסיור'], ['שפות הסיור', 'עברית ואנגלית']],
-    caution: 'לפני ההזמנה יש לברר לבוש מתאים, נגישות, כשרות והתאמות לצמחונים או לאלרגיות. התחנות והטעימות עשויות להשתנות; אין כאן התחייבות לזמינות של תאריך או של מאכל מסוים.',
+    caution: `${tourServiceFacts.he.kosher} ${tourServiceFacts.he.dietary} ${tourServiceFacts.he.accessibility} הגיעו בלבוש צנוע ומכבד. התחנות והטעימות עשויות להשתנות; יש לבדוק זמינות למועד המבוקש.`,
     guides: 'מדריכים לתכנון הביקור בבני ברק',
     links: ['סיור קולינרי בבני ברק: מה טועמים ואיך מתכוננים', 'סיור פרטי בבני ברק: תכנון מפגש לקבוצה', 'Bnei Brak food tour — English guide'],
     contact: 'לבירור עם חיליק', booking: 'בחירת תאריך לסיור', faq: 'שאלות נפוצות',
@@ -22,7 +24,7 @@ export const organicCopy = {
     intro: 'A Bnei Brak culinary tour with Hilik Rozenberg combines Jewish food tastings with stories about the city and Haredi life. Hilik lives in Bnei Brak and studied at Ponevezh Yeshiva, bringing personal experience to the visit.',
     heading: 'What should you know before your tour?',
     facts: [['Duration', 'Usually 2.5–3 hours'], ['Price per guest', '₪250 for the tour shown on the website'], ['Timing', 'Usually Thursday evening, starting at 20:00; check availability for your chosen date'], ['Meeting point', 'In Bnei Brak; the exact address is sent during the tour week'], ['Languages', 'Hebrew and English']],
-    caution: 'Ask before booking about suitable clothing, accessibility, kosher supervision, vegetarian options and allergies. Stops and tastings may vary; this information does not guarantee availability for a date or a particular dish.',
+    caution: `${tourServiceFacts.en.kosher} ${tourServiceFacts.en.dietary} ${tourServiceFacts.en.accessibility} Wear modest, respectful clothing. Stops and tastings may vary; check availability for your chosen date.`,
     guides: 'Guides to planning your Bnei Brak visit',
     links: ['Bnei Brak food tour — Hebrew guide', 'Planning a private group tour — Hebrew guide', 'Bnei Brak food tour: what to taste and how to prepare'],
     contact: 'Ask Hilik', booking: 'Choose a tour date', faq: 'Frequently asked questions',

@@ -2,7 +2,7 @@
 
 Separate Firebase Functions codebase. It never deploys or deletes the live `booking` codebase.
 
-- `notifyOwnerOnBooking`: Firestore `bookings/{id}` created → email to `hr20192022@gmail.com` (claim flag `ownerNoticeSentAt`).
+- `notifyOwnerOnBooking`: owner registration email is **off by default** (`NOTIFY_OWNER_EMAILS=false`, owner request 17 November 2026). It returns before accessing the booking, SMTP or claim flag. WhatsApp owner alerts remain independent and enabled as before. Explicit `NOTIFY_OWNER_EMAILS=true` would restore the former email flow to `hr20192022@gmail.com` (claim flag `ownerNoticeSentAt`).
 - `notifyUnpaidBookings`: every 10 minutes → one email to a registrant whose booking is still unpaid 30 minutes after creation
   (claim flag `unpaidNoticeSentAt`, at most 3 attempts in `unpaidNoticeAttempts`). Paid (`paymentStatus: 'paid'` or `status: 'confirmed'`),
   cancelled/expired/failed and payment-review bookings are skipped. Hebrew text, plus English when `language === 'en'`.

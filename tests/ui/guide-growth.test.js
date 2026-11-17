@@ -7,7 +7,7 @@ it('guide attribution and photographs describe the actual publisher and approved
   for (const [path, language] of [['/guides/bnei-brak-food-tour.html','he'],['/guides/private-tour-bnei-brak.html','he'],['/guides/bnei-brak-food-tour-en.html','en']]) {
     const result = guideEnrichment({path,language});
     const doc = new JSDOM(result.html).window.document;
-    expect(doc.querySelector('time').dateTime).toBe('2026-11-16');
+    expect(doc.querySelector('time').dateTime).toBe('2026-11-17');
     expect(result.article.author['@type']).toBe('Organization');
     expect(result.article.dateModified).toBe(doc.querySelector('time').dateTime);
     const image = doc.querySelector('img');

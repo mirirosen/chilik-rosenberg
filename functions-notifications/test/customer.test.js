@@ -147,10 +147,14 @@ test('unpaid sweep skips registrants who already got the received email', async 
   assert.deepStrictEqual(sent.map(m => m.key), ['customer-received-BK-got-received', 'unpaid-BK-flag-was-off']);
 });
 
-test('owner notice is unchanged by the customer flag', async () => {
-  const { db, n, sent } = setup({ 'BK-1': created });
-  assert.strictEqual(await n.onBookingCreated(db.snap('BK-1')), true);
-  assert.deepStrictEqual(sent.map(m => [m.key, m.to]), [['owner-BK-1', 'hr20192022@gmail.com']]);
+test('customer received and confirmed emails still work with owner email off', async () => {
+  const { db, n, sent, update } = setup({ 'BK-1': created });
+  assert.strictEqual(await n.onBookingCreated(db.snap('BK-1')), false);
+  assert.strictEqual(await n.onCustomerBookingCreated(db.snap('BK-1')), true);
+  assert.strictEqual(await n.onCustomerBookingUpdated(update('BK-1', { status: 'confirmed', paymentStatus: 'paid' })), true);
+  assert.deepStrictEqual(sent.map(m => [m.key, m.to]), [
+    ['customer-received-BK-1', 'a@b.c'], ['customer-confirmed-BK-1', 'a@b.c'],
+  ]);
 });
 
 // ---- rendering ----
