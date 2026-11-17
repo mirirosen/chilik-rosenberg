@@ -83,6 +83,20 @@ describe('automatic analytics and retained opt-outs', () => {
 });
 
 describe('events after consent', () => {
+  it('measures only the designated booking coverage link without sending its URL or link text', async () => {
+    const { analytics } = await fresh(); analytics.initAnalytics();
+    const link = document.createElement('a');
+    link.href = 'https://www.mako.co.il/food-restaurants/restaurant-news/Article-f69eb4533183e81027.htm';
+    link.dataset.bookingCoverage = 'mako-tour';
+    link.textContent = 'Previous tour report';
+    link.addEventListener('click', e => e.preventDefault()); document.body.append(link);
+    try {
+      link.click(); link.dataset.bookingCoverage = 'untrusted'; link.click();
+      link.dataset.bookingCoverage = 'mako-tour'; link.href = 'https://example.invalid/?customer=secret'; link.click();
+      const button = document.createElement('button'); document.body.append(button); button.click(); button.remove();
+      expect(events()).toEqual([['booking_coverage_click', { page_language: 'he' }]]);
+    } finally { link.remove(); }
+  });
   it('measures the current interface language at each funnel event, including a language change', async () => {
     const { analytics } = await fresh(); analytics.initAnalytics();
     const booking = { participants: 2, pricePerPerson: 250, totalPrice: 500 };

@@ -1,5 +1,6 @@
 import { IS_PREPROD } from '../utils/preview';
 import { privateTourContactHref } from '../../../../src/data/privateTourContact';
+import { makoTourCoverage } from '../../../../src/data/tourCoverage.js';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc } from 'firebase/firestore';
@@ -18,6 +19,8 @@ const PRICE_PER_PERSON = 250;
 // booking-screen design (BookingSection.css); availability rules are unchanged.
 const BookingSection = ({ onContinue, initialSelection, standalone = false } = {}) => {
   const { t, i18n } = useTranslation();
+  const coverageEnglish = i18n.language?.startsWith('en');
+  const coverageDate = new Intl.DateTimeFormat(coverageEnglish ? 'en-GB' : 'he-IL', { day: 'numeric', month: coverageEnglish ? 'short' : 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(makoTourCoverage.date));
   const [selectedDate, setSelectedDate] = useState(initialSelection?.date || '');
   const [participants, setParticipants] = useState(initialSelection?.participants || 1);
   const [visibleMonth, setVisibleMonth] = useState(initialSelection?.date?.slice(0, 7) || '');
@@ -151,6 +154,11 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
           <a href={privateTourContactHref(i18n.language)} data-contact-context="private_tour" target="_blank" rel="noopener noreferrer">
             {t('bookingDesign.contact')}
             <span aria-hidden="true"> {dir === 'rtl' ? '←' : '→'}</span>
+          </a>
+        </p>
+        <p className="booking-screen__coverage">
+          <a href={makoTourCoverage.url} data-booking-coverage={makoTourCoverage.id} target="_blank" rel="noopener noreferrer">
+            {t('bookingDesign.coverage')} · <time dateTime={makoTourCoverage.date}>{coverageDate}</time>
           </a>
         </p>
       </div>
