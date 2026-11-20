@@ -21,3 +21,23 @@ main.organic-overview{margin-top:2rem}
 .guide-quick-facts h2{margin-top:0}
 .guide-intro-action{margin:1.5rem 0}
 @media(max-width:420px){.guide-header{gap:.75rem}.guide-header .guide-cta__button{white-space:normal;font-size:14px;padding:8px 12px;max-width:58%}}
+
+/* Static guide and watch pages share the public palette without styling other shells. */
+body.guide-page{background:var(--tour-paper);color:var(--tour-ink);font-family:var(--eti-body-font)}
+.guide-page main.organic-overview{box-sizing:border-box;max-width:70ch;padding:24px;margin:24px auto;font-size:18px;line-height:1.8;color:var(--tour-ink)}
+.guide-page .organic-overview :is(h1,h2,h3){color:var(--tour-ink);line-height:1.3;text-wrap:pretty}
+.guide-page .organic-overview h1{font-size:clamp(28px,3.5vw,40px)}
+.guide-page .organic-overview h2{font-size:clamp(24px,2.6vw,32px);margin-top:32px}
+.guide-page .organic-overview h3{font-size:22px}
+.guide-page .organic-overview a{color:var(--tour-link)}
+.guide-page .organic-overview a:focus-visible,.guide-page .guide-privacy :is(a,button):focus-visible{outline:3px solid var(--tour-link);outline-offset:4px}
+.guide-page :is(.guide-editorial,.guide-photo figcaption,.guide-privacy){color:var(--tour-muted);font-size:14px;line-height:1.7}
+.guide-page .organic-overview dl>div{background:var(--tour-surface);border-color:#c4b79f;border-radius:var(--tour-media-radius)}
+.guide-page .organic-overview dt{color:var(--tour-ink)}
+.guide-page .guide-quick-facts{padding:16px;border-color:var(--tour-link)}
+.guide-page .guide-source-story,.guide-page .organic-overview .guide-cta{border-color:#c4b79f;background:var(--tour-surface);border-radius:var(--tour-media-radius)}
+.guide-page .guide-photo img{background:var(--tour-surface);border-radius:var(--tour-media-radius)}
+.guide-page :is(.guide-header,.organic-overview) .guide-cta__button{background:var(--tour-accent);color:var(--tour-ink);border-radius:var(--tour-control-radius);min-height:48px;font-size:16px;text-decoration:none}
+.guide-page .guide-header__brand{color:var(--tour-link);min-height:44px;display:flex;align-items:center}
+.guide-page .guide-privacy a,.guide-page .guide-privacy button{display:inline-flex;min-height:44px;align-items:center}
+@media(max-width:359px){.guide-page main.organic-overview{padding-inline:16px}.guide-page .guide-header{padding-inline:16px}}

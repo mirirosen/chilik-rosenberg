@@ -19,6 +19,8 @@ it('guide attribution and photographs describe the actual publisher and approved
 
 it('the watch page visibly exposes the same real video, date and text as its structured data', () => {
   const doc = new JSDOM(watchPage({mode:'booking',analyticsScript:'/assets/guide-analytics-test.js',css:''})).window.document;
+  expect(doc.body.classList.contains('guide-page')).toBe(true);
+  expect(doc.querySelector('video').closest('details')).toBeNull();
   const graph = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'];
   const video = graph.find(n=>n['@type']==='VideoObject');
   expect(doc.querySelectorAll('h1')).toHaveLength(1); expect(doc.querySelectorAll('video')).toHaveLength(1);

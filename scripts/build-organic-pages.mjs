@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { bookingConversionCopy } from '../src/data/bookingConversion.js';
 import { privateTourGuide, privateTourFaqs } from '../src/data/privateTourGuide.js';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
@@ -14,7 +15,7 @@ if (!['booking', 'inquiry'].includes(mode)) throw Error('Expected booking or inq
 const out = path.resolve(mode === 'booking' ? 'dist-booking' : 'dist-inquiry');
 const entry = fs.readFileSync(path.join(out, `${mode}-index.html`), 'utf8');
 const analyticsScript = mode === 'booking' ? '/' + JSON.parse(fs.readFileSync(path.join(out, '.vite/manifest.json'), 'utf8'))['src/guideAnalytics.js'].file : undefined;
-const css = fs.readFileSync(new URL('../src/typography.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
+const css = fs.readFileSync(new URL('../src/typography.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/design-tokens.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
 const heSections = [
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
   ['למה מבקרים בבני ברק ביום חמישי בערב?', 'הסיורים מתקיימים בדרך כלל בחמישי בערב, לקראת שבת, ומתחילים בשעה 20:00. חיליק מספר על העיר שבה נולד וחי, ומחבר בין האוכל לבין מוסדות, מנהגים וחיי החברה החרדית. זו הזדמנות לשאול שאלות על דברים שרואים בדרך ולקבל תשובה ממדריך מקומי. המועד בפועל תלוי בתיאום ובזמינות; מידע כללי על חמישי אינו אישור להרשמה.'],
@@ -62,7 +63,7 @@ function guideHeader(page) {
   return `<header class="guide-header"><a class="guide-header__brand" href="/">${e(headerCopy(page.language).titleShort)}</a>${page.path === guidePaths[1] ? privateTourButton() : bookingButton(page)}</header>`;
 }
 function privateTourButton() {
-  return `<a class="guide-cta__button" href="${e(privateTourContactHref('he'))}" data-contact-context="private_tour">לתיאום סיור פרטי לקבוצה</a>`;
+  return `<a class="guide-cta__button" href="${e(privateTourContactHref('he'))}" data-contact-context="private_tour">${e(bookingConversionCopy('he').privateContact)}</a>`;
 }
 function openingDetails(page) {
   if (page.path === guidePaths[1]) return `<section class="guide-quick-facts"><h2>פרטי הסיור הפרטי במבט מהיר</h2><dl>${tourServiceFacts.he.privateQuickFacts.map(([label, value]) => `<div><dt>${e(label)}</dt><dd>${e(value)}</dd></div>`).join('')}</dl></section><p class="guide-intro-action">${privateTourButton()}</p><p>הקישור פותח טיוטת הודעה שאפשר לערוך לפני השליחה, עם שאלות על מספר המשתתפים, המועד, שפת ההדרכה ומטרת המפגש.</p>`;
@@ -92,7 +93,7 @@ for (const page of pages) {
   ] };
   // x-default is the Hebrew guide of the pair.
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
-  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:#121214;font-family:Arial,sans-serif}${css}</style></head><body>${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:var(--tour-paper,#f7f3eb);font-family:var(--eti-body-font,Arial,sans-serif)}${css}</style></head><body class="guide-page">${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
   // On the booking site the English guide sends readers to the English homepage.
   if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
