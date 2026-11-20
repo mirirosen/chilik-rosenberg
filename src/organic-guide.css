@@ -39,5 +39,5 @@ body.guide-page{background:var(--tour-paper);color:var(--tour-ink);font-family:v
 .guide-page .guide-photo img{background:var(--tour-surface);border-radius:var(--tour-media-radius)}
 .guide-page :is(.guide-header,.organic-overview) .guide-cta__button{background:var(--tour-accent);color:var(--tour-ink);border-radius:var(--tour-control-radius);min-height:48px;font-size:16px;text-decoration:none}
 .guide-page .guide-header__brand{color:var(--tour-link);min-height:44px;display:flex;align-items:center}
-.guide-page .guide-privacy a,.guide-page .guide-privacy button{display:inline-flex;min-height:44px;align-items:center}
+.guide-page .guide-privacy a,.guide-page .guide-privacy button:not([hidden]){display:inline-flex;min-height:44px;align-items:center}
 @media(max-width:359px){.guide-page main.organic-overview{padding-inline:16px}.guide-page .guide-header{padding-inline:16px}}

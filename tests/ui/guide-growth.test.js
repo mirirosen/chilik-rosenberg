@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { guideEnrichment, watchPage, videoVtt } from '../../scripts/guide-growth.mjs';
 
 it('guide attribution and photographs describe the actual publisher and approved media', () => {
@@ -43,4 +43,14 @@ it('contact-only video pages have no tracking and caption cues fit the complete 
     expect(windows.length).toBeGreaterThan(3);
     windows.forEach(([start,end],i)=>{expect(end).toBeGreaterThan(start);expect(end).toBeLessThanOrEqual(12.721);if(i)expect(start).toBeGreaterThanOrEqual(windows[i-1][1]);});
   }
+});
+
+it('honors the native hidden state of guide measurement controls through withdrawal', () => {
+  const css=['typography','design-tokens','organic-seo','organic-guide'].map(name=>readFileSync('src/'+name+'.css','utf8')).join('\n');
+  const dom=new JSDOM(watchPage({mode:'booking',analyticsScript:'/assets/guide-analytics-test.js',css}),{pretendToBeVisual:true});
+  const button=dom.window.document.getElementById('analytics-opt-out');
+  expect(button.hidden).toBe(true);expect(dom.window.getComputedStyle(button).display).toBe('none');
+  button.hidden=false;expect(dom.window.getComputedStyle(button).display).not.toBe('none');
+  button.hidden=true;expect(dom.window.getComputedStyle(button).display).toBe('none');
+  dom.window.close();
 });
