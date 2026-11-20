@@ -27,7 +27,7 @@ export function guideTracking({ mode, analyticsScript, language = 'he' }) {
 }
 
 export function videoSchema() {
-  return { '@type': 'VideoObject', '@id': siteOrigin + bakeryVideo.path + '#video', name: bakeryVideo.name, description: bakeryVideo.description, thumbnailUrl: [siteOrigin + bakeryVideo.poster], uploadDate: bakeryVideo.uploadDate, duration: bakeryVideo.duration, contentUrl: siteOrigin + bakeryVideo.src, inLanguage: 'he', creator: { '@id': siteOrigin + '/#chilik' }, publisher: { '@id': siteOrigin + '/#organization' }, transcript: bakeryCaptionCues.map(c => c.he).join(' ') };
+  return { '@type': 'VideoObject', '@id': siteOrigin + bakeryVideo.path + '#video', name: bakeryVideo.name, description: bakeryVideo.description, thumbnailUrl: [siteOrigin + bakeryVideo.poster], uploadDate: bakeryVideo.uploadDate, duration: bakeryVideo.duration, contentUrl: siteOrigin + bakeryVideo.src, inLanguage: 'he', creator: { '@type': 'Person', '@id': siteOrigin + '/#chilik', name: 'חיליק רוזנברג', url: siteOrigin + '/' }, publisher: { '@id': siteOrigin + '/#organization' }, transcript: bakeryCaptionCues.map(c => c.he).join(' ') };
 }
 
 export function videoVtt(language) {
