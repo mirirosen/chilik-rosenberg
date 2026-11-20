@@ -1,3 +1,5 @@
+@import '../../../../src/design-tokens.css';
+
 /* Booking picker (step 1) design, recovered verbatim from the live hosting build of 2026-10. */
 .target-site #date-selection.booking-screen[dir]{--booking-gold: #edc76b;--booking-ink: #302c25;--booking-muted: #70685a;max-width:1200px;margin:64px auto;padding:48px;display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:clamp(36px,5vw,72px);align-items:center;color:#f7f0e3;text-align:start;background:radial-gradient(ellipse at 95% 0%,#4c42312e,transparent 62%),#272622;border:1px solid #413d34;border-radius:28px;box-shadow:0 24px 70px #34250f0d;isolation:isolate}
 .target-site #date-selection.booking-screen[dir] *{box-sizing:border-box}
@@ -166,3 +168,11 @@
 .target-site #date-selection.booking-screen[dir] .booking-screen__coverage{grid-column:1/-1;margin:8px 0 0;font-size:13px;line-height:1.7}
 .target-site #date-selection.booking-screen[dir] .booking-screen__coverage a{color:#e6b948;text-decoration:underline;text-underline-offset:3px}
 .target-site #date-selection.booking-screen[dir] .booking-screen__coverage a:focus-visible{outline:2px solid #e6b948;outline-offset:4px}
+
+/* Readability only. Keep all selection, validation, availability and payment handlers. */
+.target-site #date-selection.booking-screen[dir] :is(.booking-screen__heading p,.booking-screen__people p,.booking-screen__date-nav,.booking-screen__date>span,.booking-screen__date .booking-screen__day-name,.booking-screen__date small,.booking-screen__other-date,.booking-screen__summary p,.booking-screen__no-charge,.booking-screen__secure,.booking-screen__error,.booking-screen__notice,.booking-screen__month>span,.booking-screen__steps,.booking-screen__personal,.booking-screen__price>span,.booking-screen__price>div>span){font-size:14px;line-height:1.6}
+.target-site #date-selection.booking-screen[dir] button.booking-screen__continue{font-size:16px;min-height:54px;line-height:1.5}
+.target-site #date-selection.booking-screen[dir] .booking-screen__date{min-width:104px;min-height:132px}
+.target-site #date-selection.booking-screen[dir] :is(.booking-screen__error,.booking-screen__notice){font-size:16px}
+.booking-details-shell .booking-form-card :is(input:not([type=checkbox]):not([type=radio]),select,textarea){font-size:16px}
+.booking-details-shell .booking-form-card :is(.text-xs,.text-sm){font-size:14px;line-height:1.6}
