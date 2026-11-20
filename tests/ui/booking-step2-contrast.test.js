@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 // there won the cascade and left the labels and step names at 1.2:1.
 const css = readFileSync('src/site-design.css', 'utf8');
 const picker = readFileSync('apps/protected-booking/src/components/BookingSection.css', 'utf8');
-const token = name => css.match(new RegExp(`--${name}: (#[0-9a-f]{6});`))[1];
+const palette = Object.fromEntries([...(css + '\n' + readFileSync('src/design-tokens.css', 'utf8')).matchAll(/--([\w-]+):\s*([^;]+);/g)].map(match => [match[1], match[2]]));
+const token = name => { const value = palette[name]; const alias = value.match(/^var\(--([\w-]+)\)$/); return alias ? token(alias[1]) : value; };
 const luminance = hex => {
   const [r, g, b] = hex.slice(1).match(/../g).map(part => {
     const value = parseInt(part, 16) / 255;

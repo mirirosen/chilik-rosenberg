@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { gsap } from 'gsap';
 import i18n from '../../src/inquiry-i18n';
-import Hero from '../../src/components/Hero';
-import { BREATH, DEPTH } from '../../src/animations/figureLife';
+import profileImage from '../../src/assets/hilik-cutout-provided.webp';
+import { useAmbientVideo } from '../../src/hooks/useAmbientVideo';
+import { BREATH, DEPTH, setupFigureLife } from '../../src/animations/figureLife';
+
+// Keep testing the reusable motion helper after the public hero stops using the cutout.
+function FigureFixture() {
+  const hero = useRef(null), figure = useRef(null), life = useRef(null), posterRef = useRef(null);
+  const ambient = useAmbientVideo({ posterRef, webm: '/media/hero/bnei-brak-sequence.webm', mp4: '/media/hero/bnei-brak-sequence.mp4' });
+  useEffect(() => { life.current = setupFigureLife(figure.current, hero.current); return () => life.current.revert(); }, []);
+  useEffect(() => { life.current?.setPlaying(ambient.playing); }, [ambient.playing]);
+  return <header ref={hero} className="target-hero"><img ref={posterRef} className="target-hero__food" src="/media/hero/bnei-brak-sequence-poster.webp" alt=""/><video ref={ambient.ref} className="target-hero__ambient"/><div className="target-hero__person-frame" aria-hidden="true"><div ref={figure} className="target-hero__person-body" style={{'--person-mask': `url(${profileImage})`}}><img className="target-hero__person" src={profileImage} alt=""/><span className="target-hero__person-light"/></div></div></header>;
+}
 
 // Chilik's figure: light inside the silhouette, breathing only while the scene plays, depth toward a fine pointer,
 // nothing under reduced motion (also when it flips mid-session), no depth on touch, nothing left after unmount,
-// nothing at all in the legacy shell (the same Hero rendered outside .target-site).
+// nothing at all in the legacy shell (the same fixture rendered outside .target-site).
 let reduced, fine, queries;
 class MQL extends EventTarget {
   constructor(media) { super(); this.media = media; queries.push(this); }
@@ -34,7 +44,7 @@ beforeEach(async () => {
 afterEach(() => { cleanup(); gsap.globalTimeline.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const body = c => c.querySelector('.target-hero__person-body');
-const renderSite = () => render(<div className="target-site"><Hero /></div>);
+const renderSite = () => render(<div className="target-site"><FigureFixture /></div>);
 const flip = () => act(() => { queries.forEach(q => q.dispatchEvent(new Event('change'))); });
 const settleDepth = c => gsap.getTweensOf(body(c)).filter(t => t.vars.scaleY === undefined).forEach(t => t.progress(1));
 const pointer = (target, clientX, pointerType = 'mouse') => {
@@ -172,7 +182,7 @@ describe("Chilik's figure", () => {
   it('the legacy shell (no .target-site) gets no figure motion and no pointer listeners', async () => {
     // Spy where the method lives: spying on a subclass prototype leaves an own property behind for later files.
     const added = vi.spyOn(EventTarget.prototype, 'addEventListener');
-    const { container } = render(<Hero />);
+    const { container } = render(<FigureFixture />);
     const hero = container.querySelector('.target-hero');
     wide(hero);
     await playing(container, true);

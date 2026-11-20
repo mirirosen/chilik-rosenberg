@@ -7,12 +7,34 @@ import { useNavigation } from '../navigation/NavigationContext';
 import { settle } from '../animations/registry';
 import { DIST, EASE, STAGGER, fromInlineStart } from '../animations/tokens';
 import { mediaContext } from '../animations/mediaContext';
+import { bookingConversionCopy } from '../data/bookingConversion';
 
 const Header = ({ showVideos = false }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const actionCopy = bookingConversionCopy(i18n?.resolvedLanguage || i18n?.language || 'he');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dialogRef = useRef(null);
+  const moreRef = useRef(null);
   const { goToInquiry, cancelNavigation } = useNavigation();
+
+  useEffect(() => {
+    const closeOutside = event => { if (moreRef.current?.open && !moreRef.current.contains(event.target)) moreRef.current.open = false; };
+    const closeEscape = event => {
+      if (event.key !== 'Escape' || !moreRef.current?.open) return;
+      event.preventDefault(); moreRef.current.open = false;
+      moreRef.current.querySelector('summary')?.focus();
+    };
+    const mobile = window.matchMedia('(max-width: 1279px)');
+    const closeOnMobile = event => { if (event.matches && moreRef.current) moreRef.current.open = false; };
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('keydown', closeEscape);
+    mobile.addEventListener('change', closeOnMobile);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('keydown', closeEscape);
+      mobile.removeEventListener('change', closeOnMobile);
+    };
+  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -47,6 +69,7 @@ const Header = ({ showVideos = false }) => {
     // Keep real hrefs for keyboard, no-JS and modified-click navigation.
     if (event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)) return;
     if (event) event.preventDefault();
+    if (moreRef.current) moreRef.current.open = false;
     // Close the menu now (not in the effect cleanup), so focus can land on the destination afterwards.
     const dialog = dialogRef.current;
     if (dialog?.open) { dialog.close(); document.body.style.overflow = ''; }
@@ -62,14 +85,9 @@ const Header = ({ showVideos = false }) => {
     }
   };
 
-  const sections = [
-    ['about', 'header.about'],
-    ['journey', 'header.journey'],
-    ['menu', 'header.menu'],
-    ['lectures', 'header.lectures'],
-    ...(showVideos ? [['videos', 'tourVideos.nav']] : []),
-    ['date-selection', 'header.dates'],
-  ];
+  const primarySections = [['about', 'header.about'], ['journey', 'header.journey'], ['menu', 'header.menu'], ['faq', 'header.faq']];
+  const secondarySections = [['lectures', 'header.lectures'], ...(showVideos ? [['videos', 'tourVideos.nav']] : []), ['media', 'header.media']];
+  const sections = [...primarySections, ...secondarySections, ['date-selection', 'header.dates']];
 
   return (
     <>
@@ -78,20 +96,25 @@ const Header = ({ showVideos = false }) => {
           <span className="header-brand__full">{t('header.title')}</span>
           <span className="header-brand__short">{t('header.titleShort')}</span>
         </a>
-        <div className="hidden xl:flex gap-8 text-gray-200 text-sm items-center">
-          {sections.map(([id, label]) => (
+        <div className="desktop-navigation hidden xl:flex gap-8 text-gray-200 text-sm items-center">
+          {primarySections.map(([id, label]) => (
             <a key={id} href={`/#${id}`} onClick={event => scrollToSection(id, event)} className="nav-link">{t(label)}</a>
           ))}
-          <a href="/terms" className="nav-link text-gray-400 hover:text-white">{t('header.terms')}</a>
+          <details className="desktop-navigation-more" ref={moreRef}>
+            <summary>{t('header.more')}</summary>
+            <div>{secondarySections.map(([id, label]) => <a key={id} href={`/#${id}`} onClick={event => scrollToSection(id, event)}>{t(label)}</a>)}
+              <a href="/terms" onClick={() => { if (moreRef.current) moreRef.current.open = false; }}>{t('header.terms')}</a>
+            </div>
+          </details>
           <LanguageSwitcher />
           <button type="button" onClick={() => scrollToSection('date-selection')} className="header-cta bg-brand-gold text-brand-dark px-6 py-2 rounded-full font-black hover:scale-105 transition-all">
-            {t('header.register')}
+            {actionCopy.openAction}
           </button>
         </div>
         <button type="button" className="mobile-menu-trigger xl:hidden text-brand-gold" onClick={() => { cancelNavigation(); setMobileMenuOpen(true); }} aria-label={t('header.menuButton')} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" aria-haspopup="dialog">
           <Menu size={32} aria-hidden="true" />
         </button>
-        <a href="/#date-selection" className="mobile-header-cta xl:hidden" onClick={event => scrollToSection('date-selection', event)}>{t('header.upcomingTours')}</a>
+        <a href="/#date-selection" className="mobile-header-cta xl:hidden" onClick={event => scrollToSection('date-selection', event)}>{actionCopy.openAction}</a>
       </nav>
 
       <dialog ref={dialogRef} id="mobile-navigation" className="mobile-navigation" aria-label={t('header.menuButton')} onCancel={(event) => { event.preventDefault(); setMobileMenuOpen(false); }}>
@@ -105,7 +128,7 @@ const Header = ({ showVideos = false }) => {
           <a href="/terms" className="text-xl text-gray-300 font-serif">{t('header.terms')}</a>
           <LanguageSwitcher mobile />
           <button type="button" onClick={() => scrollToSection('date-selection')} className="bg-brand-gold text-black px-8 py-4 rounded-full font-black text-xl">
-            {t('header.register')}
+            {actionCopy.openAction}
           </button>
         </div>
       </dialog>

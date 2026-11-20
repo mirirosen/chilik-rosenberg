@@ -1,0 +1,10 @@
+:root {
+  --tour-paper: #f7f3eb;
+  --tour-surface: #fffdf8;
+  --tour-ink: #302c25;
+  --tour-muted: #6c6255;
+  --tour-accent: #e6b948;
+  --tour-link: #795719;
+  --tour-control-radius: 12px;
+  --tour-media-radius: 16px;
+}

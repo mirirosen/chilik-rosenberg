@@ -10,6 +10,7 @@ import Lectures from './components/Lectures';
 import Bio from './components/Bio';
 import TourVideos from './components/TourVideos';
 import MediaSection from './components/MediaSection';
+import MediaHighlights from './components/MediaHighlights';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import Terms from './components/Terms';
@@ -51,13 +52,13 @@ export default function InquiryApp({ bookingSection, bookingDiscovery } = {}) {
     <Header showVideos={populatedTourVideoGroups(tourVideos).length > 0} />
     <main ref={motion} id="main-content" tabIndex={-1}>
       {route === 'home' ? <>
-        <Hero showPlanningFacts={Boolean(bookingSection)} />{bookingDiscovery}<RatingBar />{bookingSection || <InquirySection />}<TourOverview />
+        <Hero showPlanningFacts={Boolean(bookingSection)} />{bookingDiscovery}<MediaHighlights language={i18n.resolvedLanguage || i18n.language} /><RatingBar />{bookingSection || <InquirySection />}<TourOverview />
         {/* Independent hydration boundaries keep below-fold work interruptible.
             Their complete HTML is still rendered at build time. */}
         <Suspense fallback={null}><TourInclusions /></Suspense>
         <Suspense fallback={null}><Journey /></Suspense>
-        <Suspense fallback={null}><Menu /></Suspense>
         <Suspense fallback={null}><TourVideos compact /></Suspense>
+        <Suspense fallback={null}><Menu /></Suspense>
         <Suspense fallback={null}><Lectures /></Suspense>
         <Suspense fallback={null}><Bio /></Suspense>
         <Suspense fallback={null}><MediaSection /></Suspense>
