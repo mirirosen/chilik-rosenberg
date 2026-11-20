@@ -25,3 +25,12 @@ it('retains opt-out/management/demo exclusions and never throws from diagnostic 
  window.history.replaceState({},'','/booking');window.gtag=()=>{throw Error('measurement blocked')};expect(()=>analytics.trackBookingError('details','validation_terms')).not.toThrow();
  analytics.__setMeasurementIdForTests('');expect(analytics.trackCalendarView()).toBe(false);
 });
+
+it('legacy booking, checkout and verified purchase measurement cannot throw into customer flow',()=>{
+ window.gtag=()=>{throw Error('blocked sink')};
+ expect(()=>analytics.trackBeginBooking({participants:2,pricePerPerson:250,totalPrice:500})).not.toThrow();
+ expect(analytics.trackBeginCheckout({participants:2,pricePerPerson:250,totalPrice:500})).toBe(false);
+ const paid={bookingId:'BK-'+'c'.repeat(24),paymentStatus:'paid',status:'confirmed',totalPrice:500,participants:2,pricePerPerson:250};
+ expect(analytics.trackPurchase(paid)).toBe(false);expect(localStorage.getItem('chilik-analytics-purchase:'+paid.bookingId)).toBeNull();
+ window.gtag=function(){window.dataLayer.push(arguments)};expect(analytics.trackPurchase(paid)).toBe(true);expect(analytics.trackPurchase(paid)).toBe(false);
+});

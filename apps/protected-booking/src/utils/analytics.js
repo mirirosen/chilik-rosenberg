@@ -145,8 +145,8 @@ export function track(name, params = {}) {
   // This is the visible interface language, not browser language or booking data.
   const language = document.documentElement.lang.toLowerCase().split('-')[0];
   if (language === 'he' || language === 'en') measured.page_language = language;
-  window.gtag('event', name, measured);
-  return true;
+  try { window.gtag('event', name, measured); return true; }
+  catch { return false; } // Measurement must never prevent booking, redirect or confirmation.
 }
 
 // WhatsApp and phone links anywhere on the site, via one delegated listener.

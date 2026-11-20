@@ -223,3 +223,14 @@ describe('offline booking components', () => {
   });
 
 });
+
+it('a legacy analytics exception cannot stop a successful checkout redirect',async()=>{
+ const analytics=await import('../../src/utils/analytics');analytics.__setMeasurementIdForTests('G-CXTM7ZJZYX');analytics.initAnalytics();
+ const previous=window.gtag;
+ try {
+  const redirect=vi.fn();mocks.createCreditPayment.mockResolvedValue(CHECKOUT);
+  const {container}=render(<BookingForm onPaymentRedirect={redirect}/>);fillForm(container);
+  window.gtag=()=>{throw Error('blocked analytics')};fireEvent.submit(container.querySelector('form'));
+  await waitFor(()=>expect(redirect).toHaveBeenCalledWith(CHECKOUT.paymentUrl));expect(mocks.createCreditPayment).toHaveBeenCalledTimes(1);
+ } finally {window.gtag=previous;analytics.__setMeasurementIdForTests('');document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]').forEach(s=>s.remove());}
+});
