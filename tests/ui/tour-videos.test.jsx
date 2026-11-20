@@ -116,11 +116,11 @@ describe('provided tour videos and empty-group behavior', () => {
     expect(document.body.style.overflow).toBe('');
   });
 
-  it.each(['he', 'en'])('places populated %s videos after the menu, keeps inquiry earlier, and resolves #videos', async language => {
+  it.each(['he', 'en'])('places populated %s videos before the menu, keeps inquiry earlier, and resolves #videos', async language => {
     await i18n.changeLanguage(language); populate(); window.history.replaceState({}, '', '/#videos');
     const { container } = render(<InquiryApp />);
     const section = container.querySelector('#videos');
-    expect(section.previousElementSibling.id).toBe('menu'); expect(section.nextElementSibling.id).toBe('lectures');
+    expect(section.previousElementSibling.id).toBe('journey'); expect(section.nextElementSibling.id).toBe('menu');
     expect(container.querySelector('#date-selection').compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(section.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto' });
     expect(document.documentElement.dir).toBe(language === 'he' ? 'rtl' : 'ltr');

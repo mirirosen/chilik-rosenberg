@@ -28,44 +28,42 @@ describe('locally hosted illustrative imagery', () => {
       }
     }
   });
-  it('labels generated hero and tour images without fabricating lecturer photography', () => {
+  it('identifies original hero and tour media without fabricating lecturer photography', () => {
     const { container } = render(<><Hero /><RatingBar /></>);
-    // The hero is now real footage (plan §18, S7): no AI disclosure there; the tour pick keeps its AI cholent label.
-    expect(screen.getAllByText(he.imagery.generated)).toHaveLength(1);
+    // Both public scenes are original footage. The menu retains its separate illustration disclosure.
+    expect(screen.queryAllByText(he.imagery.generated)).toHaveLength(0);
+    expect(screen.getByText(he.imagery.previousVisit)).toBeTruthy();
     expect(container.querySelector('.target-hero .target-hero__image-note')).toBeNull();
-    expect(container.querySelector('.target-tour-pick').textContent).toContain(he.imagery.generated);
+    expect(container.querySelector('.target-tour-pick').textContent).toContain(he.imagery.previousVisit);
     expect(container.querySelector('.target-hero__food').getAttribute('src')).toBe('/media/hero/bnei-brak-sequence-poster.webp');
     expect(container.querySelector('.target-hero__food').getAttribute('fetchpriority')).toBe('high');
     expect(container.querySelector('.target-tour-pick--portrait img').getAttribute('src')).toContain('hilik-cutout-provided');
     expect(Object.keys(he.imagery)).toEqual(Object.keys(en.imagery));
   });
-  it('announces the tour card AI disclosure as its description, not its name', () => {
+  it('announces the real tour card provenance as its description, not its name', () => {
     render(<RatingBar />);
     const tours = screen.getByRole('link', { name: he.intro.tours });
     const note = document.getElementById(tours.getAttribute('aria-describedby'));
-    expect(note.textContent).toBe(he.imagery.generated);
+    expect(note.textContent).toBe(he.imagery.previousVisit);
     for (const img of document.querySelectorAll('.target-tour-pick img')) {
       expect(img.getAttribute('loading')).toBe('lazy');
       expect(Number(img.getAttribute('width'))).toBeGreaterThan(0);
       expect(Number(img.getAttribute('height'))).toBeGreaterThan(0);
     }
   });
-  it('requests the tour photo at the width it is drawn in the taller card, not the card width', () => {
+  it('uses the existing documentary source with its measured landscape dimensions', () => {
     const { container } = render(<RatingBar />);
-    const sizes = container.querySelector('.target-tour-pick:not(.target-tour-pick--portrait) img').getAttribute('sizes');
-    const [mobile, tablet, desktop] = sizes.split(',').map(part => parseFloat(part.trim().split(' ').pop()));
-    // 16:9 cover in a 4/5 card: 545px tall on desktop → ≈969px wide; 6/5 mobile ≈ 1.48 × width; 2-up 4/5 tablet ≈ 1.11 × vw.
-    expect(desktop).toBeGreaterThanOrEqual(969);
-    expect(mobile).toBeGreaterThanOrEqual(148);
-    expect(tablet).toBeGreaterThanOrEqual(111);
+    const img = container.querySelector('.target-tour-pick--documentary img');
+    expect(img.getAttribute('src')).toBe('/media/posters/bneibrak-zoo-720p.webp');
+    expect([img.width,img.height]).toEqual([640,360]);
+    const bytes=readFileSync('public'+img.getAttribute('src'));
+    expect(bytes.toString('ascii',8,12)).toBe('WEBP');
   });
-  it('enlarges the lecturer cutout only in the mobile card', () => {
-    const css = readFileSync('src/site-design.css', 'utf8');
-    const rule = '.target-site .target-tour-pick--portrait .target-tour-pick__visual img { height: 132%; bottom: -25%; }';
-    const mobile = css.slice(css.indexOf('@media(max-width:600px)'));
-    // 376×513 cutout, alpha 50–422px: 132% of the 6/5 card puts the head ~6% down and the figure over ~94% of its height.
-    expect(mobile.slice(0, mobile.indexOf('\n}'))).toContain(rule);
-    expect(css.indexOf(rule)).toBe(css.lastIndexOf(rule));
-    expect(css).toContain('.target-site .target-tour-pick--portrait .target-tour-pick__visual img { inset: auto 0 -14.5%; height: 100%;');
+  it('retains the supplied portrait and its actual dimensions', () => {
+    const { container } = render(<RatingBar />);
+    const img=container.querySelector('.target-tour-pick--portrait img');
+    expect(img.getAttribute('src')).toContain('hilik-cutout-provided');
+    expect([img.width,img.height]).toEqual([376,513]);
+    expect(readFileSync('src/assets/hilik-cutout-provided.webp').toString('ascii',8,12)).toBe('WEBP');
   });
 });

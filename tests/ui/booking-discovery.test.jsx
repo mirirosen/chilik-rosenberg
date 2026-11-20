@@ -23,7 +23,7 @@ describe('nearby dates and distinct booking choices', () => {
     const dates=await screen.findAllByRole('button', { name:/2026/ });
     expect(dates.map(b=>b.dataset.tourDate)).toEqual(['2026-11-19','2026-11-26','2026-12-10']);
     fireEvent.click(dates[1]); expect(choose).toHaveBeenCalledWith('2026-11-26');
-    expect(screen.getByRole('link', {name:'בחירת מועד לסיור פתוח'}).getAttribute('href')).toBe('/booking');
+    expect(screen.getByRole('link', {name:'בחירת מועד'}).getAttribute('href')).toBe('/booking');
     expect(screen.getByRole('link', {name:'פרטי סיור לקבוצה'}).getAttribute('href')).toBe('/guides/private-tour-bnei-brak.html');
   });
   it('removes expired suggestions and keeps a useful regular booking path', async () => {
@@ -33,7 +33,7 @@ describe('nearby dates and distinct booking choices', () => {
     expect(screen.getAllByRole('button', {name:/2026/})).toHaveLength(3);
     await act(async()=>{ await vi.advanceTimersByTimeAsync(60001); });
     expect(screen.queryAllByRole('button', {name:/2026/})).toHaveLength(0);
-    expect(screen.getByRole('link',{name:'Choose a public tour date'}).getAttribute('href')).toBe('/booking');
+    expect(screen.getByRole('link',{name:'Choose a date'}).getAttribute('href')).toBe('/booking');
   });
   it('does not advertise unknown or closed dates on an outage and aborts the pending read on unmount', async () => {
     let signal; const load=({signal:s})=>{signal=s;return Promise.reject(Error('unavailable'));};

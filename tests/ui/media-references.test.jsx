@@ -31,8 +31,8 @@ describe('media directory', () => {
     state.language = language;
     const copy = language === 'he' ? he.media : en.media;
     const { container } = render(<MediaSection />);
-    expect(screen.getAllByRole('link')).toHaveLength(6);
-    fireEvent.click(container.querySelector('.media-show-more'));
+    expect(container.querySelector('.media-reference-grid').querySelectorAll('a')).toHaveLength(3);
+    const details = container.querySelector('details'); details.open = true; fireEvent(details, new Event('toggle'));
     expect(screen.getAllByRole('link')).toHaveLength(38);
     for (const link of screen.getAllByRole('link')) {
       expect(link.getAttribute('target')).toBe('_blank');
@@ -42,12 +42,12 @@ describe('media directory', () => {
       const filter = screen.getByRole('button', { name: new RegExp(copy.categories[category]) });
       fireEvent.click(filter);
       expect(filter.getAttribute('aria-pressed')).toBe('true');
-      expect(screen.getAllByRole('link')).toHaveLength(6);
-      fireEvent.click(container.querySelector('.media-show-more'));
+      expect(container.querySelector('.media-reference-grid').querySelectorAll('a')).toHaveLength(3);
+      const details = container.querySelector('details'); details.open = true; fireEvent(details, new Event('toggle'));
       expect(screen.getAllByRole('link').map(link => link.getAttribute('href'))).toEqual(mediaReferences.filter(item => item.category === category).map(item => item.url));
-      expect(container.querySelector('.media-show-more').getAttribute('aria-expanded')).toBe('true');
-      fireEvent.click(container.querySelector('.media-show-more'));
-      expect(screen.getAllByRole('link')).toHaveLength(6);
+      expect(container.querySelector('details').open).toBe(true);
+      details.open = false; fireEvent(details, new Event('toggle'));
+      expect(container.querySelector('.media-reference-grid').querySelectorAll('a')).toHaveLength(3);
     }
   });
 });

@@ -18,12 +18,15 @@
     "menu": "What will we eat?",
     "dates": "When is the tour?",
     "terms": "Terms",
-    "register": "Register for Tour",
+    "register": "Choose a date",
     "toWebsite": "To Main Site",
     "logout": "Logout",
     "menuButton": "Menu",
     "lectures": "Talks",
-    "upcomingTours": "Upcoming tours"
+    "upcomingTours": "Choose a date",
+    "more": "More",
+    "faq": "FAQ",
+    "media": "In the media"
   },
   "hero": {
     "planningFacts": "Public tour details",
@@ -40,7 +43,7 @@
     "keyword": "Bnei Brak culinary tour",
     "title": "Experience the Haredi world\nas you never have before",
     "subtitle": "Culinary and cultural tours, and talks from me, a Haredi man from Bnei Brak, offering an authentic, thoughtful, light-hearted and humorous glimpse into my world.",
-    "cta": "Book a tour",
+    "cta": "Choose a date",
     "termsReminder": "Before registering, please read the terms and conditions"
   },
   "booking": {
@@ -356,7 +359,8 @@
         "desc": "How technology meets tradition and how people surf the web in Bnei Brak?"
       }
     },
-    "eyebrow": "Get to know it from the inside"
+    "eyebrow": "Get to know it from the inside",
+    "more": "{{count}} more stops"
   },
   "menu": {
     "title": "Taste, experience, discover",
@@ -415,7 +419,9 @@
     "reshet": "Reshet 13",
     "readArticle": "Read the article",
     "watchEpisode": "Watch episode",
-    "watchSeries": "Watch series"
+    "watchSeries": "Watch series",
+    "more": "{{count}} more references",
+    "count": "{{count}} references"
   },
   "bookingSection": {
     "title": "When is the tour?",
@@ -569,7 +575,8 @@
   },
   "imagery": {
     "generated": "AI-generated illustration",
-    "menuDisclosure": "Food images are AI-generated illustrations. Dishes served may vary."
+    "menuDisclosure": "Food images are AI-generated illustrations. Dishes served may vary.",
+    "previousVisit": "From a previous tour"
   },
   "demo": {
     "title": "Booking demo · Simulated payment",
@@ -622,6 +629,7 @@
       "tour-moments": "Moments from the tour"
     },
     "unsupported": "Your browser does not support video playback.",
-    "openVideo": "Open the video"
+    "openVideo": "Open the video",
+    "more": "{{count}} more videos"
   }
 }
