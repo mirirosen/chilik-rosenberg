@@ -2,17 +2,19 @@ import { escapeHtml as e, metadataHtml } from './organic-html.mjs';
 import { siteOrigin } from '../src/data/organicContent.js';
 import { bakeryVideo, bakeryCaptionCues } from '../src/data/organicVideo.js';
 import { TOUR_FACTS_UPDATED } from '../src/data/tourServiceFacts.js';
+import { PRIVATE_GUIDE_UPDATED } from '../src/data/privateTourGuide.js';
 import { privateTourContactHref } from '../src/data/privateTourContact.js';
 
 export function guideEnrichment({ path, language }) {
   const english = language === 'en', privateGroup = path.includes('private-tour');
+  const updated = privateGroup ? PRIVATE_GUIDE_UPDATED : TOUR_FACTS_UPDATED;
   const publisher = english ? 'Hilik Tours website team' : 'צוות אתר סיורי חיליק';
   const image = privateGroup ? '/media/posters/tour-conversations.webp' : bakeryVideo.poster;
   const alt = privateGroup ? 'שיחה עם משתתפים מתוך סרטון הסיור' : english ? 'Vizhnitz challahs beside the ovens, from Hilik’s video' : 'חלות ויזניץ ליד התנורים, מתוך הסרטון של חיליק';
   const caption = privateGroup ? 'המפגשים שבדרך — מתוך סרטון הסיור של חיליק.' : english ? 'A still from Hilik’s Vizhnitz challah clip.' : 'החלות המפורסמות והידועות של מאפיית ויזניץ — מתוך הסרטון של חיליק.';
-  const article = { '@type': 'Article', '@id': siteOrigin + path + '#article', mainEntityOfPage: { '@id': siteOrigin + path + '#webpage' }, author: { '@type': 'Organization', '@id': siteOrigin + '/#site-editors', name: publisher, url: siteOrigin + '/' }, publisher: { '@id': siteOrigin + '/#organization' }, about: { '@id': siteOrigin + '/#tour' }, inLanguage: language, dateModified: TOUR_FACTS_UPDATED, image: siteOrigin + image };
-  const updatedLabel = new Intl.DateTimeFormat(english ? 'en-GB' : 'he-IL', { day: 'numeric', month: english ? 'long' : 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(TOUR_FACTS_UPDATED));
-  const byline = `<p class="guide-editorial">${e(publisher)} · ${english ? 'Updated' : 'עודכן'} <time datetime="${TOUR_FACTS_UPDATED}">${e(updatedLabel)}</time></p>`;
+  const article = { '@type': 'Article', '@id': siteOrigin + path + '#article', mainEntityOfPage: { '@id': siteOrigin + path + '#webpage' }, author: { '@type': 'Organization', '@id': siteOrigin + '/#site-editors', name: publisher, url: siteOrigin + '/' }, publisher: { '@id': siteOrigin + '/#organization' }, about: { '@id': siteOrigin + '/#tour' }, inLanguage: language, dateModified: updated, image: siteOrigin + image };
+  const updatedLabel = new Intl.DateTimeFormat(english ? 'en-GB' : 'he-IL', { day: 'numeric', month: english ? 'long' : 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(updated));
+  const byline = `<p class="guide-editorial">${e(publisher)} · ${english ? 'Updated' : 'עודכן'} <time datetime="${updated}">${e(updatedLabel)}</time></p>`;
   const figure = `<figure class="guide-photo"><img src="${image}" alt="${e(alt)}" width="540" height="960" loading="lazy"><figcaption>${e(caption)}</figcaption></figure>`;
   const original = privateGroup ? '' : `<section class="guide-source-story"><h2>${english ? 'A moment from Hilik’s tour: Vizhnitz challah' : 'רגע מתוך הסיור של חיליק: חלות ויזניץ'}</h2><p>${english ? 'In his short clip, Hilik talks about the challahs beside the ovens and different preferences for their baking. Watching the clip gives a first-hand example of the food stories he shares. The footage is from a previous visit; it does not promise entry into the bakery or a particular stop on a future tour.' : 'בקטע המצולם חיליק מדבר על החלות ליד התנורים ועל העדפות שונות של מידת האפייה. הסרטון נותן דוגמה ממקור ראשון לסיפורים שמלווים את האוכל. זהו תיעוד מביקור קודם, ללא הבטחת כניסה למאפייה או לתחנה מסוימת בסיור עתידי.'}</p><p><a href="${bakeryVideo.path}">${english ? 'Watch the challah clip with its on-screen text and English translation' : 'לצפייה בסרטון החלות, בכיתוב ובתרגום לאנגלית'}</a></p></section>`;
   return { article, html: byline + figure + original };
@@ -25,7 +27,7 @@ export function guideTracking({ mode, analyticsScript, language = 'he' }) {
 }
 
 export function videoSchema() {
-  return { '@type': 'VideoObject', '@id': siteOrigin + bakeryVideo.path + '#video', name: bakeryVideo.name, description: bakeryVideo.description, thumbnailUrl: [siteOrigin + bakeryVideo.poster], uploadDate: bakeryVideo.uploadDate, duration: bakeryVideo.duration, contentUrl: siteOrigin + bakeryVideo.src, inLanguage: 'he', creator: { '@id': siteOrigin + '/#chilik' }, publisher: { '@id': siteOrigin + '/#organization' }, transcript: bakeryCaptionCues.map(c => c.he).join(' ') };
+  return { '@type': 'VideoObject', '@id': siteOrigin + bakeryVideo.path + '#video', name: bakeryVideo.name, description: bakeryVideo.description, thumbnailUrl: [siteOrigin + bakeryVideo.poster], uploadDate: bakeryVideo.uploadDate, duration: bakeryVideo.duration, contentUrl: siteOrigin + bakeryVideo.src, inLanguage: 'he', creator: { '@type': 'Person', '@id': siteOrigin + '/#chilik', name: 'חיליק רוזנברג', url: siteOrigin + '/' }, publisher: { '@id': siteOrigin + '/#organization' }, transcript: bakeryCaptionCues.map(c => c.he).join(' ') };
 }
 
 export function videoVtt(language) {

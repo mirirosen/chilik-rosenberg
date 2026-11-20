@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { privateTourGuide, privateTourFaqs } from '../src/data/privateTourGuide.js';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/data/organicContent.js';
@@ -26,22 +27,17 @@ const enSections = [
   ['How should you prepare?', `Wear modest, respectful clothing. ${tourServiceFacts.en.accessibility} ${tourServiceFacts.en.kosher} ${tourServiceFacts.en.dietary} The meeting point is in Bnei Brak; the exact address is sent during the week of your tour. Ask Hilik about parking and transport before arrival. Tours are guided in Hebrew and English.`],
   ['An open tour or a private group?', 'Before joining an open tour, check which dates are available and how to confirm your booking. A group can ask Hilik about a private tour with timing and content agreed beforehand. The listed price of ₪250 per guest relates to the tour shown on the website and is not a quotation for a private group. Contact Hilik for the group’s requirements, language and terms.'],
 ];
-const privateSections = [
-  ['למי מיועד סיור פרטי בבני ברק?', `${tourServiceFacts.he.privateGroup} ${tourServiceFacts.he.privateWindow} מפגש חברים, צוות או קבוצה שמתעניינת באוכל ובחיים החרדיים יכולים לתאם מועד ותוכן מראש. גילי המשתתפים וצורכי הגישה חשובים לתכנון.`],
-  ['אילו פרטים כדאי להעביר לחיליק?', 'הכינו את המועד או טווח המועדים הרצוי, מספר המשתתפים, גילאים בקבוצה ושפת ההדרכה המבוקשת. ספרו מה מעניין אתכם: אוכל יהודי, היכרות עם העיר או שיחה על התרבות החרדית. אם נדרשת התאמת הליכה, כיסאות גלגלים או עגלות, ציינו זאת בתחילת הבירור. כך אפשר לברר את מסלול הסיור ואת התאמת התחנות לפני קבלת החלטה.'],
-  ['איך מתאמים את האוכל ואת הנגישות?', `${tourServiceFacts.he.kosher} ${tourServiceFacts.he.dietary} ${tourServiceFacts.he.accessibility} המאכלים והתחנות נקבעים לפי התיאום; אין כאן תפריט פרטי קבוע.`],
-  ['מה המחיר, משך הסיור ונקודת המפגש?', 'הסיור המוצג באתר עולה 250 ש״ח למשתתף ונמשך בדרך כלל כשעתיים וחצי עד שלוש שעות. המחיר והתנאים לסיור פרטי דורשים תיאום נפרד; אין להשתמש במחיר הסיור הפתוח כהצעת מחיר לקבוצה. יש לברר מראש את משך המפגש המתוכנן, נקודת ההתחלה, חניה, לבוש ותנאי ביטול ודחייה.'],
-  ['איך מתקדמים מהבירור להזמנה?', 'פונים לחיליק עם פרטי הקבוצה ומבררים זמינות והתאמה. לפני האישור ודאו שהמועד, המחיר, התוכן ודרישות מיוחדות ברורים לשני הצדדים. פנייה ב־WhatsApp היא התחלת בירור ואינה שומרת מקום או מאשרת סיור פרטי. אם אתם מעוניינים להצטרף לסיור פתוח, חזרו לאתר לפרטי ההזמנה או פנו לחיליק לבירור.'],
-];
+const privateSections = privateTourGuide.sections;
 const pages = [
   { path: guidePaths[0], language: 'he', title: 'סיור קולינרי בבני ברק: אוכל, מחיר והכנה | חיליק רוזנברג', h1: 'סיור קולינרי בבני ברק: מה טועמים ואיך מתכוננים?', description: 'מה טועמים בסיור אוכל בבני ברק, למה מבקרים בחמישי בערב ואיך מתכוננים? מדריך ללבוש, כשרות, נגישות, מחיר ותיאום עם חיליק רוזנברג.', sections: heSections, alternate: guidePaths[2] },
-  { path: guidePaths[1], language: 'he', title: 'סיור פרטי בבני ברק לקבוצה | חיליק רוזנברג', h1: 'סיור פרטי בבני ברק: איך מתכננים מפגש לקבוצה?', description: 'תכנון סיור פרטי בבני ברק עם חיליק רוזנברג: מועד, מספר משתתפים, אוכל, כשרות, נגישות ותנאי ההזמנה. פונים לתיאום אישי לקבוצה.', sections: privateSections },
+  { path: guidePaths[1], language: 'he', ...privateTourGuide, sections: privateSections },
   { path: guidePaths[2], language: 'en', title: 'Bnei Brak Food Tour: Price & Planning | Hilik Rozenberg', h1: 'Bnei Brak food tour: what to taste and how to prepare', description: 'Plan a Bnei Brak food tour with Hilik Rozenberg: Jewish dishes, Thursday evenings at 20:00, tours in Hebrew and English, clothing, dietary questions and private groups.', sections: enSections, alternate: guidePaths[0] },
 ];
 fs.mkdirSync(path.join(out, 'guides'), { recursive: true });
 function guideFaqs(page) {
   const faqs = faqsFor(page.language, mode === 'booking');
-  const keys = page.path.includes('private-tour') ? ['q1', 'q3', 'q4', 'q10', 'q11', 'q12'] : ['q3', 'q7', 'q8', 'q13', 'q4', 'q5', 'q10', 'q11', 'q12'];
+  if (page.path.includes('private-tour')) return privateTourFaqs(faqs);
+  const keys = ['q3', 'q7', 'q8', 'q13', 'q4', 'q5', 'q10', 'q11', 'q12'];
   return keys.map(key => faqs[key]);
 }
 function planningDetails(page) {
@@ -81,7 +77,7 @@ function closingCta(page) {
 for (const page of pages) {
   const copy = organicCopy[page.language];
   const intro = page.path === guidePaths[1]
-    ? `${tourServiceFacts.he.privateGroup} לתכנון סיור פרטי בבני ברק עם חיליק רוזנברג, פונים עם המועד המבוקש ושפת ההדרכה. המחיר, התחנות וההתאמות לקבוצה נקבעים בתיאום אישי.`
+    ? privateTourGuide.intro
     : copy.intro;
   const primaryContact = page.path.includes('private-tour')
     ? `<a href="${e(privateTourContactHref('he'))}" data-contact-context="private_tour">${e(copy.contact)}</a>`

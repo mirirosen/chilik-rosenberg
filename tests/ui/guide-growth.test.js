@@ -7,7 +7,7 @@ it('guide attribution and photographs describe the actual publisher and approved
   for (const [path, language] of [['/guides/bnei-brak-food-tour.html','he'],['/guides/private-tour-bnei-brak.html','he'],['/guides/bnei-brak-food-tour-en.html','en']]) {
     const result = guideEnrichment({path,language});
     const doc = new JSDOM(result.html).window.document;
-    expect(doc.querySelector('time').dateTime).toBe('2026-11-17');
+    expect(doc.querySelector('time').dateTime).toBe(path.includes('private-tour')?'2026-11-20':'2026-11-17');
     expect(result.article.author['@type']).toBe('Organization');
     expect(result.article.dateModified).toBe(doc.querySelector('time').dateTime);
     const image = doc.querySelector('img');
@@ -22,7 +22,7 @@ it('the watch page visibly exposes the same real video, date and text as its str
   const graph = JSON.parse(doc.querySelector('#organic-schema').textContent)['@graph'];
   const video = graph.find(n=>n['@type']==='VideoObject');
   expect(doc.querySelectorAll('h1')).toHaveLength(1); expect(doc.querySelectorAll('video')).toHaveLength(1);
-  expect(video.uploadDate).toBe('2026-01-26'); expect(doc.querySelector('[data-video-published]').dateTime).toBe(video.uploadDate);
+  expect(video.uploadDate).toBe('2026-01-26T08:45:40-08:00'); expect(video.creator).toMatchObject({ '@type':'Person', name:'חיליק רוזנברג', url:'https://www.chilik-tours.com/' }); expect(doc.querySelector('[data-video-published]').dateTime).toBe(video.uploadDate);
   expect(video.contentUrl).toBe('https://www.chilik-tours.com'+doc.querySelector('video').getAttribute('src'));
   expect(doc.querySelector('video').hasAttribute('autoplay')).toBe(false);
   expect(doc.querySelectorAll('track')).toHaveLength(2);

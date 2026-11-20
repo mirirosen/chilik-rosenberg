@@ -13,6 +13,8 @@ import { warmPaymentFunctions } from '../utils/paymentWarmup';
 import hostPortrait from '../../../../src/assets/hilik-cutout-provided.png';
 import './BookingSection.css';
 import MobileBookingBar from '../../../../src/components/MobileBookingBar';
+import BookingSourceStory from '../../../../src/components/BookingSourceStory';
+import { trackCalendarView, trackTourDateSelected, trackBookingError } from '../utils/analytics';
 
 const PRICE_PER_PERSON = 250;
 
@@ -28,6 +30,22 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const selectedCard = useRef(null);
   const continueButton = useRef(null);
   const heading = useRef(null);
+  const calendarChoices = useRef(null), calendarObserved = useRef(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  useEffect(() => {
+    const record = () => {
+      if (calendarObserved.current) return;
+      calendarObserved.current = true;
+      setCalendarVisible(true);
+      if (!IS_PREPROD) trackCalendarView();
+    };
+    if (typeof IntersectionObserver !== 'function') { record(); return; }
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { record(); observer.disconnect(); }
+    });
+    if (calendarChoices.current) observer.observe(calendarChoices.current);
+    return () => observer.disconnect();
+  }, []);
   const restoredFocus = useRef(false);
   const [isChecking, setIsChecking] = useState(false);
   const [checkError, setCheckError] = useState('');
@@ -36,6 +54,9 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   useEffect(() => { warmPaymentFunctions(); }, []);
 
   const cloudData = useFirebaseData();
+  useEffect(() => {
+    if (!IS_PREPROD && calendarVisible && cloudData?.availabilityStatus === 'error') trackBookingError('date_selection', 'availability_unavailable');
+  }, [calendarVisible, cloudData?.availabilityStatus]);
   const thursdays = useMemo(() => getUpcomingThursdays(undefined, i18n.language), [i18n.language]);
   const months = useMemo(() => [...new Set(thursdays.map(date => date.dateStr.slice(0, 7)))], [thursdays]);
   const monthIndex = Math.max(0, months.indexOf(visibleMonth));
@@ -78,6 +99,10 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
   const canContinue = selectedDate && status.available && Number.isInteger(participants) && participants >= 1 && participants <= maxParticipants;
 
   const selectDate = (dateStr) => {
+    if (!IS_PREPROD && dateStr && dateStr !== selectedDate) {
+      if (getStatus(dateStr).available) trackTourDateSelected();
+      else trackBookingError('date_selection', 'date_unavailable');
+    }
     setSelectedDate(dateStr);
     if (months.includes(dateStr.slice(0, 7))) setVisibleMonth(dateStr.slice(0, 7));
     setCheckError('');
@@ -104,6 +129,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         }
         const freshStatus = getStatus(selectedDate, fresh);
         if (!freshStatus.available || freshStatus.spots < participants) {
+          trackBookingError('date_selection', 'date_unavailable');
           setCheckError(t('bookingSection.notEnoughSpots', { date: fmtDate(selectedDate), requested: participants, available: freshStatus.spots || 0 }));
           return;
         }
@@ -111,6 +137,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
       if (onContinue) onContinue(selectedDate, participants);
       else window.location.assign(`/booking?date=${encodeURIComponent(selectedDate)}&participants=${participants}`);
     } catch {
+      if (!IS_PREPROD) trackBookingError('date_selection', 'availability_unavailable');
       setCheckError(t('common.availabilityUnavailable'));
     } finally {
       checking.current = false;
@@ -197,7 +224,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
           </div>
         </div>
 
-        <div className="booking-screen__dates" dir={dir} aria-label={t('bookingSection.step1Title')}>
+        <div ref={calendarChoices} className="booking-screen__dates" dir={dir} aria-label={t('bookingSection.step1Title')}>
           {visibleDates.map((thursday) => {
             const dateStatus = getStatus(thursday.dateStr);
             const selected = selectedDate === thursday.dateStr;
@@ -280,6 +307,7 @@ const BookingSection = ({ onContinue, initialSelection, standalone = false } = {
         )}
         <p className="booking-screen__no-charge">{t('bookingDesign.noCharge')}</p>
         <p className="booking-screen__secure"><Lock size={13} aria-hidden="true" />{t('bookingDesign.secureNote')}</p>
+        <BookingSourceStory language={i18n.language} />
       </div>
       {canContinue && <MobileBookingBar language={i18n.language} date={selectedDate} participants={participants} total={participants * PRICE_PER_PERSON} actionLabel={t(isChecking ? 'bookingSection.checkingAvailability' : 'bookingDesign.continue')} onContinue={continueToBooking} disabled={isChecking} primaryActionRef={continueButton} />}
     </section>

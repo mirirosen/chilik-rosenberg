@@ -1,14 +1,15 @@
 // Owner-provided source: public/media/tour/README.md. YouTube publication date
 // checked via public metadata for CUYEMWo96u8 on 2026-11-16. Duration: ffprobe.
 export const WATCH_VIDEO_PATH = '/videos/vizhnitz-challah.html';
-export const GUIDE_UPDATED = '2026-11-17';
+export const GUIDE_UPDATED = '2026-11-20';
 export const bakeryVideo = {
   path: WATCH_VIDEO_PATH,
   name: 'החלות המפורסמות והידועות של מאפיית ויזניץ',
   description: 'סרטון קצר של חיליק רוזנברג על החלות של ויזניץ והעדפות האפייה, עם כיתוב לקריאה ותרגום לאנגלית.',
   src: '/media/tour/vizhnitz-bakery.mp4',
   poster: '/media/posters/vizhnitz-bakery.webp',
-  uploadDate: '2026-01-26',
+  // Exact publishDate/uploadDate from the official YouTube watch-page microformat, checked20November2026.
+  uploadDate: '2026-01-26T08:45:40-08:00',
   duration: 'PT12.721S',
   source: 'https://www.youtube.com/watch?v=CUYEMWo96u8',
 };
