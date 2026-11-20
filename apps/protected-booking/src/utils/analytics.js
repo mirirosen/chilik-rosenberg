@@ -196,3 +196,24 @@ export function trackPurchase(state) {
   }
   return ok;
 }
+
+// Diagnostic events carry fixed categories only. Measurement must never block booking.
+const BOOKING_ERRORS = {
+  date_selection: ['date_unavailable', 'availability_unavailable'],
+  details: ['validation_name', 'validation_phone', 'validation_email', 'validation_date', 'validation_participants', 'validation_payment_method', 'validation_terms'],
+  payment: ['checkout_unavailable', 'date_unavailable', 'session_unavailable', 'request_closed'],
+};
+function observeBooking(name, params) {
+  try {
+    if (!loaded || !analyticsConfigured() || consentState() !== 'granted' || window.location.pathname === MANAGEMENT_PATH) return false;
+    return track(name, params);
+  } catch { return false; }
+}
+export const trackCalendarView = () => observeBooking('view_booking_calendar', { booking_stage: 'date_selection' });
+export const trackTourDateSelected = () => observeBooking('select_tour_date', { booking_stage: 'date_selection' });
+export function trackBookingError(stage, code) {
+  try {
+    if (!Object.prototype.hasOwnProperty.call(BOOKING_ERRORS, stage) || !BOOKING_ERRORS[stage].includes(code)) return false;
+    return observeBooking('booking_error', { booking_stage: stage, booking_error_code: code });
+  } catch { return false; }
+}

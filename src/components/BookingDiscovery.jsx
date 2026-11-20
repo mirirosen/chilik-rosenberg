@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { trackTourDateSelected } from '../../apps/protected-booking/src/utils/analytics';
 import { bookingConversionCopy, conversionDate } from '../data/bookingConversion';
 import { privateTourContactHref } from '../data/privateTourContact';
 import { freshAvailabilityRow } from '../../apps/protected-booking/src/utils/calendarAvailability';
@@ -29,7 +30,7 @@ export default function BookingDiscovery({ language='he', loadAvailability, onSe
         <div className="booking-discovery__nearby" aria-labelledby="booking-nearby-title"><h4 id="booking-nearby-title">{copy.dates}</h4>
           {dates.length>0 ? <><div className="booking-discovery__dates">{dates.map(date=><button type="button" key={date} aria-label={copy.dateAction + ' ' + conversionDate(date,language)} data-tour-date={date} onClick={()=>{
             const current=freshAvailabilityRow(data,date);
-            if(current?.available && current.availableSpots>0 && isSelectableTourDate(date)) onSelectDate(date);
+            if(current?.available && current.availableSpots>0 && isSelectableTourDate(date)) { trackTourDateSelected(); onSelectDate(date); }
             else setData(null);
           }}>{conversionDate(date,language)}</button>)}</div><p className="booking-discovery__note">{copy.availability}</p></> : <p role="status">{loading?copy.loading:copy.fallback}</p>}
         </div>

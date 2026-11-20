@@ -7,7 +7,7 @@ import { freshAvailabilityRow } from '../utils/calendarAvailability';
 import { createCreditPayment, getPaymentStatus, makeIdempotencyKey, retryCreditPayment } from '../utils/paymentService';
 import { normalizePhone } from '../utils/phone';
 import { warmPaymentFunctions } from '../utils/paymentWarmup';
-import { trackBeginBooking, trackBeginCheckout, trackPurchase } from '../utils/analytics';
+import { trackBeginBooking, trackBeginCheckout, trackPurchase, trackBookingError } from '../utils/analytics';
 import MobileBookingBar from '../../../../src/components/MobileBookingBar';
 import BookingReassurance from '../../../../src/components/BookingReassurance';
 import { PAYMENT_METHODS, DEFAULT_PAYMENT_METHOD } from '../utils/paymentMethods';
@@ -17,10 +17,20 @@ import { DemoBookingNotice, DemoBookingControls, DemoCheckout } from './DemoBook
 import { Users, Phone, Mail, MessageSquare, Calendar, Plus, Minus } from '../utils/icons';
 
 const PRICE_PER_PERSON = 250;
+const validationObservation = field => ({ name: 'validation_name', phone: 'validation_phone', email: 'validation_email', tourDate: 'validation_date', participants: 'validation_participants', paymentMethod: 'validation_payment_method', agreeToTerms: 'validation_terms' })[field];
 
 const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelection, onPaymentRedirect = url => window.location.assign(url) }) => {
   const { t, i18n } = useTranslation();
   const formElement = useRef(null), submitButton = useRef(null);
+  const nativeInvalid = useRef(false), nativeInvalidTimer = useRef(null);
+  useEffect(() => () => clearTimeout(nativeInvalidTimer.current), []);
+  const observeNativeInvalid = event => {
+    const code = validationObservation(event.target.id);
+    if (IS_PREPROD || nativeInvalid.current || !code) return;
+    nativeInvalid.current = true;
+    nativeInvalidTimer.current = setTimeout(() => { nativeInvalid.current = false; }, 0);
+    trackBookingError('details', code);
+  };
 
   // Get pre-filled data from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -213,6 +223,10 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
 
     setErrors(newErrors);
     const firstInvalid = Object.keys(newErrors)[0];
+    if (!IS_PREPROD && firstInvalid) {
+      const code = validationObservation(firstInvalid);
+      trackBookingError('details', code);
+    }
     if (firstInvalid) requestAnimationFrame(() => {
       const field = firstInvalid === 'paymentMethod'
         ? document.querySelector('input[name="paymentMethod"]')
@@ -250,7 +264,9 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
     } catch (error) {
       console.error('Error creating booking:', error);
       setPaymentRedirect(false);
-      setSubmitError(t(bookingErrorKey(error)));
+      const errorKey = bookingErrorKey(error);
+      if (!IS_PREPROD) trackBookingError('payment', { 'booking.payment.sessionRecovery': 'session_unavailable', 'booking.validation.dateUnavailable': 'date_unavailable', 'booking.payment.closedRequest': 'request_closed' }[errorKey] || 'checkout_unavailable');
+      setSubmitError(t(errorKey));
     } finally {
       submitting.current = false;
       setIsSubmitting(false);
@@ -390,7 +406,7 @@ const BookingForm = ({ onSuccess, statusBookingId, initialDraft, onChangeSelecti
       )}
 
       {cloudData?.availabilityStatus !== 'ready' && <p role="status">{t(cloudData?.availabilityStatus === 'error' ? 'common.availabilityUnavailable' : 'common.loading')}</p>}
-      <form ref={formElement} onSubmit={handleSubmit} className="space-y-6">
+      <form ref={formElement} onSubmit={handleSubmit} onInvalidCapture={observeNativeInvalid} className="space-y-6">
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-bold mb-2 text-right">
