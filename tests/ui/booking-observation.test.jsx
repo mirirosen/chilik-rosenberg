@@ -3,7 +3,7 @@ import { cleanup } from '@testing-library/react';
 import * as analytics from '../../apps/protected-booking/src/utils/analytics';
 const events=()=>[...(window.dataLayer||[])].filter(e=>e[0]==='event').map(e=>[e[1],e[2]]);
 beforeEach(()=>{localStorage.clear();document.cookie='chilik-analytics-opt-out=; Max-Age=0; path=/';document.documentElement.lang='he';window.history.replaceState({},'','/booking');delete window.gtag;delete window.dataLayer;analytics.__setMeasurementIdForTests('G-CXTM7ZJZYX');analytics.initAnalytics();});
-afterEach(()=>{cleanup();document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]').forEach(s=>s.remove());vi.restoreAllMocks();});
+afterEach(()=>{cleanup();window.history.replaceState({},'','/');localStorage.clear();delete window.gtag;delete window.dataLayer;document.querySelectorAll('script[src^="https://www.googletagmanager.com/gtag/js"]').forEach(s=>s.remove());vi.restoreAllMocks();});
 it('observes only fixed booking stages/errors and current language, without accepting customer data',()=>{
  analytics.trackCalendarView();analytics.trackTourDateSelected();analytics.trackBookingError('details','validation_phone');
  document.documentElement.lang='en';analytics.trackBookingError('payment','session_unavailable');
