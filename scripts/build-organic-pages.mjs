@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import { growthPages, renderGrowthPage } from './growth-pages.mjs';
+import { growthGuideLinks } from '../src/data/growthPages.js';
 import { bookingConversionCopy } from '../src/data/bookingConversion.js';
 import { privateTourGuide, privateTourFaqs } from '../src/data/privateTourGuide.js';
 import path from 'node:path';
@@ -17,12 +19,14 @@ const entry = fs.readFileSync(path.join(out, `${mode}-index.html`), 'utf8');
 const analyticsScript = mode === 'booking' ? '/' + JSON.parse(fs.readFileSync(path.join(out, '.vite/manifest.json'), 'utf8'))['src/guideAnalytics.js'].file : undefined;
 const css = fs.readFileSync(new URL('../src/typography.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/design-tokens.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-seo.css', import.meta.url), 'utf8') + fs.readFileSync(new URL('../src/organic-guide.css', import.meta.url), 'utf8');
 const heSections = [
+  ['סיור קולינרי כשר בבני ברק: מה חשוב לדעת?', tourServiceFacts.he.kosher+' אם חשובה לכם תעודת הכשר של תחנה מסוימת או דרישה תזונתית נוספת, בררו את פרטי הטעימות עם חיליק לפני ההזמנה. '+tourServiceFacts.he.dietary+' מדריך זה מרכז גם את משך הסיור, המחיר וההכנה לביקור, כדי שתוכלו לתכנן מפגש שמתאים לכם.'],
   ['מה טועמים בסיור קולינרי בבני ברק?', 'בתפריט של חיליק מופיעים צ׳ולנט, קוגל ירושלמי, דגים וכבד קצוץ. אלה מאכלים המזוהים עם המטבח היהודי ועם ההכנות לשבת. השילוב בין הטעימות לסיפורים נותן הקשר למה שאוכלים: אוכל ביתי, מאפיות והמפגש בין חיי היום־יום למסורת. אין להסיק שכל מאכל מוצע בכל סיור; מומלץ לברר מראש מה מתוכנן במועד שבחרתם.'],
   ['למה מבקרים בבני ברק ביום חמישי בערב?', 'הסיורים מתקיימים בדרך כלל בחמישי בערב, לקראת שבת, ומתחילים בשעה 20:00. חיליק מספר על העיר שבה נולד וחי, ומחבר בין האוכל לבין מוסדות, מנהגים וחיי החברה החרדית. זו הזדמנות לשאול שאלות על דברים שרואים בדרך ולקבל תשובה ממדריך מקומי. המועד בפועל תלוי בתיאום ובזמינות; מידע כללי על חמישי אינו אישור להרשמה.'],
   ['איך מתכוננים לביקור?', `הגיעו בלבוש צנוע ומכבד. ${tourServiceFacts.he.accessibility} ${tourServiceFacts.he.kosher} ${tourServiceFacts.he.dietary} נקודת המפגש נמצאת בבני ברק, והכתובת המדויקת נשלחת בשבוע הסיור. לשאלות על חניה ודרכי הגעה, פנו לחיליק לפני ההגעה. הסיור מתקיים בעברית ובאנגלית.`],
   ['סיור פתוח או מפגש פרטי?', 'לפני הצטרפות לסיור פתוח, בדקו איזה מועדים זמינים וכיצד מאשרים את ההזמנה. קבוצה המעוניינת במועד ובתוכן שיתואמו מראש יכולה לברר על סיור פרטי. מחיר של 250 ש״ח למשתתף מתייחס לסיור המוצג באתר ואינו הצעת מחיר לקבוצה פרטית. את התאמת הסיור לצורכי הקבוצה ואת התנאים יש לקבל מחיליק.'],
 ];
 const enSections = [
+  ['A kosher food tour in Bnei Brak', tourServiceFacts.en.kosher+' Ask Hilik before booking if you need the certification details for a particular stop or have additional dietary requirements. '+tourServiceFacts.en.dietary+' This guide also covers the tour duration, public ticket price and preparation for your visit.'],
   ['What food can you expect?', 'Hilik’s published menu includes cholent, Jerusalem kugel, fish and chopped liver. These dishes provide an introduction to Jewish food traditions and preparations for Shabbat. Tastings are combined with stories about the city and the people who live there. Ask what is planned for your chosen date; a dish listed on the website is not a promise that it will be served on every tour.'],
   ['Why visit on a Thursday evening?', 'Tours usually take place on Thursday evenings, before Shabbat, and start at 20:00. Hilik connects the food with stories about everyday life, traditions and the Haredi community. As a guide who was born in Bnei Brak and lives there, he brings a local perspective to the visit. A general description of Thursday tours does not confirm a particular date: availability and your booking must still be checked.'],
   ['How should you prepare?', `Wear modest, respectful clothing. ${tourServiceFacts.en.accessibility} ${tourServiceFacts.en.kosher} ${tourServiceFacts.en.dietary} The meeting point is in Bnei Brak; the exact address is sent during the week of your tour. Ask Hilik about parking and transport before arrival. Tours are guided in Hebrew and English.`],
@@ -30,7 +34,7 @@ const enSections = [
 ];
 const privateSections = privateTourGuide.sections;
 const pages = [
-  { path: guidePaths[0], language: 'he', title: 'סיור קולינרי בבני ברק: אוכל, מחיר והכנה | חיליק רוזנברג', h1: 'סיור קולינרי בבני ברק: מה טועמים ואיך מתכוננים?', description: 'מה טועמים בסיור אוכל בבני ברק, למה מבקרים בחמישי בערב ואיך מתכוננים? מדריך ללבוש, כשרות, נגישות, מחיר ותיאום עם חיליק רוזנברג.', sections: heSections, alternate: guidePaths[2] },
+  { path: guidePaths[0], language: 'he', title: 'סיור קולינרי בבני ברק: אוכל, מחיר והכנה | חיליק רוזנברג', h1: 'סיור קולינרי בבני ברק: מה טועמים ואיך מתכוננים?', description: 'מחפשים סיור קולינרי כשר בבני ברק? טעימות בכשרות בד״ץ עם חיליק רוזנברג, מחיר, הכנה, לבוש ונגישות. יש לתאם מראש צרכים תזונתיים ולבדוק מועדים פנויים.', sections: heSections, alternate: guidePaths[2] },
   { path: guidePaths[1], language: 'he', ...privateTourGuide, sections: privateSections },
   { path: guidePaths[2], language: 'en', title: 'Bnei Brak Food Tour: Price & Planning | Hilik Rozenberg', h1: 'Bnei Brak food tour: what to taste and how to prepare', description: 'Plan a Bnei Brak food tour with Hilik Rozenberg: Jewish dishes, Thursday evenings at 20:00, tours in Hebrew and English, clothing, dietary questions and private groups.', sections: enSections, alternate: guidePaths[0] },
 ];
@@ -85,6 +89,7 @@ for (const page of pages) {
     : `<a href="/#date-selection">${e(mode === 'booking' ? copy.booking : copy.contact)}</a> · <a href="https://wa.me/972506724312">${e(copy.contact)}</a>`;
   const url = siteOrigin + page.path;
   const enrichment = guideEnrichment(page);
+  const growthNav = '<nav aria-label="' + (page.language === 'en' ? 'More reading in Hebrew' : 'עוד על בני ברק, אוכל והרצאות') + '"><h2>' + (page.language === 'en' ? 'More reading in Hebrew' : 'עוד על בני ברק, אוכל והרצאות') + '</h2><ul>' + growthGuideLinks(page.language).map(item => '<li><a href="' + e(item.href) + '">' + e(item.label) + '</a></li>').join('') + '</ul></nav>';
   const graph = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'WebPage', '@id': url + '#webpage', url, name: page.title, description: page.description, inLanguage: page.language, about: { '@id': siteOrigin + '/#tour' }, mainEntity: { '@id': url + '#article' }, hasPart: { '@id': url + '#guide-faq' } },
     { ...enrichment.article, headline: page.h1 },
@@ -93,10 +98,14 @@ for (const page of pages) {
   ] };
   // x-default is the Hebrew guide of the pair.
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
-  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:var(--tour-paper,#f7f3eb);font-family:var(--eti-body-font,Arial,sans-serif)}${css}</style></head><body class="guide-page">${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:var(--tour-paper,#f7f3eb);font-family:var(--eti-body-font,Arial,sans-serif)}${css}</style></head><body class="guide-page">${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${growthNav}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
   // On the booking site the English guide sends readers to the English homepage.
   if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
+}
+for (const page of growthPages) {
+  fs.mkdirSync(path.dirname(path.join(out, page.path.slice(1))), { recursive: true });
+  fs.writeFileSync(path.join(out, page.path.slice(1)), renderGrowthPage({ page, mode, css, analyticsScript }));
 }
 fs.mkdirSync(path.join(out, 'videos'), { recursive: true });
 fs.mkdirSync(path.join(out, 'media/captions'), { recursive: true });

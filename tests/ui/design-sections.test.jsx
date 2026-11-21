@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import he from '../../src/locales/he.json';
 import en from '../../src/locales/en.json';
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: key => key.split('.').reduce((value, part) => value?.[part], he) || key }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ i18n: { language: 'he' }, t: key => key.split('.').reduce((value, part) => value?.[part], he) || key }) }));
 import RatingBar from '../../src/components/RatingBar';
 import TourInclusions from '../../src/components/TourInclusions';
 import Lectures from '../../src/components/Lectures';
@@ -18,6 +18,7 @@ describe('verified design sections', () => {
     expect(screen.getByRole('link', { name: he.intro.lectures }).getAttribute('href')).toBe('#lectures');
     expect(screen.getByRole('link', { name: he.menu.nextTours }).getAttribute('href')).toBe('#date-selection');
     expect(screen.getByRole('link', { name: he.lectures.cta }).getAttribute('href')).toBe('https://wa.me/972506724312');
+    expect(screen.getByRole('link', { name: 'על ההרצאות, נושאי השיחה ותיאום המפגש' }).getAttribute('href')).toBe('/lectures/haredi-society.html');
     const lectures = screen.getByRole('link', { name: he.lectures.cta });
     expect(lectures.getAttribute('target')).toBe('_blank');
     expect(lectures.getAttribute('rel').split(/\s+/).sort()).toEqual(['noopener', 'noreferrer']);
