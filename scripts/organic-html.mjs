@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { organicCopy, guidePaths, siteOrigin, buildHomeSchema } from '../src/data/organicContent.js';
 import { bookingFaqOverrides } from '../src/data/bookingFaqCopy.js';
+import { growthPages } from '../src/data/growthPages.js';
 import { WATCH_VIDEO_PATH } from '../src/data/organicVideo.js';
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -42,7 +43,7 @@ export function metadataHtml({ title, description, path = '/', language = 'he', 
 ${graph ? schemaTag(graph) : ''}`;
 }
 // Indexable URLs in the generated sitemap. Only the booking site publishes /en.
-export const sitemapPaths = mode => ['/', ...(mode === 'booking' ? ['/en'] : []), '/terms', ...guidePaths, WATCH_VIDEO_PATH];
+export const sitemapPaths = mode => ['/', ...(mode === 'booking' ? ['/en'] : []), '/terms', ...guidePaths, ...growthPages.map(page => page.path), WATCH_VIDEO_PATH];
 // YYYY-MM-DD of the source commit being built; SOURCE_DATE_EPOCH or today as fallback.
 export function sitemapLastmod() {
   if (/^\d+$/.test(process.env.SOURCE_DATE_EPOCH || '')) return new Date(Number(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString().slice(0, 10);

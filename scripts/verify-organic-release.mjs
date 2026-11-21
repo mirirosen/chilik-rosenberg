@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { verifyGrowthPages } from './verify-growth-pages.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
@@ -14,6 +15,7 @@ const out = path.resolve(`dist-${mode}`);
 const config = JSON.parse(fs.readFileSync(`firebase.hosting.${mode}.json`, 'utf8')).hosting;
 fs.mkdirSync('docs/seo/runtime', { recursive: true });
 const results = [];
+verifyGrowthPages({ out, mode });
 assert.equal(fs.existsSync(path.join(out, '.vite/manifest.json')), false, 'internal SSR map is never deployable');
 const price = Number(fs.readFileSync('functions/src/booking-core.js', 'utf8').match(/const PRICE_PER_PERSON = (\d+);/)[1]);
 for (const file of ['index.html', ...(mode === 'booking' ? ['en.html'] : []), ...guidePaths.map(p => p.slice(1)), bakeryVideo.path.slice(1), 'terms.html', 'booking.html', 'confirmation.html', ...(mode === 'booking' ? ['manage-bookings.html'] : [])]) {

@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import { growthPages, renderGrowthPage } from './growth-pages.mjs';
+import { growthGuideLinks } from '../src/data/growthPages.js';
 import { bookingConversionCopy } from '../src/data/bookingConversion.js';
 import { privateTourGuide, privateTourFaqs } from '../src/data/privateTourGuide.js';
 import path from 'node:path';
@@ -85,6 +87,7 @@ for (const page of pages) {
     : `<a href="/#date-selection">${e(mode === 'booking' ? copy.booking : copy.contact)}</a> · <a href="https://wa.me/972506724312">${e(copy.contact)}</a>`;
   const url = siteOrigin + page.path;
   const enrichment = guideEnrichment(page);
+  const growthNav = '<nav aria-label="' + (page.language === 'en' ? 'More reading in Hebrew' : 'עוד על בני ברק, אוכל והרצאות') + '"><h2>' + (page.language === 'en' ? 'More reading in Hebrew' : 'עוד על בני ברק, אוכל והרצאות') + '</h2><ul>' + growthGuideLinks(page.language).map(item => '<li><a href="' + e(item.href) + '">' + e(item.label) + '</a></li>').join('') + '</ul></nav>';
   const graph = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'WebPage', '@id': url + '#webpage', url, name: page.title, description: page.description, inLanguage: page.language, about: { '@id': siteOrigin + '/#tour' }, mainEntity: { '@id': url + '#article' }, hasPart: { '@id': url + '#guide-faq' } },
     { ...enrichment.article, headline: page.h1 },
@@ -93,10 +96,14 @@ for (const page of pages) {
   ] };
   // x-default is the Hebrew guide of the pair.
   const alternates = page.alternate ? `<link rel="alternate" hreflang="${page.language}" href="${url}"><link rel="alternate" hreflang="${page.language === 'he' ? 'en' : 'he'}" href="${siteOrigin + page.alternate}"><link rel="alternate" hreflang="x-default" href="${siteOrigin + (page.language === 'he' ? page.path : page.alternate)}">` : '';
-  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:var(--tour-paper,#f7f3eb);font-family:var(--eti-body-font,Arial,sans-serif)}${css}</style></head><body class="guide-page">${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
+  let html = `<!doctype html><html lang="${page.language}" dir="${page.language === 'he' ? 'rtl' : 'ltr'}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">${metadataHtml({ ...page, graph })}${alternates}<link rel="icon" href="/favicon.svg"><style>body{margin:0;background:var(--tour-paper,#f7f3eb);font-family:var(--eti-body-font,Arial,sans-serif)}${css}</style></head><body class="guide-page">${guideHeader(page)}<main class="organic-overview"><nav aria-label="${page.language === 'he' ? 'ניווט' : 'Navigation'}"><a href="/">${page.language === 'he' ? 'סיורים עם חיליק' : 'Hilik Tours'}</a></nav><h1>${e(page.h1)}</h1><p>${e(intro)}</p>${openingDetails(page)}${enrichment.html}${page.sections.map(([title, text]) => `<section><h2>${e(title)}</h2><p>${e(text)}</p></section>`).join('')}${planningDetails(page)}${growthNav}${closingCta(page)}<nav aria-label="${e(copy.guides)}"><h2>${e(copy.guides)}</h2><ul>${guidePaths.filter(p => p !== page.path).map(p => `<li><a href="${p}">${e(copy.links[guidePaths.indexOf(p)])}</a></li>`).join('')}</ul></nav><p>${primaryContact} · <a href="tel:0506724312">0506724312</a></p><p><a href="/terms">${page.language === 'he' ? 'תנאי שימוש ותקנון' : 'Terms and conditions'}</a></p></main>${guideTracking({mode,analyticsScript,language:page.language})}</body></html>`;
   // On the booking site the English guide sends readers to the English homepage.
   if (mode === 'booking' && page.language === 'en') html = html.replace(/href="\/(#[^"]*)?"/g, (_match, hash = '') => `href="/en${hash}"`);
   fs.writeFileSync(path.join(out, page.path.slice(1)), html);
+}
+for (const page of growthPages) {
+  fs.mkdirSync(path.dirname(path.join(out, page.path.slice(1))), { recursive: true });
+  fs.writeFileSync(path.join(out, page.path.slice(1)), renderGrowthPage({ page, mode, css, analyticsScript }));
 }
 fs.mkdirSync(path.join(out, 'videos'), { recursive: true });
 fs.mkdirSync(path.join(out, 'media/captions'), { recursive: true });

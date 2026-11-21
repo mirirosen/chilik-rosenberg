@@ -477,3 +477,6 @@ html:lang(he) .target-site .target-hero h1,html:lang(he) .target-site #date-sele
 
 .target-site .main-header .desktop-navigation>.nav-link{display:flex;align-items:center;min-height:44px;font-size:16px}
 .target-site .main-header .bg-brand-dark-lighter button{min-height:44px;min-width:44px}
+
+.growth-guide-links summary{min-height:44px;padding-block:8px;cursor:pointer;font-weight:700}
+.target-lectures__content .lecture-details-link{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:underline;text-underline-offset:4px}
