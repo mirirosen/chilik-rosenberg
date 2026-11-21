@@ -63,4 +63,3 @@ it('text from a page cannot inject executable HTML or terminate JSON-LD',()=>{
  expect(doc.querySelector('img[onerror]')).toBeNull();expect(doc.querySelector('script:not([type])')).toBeNull();
  expect(()=>JSON.parse(doc.querySelector('#organic-schema').textContent)).not.toThrow();dom.window.close();
 });
-
